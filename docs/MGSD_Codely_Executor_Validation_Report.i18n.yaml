@@ -1,0 +1,43 @@
+# Bilingual-pair consistency record for MGSD_Codely_Executor_Validation_Report.md (docs/i18n/README.md): per heading
+# section, a hash of its English and Chinese blocks outside code blocks and generated regions.
+# After editing either side, bring the other along and re-record with:
+#   pnpm run verify-translation-pairing --write docs/MGSD_Codely_Executor_Validation_Report.md
+/mgsd-codely-executor-validation-report:
+  en: 6505884a370f4d7f
+  zh: 71130b5eaa84af0d
+/mgsd-codely-executor-validation-report/summary:
+  en: 4dac92b20aed9345
+  zh: 67185824b3495c40
+/mgsd-codely-executor-validation-report/table-of-contents:
+  en: c21a7e1fbcf14fad
+  zh: a380950bb872da53
+/mgsd-codely-executor-validation-report/environment:
+  en: 9f7a8e09e4658730
+  zh: 8385fe9e272aa9ce
+/mgsd-codely-executor-validation-report/method:
+  en: 6231b90a064f70fc
+  zh: 4ba01213719936e6
+/mgsd-codely-executor-validation-report/results:
+  en: b2f6f682d9230dcb
+  zh: 6302078af1c975f7
+/mgsd-codely-executor-validation-report/results/file-edit-evidence:
+  en: 125171aae2e6f742
+  zh: 967378471c233189
+/mgsd-codely-executor-validation-report/results/failure-evidence:
+  en: da3811158cadd021
+  zh: 65bb7d6ed4687500
+/mgsd-codely-executor-validation-report/results/isolation-evidence:
+  en: 64740ae6f6e47e68
+  zh: 5d3586f1aaf69218
+/mgsd-codely-executor-validation-report/decision:
+  en: 5f0204434bcd4b78
+  zh: 51eaf96d9b6143a3
+/mgsd-codely-executor-validation-report/required-executor-contract:
+  en: fb4e60b1167976ed
+  zh: e5ca00d50e750560
+/mgsd-codely-executor-validation-report/reproduction-commands:
+  en: c07ead8bb898f033
+  zh: 9e7c36184b763e2e
+/mgsd-codely-executor-validation-report/dev-note:
+  en: fb7019afadf889a3
+  zh: a19a72efe8aa2851
