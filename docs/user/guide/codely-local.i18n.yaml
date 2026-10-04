@@ -1,0 +1,31 @@
+# Bilingual-pair consistency record for codely-local.md (docs/i18n/README.md): per heading
+# section, a hash of its English and Chinese blocks outside code blocks and generated regions.
+# After editing either side, bring the other along and re-record with:
+#   pnpm run verify-translation-pairing --write docs/user/guide/codely-local.md
+/:
+  en: e554ac904c91f7b1
+  zh: 27c60298e44ff71e
+/run-local-codely-tasks:
+  en: b52ff8d389fc0647
+  zh: d558863b3c63016c
+/run-local-codely-tasks/summary:
+  en: 13a00359f24eaaba
+  zh: 8f787ce2899a2d53
+/run-local-codely-tasks/table-of-contents:
+  en: 16610cc966393b16
+  zh: 11847e698e6baf56
+/run-local-codely-tasks/configure:
+  en: 8f6fd917c5e6dd9a
+  zh: 532ea33e597ced0b
+/run-local-codely-tasks/commands:
+  en: b1f5c73d0918551e
+  zh: 40b6aa384e4406e1
+/run-local-codely-tasks/limits:
+  en: 4b78ac5ae0c45636
+  zh: 129e4c51c270ecc3
+/run-local-codely-tasks/verification:
+  en: ef4bf5cbc078149d
+  zh: 24d95daa642d646a
+/run-local-codely-tasks/verification/dev-note:
+  en: 16ba739e06a63b64
+  zh: eacb3345c65f7814

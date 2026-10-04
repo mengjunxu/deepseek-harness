@@ -1,10 +1,23 @@
 # MGSD Distributed Agent Harness
 ## 完整架构设计与从 0 开始执行清单
 
-> 版本：v1.0  
-> 日期：2026-09-28  
-> 目标环境：Windows + Unity/Tuanjie + Git + Codely CLI + Codex CLI + DeepSeek Harness (DSH) + GitHub Actions  
+> 版本：v1.1；日期：2026-10-04；实施顺序：本地 DSH → GitHub remote task。
+
+> 目标环境：Windows + Unity/Tuanjie + Git + Codely CLI + Codex CLI + DeepSeek Harness (DSH) + GitHub Actions
+
 > 设计原则：**Codely 负责主要 Agent Loop；DSH 负责确定性 Harness；Codex 只做高价值架构/高风险规划/独立 Review；GitHub 负责多端控制平面；所有远程工程任务在独立 Git worktree 中执行。**
+
+---
+
+## 实施阶段与当前入口
+
+本计划分为两个交付阶段：第一阶段先完成单机 DSH 的实际使用闭环，第二阶段再扩展 GitHub remote task。GitHub Control Repo、Runner、远程派发和跨机器审批不是第一阶段的前置条件。下文保留 Phase 0–21 的编号用于引用，实际开发顺序以第 26 节为准，不再按编号递增实施。
+
+第一阶段由 DSH 提供本地任务入口、状态和日志，Codely 执行任务，独立验证命令判断结果；随后补齐本地 Core/FSM、worktree、上下文、风险策略、人工审批和必要的 Codex 规划/Review。DSH 适配及本地界面属于第一阶段，不能推迟到 GitHub 远程接入之后。Core 仍不得依赖 DSH/Cordis，DSH 不运行第二个模型驱动 Loop。
+
+第二阶段在第一阶段验收通过后启动，只增加 GitHub 控制平面、Self-hosted Runner、多端派发、远程状态/审批/取消以及数据上传策略，并复用已验证的本地执行流程。
+
+当前已有本地 Codely 执行原型，尚不等于第一阶段完成。已完成项、代码位置、历史验证结果和下一项待办以[实施 checklist 与 Codely 交接](MGSD_Implementation_Checklist.zh.md)为准；本地使用方式见[本地 Codely 使用说明](user/guide/codely-local.zh.md)。
 
 ---
 
@@ -12,7 +25,9 @@
 
 本文给出一套可以实际落地的工程 Agent 平台，而不是单纯的 Prompt 或多 Agent Demo。
 
-最终要实现的用户体验：
+第一阶段要实现的用户体验：用户在本机 DSH 发起工程任务，查看任务、Plan、执行输出和 Review，按风险策略进行本地审批，取消正在执行的任务，并通过独立验证获得成功或失败结果。不需要 GitHub 账号、Control Repo 或 Runner 即可完成这个闭环。
+
+第二阶段扩展的远程用户体验：
 
 ```text
 家里电脑
@@ -437,7 +452,7 @@ HMI8295/
 
 注意：Control Repo 中的 Task 尽量保持**不可变请求**。
 
-运行状态优先使用 GitHub Workflow Run + 本地 `.agent/tasks/TASK-xxxx.json` 管理，不要多个 Runner 频繁回写同一个 JSON，避免 Git 冲突。
+第一阶段运行状态由本地 TaskStore 和 `.agent/tasks/TASK-xxxx.json` 管理，DSH 展示该状态。第二阶段关联 GitHub Workflow Run；不要多个 Runner 频繁回写同一个 JSON，避免 Git 冲突。
 
 ---
 
@@ -871,7 +886,7 @@ OFFICE-PC local .agent/
 
 # 15. 从 0 开始执行步骤
 
-以下步骤建议严格按顺序执行。
+下列 Phase 编号是能力索引，不是开发顺序。按第 26 节先完成第一阶段本地 DSH，再进入第二阶段 GitHub remote task；同一阶段内部按依赖验收。
 
 ---
 
@@ -879,9 +894,9 @@ OFFICE-PC local .agent/
 
 ## 目标
 
-确保两个节点基础环境可用。
+第一阶段只确认当前本机的 Git、Node、Codely、DSH 和按需使用的 Codex 环境。GitHub CLI、GitHub 登录及第二台机器的检查推迟到第二阶段。
 
-## Home-PC / Office-PC 都执行
+## 本机先执行；第二阶段再检查 Home-PC / Office-PC
 
 PowerShell：
 
@@ -891,7 +906,7 @@ node --version
 npm --version
 ```
 
-安装 GitHub CLI：
+以下 GitHub CLI 安装与登录检查仅在第二阶段执行：
 
 ```powershell
 gh --version
@@ -948,10 +963,10 @@ codex
 ## 验收条件
 
 ```text
-[ ] 两台机器 git 正常
-[ ] 两台机器 gh auth status 正常
-[ ] 两台机器 codely 可启动
-[ ] 需要 Codex 的机器 codex 可启动
+[ ] 第一阶段：本机 Git、Node、Codely 和 DSH 可用
+[ ] 第一阶段：需要 Codex 的本机 Codex 可用
+[ ] 第二阶段：Home-PC / Office-PC 上 Git、Node、Codely 可用
+[ ] 第二阶段：两台机器 gh auth status 正常，按需使用的 Codex 可用
 ```
 
 ## 失败回滚
@@ -961,6 +976,8 @@ Phase 0 不修改任何工程，无需回滚。
 ---
 
 # Phase 1：创建 GitHub Control Repo
+
+所属阶段：第二阶段。第一阶段不创建 Control Repo。
 
 ## 目标
 
@@ -1023,6 +1040,8 @@ git push
 ---
 
 # Phase 2：注册 Self-hosted Runner
+
+所属阶段：第二阶段。第一阶段不注册 Runner。
 
 ## 目标
 
@@ -1111,6 +1130,8 @@ GitHub → Settings → Actions → Runners → Remove
 ---
 
 # Phase 3：建立最小 Dispatch Workflow
+
+所属阶段：第二阶段。在本地 DSH 验收通过后执行。
 
 创建：
 
@@ -1874,7 +1895,7 @@ CANCELLED
 
 # Phase 17：DSH 集成
 
-**这一步放到 Core Harness 稳定以后。**
+所属阶段：第一阶段。先复用已有本地 Codely 命令原型验证 DSH 入口，再在 Core Harness 稳定后接入 Core 服务；必须在 GitHub remote task 开发前完成本地 DSH 验收。
 
 原因：DSH 是 Developer Preview。
 
@@ -1941,7 +1962,7 @@ DSH plugin 只调用 Core Harness Service，不复制 FSM。
 
 # Phase 18：DSH 第一版功能
 
-只做：
+所属阶段：第一阶段。本地任务入口、取消和以下状态视图应随本地流程一起验收，不依赖 GitHub：
 
 ```text
 Task status view
@@ -2334,9 +2355,33 @@ git branch -D agent/TASK-0127-office-pc
 
 ---
 
-# 24. MVP 完成定义
+# 24. 两阶段完成定义
 
-MVP 必须满足以下全部条件：
+## 24.1 第一阶段：本地 DSH MVP
+
+第一阶段必须满足以下全部条件；它们是第二阶段启动的前置条件：
+
+```text
+[ ] 本机通过受支持的 DSH profile 启动
+[ ] 在 DSH 发起 Codely 任务并查看状态、输出和取消结果
+[ ] DSH 不增加第二个模型驱动 Loop
+[ ] 独立验证命令决定成功/失败，不只依赖 Codely 退出码或成功文本
+[ ] Core FSM、TaskStore、Risk Policy 和 ContextBuilder 有验证
+[ ] 工程任务创建独立 worktree；失败不回退到日常工作目录
+[ ] Plan 与执行范围明确，人工审批不可由执行器绕过
+[ ] HIGH_RISK 可按预算调用 Codex Plan/Review；Review 最多两轮
+[ ] 执行、失败、超时、取消和卸载清理有回归覆盖
+[ ] 本地任务状态和审计可持久保存，重启后的行为明确
+[ ] DSH 本地 Task/Plan/Execution/Review 视图可用
+[ ] 本地端到端验收、录制会话场景及使用文档完成
+[ ] 凭证留在本机；不依赖 GitHub 完成任务
+```
+
+当前命令原型和真实冒烟测试只覆盖其中一部分，不能代替本节完整验收。
+
+## 24.2 第二阶段：GitHub 远程任务 MVP
+
+第二阶段复用第一阶段结果，并满足以下条件：
 
 ```text
 [ ] GitHub Private Control Repo 建立
@@ -2364,7 +2409,7 @@ MVP 必须满足以下全部条件：
 
 # 25. MVP 明确不做
 
-第一阶段禁止扩展：
+两个阶段的 MVP 均不包含以下能力。第一阶段额外排除 GitHub Control Repo、Runner、远程派发、跨节点审批/取消及数据上传；这些属于第二阶段，不是永久取消：
 
 ```text
 复杂 Web Dashboard
@@ -2386,12 +2431,13 @@ DSH 第二个模型 Agent Loop
 
 # 26. 推荐实施顺序总清单
 
+保留原 Phase 编号，按下面的交付顺序实施。Phase 4 的本地路径配置和 Phase 16 的本地取消属于第一阶段；其远程节点路由和跨节点取消属于第二阶段。
+
 ```text
-Phase 0   环境检查
-Phase 1   GitHub Control Repo
-Phase 2   Self-hosted Runners
-Phase 3   Dispatch Smoke Test
-Phase 4   Node Local Config
+第一阶段 A：先完成本机 DSH 使用
+Phase 0   仅本机环境检查；不要求 GitHub CLI/账号或第二台机器
+Phase 17  先完成已有 DSH → Codely 原型的入口、失败/取消/超时验收
+Phase 4   本机项目路径及执行配置
 Phase 5   Harness Core
 Phase 6   FSM
 Phase 7   Worktree Service
@@ -2399,44 +2445,54 @@ Phase 8   Context Builder
 Phase 9   Codex Adapter
 Phase 10  CODELY.md
 Phase 11  Codely Harness Skill
-Phase 12  Local E2E
+Phase 16  本地取消与进程清理
+Phase 17  Core-backed DSH Bundle Integration
+Phase 18  DSH Local Task/Plan/Execution/Review UI
+Phase 12  包含 DSH 入口的 Local E2E；通过第 24.1 节验收
+
+第二阶段 B：GitHub remote task 扩展
+Phase 0   GitHub CLI/账号及第二台机器环境检查
+Phase 1   GitHub Control Repo
+Phase 2   Self-hosted Runners
+Phase 3   Dispatch Smoke Test
+Phase 4   节点标签、repoAlias 路由配置
 Phase 13  GitHub → Harness
 Phase 14  agent send/status CLI
 Phase 15  Approval Workflow
-Phase 16  Cancel
-Phase 17  DSH Bundle Integration
-Phase 18  DSH Status UI
+Phase 16  跨节点 Cancel
+          远程状态接入现有 DSH 视图；通过第 24.2 节验收
+
+MVP 后按需扩展
 Phase 19  Codely Subagents
 Phase 20  Advanced Context Index
 Phase 21  Capability Scheduling
 ```
 
-严格建议：Phase N 不通过验收，不进入 Phase N+1。
+当前交付项未通过验收，不进入依赖它的交付项；第一阶段未通过第 24.1 节验收，不开始第二阶段。原 Phase 编号大小不再决定先后。
 
 ---
 
 # 27. 交给 Codex 的实施方式
 
-不要一次要求 Codex 实现全部 21 个 Phase。
+不要一次要求 Codely 或 Codex 实现全部 22 个 Phase（0–21）。按交接 checklist 选择一个可验收的交付项。
 
 建议：
 
 ```text
 Milestone A
-Phase 5~8
-Harness Core + FSM + Worktree + Context
+第一阶段：本地 DSH → Codely 原型验收，补齐失败/超时/取消/清理及输出证据
 
 Milestone B
-Phase 9~12
-Codex + Codely Protocol + Local E2E
+第一阶段：Phase 4~8
+Harness Core + FSM + Worktree + Context
 
 Milestone C
-Phase 13~16
-GitHub Multi-node
+第一阶段：Phase 9~12 + 本地 Phase 16 + Phase 17~18
+Codex + Codely Protocol + Core-backed DSH + Local E2E
 
 Milestone D
-Phase 17~18
-DSH Integration
+第二阶段：Phase 1~3 + 远程 Phase 4 + Phase 13~16
+GitHub Remote Task；复用本地 Core 和 DSH
 ```
 
 每个 milestone：
@@ -2452,6 +2508,8 @@ Plan
 ---
 
 # 28. 可直接复制给 Codex 的第一阶段 Prompt
+
+本节用于第一阶段的本地 Core 子里程碑，不代表第一阶段全部完成。先按交接 checklist 完成本地执行原型验收，随后实施本节，再使用第 30 节完成本地 DSH 集成，最后验收第 24.1 节。
 
 ```text
 You are working in an existing Unity/Tuanjie Git repository.
@@ -2501,7 +2559,7 @@ CORE ARCHITECTURE RULE
 
 The Core Harness must have zero imports from DSH/Cordis.
 
-DSH integration will be an adapter later because DSH is still in developer preview and may have breaking changes.
+DSH integration remains in Stage 1, after this Core sub-milestone and before any GitHub remote-task work. Keep it in a dedicated adapter because DSH is still in developer preview and may have breaking changes.
 
 REPOSITORY SAFETY
 
@@ -2652,12 +2710,12 @@ First inspect the repository and produce a short implementation plan. Then imple
 
 # 29. 第二阶段 Codex Prompt（GitHub 多端）
 
-在第一阶段本地 E2E 通过后使用：
+仅在第一阶段本地 DSH 完整通过第 24.1 节验收后使用；不能仅凭 Core CLI 或 Codely 冒烟测试通过就启动本节：
 
 ```text
 Implement the distributed control-plane milestone for the existing agent harness.
 
-The local harness core is already working. Do not redesign it.
+The local Harness Core and DSH user workflow have passed Stage 1 acceptance. Reuse them; do not redesign or duplicate them.
 
 GOAL
 
@@ -2697,15 +2755,19 @@ SECURITY
 - Do not upload company source by default.
 - Do not modify the user's normal working tree.
 
-Do not implement DSH integration in this milestone.
+DSH local integration already belongs to Stage 1. Add only the remote task/status projection needed for this milestone; do not defer local DSH usability until after GitHub integration.
 ```
 
 ---
 
-# 30. 第三阶段 Codex Prompt（DSH Adapter）
+# 30. 第一阶段 DSH 集成子里程碑 Prompt（DSH Adapter）
+
+在本地 Core 稳定后、第二阶段 GitHub remote task 开发前使用。它与第 28 节共同组成第一阶段，不是第三阶段。
 
 ```text
 Integrate the existing stable local Agent Harness Core into DeepSeek Harness (DSH).
+
+This is part of Stage 1: local DSH usability. GitHub remote tasks are Stage 2 and must not be implemented here.
 
 DSH is not the primary model-driven agent loop.
 Codely remains the primary executor.
@@ -2718,6 +2780,8 @@ DSH responsibilities:
 - expose local node status
 - provide audit/event visualization
 - wrap existing Core Harness services
+- let the user start and cancel local tasks through DSH
+- verify the full local workflow without GitHub, runners, or remote dispatch
 
 CRITICAL CONSTRAINT
 
@@ -2783,47 +2847,39 @@ V1.8  GitHub → custom Task Hub migration if scale requires
 12. 公司数据是否上 GitHub 由安全模式控制。
 13. MVP 不做复杂多 Agent 编排。
 14. 每个 Phase 都必须有验收点。
-15. 没有通过前一阶段，不进入下一阶段。
+15. 第一阶段先完成本地 DSH；验收通过后，第二阶段才开发 GitHub remote task。
 ```
 
 ---
 
 # 33. 参考资料（实施时以当前官方文档为准）
 
-- DeepSeek Harness GitHub / Architecture / Bundle & Profile docs  
-  https://github.com/deepseek-ai/deepseek-harness
+- [DeepSeek Harness GitHub / Architecture / Bundle & Profile docs](https://github.com/deepseek-ai/deepseek-harness)
 
-- Codely CLI 文档  
-  https://codely-docs.tuanjie.cn/
+- [Codely CLI 文档](https://codely-docs.tuanjie.cn/)
 
-- OpenAI Codex 文档  
-  https://developers.openai.com/
+- [OpenAI Codex 文档](https://developers.openai.com/)
 
-- Using Codex with your ChatGPT plan  
-  https://help.openai.com/en/articles/11369540-using-codex-with-your-chatgpt-plan
+- [Using Codex with your ChatGPT plan](https://help.openai.com/en/articles/11369540-using-codex-with-your-chatgpt-plan)
 
-- GitHub Actions Self-hosted Runner  
-  https://docs.github.com/en/actions/how-tos/manage-runners/self-hosted-runners
+- [GitHub Actions Self-hosted Runner](https://docs.github.com/en/actions/how-tos/manage-runners/self-hosted-runners)
 
-- GitHub Actions Self-hosted Runner Security  
-  https://docs.github.com/en/actions/reference/security/secure-use
+- [GitHub Actions Self-hosted Runner Security](https://docs.github.com/en/actions/reference/security/secure-use)
 
 ---
 
 # 34. 当前建议的下一步
 
-执行到这里后，不要继续讨论更多抽象架构。
+当前先完成本地 DSH 使用，不创建 GitHub Control Repo，也不注册 Runner。具体已完成项和待办以[实施 checklist](MGSD_Implementation_Checklist.zh.md)为准。
 
 实际下一步应当是：
 
 ```text
-1. 创建 Private mgsd-agent-control repo。
-2. 注册 home-pc / office-pc runner。
-3. 用 TASK-0001 完成纯 Print Smoke Test。
-4. 把本文件交给 Codex。
-5. 只执行“第一阶段 Prompt”：Harness Core。
-6. 本地 E2E 通过后，再进入 GitHub 多端阶段。
+1. 阅读交接 checklist，检查当前分支和未提交改动，保留已有本地执行原型。
+2. 从 checklist 的 L1 开始：本机 DSH 命令/浏览器验收及失败、超时、取消、清理回归。
+3. 按 L2–L4 补齐本地 Core、worktree、上下文、审批和必要的 Codex 规划/Review。
+4. 按 L5 完成 Core-backed DSH 集成和本地端到端验收。
+5. 第一阶段通过第 24.1 节后，再创建 Control Repo、注册 Runner 并实施 GitHub remote task。
 ```
 
 这是当前成本最低、风险最低、最容易调试的落地路径。
-

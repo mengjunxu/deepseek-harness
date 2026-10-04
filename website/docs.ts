@@ -155,6 +155,14 @@ const homeAndGuide = pairedPages([
     order: 1,
   },
   {
+    source: 'docs/user/guide/codely-local.md',
+    route: 'guide/codely-local.md',
+    label: { root: '本地 Codely 任务', en: 'Local Codely tasks' },
+    sidebar: { root: 'zh-guide', en: 'en-guide' },
+    section: { root: '自动化', en: 'Automation' },
+    order: 3,
+  },
+  {
     source: 'docs/user/guide/schedule.md',
     route: 'guide/schedule.md',
     label: { root: '会话内提醒', en: 'Session reminders' },

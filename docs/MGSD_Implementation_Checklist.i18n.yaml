@@ -1,0 +1,58 @@
+# Bilingual-pair consistency record for MGSD_Implementation_Checklist.md (docs/i18n/README.md): per heading
+# section, a hash of its English and Chinese blocks outside code blocks and generated regions.
+# After editing either side, bring the other along and re-record with:
+#   pnpm run verify-translation-pairing --write docs/MGSD_Implementation_Checklist.md
+/:
+  en: d2581dfaa6ac17f1
+  zh: b808809789647fc9
+/mgsd-implementation-checklist-and-codely-handoff:
+  en: 59cf6d2e33012eb7
+  zh: 2793ae0aba251b79
+/mgsd-implementation-checklist-and-codely-handoff/summary:
+  en: 04abe5e338ecff9a
+  zh: be143fdc58492faa
+/mgsd-implementation-checklist-and-codely-handoff/table-of-contents:
+  en: bd3172d945c3904f
+  zh: 1e0c1bc0fc3b2031
+/mgsd-implementation-checklist-and-codely-handoff/take-over-this-checkout:
+  en: ad42b7ff87f1a887
+  zh: 3595a11c5965bd25
+/mgsd-implementation-checklist-and-codely-handoff/completed-local-work:
+  en: 468323f053af2f36
+  zh: c626d64a46a746b5
+/mgsd-implementation-checklist-and-codely-handoff/original-phase-mapping:
+  en: add968f5de384165
+  zh: 24dbf7f41961bf9a
+/mgsd-implementation-checklist-and-codely-handoff/next-local-checklist:
+  en: 5b2c9880b4c3c7f1
+  zh: 516653c22178c1e6
+/mgsd-implementation-checklist-and-codely-handoff/next-local-checklist/l1-finish-acceptance-of-the-current-dsh-prototype:
+  en: b0daa9071e84b9bb
+  zh: 109d7f9b897d24bf
+/mgsd-implementation-checklist-and-codely-handoff/next-local-checklist/l2-local-task-data-and-deterministic-workflow-phase-4-6-section-22:
+  en: de327bc2ae03bcdf
+  zh: 48f6e84847d4f07c
+/mgsd-implementation-checklist-and-codely-handoff/next-local-checklist/l3-worktree-and-context-phase-7-8-section-23:
+  en: 87d5526439b87d97
+  zh: 918204fe160424ed
+/mgsd-implementation-checklist-and-codely-handoff/next-local-checklist/l4-plan-execution-envelope-and-codely-protocol-phase-9-11:
+  en: 7cfae2206041e1ac
+  zh: fe1866f1a4217a8d
+/mgsd-implementation-checklist-and-codely-handoff/next-local-checklist/l5-complete-local-engineering-workflow-phase-12-16-18:
+  en: 569a2b5f738edcb8
+  zh: a40bf0684574f18c
+/mgsd-implementation-checklist-and-codely-handoff/remote-checklist:
+  en: 70994b917f3ee519
+  zh: 1ec9632b09ace090
+/mgsd-implementation-checklist-and-codely-handoff/verification-and-blockers:
+  en: 05d0d8fb53f39e88
+  zh: 50c53041798db9c9
+/mgsd-implementation-checklist-and-codely-handoff/codely-handoff-prompt:
+  en: 80032eee51ead84b
+  zh: 417ba6980e028368
+/mgsd-implementation-checklist-and-codely-handoff/maintain-this-checklist:
+  en: da22f3b942e9bf6e
+  zh: bf25fddd75dcd025
+/mgsd-implementation-checklist-and-codely-handoff/maintain-this-checklist/dev-note:
+  en: eddeb5188567b6de
+  zh: 3bf4b352e900f8ce

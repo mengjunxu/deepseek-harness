@@ -68,3 +68,5 @@ Cached because they are not visible from the command surface; AGENTS.md owns the
 ### Project
 
 ### Reference
+
+- MGSD continuation: read [the implementation checklist and handoff](docs/MGSD_Implementation_Checklist.zh.md) for the uncommitted local Codely prototype, verified results, original Phase mapping, and the next local milestone. Complete local DSH acceptance before remote dispatch.

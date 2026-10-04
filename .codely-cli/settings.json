@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "TJGenerators": {
+      "httpUrl": "https://ai-generator.tuanjie.cn/mcp"
+    }
+  },
+  "autoEditMemory": true,
+  "model": "codely-core"
+}

@@ -1,0 +1,196 @@
+{
+  "main": {
+    "id": "cbf19dcf011b7777",
+    "type": "split",
+    "children": [
+      {
+        "id": "13416abe6db2bfc6",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "b49c6db3a00f6c15",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "MGSD_Distributed_Agent_Harness_Architecture_and_Execution_Plan.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "MGSD_Distributed_Agent_Harness_Architecture_and_Execution_Plan"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "c8755ab4148a3e08",
+    "type": "split",
+    "children": [
+      {
+        "id": "6f60b148156bd98d",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "dc41a093f4900320",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical",
+                "autoReveal": false,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-folder-closed",
+              "title": "文件列表"
+            }
+          },
+          {
+            "id": "678a08f4d040ca92",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              },
+              "icon": "lucide-search",
+              "title": "搜索"
+            }
+          },
+          {
+            "id": "b17e49ba821ba7b7",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-bookmark",
+              "title": "书签"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300
+  },
+  "right": {
+    "id": "552f3f6c3f4693d1",
+    "type": "split",
+    "children": [
+      {
+        "id": "396f5fde6eca3ead",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "e6e27d10466073c1",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "file": "MGSD_Distributed_Agent_Harness_Architecture_and_Execution_Plan.md",
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-coming-in",
+              "title": "反向链接"
+            }
+          },
+          {
+            "id": "a6302a580cdfcf70",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "file": "MGSD_Distributed_Agent_Harness_Architecture_and_Execution_Plan.md",
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-going-out",
+              "title": "出链"
+            }
+          },
+          {
+            "id": "851580e4a05299e9",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-tags",
+              "title": "标签"
+            }
+          },
+          {
+            "id": "024e22a998628fd4",
+            "type": "leaf",
+            "state": {
+              "type": "all-properties",
+              "state": {
+                "sortOrder": "frequency",
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-archive",
+              "title": "添加笔记属性"
+            }
+          },
+          {
+            "id": "e5fb0d73d68636f4",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "file": "MGSD_Distributed_Agent_Harness_Architecture_and_Execution_Plan.md",
+                "followCursor": false,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-list",
+              "title": "大纲"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300,
+    "collapsed": true
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "switcher:打开快速切换": false,
+      "graph:查看关系图谱": false,
+      "canvas:新建白板": false,
+      "daily-notes:打开/创建今天的日记": false,
+      "templates:插入模板": false,
+      "command-palette:打开命令面板": false,
+      "bases:新建数据库": false
+    }
+  },
+  "active": "b49c6db3a00f6c15",
+  "lastOpenFiles": [
+    "MGSD_Codely_Executor_Validation_Report.md",
+    "MGSD_Distributed_Agent_Harness_Architecture_and_Execution_Plan.md"
+  ]
+}
