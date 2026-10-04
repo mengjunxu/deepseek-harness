@@ -37,6 +37,7 @@ pre-commit:
     - name: vendor manifest guard
       run: scripts/check-vendor-manifest.sh
 
+
 pre-merge-commit:
   jobs:
     - name: translation pairing (staged records)
@@ -52,4 +53,4 @@ pre-merge-commit:
 pre-push:
   jobs:
     - name: typecheck
-      run: pnpm run typecheck
+      run: node node_modules/pnpm/bin/pnpm.mjs run typecheck
