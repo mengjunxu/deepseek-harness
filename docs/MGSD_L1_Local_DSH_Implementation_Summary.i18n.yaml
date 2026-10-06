@@ -1,0 +1,52 @@
+# Bilingual-pair consistency record for MGSD_L1_Local_DSH_Implementation_Summary.md (docs/i18n/README.md): per heading
+# section, a hash of its English and Chinese blocks outside code blocks and generated regions.
+# After editing either side, bring the other along and re-record with:
+#   pnpm run verify-translation-pairing --write docs/MGSD_L1_Local_DSH_Implementation_Summary.md
+/:
+  en: a493523aeb05d74b
+  zh: 8da0ef44a60212a3
+/mgsd-l1-local-dsh-implementation-summary:
+  en: bbf0d99de2ef881e
+  zh: 9f893f2a8216fa7d
+/mgsd-l1-local-dsh-implementation-summary/summary:
+  en: 1bd080cccea6b740
+  zh: bf3c0903fa9fe8f2
+/mgsd-l1-local-dsh-implementation-summary/table-of-contents:
+  en: 362617595d91fc34
+  zh: 82a3fc1edc257a1b
+/mgsd-l1-local-dsh-implementation-summary/goals-and-delivered-scope:
+  en: 64ad5fc4214dca14
+  zh: b0773fdb884302c2
+/mgsd-l1-local-dsh-implementation-summary/responsibilities-and-execution-flow:
+  en: 37ca71877ae7bc28
+  zh: 0f842d4475175e8e
+/mgsd-l1-local-dsh-implementation-summary/implementation:
+  en: 8dbc473ccfe3b239
+  zh: c3b44a52f988baae
+/mgsd-l1-local-dsh-implementation-summary/implementation/command-plugin-and-project-ownership:
+  en: 2a3cbd0d9937bc1e
+  zh: 83d295694db5d357
+/mgsd-l1-local-dsh-implementation-summary/implementation/executor-validation-and-cleanup:
+  en: 3018bf93de149b23
+  zh: 948e3c4f91a2eb49
+/mgsd-l1-local-dsh-implementation-summary/implementation/quiet-completion-and-chat-presentation:
+  en: 17fbb5ed5c0fe81c
+  zh: 3234861d4c09a5e8
+/mgsd-l1-local-dsh-implementation-summary/configuration:
+  en: b89513c5284b1325
+  zh: be99ee85f408a87b
+/mgsd-l1-local-dsh-implementation-summary/outcomes-and-acceptance-rules:
+  en: e31a0f7daa0e261f
+  zh: 518adf4a26cd93cc
+/mgsd-l1-local-dsh-implementation-summary/acceptance-coverage:
+  en: 0d800db0b36e6f01
+  zh: 52951909fc9624f7
+/mgsd-l1-local-dsh-implementation-summary/implementation-files:
+  en: 1db50965a121e6a6
+  zh: 88319bbb8f22089e
+/mgsd-l1-local-dsh-implementation-summary/limits-and-l2-handoff:
+  en: 08a0f1592714d99e
+  zh: bfbe949e3f281543
+/mgsd-l1-local-dsh-implementation-summary/dev-note-recorded-verification:
+  en: d5841d514ace3a75
+  zh: a665be2c1b196ddd

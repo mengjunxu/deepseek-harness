@@ -32,7 +32,7 @@ description: "对照架构计划记录 MGSD 实施状态与 Codely 交接清单�
 
 1. [根目录指令](../AGENTS.md)及 [Codely 上下文](../CODELY.md)。
 2. 本清单，以及原始计划的组件职责、Phase 5–12、Phase 17–18 和 MVP 验收条件。
-3. [本地 Codely 使用说明](user/guide/codely-local.zh.md)，了解配置、行为及已记录结果。
+3. [L1 实现总结](MGSD_L1_Local_DSH_Implementation_Summary.zh.md)，了解职责、执行流程、验收及限制；[本地 Codely 使用说明](user/guide/codely-local.zh.md)，了解配置、行为及已记录结果。
 4. [执行器实验报告](MGSD_Codely_Executor_Validation_Report.zh.md)，了解实际观察到的退出码、提示词传输、自动保存及沙箱限制。
 5. 开始实现前阅读[架构](architecture.zh.md)、[测试策略](testing.zh.md)和[防御模式](defensive-patterns.zh.md)。
 

@@ -32,7 +32,7 @@ Read these files in order:
 
 1. [Root instructions](../AGENTS.md) and [Codely context](../CODELY.md).
 2. This checklist and the source plan's component responsibilities, Phase 5–12, Phase 17–18, and MVP acceptance criteria.
-3. [Local Codely guide](user/guide/codely-local.md) for configuration, behavior, and recorded results.
+3. [L1 implementation summary](MGSD_L1_Local_DSH_Implementation_Summary.md) for responsibilities, execution flow, acceptance, and limits; [local Codely guide](user/guide/codely-local.md) for configuration, behavior, and recorded results.
 4. [Executor experiment](MGSD_Codely_Executor_Validation_Report.md) for the observed exit-code, prompt-transport, auto-save, and sandbox limitations.
 5. [Architecture](architecture.md), [testing policy](testing.md), and [defensive patterns](defensive-patterns.md) before implementation work.
 
