@@ -292,7 +292,7 @@ export function apply(ctx: Context, config: Config): void {
         summary: completionSummary(event.job),
       },
     })
-    if (delivery === 'wakeup' && owner.status === 'idle') {
+    if (delivery === 'wakeup' && event.completionDelivery !== 'quiet' && owner.status === 'idle') {
       if (wakeBudget === undefined) {
         owner.followup(message)
         return

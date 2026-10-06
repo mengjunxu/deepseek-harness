@@ -1,8 +1,4 @@
 # Opt-in overlay. Commands execute directly; completion never wakes a DSH model.
-- id: tool-jobs
-  config:
-    completionDelivery: quiet
-
 - insert:
     - id: codely-local
       name: './plugin.mjs'

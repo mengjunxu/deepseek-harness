@@ -1,0 +1,27 @@
+{"type":"session","version":4,"id":"{{session:1}}","createdAt":0,"cwd":"{{cwd}}","isSeeded":false,"delegationDepth":0,"agentPreset":"standard"}
+{"type":"permission/preset","data":{"preset":"workspace-write"}}
+{"type":"sandbox/mode","data":{"mode":"workspace-write"}}
+{"type":"approval/policy","data":{"policy":"ask"}}
+{"type":"command/run","data":{"commandId":"{{command:1}}","name":"codely","args":" run success","source":{"kind":"user"}}}
+{"type":"command/done","data":{"commandId":"{{command:1}}","kind":"success","text":"Started codely-1. Use /codely output codely-1 or /codely cancel codely-1."}}
+{"type":"agent/inbox/spliced","data":{"target":"next-step","start":0,"inserted":[{"content":[{"type":"text","text":"background job codely-1 (codely: success) finished [status: completed, Codely exited 0; all configured validation commands exited 0]. Read its output with job_output."}],"source":{"kind":"tool-jobs","form":"notice","summary":"codely success [status: completed, Codely exited 0; all configured validation commands exited 0]"},"role":"user","id":"{{message:1}}"}]}}
+{"type":"command/run","data":{"commandId":"{{command:2}}","name":"codely","args":" status","source":{"kind":"user"}}}
+{"type":"command/done","data":{"commandId":"{{command:2}}","kind":"success","text":"codely-1: completed — Codely exited 0; all configured validation commands exited 0"}}
+{"type":"command/run","data":{"commandId":"{{command:3}}","name":"codely","args":" output codely-1","source":{"kind":"user"}}}
+{"type":"command/done","data":{"commandId":"{{command:3}}","kind":"success","text":"codely-1: completed\nExecutor wrote result.txt\nCodely exit code: 0; signal: null\nValidation 1/1\nIndependent validation executed\nValidation 1 exit code: 0; signal: null\n"}}
+{"type":"command/run","data":{"commandId":"{{command:4}}","name":"codely","args":" run fail validation","source":{"kind":"user"}}}
+{"type":"command/done","data":{"commandId":"{{command:4}}","kind":"success","text":"Started codely-2. Use /codely output codely-2 or /codely cancel codely-2."}}
+{"type":"agent/inbox/spliced","data":{"target":"next-step","start":1,"inserted":[{"content":[{"type":"text","text":"background job codely-2 (codely: fail validation) finished [status: failed, Validation 1 exit code: 23; signal: null]. Read its output with job_output."}],"source":{"kind":"tool-jobs","form":"notice","summary":"codely fail validation [status: failed, Validation 1 exit code: 23; signal: null]"},"role":"user","id":"{{message:2}}"}]}}
+{"type":"command/run","data":{"commandId":"{{command:5}}","name":"codely","args":" status","source":{"kind":"user"}}}
+{"type":"command/done","data":{"commandId":"{{command:5}}","kind":"success","text":"codely-1: completed — Codely exited 0; all configured validation commands exited 0\ncodely-2: failed — Validation 1 exit code: 23; signal: null"}}
+{"type":"command/run","data":{"commandId":"{{command:6}}","name":"codely","args":" output codely-2","source":{"kind":"user"}}}
+{"type":"command/done","data":{"commandId":"{{command:6}}","kind":"success","text":"codely-2: failed\nExecutor wrote result.txt\nCodely exit code: 0; signal: null\nValidation 1/1\nIndependent validation executed\nValidation 1 exit code: 23; signal: null\n"}}
+{"type":"command/run","data":{"commandId":"{{command:7}}","name":"codely","args":" run hang","source":{"kind":"user"}}}
+{"type":"command/done","data":{"commandId":"{{command:7}}","kind":"success","text":"Started codely-3. Use /codely output codely-3 or /codely cancel codely-3."}}
+{"type":"command/run","data":{"commandId":"{{command:8}}","name":"codely","args":" status","source":{"kind":"user"}}}
+{"type":"command/done","data":{"commandId":"{{command:8}}","kind":"success","text":"codely-1: completed — Codely exited 0; all configured validation commands exited 0\ncodely-2: failed — Validation 1 exit code: 23; signal: null\ncodely-3: running"}}
+{"type":"command/run","data":{"commandId":"{{command:9}}","name":"codely","args":" cancel codely-3","source":{"kind":"user"}}}
+{"type":"command/done","data":{"commandId":"{{command:9}}","kind":"success","text":"requested"}}
+{"type":"agent/inbox/spliced","data":{"target":"next-step","start":2,"inserted":[{"content":[{"type":"text","text":"background job codely-3 (codely: hang) finished [status: killed, Cancelled; validation is not certified; User cancelled]. Read its output with job_output."}],"source":{"kind":"tool-jobs","form":"notice","summary":"codely hang [status: killed, Cancelled; validation is not certified; User cancelled]"},"role":"user","id":"{{message:3}}"}]}}
+{"type":"command/run","data":{"commandId":"{{command:10}}","name":"codely","args":" status","source":{"kind":"user"}}}
+{"type":"command/done","data":{"commandId":"{{command:10}}","kind":"success","text":"codely-1: completed — Codely exited 0; all configured validation commands exited 0\ncodely-2: failed — Validation 1 exit code: 23; signal: null\ncodely-3: killed — Cancelled; validation is not certified; User cancelled"}}

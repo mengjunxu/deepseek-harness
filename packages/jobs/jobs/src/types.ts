@@ -135,6 +135,8 @@ export interface JobSpec {
    * caller until service disposal.
    */
   owner?: SessionId
+  /** Keep completion pending in the owner's inbox instead of opening a model turn. */
+  completionDelivery?: 'quiet'
   /**
    * Optional UTF-8 byte cap for each complete model-facing completion notice or
    * output read, including controller status metadata. Independent of ring
@@ -207,6 +209,8 @@ export type JobEvent =
     readonly type: 'settled'
     readonly job: JobView
     readonly cause: JobSettleCause
+    /** Producer's quiet-delivery requirement; omission leaves delivery to the controller. */
+    readonly completionDelivery?: 'quiet'
     /**
      * Whether this settlement released a live {@link JobRegistry.wait}. That
      * waiter's caller receives the terminal projection as its own result, so

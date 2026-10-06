@@ -10,7 +10,7 @@ description: "对照架构计划记录 MGSD 实施状态与 Codely 交接清单�
 
 本清单让 Codely 从当前仓库状态继续实施 MGSD。原始计划为 `docs/MGSD_Distributed_Agent_Harness_Architecture_and_Execution_Plan.md`，重点对照其中编号明确的 Phase 0–21。用户当前选择的顺序是先完成本机 DSH 改造，再做远程任务派发。本地 Codely 执行原型已跑通；完整本地任务流程和分布式 MVP 尚未完成。
 
-状态日期：2026-10-04，Asia/Shanghai。已勾选表示具有实现及已记录的验证。标为**部分完成**的未勾选项仅完成所述子集。标为**未验证**的未勾选项表示当前仓库没有证据，不表示其他机器一定没做。相关代码或环境变化后必须重新验证历史结果。
+状态日期：2026-10-07，Asia/Shanghai。已勾选表示具有实现及已记录的验证。标为**部分完成**的未勾选项仅完成所述子集。标为**未验证**的未勾选项表示当前仓库没有证据，不表示其他机器一定没做。相关代码或环境变化后必须重新验证历史结果。
 
 ## 目录
 
@@ -26,7 +26,7 @@ description: "对照架构计划记录 MGSD 实施状态与 Codely 交接清单�
 <a id="take-over"></a>
 ## 接手当前仓库
 
-在本机从 `F:\Agents\deepseek-harness` 开始。检查时分支为 `codely_bridge`；编辑前重新确认分支和状态。原型尚未提交或推送。重新 clone 的仓库不会包含这些未跟踪文件。
+在本机从 `F:\Agents\deepseek-harness` 开始。检查时分支为 `codely_bridge`；编辑前重新确认分支和状态。原型及 L1 验收改动均在当前仓库工作区中；换机器继续前应转移工作区 diff。
 
 按以下顺序阅读：
 
@@ -36,16 +36,17 @@ description: "对照架构计划记录 MGSD 实施状态与 Codely 交接清单�
 4. [执行器实验报告](MGSD_Codely_Executor_Validation_Report.zh.md)，了解实际观察到的退出码、提示词传输、自动保存及沙箱限制。
 5. 开始实现前阅读[架构](architecture.zh.md)、[测试策略](testing.zh.md)和[防御模式](defensive-patterns.zh.md)。
 
-保留现有改动：`website/docs.ts`、`apps/cli/config/examples/codely-local/`、`apps/cli/tests/codely-local.spec.ts`、`apps/cli/tests/fixtures/codely-local/` 及本地使用说明三件套。`.codely-cli/` 和 `docs/.obsidian/` 是另外两处原先就存在的未跟踪目录；只检查与任务有关的文件，不要整体加入 Git。不要 reset、clean、自动提交或自动推送当前仓库。
+保留现有 `.codely-cli/settings.json` 改动，以及当前执行器、测试、使用说明和 checklist 的编辑。只检查与任务有关的文件，不要整体加入本地设置或编辑器数据。不要 reset、clean、自动提交或自动推送当前仓库。
 
 | 现有文件 | 接手执行器应检查的内容 |
 |---|---|
-| [覆盖层](../apps/cli/config/examples/codely-local/cordis.patch.yml) | 按需加载及 `completionDelivery: quiet`；它也会改变本组合其他任务的完成通知方式。 |
+| [覆盖层](../apps/cli/config/examples/codely-local/cordis.patch.yml) | 按需加载。Codely 生产方逐任务请求静默完成通知；其他任务保留原通知配置。 |
 | [命令插件](../apps/cli/config/examples/codely-local/plugin.mjs) | 直接执行的人类命令、会话归属、目录准入、截止时间及 effect 管理的清理。 |
 | [执行 runner](../apps/cli/config/examples/codely-local/run.mjs) | Codely argv、独立 stdout/stderr、独立检查、有界收集及进程清理。 |
-| [测试入口](../apps/cli/tests/codely-local.spec.ts) | 两个 Vitest 用例，包含六个嵌套确定性 Node 测试和真实 Loader/进程场景。 |
+| [测试入口](../apps/cli/tests/codely-local.spec.ts) | 三个 Vitest 用例，包含 13 个嵌套确定性 Node 测试和两个真实 Loader/进程场景。 |
 | [Loader 驱动](../apps/cli/tests/fixtures/codely-local/driver.ts) | 真实覆盖层执行、文件断言、验收失败、取消、跨会话拒绝、卸载及模型调用次数。 |
 | [真实冒烟测试](../apps/cli/tests/fixtures/codely-local/live.ts) | 已登录的真实 Codely 在临时目录运行，并接受外部内容检查。 |
+| [Web 验收](../apps/web/tests/codely-local.snapshot.ts) | 构建后的 Web profile、页内选择器、执行器/验收结果、模型调用探针、浏览器回放及工作区预期值。 |
 
 <a id="completed-local-work"></a>
 ## 已完成的本地工作
@@ -60,12 +61,13 @@ description: "对照架构计划记录 MGSD 实施状态与 Codely 交接清单�
 - [x] 输出保留有界，丢失早期输出时明确提示。
 - [x] 同目录并发准入、其他会话输出访问拒绝、手动取消及插件卸载清理具有 Loader/进程测试覆盖。
 - [x] 真实 Codely 冒烟测试生成预期文件、通过独立检查，并记录 DSH 模型调用次数为 0。
-- [x] Web profile 配置组合包含按需启用的插件及静默完成通知。
+- [x] Web 覆盖层加载按需插件；每个 Codely 任务逐项请求静默完成，不改变其他任务的通知配置。
 - [x] 中英文本地使用说明及网站映射已存在；此前 lint/Host 构建和网站检查通过。
-- [ ] **部分完成：**已有截止时间处理；仍需专门验证真实超时、后代进程，以及最终清理期间超时的回归场景。
+- [x] 截止时间、最终清理期间取消、清理失败及 Windows 父子进程终止具有 2026-10-06 的专项自动化证据。
 - [ ] **部分完成：**stdout 为原始流式 JSON；尚未实现结构化事件解析、持久审计及完整输出恢复。
 - [ ] **部分完成：**根目录 `CODELY.md` 已有仓库上下文；尚未实现 MGSD 任务/envelope 协议及其 Codely skill（技能）。
-- [ ] **待完成：**浏览器命令验收及仓库要求的录制会话场景。
+- [x] 真实 Web 验收展示 run/status/output/cancel、独立退出码 23 验收失败、刷新后保留的命令记录及零 DSH 模型调用。
+- [x] 无密钥的当前格式 Session fixture 通过构建后的正式 Web profile 回放，并匹配 UI 和完整工作区预期值。
 
 <a id="phase-mapping"></a>
 ## 原计划阶段对照
@@ -100,19 +102,19 @@ description: "对照架构计划记录 MGSD 实施状态与 Codely 交接清单�
 <a id="next-local-checklist"></a>
 ## 接下来的本地 checklist
 
-每次完成一组事项。下一个可执行里程碑是 **L1**，不是注册 GitHub runner。L2–L5 是计划交付项，不是已经存在的命令或目录。
+每次完成一组事项。**L1** 已完成；下一步进入 L2，构建本地任务数据及确定性工作流。L2–L5 是计划交付项，不是已经存在的命令或目录。
 
 ### L1 — 完成当前 DSH 原型验收
 
-- [ ] 使用下方验证入口复现聚焦测试；保留失败输出，并在当前插件中修复回归。
-- [ ] 补充截止时间到达、最终进程清理期间截止时间/取消、清理失败的确定性回归；分别报告超时及退出事实。
-- [ ] 对实际 Windows 提供方验证托管子进程终止，包含子命令；不要用 `strict` 或 worktree 布局证明隔离。
-- [ ] 使用 Codely 覆盖层及仓库要求的页内目录选择器覆盖层启动真实 Web profile；选择临时本地项目，在浏览器执行 run/status/output/cancel。
-- [ ] 在界面观察成功执行及独立验收失败；确认两者都不会发起 DSH 模型请求。
-- [ ] 为命令/任务输出补充仓库要求的无密钥录制会话场景；按 `snapshots/AGENTS.md` 选择归属，不要自创回放归一化。
-- [ ] 将可运行步骤及结果记录到本地使用说明；若创建涉及界面变更的 PR（Pull Request），提供真实流程 GIF 证据。
+- [x] 已复现聚焦测试：三个 Vitest 用例通过，包含 13 个 Node 测试；五个结果报告断言先失败，修复后通过。
+- [x] 已补充截止时间到达、最终清理期间截止时间/取消、清理失败回归；超时与观察到的退出事实分别报告。
+- [x] 已使用实际 Windows 提供方确认取消和卸载后父子进程均终止；此结果不构成文件系统隔离证明。
+- [x] 使用 Codely 及页内选择器覆盖层启动真实 Web profile；在 Edge 选择隔离项目并执行 run/status/output/cancel。
+- [x] 界面显示了执行成功及退出码 23 的独立验收失败；模型探针及空调用记录确认没有 DSH 模型请求。逐任务静默通知阻止 preset 唤醒模型。
+- [x] 按仓库规范添加并回放当前格式无密钥 Session 场景，校验 UI 与完整工作区结果，并将 owner 注册到快照清单。
+- [x] 中英文使用说明记录了可复现的浏览器、真实 Codely、回放和生命周期命令及结果。当前没有创建 PR，因此无需 GIF。
 
-L1 验收：CLI/Loader 与浏览器路径展示一致结果，检查失败不能报告成功，取消/卸载/截止时间处理在托管清理后结束，录制输出无需 API key 即可回放。
+L1 验收：CLI/Loader 与浏览器路径展示一致结果，检查失败不能报告成功，取消/卸载/截止时间处理在托管清理后结束，录制输出无需 API key 即可回放。所有条件于 2026-10-07 通过；命令及结果见使用说明的开发备注和验证记录。
 
 ### L2 — 本地任务数据及确定性工作流（Phase 4–6；第 22 节）
 
@@ -172,7 +174,7 @@ L5 验收：完整本地流程可复现，任务数据重启后仍存在，检�
 <a id="verification"></a>
 ## 验证与阻塞项
 
-以下现有入口运行无密钥执行器及 Loader/进程测试。2026-10-04 已记录结果为两个 Vitest 用例通过，包含六个嵌套 Node 测试。本次 checklist 编写不重新调用模型推理。
+以下现有入口运行无密钥执行器及 Loader/进程测试。2026-10-04 的记录结果为两个 Vitest 用例通过，包含六个嵌套 Node 测试。2026-10-06 最近一次聚焦生命周期回归通过三个文件、147 个测试，包含 13 个嵌套 Node 测试。2026-10-07 重新验证了 Web 验收和无密钥回放；具体命令及结果见本地使用说明的开发备注。
 
 ```powershell
 node node_modules/vitest/vitest.mjs run apps/cli/tests/codely-local.spec.ts
@@ -190,9 +192,9 @@ node --import tsx/esm apps/cli/tests/fixtures/codely-local/live.ts
 - 已验证 Node 升级；`v26.10.0` 是 Node.js 版本，不是 Codely 版本。早期执行器报告的 Node v22.18.0 及 Codely nightly 版本仅描述当时实验。
 - 依赖文件已下载；根目录 postinstall 因现有子模块 Git `core.worktree` 配置失败。不要仅为了运行命令就在未确认归属时修改 Git 公共配置。
 - 此前固定版本 pnpm 调用使用 `pnpm_config_verify_deps_before_run=false` 避免重复安装。这不能证明新 clone 的依赖就绪；新环境应按正常流程安装和设置。
-- 此前 `lint` 及 Host 构建、`docs:check` 通过。此前 `test:docs` 为 18 通过 / 2 失败；`doc-sync` 为 39 通过 / 3 失败，剩余失败均指向原计划缺少双语文件、硬换行及无法编译的 TypeScript 示例。相关编辑后重新检查；不要宣称全仓完全通过。
+- 此前 `lint` 及 Host 构建、`docs:check` 通过。2026-10-07 在 L1 编辑后重新运行了文档检查；最终交接记录见本地使用说明。若原计划的双语配对或 TypeScript 示例仍失败，不要宣称全仓完全通过。
 - 2026-10-04 的计划修订在第 24.1 节定义本地 DSH 验收、第 24.2 节定义远程验收。checklist 配对、Markdown 链接、`lint` 和 `git diff --check` 通过。原计划的硬换行已修正，换行检查通过；完整文档检查仍报告它原有的双语配对缺失及无法编译的 TypeScript 示例。这些文档问题不代表本地或远程实现完成。
-- 根目录 `CODELY.md` 是现有仓库上下文。当前本地任务插件没有完成 MGSD TaskStore/FSM、worktree 自动化、执行 envelope 强制校验、持久流审计、浏览器验收及会话回放。
+- 根目录 `CODELY.md` 是现有仓库上下文。当前本地任务插件没有完成 MGSD TaskStore/FSM、worktree 自动化、执行 envelope 强制校验及持久流审计。浏览器验收和无密钥回放现已覆盖本机 Codely 原型，但这不代表后续里程碑已完成。
 
 <a id="handoff-prompt"></a>
 ## Codely 接手提示词
@@ -207,12 +209,13 @@ Use docs/MGSD_Distributed_Agent_Harness_Architecture_and_Execution_Plan.md
 for the final architecture, and this checklist for current status and order.
 
 The user chose local DSH integration first and remote dispatch second.
-Start with L1: finish acceptance of the existing local Codely prototype.
+L1 acceptance passed on 2026-10-07; start L2, local task data and deterministic
+workflow. Read its unchecked acceptance items before designing changes.
 Inspect git status and preserve the uncommitted prototype and user files.
 Read the existing plugin, runner, overlay, tests, and local user guide.
-Reproduce the focused keyless test, then implement and verify the next
-unchecked L1 items, including deadlines, managed cleanup, browser command
-acceptance, and the repository-required recorded-session coverage.
+Use the current checklist as the status source. Rerun only relevant checks
+after changes; current evidence includes 147 lifecycle tests, the authenticated
+real Codely smoke, and the Edge browser acceptance plus keyless v4 replay.
 
 Codely is the primary execution loop. DSH owns deterministic execution,
 state, validation, and presentation. Keep DSH model-call count zero for
@@ -223,7 +226,8 @@ does not. Do not treat worktrees or strict path policy as OS confinement.
 Keep the workflow Core independent of DSH/Cordis when reaching L2.
 Reuse the current adapter; do not duplicate task state machines.
 Do not configure GitHub runners, remote dispatch, or upload project data
-during L1. Do not reset, clean, auto-commit, or auto-push user changes.
+until the user starts that second stage. Do not reset, clean, auto-commit,
+or auto-push user changes.
 
 For each completed item, update both checklist languages and their pairing
 record with file evidence, exact checks run, observed result, and remaining

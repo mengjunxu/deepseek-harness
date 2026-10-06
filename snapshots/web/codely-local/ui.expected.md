@@ -1,0 +1,10 @@
+- text: "codely Started codely-1. Use /codely output codely-1 or /codely cancel codely-1. codely codely-1: completed — Codely exited 0; all configured validation commands exited 0"
+- 'button "codely codely-1: completed Executor wrote result.txt Codely exit code: 0; signal: null Validation 1/1 Independent validation executed Validation 1 exit code: 0; signal: null"'
+- text: codely Started codely-2. Use /codely output codely-2 or /codely cancel codely-2.
+- 'button "codely codely-1: completed — Codely exited 0; all configured validation commands exited 0 codely-2: failed — Validation 1 exit code: 23; signal: null"'
+- 'button "codely codely-2: failed Executor wrote result.txt Codely exit code: 0; signal: null Validation 1/1 Independent validation executed Validation 1 exit code: 23; signal: null"'
+- text: codely Started codely-3. Use /codely output codely-3 or /codely cancel codely-3.
+- 'button "codely codely-1: completed — Codely exited 0; all configured validation commands exited 0 codely-2: failed — Validation 1 exit code: 23; signal: null codely-3: running"'
+- text: codely requested
+- 'button "codely codely-1: completed — Codely exited 0; all configured validation commands exited 0 codely-2: failed — Validation 1 exit code: 23; signal: null codely-3: killed — Cancelled; validation is not certified; User cancelled" [expanded]'
+- text: "codely-1: completed — Codely exited 0; all configured validation commands exited 0 codely-2: failed — Validation 1 exit code: 23; signal: null codely-3: killed — Cancelled; validation is not certified; User cancelled"

@@ -21,25 +21,4 @@
 - id: tool-jobs
   name: '@deepseek-ai/dsh-tool-jobs'
   config:
-    completionDelivery: quiet
-- id: codely-local
-  name: >-
-    file:///F:/Agents/deepseek-harness/apps/cli/config/examples/codely-local/plugin.mjs
-  config:
-    command: !!js JSON.parse(process.env.DSH_CODELY_COMMAND)
-    checks: !!js JSON.parse(process.env.DSH_CODELY_CHECKS)
-  disabled: true
-- id: codely-local
-  name: >-
-    file:///F:/Agents/deepseek-harness/apps/cli/config/examples/codely-local/plugin.mjs
-  config:
-    command: !!js JSON.parse(process.env.DSH_CODELY_COMMAND)
-    checks: !!js JSON.parse(process.env.DSH_CODELY_CHECKS)
-  disabled: true
-- id: codely-local
-  name: >-
-    file:///F:/Agents/deepseek-harness/apps/cli/config/examples/codely-local/plugin.mjs
-  config:
-    command: !!js JSON.parse(process.env.DSH_CODELY_COMMAND)
-    checks: !!js JSON.parse(process.env.DSH_CODELY_CHECKS)
-  disabled: true
+    completionDelivery: wakeup

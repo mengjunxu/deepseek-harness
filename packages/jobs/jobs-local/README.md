@@ -29,6 +29,8 @@ Load this plugin when a composition needs in-process background jobs: long-runni
 
 ### When to choose it
 
+The registry preserves a producer's `completionDelivery: 'quiet'` requirement on the settlement event; the completion controller applies it without changing status or output.
+
 Choose it when jobs should live in the harness process and die with it. Avoid it when work must survive a restart or span processes: records are in-memory, so a durable or cross-process backend must implement the same contract differently.
 
 ### Minimal configuration

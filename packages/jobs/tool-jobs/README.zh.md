@@ -25,6 +25,8 @@ kind: "package-reference"
 <a id="use-this-package"></a>
 ## 使用本包
 
+job 的 `completionDelivery: 'quiet'` 要求优先于本插件的唤醒配置。通知保持待领，直到普通模型轮次领取。
+
 在 agent 需要启动、观察和停止后台任务的任何组合中加载本插件：它注册三个工具、附加生产方所需的控制器，并投递完成通知。它需要组合中已提供的 `ctx.tools`、`ctx.jobs` 与 `ctx.systemPrompt` 服务；完成通知经 `ctx.agents` 解析投递目标，凡有归属任务的组合都已提供它。
 
 ### 三个工具

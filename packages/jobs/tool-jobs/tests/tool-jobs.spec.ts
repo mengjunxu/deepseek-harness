@@ -83,7 +83,7 @@ function producer(overrides: Partial<Omit<JobSpec, 'run' | 'output'> & JobHooks>
   let settle!: (outcome: JobOutcome) => void
   let handle: JobHandle | undefined
   const cancels: (string | undefined)[] = []
-  const { kind = 'bash', label = 'sleep 60', owner, outputLimitBytes, ...hookOverrides } = overrides
+  const { kind = 'bash', label = 'sleep 60', owner, outputLimitBytes, completionDelivery, ...hookOverrides } = overrides
   const hooks: JobHooks = {
     cancel(reason) { cancels.push(reason) },
     done: new Promise<JobOutcome>((res) => { settle = res }),
@@ -94,6 +94,7 @@ function producer(overrides: Partial<Omit<JobSpec, 'run' | 'output'> & JobHooks>
     label,
     ...owner !== undefined ? { owner } : {},
     ...outputLimitBytes !== undefined ? { outputLimitBytes } : {},
+    ...completionDelivery === undefined ? {} : { completionDelivery },
     run: (job) => { handle = job; return hooks },
   }
   const started = (): JobHandle => {
@@ -757,6 +758,19 @@ describe('completion notice delivery', () => {
     const p = producer({ owner: owner.id })
     ctx.jobs.start(p.spec)
 
+    p.settle({ status: 'completed' })
+    await tick()
+    expect(inject).toHaveBeenCalledTimes(1)
+    expect(followup).not.toHaveBeenCalled()
+  })
+
+  it('keeps producer-requested quiet completion pending under a wakeup controller', async () => {
+    const { ctx } = await setup()
+    const inject = vi.fn()
+    const followup = vi.fn()
+    const owner = await fakeAgent(ctx, 'sess-1', { inject, followup, status: 'idle' })
+    const p = producer({ owner: owner.id, completionDelivery: 'quiet' })
+    ctx.jobs.start(p.spec)
     p.settle({ status: 'completed' })
     await tick()
     expect(inject).toHaveBeenCalledTimes(1)

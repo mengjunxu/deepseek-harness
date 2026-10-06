@@ -72,9 +72,7 @@ describe('web e2e: /feedback command acknowledgement', () => {
 
   it.skipIf(MODE === 'record')('records feedback and renders the acknowledgement with session and anonymous user ids', async () => {
     onTestFailed(() => saveFailureShot(page, 'web-e2e-feedback-command'))
-    // The drive test settled the recorded turn: the transcript is active (a
-    // command row does not render while a fresh session is still blank) and
-    // the replayed reply is on screen.
+    // The drive test settled the recorded turn and its reply is on screen.
     await page.getByText('LIGHTHOUSE', { exact: true }).waitFor({ timeout: 15_000 })
     const input = page.locator('[data-composer-input]').first()
     await input.fill('/feedback the diff view is unreadable')

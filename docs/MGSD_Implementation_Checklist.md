@@ -10,7 +10,7 @@ English | [中文](MGSD_Implementation_Checklist.zh.md)
 
 This checklist lets Codely continue the MGSD implementation from the current checkout. The source plan is `docs/MGSD_Distributed_Agent_Harness_Architecture_and_Execution_Plan.md`, especially its numbered Phase 0–21 sections. The user's current order is local DSH integration first, then remote task dispatch. The local Codely execution prototype works; the complete local task workflow and distributed MVP remain incomplete.
 
-Status date: 2026-10-04, Asia/Shanghai. A checked item has implementation and recorded verification. An unchecked item marked **partial** has only the stated subset. An unchecked item marked **unverified** has no evidence in this checkout; it does not assert that another machine lacks it. Historical results must be rerun after relevant code or environment changes.
+Status date: 2026-10-07, Asia/Shanghai. A checked item has implementation and recorded verification. An unchecked item marked **partial** has only the stated subset. An unchecked item marked **unverified** has no evidence in this checkout; it does not assert that another machine lacks it. Historical results must be rerun after relevant code or environment changes.
 
 ## Table of Contents
 
@@ -26,7 +26,7 @@ Status date: 2026-10-04, Asia/Shanghai. A checked item has implementation and re
 <a id="take-over"></a>
 ## Take over this checkout
 
-Start at `F:\Agents\deepseek-harness` on this machine. The inspected branch is `codely_bridge`; inspect the branch and status again before editing. The prototype has not been committed or pushed. A fresh clone does not contain its untracked files.
+Start at `F:\Agents\deepseek-harness` on this machine. The inspected branch is `codely_bridge`; inspect the branch and status again before editing. The prototype and L1 acceptance changes are in the current checkout. Transfer the working diff before continuing on another machine.
 
 Read these files in order:
 
@@ -36,16 +36,17 @@ Read these files in order:
 4. [Executor experiment](MGSD_Codely_Executor_Validation_Report.md) for the observed exit-code, prompt-transport, auto-save, and sandbox limitations.
 5. [Architecture](architecture.md), [testing policy](testing.md), and [defensive patterns](defensive-patterns.md) before implementation work.
 
-Preserve the existing changes: `website/docs.ts`, `apps/cli/config/examples/codely-local/`, `apps/cli/tests/codely-local.spec.ts`, `apps/cli/tests/fixtures/codely-local/`, and the local-guide triplet. `.codely-cli/` and `docs/.obsidian/` are separate pre-existing untracked directories; inspect only task-relevant files and do not add their contents wholesale. Do not reset, clean, auto-commit, or auto-push the checkout.
+Preserve the existing `.codely-cli/settings.json` change and the current execution, test, guide, and checklist edits. Inspect only task-relevant files; do not add local settings or editor data wholesale. Do not reset, clean, auto-commit, or auto-push the checkout.
 
 | Existing file | What the next executor should inspect |
 |---|---|
-| [Overlay](../apps/cli/config/examples/codely-local/cordis.patch.yml) | Opt-in loading and `completionDelivery: quiet`; this changes completion delivery for the composition's other jobs too. |
+| [Overlay](../apps/cli/config/examples/codely-local/cordis.patch.yml) | Opt-in loading. The Codely producer requests quiet completion per job; other jobs keep their configured delivery. |
 | [Command plugin](../apps/cli/config/examples/codely-local/plugin.mjs) | Direct human commands, session ownership, directory admission, deadline, and effect-owned teardown. |
 | [Execution runner](../apps/cli/config/examples/codely-local/run.mjs) | Codely argv, separate stdout/stderr, independent checks, bounded collection, and process cleanup. |
-| [Test entry](../apps/cli/tests/codely-local.spec.ts) | Two Vitest cases, including six nested deterministic Node tests and a real Loader/process scenario. |
+| [Test entry](../apps/cli/tests/codely-local.spec.ts) | Three Vitest cases, including 13 nested deterministic Node tests and two real Loader/process scenarios. |
 | [Loader driver](../apps/cli/tests/fixtures/codely-local/driver.ts) | Real overlay execution, file assertions, failed validation, cancellation, cross-session denial, unload, and model-call count. |
 | [Live smoke](../apps/cli/tests/fixtures/codely-local/live.ts) | Real authenticated Codely in a disposable directory with an external content check. |
+| [Web acceptance](../apps/web/tests/codely-local.snapshot.ts) | Built Web profile, in-page picker, executor/validator outcomes, model-call tripwire, browser replay, and workspace oracle. |
 
 <a id="completed-local-work"></a>
 ## Completed local work
@@ -60,12 +61,13 @@ These checks describe the local prototype, not completion of whole original phas
 - [x] Output retention is bounded and earlier-output loss is reported.
 - [x] Same-directory concurrent admission, foreign-session output denial, manual cancellation, and plugin-unload cleanup have Loader/process coverage.
 - [x] The real Codely smoke generated the expected file, passed the independent check, and recorded zero DSH model calls.
-- [x] Web profile configuration composition contains the opt-in plugin and quiet completion delivery.
+- [x] The Web overlay loads the opt-in plugin; each Codely job requests quiet completion without changing other jobs' delivery.
 - [x] English/Chinese local instructions and website mapping exist; prior lint/Host build and website checks passed.
-- [ ] **Partial:** deadline handling exists; dedicated real timeout, descendant-process, and timeout-during-final-cleanup regressions still need evidence.
+- [x] Deadline, cancellation during final cleanup, cleanup failure, and Windows parent/child termination have dedicated automated evidence dated 2026-10-06.
 - [ ] **Partial:** stdout carries raw stream JSON; structured event parsing, durable audit, and full-stream recovery are not implemented.
 - [ ] **Partial:** root `CODELY.md` contains repository context; the MGSD task/envelope protocol and its Codely skill are not implemented.
-- [ ] **Pending:** browser command acceptance and the required recorded-session scenario.
+- [x] Real Web acceptance shows run/status/output/cancel, independent exit-23 failure, persisted command rows after reload, and zero DSH model calls.
+- [x] The keyless current-format Session fixture replays from the built shipped Web profile and matches its UI and complete workspace oracles.
 
 <a id="phase-mapping"></a>
 ## Original phase mapping
@@ -100,19 +102,19 @@ Retain original numbers for traceability. Complete the local prerequisites befor
 <a id="next-local-checklist"></a>
 ## Next local checklist
 
-Work through one item group at a time. The next executable milestone is **L1**, not GitHub runner setup. L2–L5 are planned deliverables, not existing commands or directories.
+Work through one item group at a time. **L1** is complete; start the local task data and deterministic workflow in L2. L2–L5 are planned deliverables, not existing commands or directories.
 
 ### L1 — Finish acceptance of the current DSH prototype
 
-- [ ] Reproduce the focused suite using the verification entry below; preserve failure output and fix regressions in the current plugin.
-- [ ] Add deterministic regressions for deadline expiry, deadline/cancellation during final process cleanup, and cleanup failure; keep timeout and exit facts distinguishable.
-- [ ] Validate managed-child termination against the actual Windows provider, including a child command, without claiming confinement from `strict` or worktree layout.
-- [ ] Start the real Web profile with the Codely overlay and repository-required in-page picker overlay; select a disposable local project and exercise run/status/output/cancel from the browser.
-- [ ] Observe successful execution and failed independent validation in the UI; confirm neither opens a DSH model request.
-- [ ] Add the repository-required keyless recorded-session scenario for command/job output; select its owner using `snapshots/AGENTS.md` rather than inventing replay normalization.
-- [ ] Record runnable steps and results in the local guide; add real-flow GIF evidence if opening a GUI-change PR.
+- [x] Reproduced the focused suite: three Vitest cases passed, including 13 Node tests; five reporting assertions failed before the fix and passed afterward.
+- [x] Added deadline expiry, deadline/cancellation during final cleanup, and cleanup-failure regressions; timeout and observed exit facts are reported independently.
+- [x] Verified parent and child termination with the actual Windows provider after cancellation and unload; this does not establish filesystem confinement.
+- [x] Started the real Web profile with Codely and the in-page picker overlays; selected an isolated project and exercised run/status/output/cancel in Edge.
+- [x] Observed successful execution and exit-23 validation failure; the model tripwire and empty call ledger confirmed no DSH model requests. Per-job quiet completion prevents preset wakeups.
+- [x] Added and replayed the required keyless current-format Session scenario with UI and full workspace oracles; registered its owner in the corpus adapter list.
+- [x] Recorded reproducible browser, real Codely, replay, and lifecycle commands and observed results in the English and Chinese guide. A PR GIF is not applicable because no PR is being opened.
 
-L1 acceptance: CLI/Loader and browser paths show the same outcomes, failed checks cannot produce success, cancellation/unload/deadlines settle after managed cleanup, and recorded output replays without an API key.
+L1 acceptance: CLI/Loader and browser paths show the same outcomes, failed checks cannot produce success, cancellation/unload/deadlines settle after managed cleanup, and recorded output replays without an API key. All criteria passed on 2026-10-07; see the guide's Dev Note and verification record for commands and outcomes.
 
 ### L2 — Local task data and deterministic workflow (Phase 4–6; Section 22)
 
@@ -172,7 +174,7 @@ Remote dispatch is not currently configured by this prototype. Private repositor
 <a id="verification"></a>
 ## Verification and blockers
 
-The following existing entry runs keyless executor and Loader/process coverage. Its recorded result on 2026-10-04 was two passing Vitest cases, including six nested Node tests. This checklist-writing task does not rerun model inference.
+The following existing entry runs keyless executor and Loader/process coverage. Its recorded result on 2026-10-04 was two passing Vitest cases, including six nested Node tests. The latest focused lifecycle rerun on 2026-10-06 passed three files and 147 tests, including 13 nested Node tests. The Web acceptance and keyless replay were rerun on 2026-10-07; exact commands and outcomes are in the local guide's Dev Note.
 
 ```powershell
 node node_modules/vitest/vitest.mjs run apps/cli/tests/codely-local.spec.ts
@@ -190,9 +192,9 @@ Known handoff facts:
 - The Node upgrade is verified; `v26.10.0` is the Node.js version, not the Codely version. The earlier executor report's Node v22.18.0 and Codely nightly version describe its dated experiment.
 - Dependency files were downloaded; root postinstall failed on the existing submodule Git `core.worktree` configuration. Do not change common Git configuration merely to unblock a command without checking its owners.
 - The earlier pinned-pnpm invocation used `pnpm_config_verify_deps_before_run=false` to avoid repeating installation. This does not certify a fresh clone's dependencies; use normal installation/setup for a new environment.
-- Prior `lint` with Host build and `docs:check` passed. Prior `test:docs` was 18 passed / 2 failed; `doc-sync` was 39 passed / 3 failed, all remaining failures pointing at the source plan's missing bilingual files, hard wrapping, and non-compiling TypeScript examples. Recheck after relevant edits; do not call the repository fully green.
+- Prior `lint` with Host build and `docs:check` passed. On 2026-10-07, documentation checks were rerun after the L1 edits; see the final handoff record in the local guide. Do not call the repository fully green if the source plan's bilingual pairing or TypeScript examples still fail.
 - The 2026-10-04 plan revision defines local DSH acceptance in Section 24.1 and remote acceptance in Section 24.2. Checklist pairing, Markdown links, `lint`, and `git diff --check` pass. The plan's hard wrapping is corrected and the wrap check passes; full documentation checks still report its pre-existing missing bilingual pair and non-compiling TypeScript examples. These documentation issues do not mark local or remote implementation complete.
-- Root `CODELY.md` is existing repository context. MGSD TaskStore/FSM, worktree automation, execution-envelope enforcement, durable stream audit, browser acceptance, and session replay are not completed by the current local-job plugin.
+- Root `CODELY.md` is existing repository context. MGSD TaskStore/FSM, worktree automation, execution-envelope enforcement, and durable stream audit are not completed by the current local-job plugin. Browser acceptance and keyless replay now cover the Codely-local prototype; they do not complete those later milestones.
 
 <a id="handoff-prompt"></a>
 ## Codely handoff prompt
@@ -207,12 +209,13 @@ Use docs/MGSD_Distributed_Agent_Harness_Architecture_and_Execution_Plan.md
 for the final architecture, and this checklist for current status and order.
 
 The user chose local DSH integration first and remote dispatch second.
-Start with L1: finish acceptance of the existing local Codely prototype.
+L1 acceptance passed on 2026-10-07; start L2, local task data and deterministic
+workflow. Read its unchecked acceptance items before designing changes.
 Inspect git status and preserve the uncommitted prototype and user files.
 Read the existing plugin, runner, overlay, tests, and local user guide.
-Reproduce the focused keyless test, then implement and verify the next
-unchecked L1 items, including deadlines, managed cleanup, browser command
-acceptance, and the repository-required recorded-session coverage.
+Use the current checklist as the status source. Rerun only relevant checks
+after changes; current evidence includes 147 lifecycle tests, the authenticated
+real Codely smoke, and the Edge browser acceptance plus keyless v4 replay.
 
 Codely is the primary execution loop. DSH owns deterministic execution,
 state, validation, and presentation. Keep DSH model-call count zero for
@@ -223,7 +226,8 @@ does not. Do not treat worktrees or strict path policy as OS confinement.
 Keep the workflow Core independent of DSH/Cordis when reaching L2.
 Reuse the current adapter; do not duplicate task state machines.
 Do not configure GitHub runners, remote dispatch, or upload project data
-during L1. Do not reset, clean, auto-commit, or auto-push user changes.
+until the user starts that second stage. Do not reset, clean, auto-commit,
+or auto-push user changes.
 
 For each completed item, update both checklist languages and their pairing
 record with file evidence, exact checks run, observed result, and remaining

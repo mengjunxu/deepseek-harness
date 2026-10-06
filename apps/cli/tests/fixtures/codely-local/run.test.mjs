@@ -3,7 +3,7 @@ import assert from 'node:assert/strict'
 import { test } from 'node:test'
 import { runLocalTask } from '../../../config/examples/codely-local/run.mjs'
 
-function harness(outcomes, controller = new AbortController()) {
+function harness(outcomes, controller = new AbortController(), cleanup = async () => true) {
   const spawned = []
   const cleaned = []
   const output = []
@@ -22,7 +22,7 @@ function harness(outcomes, controller = new AbortController()) {
           collected: { stdout: source, stderr: source },
           done: Promise.resolve().then(() => typeof outcomes[index] === 'function' ? outcomes[index]() : outcomes[index]),
           terminate: () => cleaned.push(index),
-          waitForExit: async () => true,
+          waitForExit: () => cleanup(index),
         }
       } },
     }),
@@ -71,3 +71,51 @@ test('process failure still releases its managed range', async () => {
   assert.deepEqual(h.cleaned, [0])
   assert.match(h.output.join(''), /spawn failed/u)
 })
+
+for (const phase of [0, 1]) {
+  for (const reason of [new DOMException('Deadline reached', 'TimeoutError'), new DOMException('User cancelled', 'AbortError')]) {
+    test(`${reason.name} during phase ${phase} cleanup waits for exit and cannot complete`, async () => {
+      const controller = new AbortController()
+      const entered = Promise.withResolvers()
+      const released = Promise.withResolvers()
+      const h = harness([{ exitCode: 0, signal: null }, { exitCode: 0, signal: null }], controller, async index => {
+        if (index === phase) { entered.resolve(); await released.promise }
+        return true
+      })
+      let settled = false
+      const running = h.run().finally(() => { settled = true })
+      try {
+        await entered.promise
+        controller.abort(reason)
+        await Promise.resolve()
+        assert.equal(settled, false)
+        assert.equal(h.spawned.length, phase + 1)
+      } finally {
+        released.resolve()
+      }
+      const result = await running
+      assert.equal(result.status, 'killed')
+      assert.match(result.detail, reason.name === 'TimeoutError' ? /Timed out/u : /Cancelled/u)
+      assert.match(h.output.join(''), /exit code: 0; signal: null/u)
+      assert.equal(h.spawned.length, phase + 1)
+    })
+  }
+}
+
+test('deadline already reached never spawns and reports timeout', async () => {
+  const controller = new AbortController()
+  controller.abort(new DOMException('Deadline reached', 'TimeoutError'))
+  const h = harness([], controller)
+  assert.match((await h.run()).detail, /Timed out/u)
+  assert.equal(h.spawned.length, 0)
+})
+
+for (const [label, cleanup] of [['false result', async () => false], ['rejection', async () => { throw new Error('cleanup rejected') }]]) {
+  test(`failed cleanup (${label}) is not hidden by cancellation`, async () => {
+    const controller = new AbortController()
+    const h = harness([() => { controller.abort(); return { exitCode: 0, signal: null } }], controller, cleanup)
+    assert.equal((await h.run()).status, 'failed')
+    assert.equal(h.spawned.length, 1)
+    assert.match(h.output.join(''), /Managed process range did not stop|cleanup rejected/u)
+  })
+}

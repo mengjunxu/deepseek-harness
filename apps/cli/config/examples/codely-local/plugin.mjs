@@ -76,9 +76,10 @@ export function apply(ctx, config) {
       }
       const id = ctx.jobs.start({
         kind: 'codely', owner, label: input.slice(4).split(/\r?\n/u)[0],
+        completionDelivery: 'quiet',
         run: job => {
           const controller = new AbortController()
-          const timer = setTimeout(() => controller.abort(), config.timeoutMs)
+          const timer = setTimeout(() => controller.abort(new DOMException('Task deadline reached', 'TimeoutError')), config.timeoutMs)
           const done = runLocalTask({
             ...config, subprocess: ctx.subprocess, cwd, prompt: input.slice(4), signal: controller.signal,
             append: (text, options) => job.append(text, options),

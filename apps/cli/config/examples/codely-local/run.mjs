@@ -7,7 +7,7 @@
  */
 export async function runLocalTask({ subprocess, command, checks, cwd, prompt, signal, graceMs, maxBytes, pollMs, append }) {
   let cleanupFailed = false
-  const execute = async (argv) => {
+  const execute = async (argv, label) => {
     signal.throwIfAborted()
     const handle = subprocess.spawn({
       argv, cwd, signal, graceMs,
@@ -23,10 +23,11 @@ export async function runLocalTask({ subprocess, command, checks, cwd, prompt, s
       }
     }
     const timer = setInterval(drain, pollMs)
+    let outcome
     try {
-      const outcome = await handle.done
-      signal.throwIfAborted()
-      return outcome
+      outcome = await handle.done
+      drain()
+      append(`${label} exit code: ${outcome.exitCode}; signal: ${outcome.signal}\n`, { channel: 'log' })
     } finally {
       clearInterval(timer)
       try {
@@ -38,19 +39,21 @@ export async function runLocalTask({ subprocess, command, checks, cwd, prompt, s
       }
       drain()
     }
+    signal.throwIfAborted()
+    return outcome
   }
 
   try {
     const executor = await execute([
       ...command, '--no-upm', '--approval-mode=auto_edit', '--path-policy=strict',
       '--output-format=stream-json', `--prompt=${prompt}`,
-    ])
+    ], 'Codely')
     if (executor.exitCode !== 0) {
       return { status: 'failed', detail: `Codely exit code: ${executor.exitCode}; signal: ${executor.signal}; validation not run` }
     }
     for (const [index, check] of checks.entries()) {
       append(`Validation ${index + 1}/${checks.length}\n`, { channel: 'log' })
-      const outcome = await execute(check)
+      const outcome = await execute(check, `Validation ${index + 1}`)
       if (outcome.exitCode !== 0) {
         return { status: 'failed', detail: `Validation ${index + 1} exit code: ${outcome.exitCode}; signal: ${outcome.signal}` }
       }
@@ -58,8 +61,9 @@ export async function runLocalTask({ subprocess, command, checks, cwd, prompt, s
     signal.throwIfAborted()
     return { status: 'completed', detail: 'Codely exited 0; all configured validation commands exited 0' }
   } catch (error) {
-    if (signal.aborted && !cleanupFailed) return { status: 'killed', detail: 'Cancelled or timed out; validation is not certified' }
+    const interruption = signal.reason?.name === 'TimeoutError' ? 'Timed out' : 'Cancelled'
+    if (signal.aborted && !cleanupFailed) return { status: 'killed', detail: `${interruption}; validation is not certified` }
     append(`${error instanceof Error ? error.message : String(error)}\n`, { channel: 'stderr' })
-    return { status: 'failed', detail: 'Executor, validation, or process cleanup failed' }
+    return { status: 'failed', detail: `Executor, validation, or process cleanup failed${signal.aborted ? `; ${interruption}` : ''}` }
   }
 }

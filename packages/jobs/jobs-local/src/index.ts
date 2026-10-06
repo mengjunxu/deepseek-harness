@@ -78,6 +78,7 @@ interface TrackedJob {
   kind: JobKind
   label: string
   outputLimitBytes: number | undefined
+  completionDelivery: JobSpec['completionDelivery']
   /** Exact lifecycle owner; session-id authorization is derived from it. */
   owner: Agent | undefined
   cancel: (reason?: string) => void
@@ -245,6 +246,7 @@ export class LocalJobRegistry extends JobRegistry {
       kind: spec.kind,
       label: spec.label,
       outputLimitBytes: spec.outputLimitBytes,
+      completionDelivery: spec.completionDelivery,
       owner,
       cancel: hooks.cancel.bind(hooks),
       status: 'running',
@@ -600,7 +602,10 @@ export class LocalJobRegistry extends JobRegistry {
     job.waitResolvers.clear()
     for (const resolveWait of waitResolvers) resolveWait()
     job.markSettled()
-    this.emit({ type: 'settled', job: this.view(job), cause, awaited: waitResolvers.length > 0 }, job.owner)
+    this.emit({
+      type: 'settled', job: this.view(job), cause, awaited: waitResolvers.length > 0,
+      ...job.completionDelivery === undefined ? {} : { completionDelivery: job.completionDelivery },
+    }, job.owner)
     // The ring's stream ends with settlement; the signal follows the committed
     // settlement so an observer that wakes on it reads the terminal state.
     this.emitOutput(job)
