@@ -1,0 +1,19 @@
+{"type":"session","version":4,"id":"{{session:1}}","createdAt":0,"cwd":"{{cwd}}","isSeeded":false,"delegationDepth":0,"agentPreset":"standard"}
+{"type":"permission/preset","data":{"preset":"workspace-write"}}
+{"type":"sandbox/mode","data":{"mode":"workspace-write"}}
+{"type":"approval/policy","data":{"policy":"ask"}}
+{"type":"command/run","data":{"commandId":"{{command:1}}","name":"mgsd","args":" create {\"title\":\"Local task\",\"prompt\":\"success\",\"repoAlias\":\"project\",\"risk\":\"trivial\",\"budget\":{\"maxExecutionAttempts\":2,\"maxExpertCalls\":0,\"maxDurationMs\":60000}}","source":{"kind":"user"}}}
+{"type":"command/done","data":{"commandId":"{{command:1}}","kind":"success","text":"TASK-00000000-0000-4000-8000-000000000001: planning; plan 0; review 0/2; executions 0/2"}}
+{"type":"command/run","data":{"commandId":"{{command:2}}","name":"mgsd","args":" plan TASK-00000000-0000-4000-8000-000000000001 {\"summary\":\"Write result\",\"allowedFiles\":[\"result.txt\"],\"acceptanceCriteria\":[\"Independent check passes\"],\"source\":\"human\"}","source":{"kind":"user"}}}
+{"type":"command/done","data":{"commandId":"{{command:2}}","kind":"success","text":"TASK-00000000-0000-4000-8000-000000000001: plan_ready; plan 1; review 0/2; executions 0/2"}}
+{"type":"command/run","data":{"commandId":"{{command:3}}","name":"mgsd","args":" run TASK-00000000-0000-4000-8000-000000000001","source":{"kind":"user"}}}
+{"type":"command/done","data":{"commandId":"{{command:3}}","kind":"error","text":"Approve the current plan before execution"}}
+{"type":"command/run","data":{"commandId":"{{command:4}}","name":"mgsd","args":" approve TASK-00000000-0000-4000-8000-000000000001 1","source":{"kind":"user"}}}
+{"type":"command/done","data":{"commandId":"{{command:4}}","kind":"success","text":"TASK-00000000-0000-4000-8000-000000000001: approved; plan 1; review 0/2; executions 0/2"}}
+{"type":"command/run","data":{"commandId":"{{command:5}}","name":"mgsd","args":" run TASK-00000000-0000-4000-8000-000000000001","source":{"kind":"user"}}}
+{"type":"command/done","data":{"commandId":"{{command:5}}","kind":"success","text":"Started TASK-00000000-0000-4000-8000-000000000001; process-local job mgsd-1. Use /mgsd status TASK-00000000-0000-4000-8000-000000000001 or /mgsd output TASK-00000000-0000-4000-8000-000000000001."}}
+{"type":"agent/inbox/spliced","data":{"target":"next-step","start":0,"inserted":[{"content":[{"type":"text","text":"background job mgsd-1 (mgsd: Local task) finished [status: completed, Codely exited 0; all configured validation commands exited 0]. Read its output with job_output."}],"source":{"kind":"tool-jobs","form":"notice","summary":"mgsd Local task [status: completed, Codely exited 0; all configured validation commands exited 0]"},"role":"user","id":"{{message:1}}"}]}}
+{"type":"command/run","data":{"commandId":"{{command:6}}","name":"mgsd","args":" status TASK-00000000-0000-4000-8000-000000000001","source":{"kind":"user"}}}
+{"type":"command/done","data":{"commandId":"{{command:6}}","kind":"success","text":"TASK-00000000-0000-4000-8000-000000000001: completed; plan 1; review 0/2; executions 1/2"}}
+{"type":"command/run","data":{"commandId":"{{command:7}}","name":"mgsd","args":" output TASK-00000000-0000-4000-8000-000000000001","source":{"kind":"user"}}}
+{"type":"command/done","data":{"commandId":"{{command:7}}","kind":"success","text":"TASK-00000000-0000-4000-8000-000000000001: completed; plan 1; review 0/2; executions 1/2\nExecutor wrote result.txt\nCodely exit code: 0; signal: null\nValidation 1/1\nIndependent validation executed\nValidation 1 exit code: 0; signal: null\n"}}

@@ -1,0 +1,10 @@
+version: 1
+scenario: mgsd-local
+profile: web
+composition: web-mgsd-local
+recording: authored
+header:
+  class: web-mgsd-local
+  pin: true
+workspace:
+  final: true

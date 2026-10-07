@@ -33,8 +33,9 @@ description: "对照架构计划记录 MGSD 实施状态与 Codely 交接清单�
 1. [根目录指令](../AGENTS.md)及 [Codely 上下文](../CODELY.md)。
 2. 本清单，以及原始计划的组件职责、Phase 5–12、Phase 17–18 和 MVP 验收条件。
 3. [L1 实现总结](MGSD_L1_Local_DSH_Implementation_Summary.zh.md)，了解职责、执行流程、验收及限制；[本地 Codely 使用说明](user/guide/codely-local.zh.md)，了解配置、行为及已记录结果。
-4. [执行器实验报告](MGSD_Codely_Executor_Validation_Report.zh.md)，了解实际观察到的退出码、提示词传输、自动保存及沙箱限制。
-5. 开始实现前阅读[架构](architecture.zh.md)、[测试策略](testing.zh.md)和[防御模式](defensive-patterns.zh.md)。
+4. [L2 实现总结](MGSD_L2_Local_DSH_Implementation_Summary.zh.md)，了解持久化流程、审批、恢复、验收及 L3 交接。
+5. [执行器实验报告](MGSD_Codely_Executor_Validation_Report.zh.md)，了解实际观察到的退出码、提示词传输、自动保存及沙箱限制。
+6. 开始实现前阅读[架构](architecture.zh.md)、[测试策略](testing.zh.md)和[防御模式](defensive-patterns.zh.md)。
 
 保留现有 `.codely-cli/settings.json` 改动，以及当前执行器、测试、使用说明和 checklist 的编辑。只检查与任务有关的文件，不要整体加入本地设置或编辑器数据。不要 reset、clean、自动提交或自动推送当前仓库。
 
@@ -47,6 +48,8 @@ description: "对照架构计划记录 MGSD 实施状态与 Codely 交接清单�
 | [Loader 驱动](../apps/cli/tests/fixtures/codely-local/driver.ts) | 真实覆盖层执行、文件断言、验收失败、取消、跨会话拒绝、卸载及模型调用次数。 |
 | [真实冒烟测试](../apps/cli/tests/fixtures/codely-local/live.ts) | 已登录的真实 Codely 在临时目录运行，并接受外部内容检查。 |
 | [Web 验收](../apps/web/tests/codely-local.snapshot.ts) | 构建后的 Web profile、页内选择器、执行器/验收结果、模型调用探针、浏览器回放及工作区预期值。 |
+| [MGSD Core](../packages/experimental/mgsd-workflow/README.zh.md) | 持久化本地请求、合法转换、精确审批、预算与重启恢复。 |
+| [MGSD 适配器与指南](user/guide/mgsd-local.zh.md) | 人工命令、Core 到 runner 接线、验收命令与 L3/L4 剩余限制。 |
 
 <a id="completed-local-work"></a>
 ## 已完成的本地工作
@@ -64,7 +67,7 @@ description: "对照架构计划记录 MGSD 实施状态与 Codely 交接清单�
 - [x] Web 覆盖层加载按需插件；每个 Codely 任务逐项请求静默完成，不改变其他任务的通知配置。
 - [x] 中英文本地使用说明及网站映射已存在；此前 lint/Host 构建和网站检查通过。
 - [x] 截止时间、最终清理期间取消、清理失败及 Windows 父子进程终止具有 2026-10-06 的专项自动化证据。
-- [ ] **部分完成：**stdout 为原始流式 JSON；尚未实现结构化事件解析、持久审计及完整输出恢复。
+- [ ] **部分完成：**stdout 为原始流式 JSON；L2 已持久化任务事实，结构化流解析及完整流恢复仍未实现。
 - [ ] **部分完成：**根目录 `CODELY.md` 已有仓库上下文；尚未实现 MGSD 任务/envelope 协议及其 Codely skill（技能）。
 - [x] 真实 Web 验收展示 run/status/output/cancel、独立退出码 23 验收失败、刷新后保留的命令记录及零 DSH 模型调用。
 - [x] 无密钥的当前格式 Session fixture 通过构建后的正式 Web profile 回放，并匹配 UI 和完整工作区预期值。
@@ -80,9 +83,9 @@ description: "对照架构计划记录 MGSD 实施状态与 Codely 交接清单�
 | 1 — 私有 Control Repo | 延后 / 未验证 | 私有可见性、可信写入者及已提交控制文件。 |
 | 2 — Self-hosted runners | 延后 / 未验证 | Home 与 Office 的 runner 服务身份、标签及在线状态。 |
 | 3 — Dispatch 冒烟测试 | 延后 / 未验证 | Home 到 Office 的打印任务派发及实际运行结果。 |
-| 4 — 节点本地配置 | 待完成 | 已验证的别名到路径映射、工作目录根及能力配置。 |
-| 5 — Harness Core | 部分完成 | 已有进程执行器；仍缺 MGSD Task schema、TaskStore、工作流 Core、策略及 Core/DSH 分离。 |
-| 6 — FSM | 待完成 | 显式转换校验器、持久化、非法转换测试及 review 循环上限。 |
+| 4 — 节点本地配置 | 本地部分完成 | 别名映射和本地目录已验证；远程能力配置延后。 |
+| 5 — Harness Core | 本地部分完成 | 已有不可变任务、SQLite TaskStore 与独立 Core；工作树、上下文和自动专家适配器属于 L3/L4。 |
+| 6 — FSM | 本地完成 | 已验证持久化、重启中断、审批失效、预算与两轮审查限制。 |
 | 7 — Worktree 服务 | 待完成 | 自动任务 worktree 创建、冲突/失败处理、保留及主 checkout 保护；手工实验 worktree 不满足此阶段。 |
 | 8 — Context Builder | 待完成 | 本地文件/历史/日志选择、输出预算及可复现上下文包。 |
 | 9 — Codex 适配器 | 待完成 | 只读规划/评审、风险预算、CLI（命令行界面）/版本检查及 mock 命令覆盖。 |
@@ -92,8 +95,8 @@ description: "对照架构计划记录 MGSD 实施状态与 Codely 交接清单�
 | 13 — GitHub 到 Harness | 延后 | Runner 侧受控入口、本地别名解析及真实端到端路由。 |
 | 14 — `agent` CLI | 延后 | `nodes/send/status/approve/cancel`、任务身份及 GitHub 调用测试。 |
 | 15 — 多节点批准 | 延后 | 两阶段 plan/execute 流程及本地批准校验。 |
-| 16 — Cancel | 部分完成 | 本地任务取消已可用；持久任务取消、排队运行取消及 Unity 安全检查点仍缺失。 |
-| 17 — DSH 集成 | 部分完成 | 源码覆盖层已可用；仍缺 Core 驱动的可安装组合包、独立工作流 Core 及 profile 验收。 |
+| 16 — Cancel | 部分完成 | 已有本地持久化取消与退出事实；远程排队取消和 Unity 安全检查点延后。 |
+| 17 — DSH 集成 | 部分完成 | 已有 Core 驱动的源码覆盖层与 profile 验收；可安装组合包仍待完成。 |
 | 18 — DSH 状态界面 | 部分完成 | 复用现有任务/命令输出；仍缺 Task/Plan/Review/Node 视图及浏览器验收。 |
 | 19 — Codely subagents | 延后 | 本地工作流稳定后增加只读 scout 及受限 test runner。 |
 | 20 — 高级索引 | 延后 | 基础上下文生成足够且完成度量后再增加文件/符号/Unity 索引。 |
@@ -102,7 +105,7 @@ description: "对照架构计划记录 MGSD 实施状态与 Codely 交接清单�
 <a id="next-local-checklist"></a>
 ## 接下来的本地 checklist
 
-每次完成一组事项。**L1** 已完成；下一步进入 L2，构建本地任务数据及确定性工作流。L2–L5 是计划交付项，不是已经存在的命令或目录。
+每次完成一组事项。**L1、L2** 已完成；下一步进入 L3，构建任务工作树和上下文。L3–L5 仍为计划交付项。[L2 操作与验证](user/guide/mgsd-local.zh.md)记录实现、验收和限制。
 
 ### L1 — 完成当前 DSH 原型验收
 
@@ -118,14 +121,14 @@ L1 验收：CLI/Loader 与浏览器路径展示一致结果，检查失败不能
 
 ### L2 — 本地任务数据及确定性工作流（Phase 4–6；第 22 节）
 
-- [ ] 实现节点本地配置、不可变任务请求、运行状态、品牌化任务标识及持久 TaskStore。
-- [ ] MGSD 工作流 Core 不导入 DSH/Cordis；当前 DSH 子进程包装器仍归适配器，而非独立 Core。
-- [ ] 实现显式合法转换及中断/重启恢复；拒绝 `queued → executing` 和未经批准的执行。
-- [ ] 明确处理原计划 `NEEDS_REPLAN` 文字与 FSM 状态清单的差异；扩大范围必须使执行批准失效。
-- [ ] 落实风险/预算决策及最多两次 review/fix；第二次评审失败进入 `needs_human`。
-- [ ] 持久记录任务/执行/验收/取消事实，区分 Task ID 和进程内 job id。
+- [x] 实现节点本地配置、不可变任务请求、运行状态、品牌化任务标识及持久 TaskStore。
+- [x] MGSD 工作流 Core 不导入 DSH/Cordis；当前 DSH 子进程包装器仍归适配器，而非独立 Core。
+- [x] 实现显式合法转换及中断/重启恢复；拒绝 `queued → executing` 和未经批准的执行。
+- [x] 明确处理原计划 `NEEDS_REPLAN` 文字与 FSM 状态清单的差异；扩大范围必须使执行批准失效。
+- [x] 落实风险/预算决策及最多两次 review/fix；第二次评审失败进入 `needs_human`。
+- [x] 持久记录任务/执行/验收/取消事实，区分 Task ID 和进程内 job id。
 
-L2 验收：序列化及重启测试通过，非法转换失败，模型输出不能直接赋值工作流状态或批准自身计划。
+L2 验收于 2026-10-07 通过：序列化与重启、非法转换、审批注入拒绝、43 个 Core 用例的逐文件 100% 覆盖率、真实 Loader 验收和无密钥 Web 回放。具体命令及结果见 [L2 使用说明](user/guide/mgsd-local.zh.md#verification)。`source: expert` 当前是可信人工声明；自动专家与强制文件范围属于 L4。
 
 ### L3 — Worktree 和上下文（Phase 7–8；第 23 节）
 
@@ -209,10 +212,11 @@ Use docs/MGSD_Distributed_Agent_Harness_Architecture_and_Execution_Plan.md
 for the final architecture, and this checklist for current status and order.
 
 The user chose local DSH integration first and remote dispatch second.
-L1 acceptance passed on 2026-10-07; start L2, local task data and deterministic
-workflow. Read its unchecked acceptance items before designing changes.
+L1 and L2 acceptance passed on 2026-10-07; start L3, task worktrees and
+context. Read its unchecked acceptance items before designing changes.
 Inspect git status and preserve the uncommitted prototype and user files.
 Read the existing plugin, runner, overlay, tests, and local user guide.
+Read docs/user/guide/mgsd-local.md and the experimental MGSD Core README.
 Use the current checklist as the status source. Rerun only relevant checks
 after changes; current evidence includes 147 lifecycle tests, the authenticated
 real Codely smoke, and the Edge browser acceptance plus keyless v4 replay.
@@ -223,7 +227,7 @@ state, validation, and presentation. Keep DSH model-call count zero for
 Configured independent checks determine acceptance; exit 0 from Codely alone
 does not. Do not treat worktrees or strict path policy as OS confinement.
 
-Keep the workflow Core independent of DSH/Cordis when reaching L2.
+Keep the existing workflow Core independent of DSH/Cordis.
 Reuse the current adapter; do not duplicate task state machines.
 Do not configure GitHub runners, remote dispatch, or upload project data
 until the user starts that second stage. Do not reset, clean, auto-commit,

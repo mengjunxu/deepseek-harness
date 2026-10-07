@@ -1,0 +1,37 @@
+# Bilingual-pair consistency record for README.md (docs/i18n/README.md): per heading
+# section, a hash of its English and Chinese blocks outside code blocks and generated regions.
+# After editing either side, bring the other along and re-record with:
+#   pnpm run verify-translation-pairing --write packages/experimental/mgsd-workflow/README.md
+/:
+  en: f2a282e83fa7f53f
+  zh: 81e92954cfa5cb6a
+/deepseek-ai-dsh-experimental-mgsd-workflow:
+  en: 9b9891f299be6415
+  zh: a8a6e355c7a9d365
+/deepseek-ai-dsh-experimental-mgsd-workflow/summary:
+  en: ddef72c69378f3fb
+  zh: b422224dd3691860
+/deepseek-ai-dsh-experimental-mgsd-workflow/table-of-contents:
+  en: d152484eb41ac6b4
+  zh: 725b47765ee8f30b
+/deepseek-ai-dsh-experimental-mgsd-workflow/use-this-package:
+  en: b61162a2832b9c70
+  zh: 9d563173538412fb
+/deepseek-ai-dsh-experimental-mgsd-workflow/understand-the-implementation:
+  en: 12965fa45f86ebba
+  zh: aa6301a79ce52b00
+/deepseek-ai-dsh-experimental-mgsd-workflow/further-exploration:
+  en: 2a2007701f838673
+  zh: be6bec9ad5298330
+/deepseek-ai-dsh-experimental-mgsd-workflow/model-experience:
+  en: 84eaefcdb7e1018d
+  zh: de005a72dc0ccaff
+/deepseek-ai-dsh-experimental-mgsd-workflow/model-experience/kv-cache-effect:
+  en: fc4f7aadff80a1cd
+  zh: cbbdae18d45f0136
+/deepseek-ai-dsh-experimental-mgsd-workflow/known-limitations-and-deferred-work:
+  en: ea59958bd8b4ebd6
+  zh: 9adf1dc6ed478727
+/deepseek-ai-dsh-experimental-mgsd-workflow/known-limitations-and-deferred-work/dev-note:
+  en: e67f633dc6fe7773
+  zh: 8ec3e73528ddb1a6

@@ -5,9 +5,9 @@
  * @param {object} options - Resolved process settings and job output sink.
  * @returns {Promise<object>} Job outcome after managed processes have stopped.
  */
-export async function runLocalTask({ subprocess, command, checks, cwd, prompt, signal, graceMs, maxBytes, pollMs, append }) {
+export async function runLocalTask({ subprocess, command, checks, cwd, prompt, signal, graceMs, maxBytes, pollMs, append, onProcessExit }) {
   let cleanupFailed = false
-  const execute = async (argv, label) => {
+  const execute = async (argv, label, phase, index) => {
     signal.throwIfAborted()
     const handle = subprocess.spawn({
       argv, cwd, signal, graceMs,
@@ -28,6 +28,7 @@ export async function runLocalTask({ subprocess, command, checks, cwd, prompt, s
       outcome = await handle.done
       drain()
       append(`${label} exit code: ${outcome.exitCode}; signal: ${outcome.signal}\n`, { channel: 'log' })
+      onProcessExit?.(phase, index, outcome.exitCode, outcome.signal)
     } finally {
       clearInterval(timer)
       try {
@@ -47,13 +48,13 @@ export async function runLocalTask({ subprocess, command, checks, cwd, prompt, s
     const executor = await execute([
       ...command, '--no-upm', '--approval-mode=auto_edit', '--path-policy=strict',
       '--output-format=stream-json', `--prompt=${prompt}`,
-    ], 'Codely')
+    ], 'Codely', 'executor', 0)
     if (executor.exitCode !== 0) {
       return { status: 'failed', detail: `Codely exit code: ${executor.exitCode}; signal: ${executor.signal}; validation not run` }
     }
     for (const [index, check] of checks.entries()) {
       append(`Validation ${index + 1}/${checks.length}\n`, { channel: 'log' })
-      const outcome = await execute(check, `Validation ${index + 1}`)
+      const outcome = await execute(check, `Validation ${index + 1}`, 'validation', index + 1)
       if (outcome.exitCode !== 0) {
         return { status: 'failed', detail: `Validation ${index + 1} exit code: ${outcome.exitCode}; signal: ${outcome.signal}` }
       }

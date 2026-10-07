@@ -461,6 +461,9 @@ importers:
       '@deepseek-ai/dsh-experimental-agent-team':
         specifier: workspace:*
         version: link:../../packages/experimental/agent-team
+      '@deepseek-ai/dsh-experimental-mgsd-workflow':
+        specifier: workspace:*
+        version: link:../../packages/experimental/mgsd-workflow
       '@deepseek-ai/dsh-experimental-ptc-runtime-python':
         specifier: workspace:*
         version: link:../../packages/experimental/ptc-runtime-python
@@ -7831,6 +7834,21 @@ importers:
       tsx:
         specifier: ^4.19.2
         version: 4.22.4
+
+  packages/experimental/mgsd-workflow:
+    devDependencies:
+      '@deepseek-ai/cordis':
+        specifier: workspace:~
+        version: link:../../../vendor/cordis
+      '@deepseek-ai/dsh-brand':
+        specifier: workspace:*
+        version: link:../../util/brand
+      '@deepseek-ai/dsh-jobs':
+        specifier: workspace:*
+        version: link:../../jobs/jobs
+      '@deepseek-ai/dsh-session':
+        specifier: workspace:*
+        version: link:../../core/session
 
   packages/experimental/ptc-runtime-python:
     dependencies:

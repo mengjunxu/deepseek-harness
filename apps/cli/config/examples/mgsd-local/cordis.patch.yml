@@ -1,0 +1,9 @@
+# Opt-in durable local tasks; node paths and database stay on this host.
+- insert:
+    - id: mgsd-local
+      name: './plugin.mjs'
+      config:
+        nodeConfig: !!js process.env.DSH_MGSD_NODE_CONFIG
+        database: !!js process.env.DSH_MGSD_DATABASE
+        command: !!js JSON.parse(process.env.DSH_CODELY_COMMAND)
+        checks: !!js JSON.parse(process.env.DSH_CODELY_CHECKS)

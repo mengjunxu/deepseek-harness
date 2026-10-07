@@ -26,6 +26,7 @@ const snapshotAdapters = [
   'apps/web/tests/code-language.snapshot.ts',
   'apps/web/tests/codely-local.snapshot.ts',
   'apps/web/tests/message-feedback-protocol.snapshot.ts',
+  'apps/web/tests/mgsd-local.snapshot.ts',
   'apps/web/tests/minimal-preset.snapshot.ts',
   'apps/web/tests/preset-migration.snapshot.ts',
   'snapshots/acp/acp.snapshot.ts',

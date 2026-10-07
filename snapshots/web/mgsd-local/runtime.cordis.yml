@@ -1,0 +1,19 @@
+- id: session-log-deepseek
+  config:
+    enabled: false
+- id: session-persistence-jsonl
+  config:
+    root: !!js process.env.DSH_CODELY_TEST_SESSIONS
+    compression: none
+- id: ui-settings-general
+  config:
+    welcomeNoticeVersion: '2026-08-13.1'
+- id: ui-plugin-manager
+  config:
+    registryProbeEnabled: false
+- id: workspace-controller
+  config:
+    documentsDirectory: !!js process.env.DSH_CODELY_TEST_DOCUMENTS
+- insert:
+    - id: mgsd-test-observer
+      name: './observer.mjs'

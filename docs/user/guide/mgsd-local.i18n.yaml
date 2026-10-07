@@ -1,0 +1,31 @@
+# Bilingual-pair consistency record for mgsd-local.md (docs/i18n/README.md): per heading
+# section, a hash of its English and Chinese blocks outside code blocks and generated regions.
+# After editing either side, bring the other along and re-record with:
+#   pnpm run verify-translation-pairing --write docs/user/guide/mgsd-local.md
+/:
+  en: e7909ac292a5b368
+  zh: d26e945abad1acbb
+/run-durable-local-mgsd-tasks:
+  en: 7e6e8972cfcea16f
+  zh: b4bfed856e4e0a71
+/run-durable-local-mgsd-tasks/summary:
+  en: fb3e66625ba8905b
+  zh: 986ec47d7c465c7b
+/run-durable-local-mgsd-tasks/table-of-contents:
+  en: 8b85dc05b6eb4d7f
+  zh: 7bac233b5cb5dad0
+/run-durable-local-mgsd-tasks/configure:
+  en: 966fb3bb9931e3e2
+  zh: 1121d326f18a78b0
+/run-durable-local-mgsd-tasks/commands:
+  en: 6d43e1c17f0d4a34
+  zh: 9ed6b4b19712a74a
+/run-durable-local-mgsd-tasks/recovery-and-limits:
+  en: f99b713f316d960f
+  zh: 77c1ff29bc2b48da
+/run-durable-local-mgsd-tasks/verification:
+  en: 25f14e22f0ea3a25
+  zh: 25ad7efbc18ab70b
+/run-durable-local-mgsd-tasks/dev-note:
+  en: 1e48eaab69ed8d11
+  zh: be567778b2514ec0

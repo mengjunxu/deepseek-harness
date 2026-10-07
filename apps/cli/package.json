@@ -104,6 +104,7 @@
     "@deepseek-ai/dsh-experimental-auto-review": "workspace:*"
   },
   "devDependencies": {
+    "@deepseek-ai/dsh-experimental-mgsd-workflow": "workspace:*",
     "@agentclientprotocol/sdk": "1.4.0",
     "@deepseek-ai/dsh-acp": "workspace:*",
     "@deepseek-ai/dsh-agent": "workspace:*",

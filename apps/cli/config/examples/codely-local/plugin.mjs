@@ -21,6 +21,15 @@ export const Config = z.object({
  * @param {object} config - Executable argv, validation argv lists, and resource bounds.
  */
 export function apply(ctx, config) {
+  validateRunnerConfig(config)
+  registerCommands(ctx, config)
+}
+
+/**
+ * Validate executable argv and resource limits shared by the local task adapters.
+ * @param {object} config - Resolved Codely and independent-check configuration.
+ */
+export function validateRunnerConfig(config) {
   for (const key of ['timeoutMs', 'graceMs', 'maxBytes', 'pollMs']) {
     if (!Number.isSafeInteger(config[key]) || config[key] <= 0 || config[key] > 2147483647) {
       throw new Error(`codely-local: ${key} must be an integer between 1 and 2147483647`)
@@ -35,6 +44,9 @@ export function apply(ctx, config) {
     }
   }
   if (!config.checks.length) throw new Error('codely-local: configure at least one independent validation command')
+}
+
+function registerCommands(ctx, config) {
   const active = new Map()
   ctx.jobs.attachController(name)
   ctx.effect(() => async () => {

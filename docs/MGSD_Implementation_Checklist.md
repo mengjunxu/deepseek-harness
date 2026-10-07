@@ -33,8 +33,9 @@ Read these files in order:
 1. [Root instructions](../AGENTS.md) and [Codely context](../CODELY.md).
 2. This checklist and the source plan's component responsibilities, Phase 5–12, Phase 17–18, and MVP acceptance criteria.
 3. [L1 implementation summary](MGSD_L1_Local_DSH_Implementation_Summary.md) for responsibilities, execution flow, acceptance, and limits; [local Codely guide](user/guide/codely-local.md) for configuration, behavior, and recorded results.
-4. [Executor experiment](MGSD_Codely_Executor_Validation_Report.md) for the observed exit-code, prompt-transport, auto-save, and sandbox limitations.
-5. [Architecture](architecture.md), [testing policy](testing.md), and [defensive patterns](defensive-patterns.md) before implementation work.
+4. [L2 implementation summary](MGSD_L2_Local_DSH_Implementation_Summary.md) for durable workflow, approval, recovery, acceptance, and L3 handoff.
+5. [Executor experiment](MGSD_Codely_Executor_Validation_Report.md) for the observed exit-code, prompt-transport, auto-save, and sandbox limitations.
+6. [Architecture](architecture.md), [testing policy](testing.md), and [defensive patterns](defensive-patterns.md) before implementation work.
 
 Preserve the existing `.codely-cli/settings.json` change and the current execution, test, guide, and checklist edits. Inspect only task-relevant files; do not add local settings or editor data wholesale. Do not reset, clean, auto-commit, or auto-push the checkout.
 
@@ -47,6 +48,8 @@ Preserve the existing `.codely-cli/settings.json` change and the current executi
 | [Loader driver](../apps/cli/tests/fixtures/codely-local/driver.ts) | Real overlay execution, file assertions, failed validation, cancellation, cross-session denial, unload, and model-call count. |
 | [Live smoke](../apps/cli/tests/fixtures/codely-local/live.ts) | Real authenticated Codely in a disposable directory with an external content check. |
 | [Web acceptance](../apps/web/tests/codely-local.snapshot.ts) | Built Web profile, in-page picker, executor/validator outcomes, model-call tripwire, browser replay, and workspace oracle. |
+| [MGSD Core](../packages/experimental/mgsd-workflow/README.md) | Durable local requests, legal transitions, exact approvals, budgets, and restart recovery. |
+| [MGSD adapter and guide](user/guide/mgsd-local.md) | Human commands, Core-to-runner wiring, acceptance commands, and remaining L3/L4 limits. |
 
 <a id="completed-local-work"></a>
 ## Completed local work
@@ -64,7 +67,7 @@ These checks describe the local prototype, not completion of whole original phas
 - [x] The Web overlay loads the opt-in plugin; each Codely job requests quiet completion without changing other jobs' delivery.
 - [x] English/Chinese local instructions and website mapping exist; prior lint/Host build and website checks passed.
 - [x] Deadline, cancellation during final cleanup, cleanup failure, and Windows parent/child termination have dedicated automated evidence dated 2026-10-06.
-- [ ] **Partial:** stdout carries raw stream JSON; structured event parsing, durable audit, and full-stream recovery are not implemented.
+- [ ] **Partial:** stdout carries raw stream JSON; task facts are durable in L2, while structured stream parsing and full-stream recovery remain unimplemented.
 - [ ] **Partial:** root `CODELY.md` contains repository context; the MGSD task/envelope protocol and its Codely skill are not implemented.
 - [x] Real Web acceptance shows run/status/output/cancel, independent exit-23 failure, persisted command rows after reload, and zero DSH model calls.
 - [x] The keyless current-format Session fixture replays from the built shipped Web profile and matches its UI and complete workspace oracles.
@@ -80,9 +83,9 @@ Retain original numbers for traceability. Complete the local prerequisites befor
 | 1 — Private Control Repo | Deferred / unverified | Private visibility, trusted writers, and committed control files. |
 | 2 — Self-hosted runners | Deferred / unverified | Home and Office runner service identity, labels, and online state. |
 | 3 — Dispatch smoke | Deferred / unverified | Home-to-Office task-print dispatch and observed run result. |
-| 4 — Node local config | Pending | Validated alias-to-path mapping, workspace root, and capabilities. |
-| 5 — Harness Core | Partial | A process executor exists; MGSD Task schema, TaskStore, workflow Core, policy, and Core/DSH separation remain. |
-| 6 — FSM | Pending | Explicit transition validator, persistence, invalid-transition tests, and review-cycle limit. |
+| 4 — Node local config | Local subset complete | Alias mapping and local directories are validated; remote capabilities are deferred. |
+| 5 — Harness Core | Local subset complete | Immutable tasks, SQLite TaskStore, and independent Core exist; worktrees, context, and automated expert adapters belong to L3/L4. |
+| 6 — FSM | Local complete | Persistence, restart interruption, approval invalidation, budgets, and two-review limit are verified. |
 | 7 — Worktree service | Pending | Automatic task worktree creation, collision/failure handling, retention, and main-checkout protection; manual spike worktrees do not fulfill this phase. |
 | 8 — Context Builder | Pending | Local file/history/log selection, output budgets, and reproducible context packet. |
 | 9 — Codex adapter | Pending | Read-only planner/reviewer, risk budgets, CLI/version checks, and mocked command coverage. |
@@ -92,8 +95,8 @@ Retain original numbers for traceability. Complete the local prerequisites befor
 | 13 — GitHub to Harness | Deferred | Runner-side controlled entry, local alias resolution, and real end-to-end routing. |
 | 14 — `agent` CLI | Deferred | `nodes/send/status/approve/cancel`, task identities, and GitHub invocation tests. |
 | 15 — Multi-node approval | Deferred | Two-stage plan/execute flow and local approval verification. |
-| 16 — Cancel | Partial | Local job cancellation works; durable task cancellation, queued-run cancellation, and safe Unity checkpoints remain. |
-| 17 — DSH integration | Partial | Source overlay works; a Core-backed installable bundle, independent workflow Core, and profile acceptance remain. |
+| 16 — Cancel | Partial | Durable local cancellation and exit facts exist; remote queued-run cancellation and Unity checkpoints are deferred. |
+| 17 — DSH integration | Partial | Core-backed source overlay and profile acceptance exist; an installable bundle remains. |
 | 18 — DSH status UI | Partial | Existing job/command output is reused; Task/Plan/Review/Node views and browser acceptance remain. |
 | 19 — Codely subagents | Deferred | Read-only scout and restricted test runner after the local workflow is stable. |
 | 20 — Advanced index | Deferred | File/symbol/Unity indices after basic context generation is sufficient and measured. |
@@ -102,7 +105,7 @@ Retain original numbers for traceability. Complete the local prerequisites befor
 <a id="next-local-checklist"></a>
 ## Next local checklist
 
-Work through one item group at a time. **L1** is complete; start the local task data and deterministic workflow in L2. L2–L5 are planned deliverables, not existing commands or directories.
+Work through one item group at a time. **L1 and L2** are complete; start L3 task worktrees and context. L3–L5 remain planned deliverables. [L2 operations and verification](user/guide/mgsd-local.md) record implementation, acceptance, and limits.
 
 ### L1 — Finish acceptance of the current DSH prototype
 
@@ -118,14 +121,14 @@ L1 acceptance: CLI/Loader and browser paths show the same outcomes, failed check
 
 ### L2 — Local task data and deterministic workflow (Phase 4–6; Section 22)
 
-- [ ] Implement node-local configuration, immutable task request, runtime state, branded task identifiers, and a durable TaskStore.
-- [ ] Keep the MGSD workflow Core free of DSH/Cordis imports; the current DSH subprocess wrapper remains an adapter, not the independent Core.
-- [ ] Implement explicit legal transitions and interruption/restart recovery; reject `queued → executing` and unapproved execution.
-- [ ] Resolve the plan's `NEEDS_REPLAN` wording against its FSM state list explicitly; scope expansion must invalidate execution approval.
-- [ ] Enforce risk/budget decisions and at most two review/fix cycles; a second failed review ends in `needs_human`.
-- [ ] Persist task/execution/validation/cancellation facts and distinguish task IDs from process-local job IDs.
+- [x] Implement node-local configuration, immutable task request, runtime state, branded task identifiers, and a durable TaskStore.
+- [x] Keep the MGSD workflow Core free of DSH/Cordis imports; the current DSH subprocess wrapper remains an adapter, not the independent Core.
+- [x] Implement explicit legal transitions and interruption/restart recovery; reject `queued → executing` and unapproved execution.
+- [x] Resolve the plan's `NEEDS_REPLAN` wording against its FSM state list explicitly; scope expansion must invalidate execution approval.
+- [x] Enforce risk/budget decisions and at most two review/fix cycles; a second failed review ends in `needs_human`.
+- [x] Persist task/execution/validation/cancellation facts and distinguish task IDs from process-local job IDs.
 
-L2 acceptance: serialization and restart tests pass, invalid transitions fail, and model output cannot directly assign workflow state or approve its own plan.
+L2 acceptance passed on 2026-10-07: serialization/restart, invalid transitions, approval injection rejection, 43 Core cases with per-file 100% coverage, real Loader acceptance, and keyless Web replay. Exact commands/results belong to the [L2 guide](user/guide/mgsd-local.md#verification). `source: expert` is currently a trusted human attestation; automated experts and enforced file scope belong to L4.
 
 ### L3 — Worktree and context (Phase 7–8; Section 23)
 
@@ -209,10 +212,11 @@ Use docs/MGSD_Distributed_Agent_Harness_Architecture_and_Execution_Plan.md
 for the final architecture, and this checklist for current status and order.
 
 The user chose local DSH integration first and remote dispatch second.
-L1 acceptance passed on 2026-10-07; start L2, local task data and deterministic
-workflow. Read its unchecked acceptance items before designing changes.
+L1 and L2 acceptance passed on 2026-10-07; start L3, task worktrees and
+context. Read its unchecked acceptance items before designing changes.
 Inspect git status and preserve the uncommitted prototype and user files.
 Read the existing plugin, runner, overlay, tests, and local user guide.
+Read docs/user/guide/mgsd-local.md and the experimental MGSD Core README.
 Use the current checklist as the status source. Rerun only relevant checks
 after changes; current evidence includes 147 lifecycle tests, the authenticated
 real Codely smoke, and the Edge browser acceptance plus keyless v4 replay.
@@ -223,7 +227,7 @@ state, validation, and presentation. Keep DSH model-call count zero for
 Configured independent checks determine acceptance; exit 0 from Codely alone
 does not. Do not treat worktrees or strict path policy as OS confinement.
 
-Keep the workflow Core independent of DSH/Cordis when reaching L2.
+Keep the existing workflow Core independent of DSH/Cordis.
 Reuse the current adapter; do not duplicate task state machines.
 Do not configure GitHub runners, remote dispatch, or upload project data
 until the user starts that second stage. Do not reset, clean, auto-commit,
