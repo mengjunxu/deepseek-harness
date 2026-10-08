@@ -86,7 +86,7 @@ description: "对照架构计划记录 MGSD 实施状态与 Codely 交接清单�
 | 4 — 节点本地配置 | 本地部分完成 | 别名映射和本地目录已验证；远程能力配置延后。 |
 | 5 — Harness Core | 本地部分完成 | 已有不可变任务、SQLite TaskStore 与独立 Core；工作树、上下文和自动专家适配器属于 L3/L4。 |
 | 6 — FSM | 本地完成 | 已验证持久化、重启中断、审批失效、预算与两轮审查限制。 |
-| 7 — Worktree 服务 | 待完成 | 自动任务 worktree 创建、冲突/失败处理、保留及主 checkout 保护；手工实验 worktree 不满足此阶段。 |
+| 7 — Worktree 服务 | 部分完成 | 已有自动任务分支/worktree、提交固定、冲突/失败处理、记录保留及主 checkout 检查；授权移除仍待完成。 |
 | 8 — Context Builder | 待完成 | 本地文件/历史/日志选择、输出预算及可复现上下文包。 |
 | 9 — Codex 适配器 | 待完成 | 只读规划/评审、风险预算、CLI（命令行界面）/版本检查及 mock 命令覆盖。 |
 | 10 — Codely 协议 | 部分完成 | 已有仓库上下文；仍需落实任务状态、批准计划、允许文件及执行报告。 |
@@ -132,13 +132,13 @@ L2 验收于 2026-10-07 通过：序列化与重启、非法转换、审批注�
 
 ### L3 — Worktree 和上下文（Phase 7–8；第 23 节）
 
-- [ ] 解析获准的本地 repo 别名、固定 base ref，为每个任务创建分支/worktree；冲突时失败，禁止回退到主 checkout。
-- [ ] 保护 dirty 主 checkout 的文件及索引；多个宿主/进程可能写同一工程时增加跨进程工作目录归属控制。
+- [x] 解析获准的本地 repo 别名、固定 base ref，为每个任务创建分支/worktree；冲突时失败，禁止回退到主 checkout。
+- [x] 隔离执行期间保持 dirty 主目录文件及索引不变；逐任务 worktree 获取排他的跨进程归属。这不是操作系统级隔离。
 - [ ] 在 diff/允许文件检查前处理 `.codely-cli/auto-saves`，并在本地保留适当审计证据。
 - [ ] 使用本地 Git/搜索/日志工具生成上下文，明确文件/日志/字节预算；延后 embedding 及高级索引。
-- [ ] 保留任务 worktree 供检查；删除前确认结果保留及明确的清理授权。
+- [ ] **部分完成：**保留任务 worktree 与工作区记录，不提供删除命令或自动清理；结果保留检查及显式清理授权仍待完成。
 
-L3 验收：两个临时任务使用独立 worktree，主目录文件字节不变，准备失败时不启动执行器，大输入下仍满足上下文限制。
+L3 worktree 验收已覆盖独立临时任务工作树、dirty 主目录文件/索引字节不变、准备失败不启动执行器及独立进程锁拒绝。有界上下文、自动保存审计及授权清理完成前，整个 L3 仍未完成；证据见[本地指南](user/guide/mgsd-local.zh.md#dev-note)。
 
 ### L4 — 计划、执行 envelope 和 Codely 协议（Phase 9–11）
 
@@ -212,8 +212,8 @@ Use docs/MGSD_Distributed_Agent_Harness_Architecture_and_Execution_Plan.md
 for the final architecture, and this checklist for current status and order.
 
 The user chose local DSH integration first and remote dispatch second.
-L1 and L2 acceptance passed on 2026-10-07; start L3, task worktrees and
-context. Read its unchecked acceptance items before designing changes.
+L1 and L2 acceptance passed on 2026-10-07; L3 worktrees are implemented.
+Continue its unchecked context, auto-save auditing, and disposal items.
 Inspect git status and preserve the uncommitted prototype and user files.
 Read the existing plugin, runner, overlay, tests, and local user guide.
 Read docs/user/guide/mgsd-local.md and the experimental MGSD Core README.

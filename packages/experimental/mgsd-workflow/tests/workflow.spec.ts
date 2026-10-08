@@ -47,6 +47,22 @@ function executed(id: TaskId): void {
   engine!.settle(id, 'completed', 'All configured checks passed')
 }
 
+it('persists failed preparation without admitting successful or killed execution settlement', () => {
+  const id = engine!.create(owner, input()).request.id
+  for (const stage of ['queued', 'claimed', 'preparing'] as const) engine!.advance(id, stage)
+  expect(() => engine!.settle(id, 'completed', 'No executor')).toThrow('Operation is not allowed')
+  expect(() => engine!.settle(id, 'killed', 'No executor')).toThrow('Operation is not allowed')
+  expect(engine!.settle(id, 'failed', 'Git preparation failed')).toMatchObject({ state: 'failed', executionAttempts: 0, jobId: null })
+  expect(() => engine!.advance(id, 'planning')).toThrow('Operation is not allowed')
+})
+
+it('retains preparation cancellation intent until managed cleanup settles', () => {
+  const id = engine!.create(owner, input()).request.id
+  for (const stage of ['queued', 'claimed', 'preparing'] as const) engine!.advance(id, stage)
+  expect(engine!.cancel(id).state).toBe('cancel_requested')
+  expect(engine!.settle(id, 'killed', 'Git processes stopped')).toMatchObject({ state: 'cancelled', executionAttempts: 0 })
+})
+
 it('preserves immutable requests and durable facts across reopening', () => {
   const id = approved()
   const original = engine!.get(id)

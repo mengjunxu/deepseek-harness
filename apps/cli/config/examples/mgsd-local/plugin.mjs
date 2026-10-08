@@ -5,10 +5,11 @@ import z from '@deepseek-ai/schemastery'
 import { MgsdWorkflow, parseNodeConfig } from '../../../../../packages/experimental/mgsd-workflow/lib/index.js'
 import { Config as RunnerConfig, validateRunnerConfig } from '../codely-local/plugin.mjs'
 import { runLocalTask } from '../codely-local/run.mjs'
+import { inspectWorkspace, lockWorkspace, prepareWorkspace } from './workspace.mjs'
 
 export const name = 'mgsd-local'
 export const inject = ['commands', 'jobs', 'subprocess']
-export const Config = z.intersect([RunnerConfig, z.object({ nodeConfig: z.string().required(), database: z.string().required() })])
+export const Config = z.intersect([RunnerConfig, z.object({ nodeConfig: z.string().required(), database: z.string().required(), gitCommand: z.array(z.string()).default(['git']) })])
 
 /**
  * Register trusted human task commands and dispose only after process settlement.
@@ -17,20 +18,47 @@ export const Config = z.intersect([RunnerConfig, z.object({ nodeConfig: z.string
  */
 export function apply(ctx, config) {
   validateRunnerConfig(config)
+  validateRunnerConfig({ ...config, command: config.gitCommand })
   if (!isAbsolute(config.nodeConfig) || !isAbsolute(config.database)) throw new Error('MGSD configuration and database paths must be absolute')
   const node = parseNodeConfig(JSON.parse(readFileSync(config.nodeConfig, 'utf8')))
   const workflow = new MgsdWorkflow(config.database, node)
   const running = new Map()
+  const preparing = new Map()
+  const git = async (cwd, args, signal) => {
+    signal.throwIfAborted()
+    const env = Object.fromEntries(Object.keys(process.env).filter(key => key.toUpperCase().startsWith('GIT_')).map(key => [key, undefined]))
+    const handle = ctx.subprocess.spawn({
+      argv: [...config.gitCommand, ...args], cwd, signal, env, graceMs: config.graceMs,
+      stdio: { stdin: 'ignore', stdout: { maxBytes: config.maxBytes }, stderr: { maxBytes: config.maxBytes } },
+    })
+    try {
+      const outcome = await handle.done
+      signal.throwIfAborted()
+      const output = handle.collected.stdout.readFrom(0)
+      if (outcome.exitCode !== 0 || output.lossy) throw new Error(`Git preparation failed: ${handle.collected.stderr.readFrom(0).text}`)
+      return output.text
+    } finally {
+      handle.terminate()
+      if (!await handle.waitForExit()) throw new Error('Managed Git process range did not stop')
+    }
+  }
   ctx.jobs.attachController(name)
   ctx.effect(() => async () => {
+    for (const [id, entry] of preparing) {
+      if (!['cancelled', 'failed', 'completed', 'needs_human'].includes(workflow.get(id).state)) workflow.cancel(id)
+      entry.controller.abort()
+    }
     for (const [id, entry] of running) {
       if (workflow.get(id).state === 'executing') workflow.cancel(id)
       entry.controller.abort()
     }
     const outcomes = await Promise.allSettled([...running.values()].map(entry => entry.done))
+    const preparations = await Promise.allSettled([...preparing.values()].map(entry => entry.done))
     workflow.close()
     const failure = outcomes.find(outcome => outcome.status === 'rejected')
     if (failure) throw failure.reason
+    const cleanupFailure = preparations.find(outcome => outcome.status === 'rejected' && outcome.reason.message === 'Managed Git process range did not stop')
+    if (cleanupFailure) throw cleanupFailure.reason
   })
   const summary = task => `${task.request.id}: ${task.state}; plan ${task.revision}; review ${task.reviewCycle}/2; executions ${task.executionAttempts}/${task.request.budget.maxExecutionAttempts}`
   const projectKey = path => {
@@ -55,7 +83,22 @@ export function apply(ctx, config) {
           const repo = node.repos[request.repoAlias]
           if (!repo || !agent.session.header.cwd || projectKey(agent.session.header.cwd) !== projectKey(repo.path)) throw new Error('Select the configured repository directory for this Session')
           const task = workflow.create(owner, request)
-          for (const stage of ['queued', 'claimed', 'preparing', 'planning']) workflow.advance(task.request.id, stage)
+          for (const stage of ['queued', 'claimed', 'preparing']) workflow.advance(task.request.id, stage)
+          const controller = new AbortController()
+          const preparationSignal = AbortSignal.any([signal, controller.signal, AbortSignal.timeout(Math.min(config.timeoutMs, task.request.budget.maxDurationMs))])
+          const done = prepareWorkspace(node, task.request, (cwd, args) => git(cwd, args, preparationSignal))
+          preparing.set(task.request.id, { controller, done })
+          try {
+            await done
+            if (workflow.get(task.request.id).state === 'preparing') workflow.advance(task.request.id, 'planning')
+          } catch (error) {
+            if (workflow.get(task.request.id).state === 'preparing') workflow.settle(task.request.id, 'failed', error instanceof Error ? error.message : String(error))
+            else if (workflow.get(task.request.id).state === 'cancel_requested') {
+              const stopped = error.message !== 'Managed Git process range did not stop'
+              workflow.settle(task.request.id, stopped ? 'killed' : 'failed', stopped ? 'Git preparation cancelled after managed settlement' : error.message)
+            }
+            throw new Error(`${task.request.id}: preparation failed; no executor started`, { cause: error })
+          } finally { preparing.delete(task.request.id) }
           return { kind: 'success', text: summary(workflow.get(task.request.id)) }
         }
         if (!match) throw new Error('Use an MGSD operation with a task id')
@@ -80,6 +123,11 @@ export function apply(ctx, config) {
             break
           case 'cancel':
             result = workflow.cancel(id)
+            if (preparing.has(id)) {
+              preparing.get(id).controller.abort()
+              try { await preparing.get(id).done } catch (error) { /* Preparation reports its own failure; cancellation awaits quiescence. */ }
+              result = workflow.get(id)
+            }
             if (running.has(id)) { running.get(id).controller.abort(); await running.get(id).done; result = workflow.get(id) }
             break
           case 'output': {
@@ -91,9 +139,21 @@ export function apply(ctx, config) {
             if (task.state !== 'approved' && task.state !== 'fixing') throw new Error('Approve the current plan before execution')
             const repo = node.repos[task.request.repoAlias]
             if (!repo || !agent.session.header.cwd || projectKey(agent.session.header.cwd) !== projectKey(repo.path)) throw new Error('Select the configured repository directory for this Session')
-            const key = projectKey(repo.path)
-            if ([...running.values()].some(entry => entry.key === key)) throw new Error('An MGSD execution already owns this directory')
-            const jobId = ctx.jobs.start({
+            const release = lockWorkspace(node, task.request)
+            let workspace
+            const controller = new AbortController()
+            const inspectionSignal = AbortSignal.any([signal, controller.signal, AbortSignal.timeout(config.timeoutMs)])
+            const inspection = inspectWorkspace(node, task.request, (cwd, args) => git(cwd, args, inspectionSignal))
+            preparing.set(id, { controller, done: inspection })
+            try { workspace = await inspection; inspectionSignal.throwIfAborted() }
+            catch (error) {
+              if (error.message !== 'Managed Git process range did not stop') release()
+              throw error
+            }
+            finally { preparing.delete(id) }
+            const key = projectKey(workspace.cwd)
+            let jobId
+            try { jobId = ctx.jobs.start({
               kind: 'mgsd', owner, label: task.request.title, completionDelivery: 'quiet',
               run: job => {
                 workflow.execute(id, job.id, config.checks.length)
@@ -103,19 +163,22 @@ export function apply(ctx, config) {
                   if (workflow.get(id).state === 'executing') workflow.cancel(id)
                   controller.abort(new DOMException('Task deadline reached', 'TimeoutError'))
                 }, Math.min(config.timeoutMs, remaining))
+                let stopped = false
                 const done = runLocalTask({
-                  ...config, subprocess: ctx.subprocess, cwd: repo.path, prompt: task.request.prompt, signal: controller.signal,
+                  ...config, subprocess: ctx.subprocess, cwd: workspace.cwd, prompt: task.request.prompt, signal: controller.signal,
                   append: (text, options) => job.append(text, options),
                   onProcessExit: (phase, index, exitCode, signal) => workflow.processExit(id, phase, index, exitCode, signal),
                 }).then(outcome => {
+                  // The runner's generic failure includes unconfirmed cleanup; keep ownership conservatively.
+                  stopped = !outcome.detail.startsWith('Executor, validation, or process cleanup failed')
                   const settled = workflow.settle(id, outcome.status, outcome.detail)
                   if (settled.state === 'executed') workflow.advance(id, 'review_started')
                   return outcome
-                }).finally(() => { clearTimeout(timer); running.delete(id) })
+                }).finally(() => { clearTimeout(timer); running.delete(id); if (stopped) release() })
                 running.set(id, { controller, done, key })
                 return { cancel: () => { if (workflow.get(id).state === 'executing') workflow.cancel(id); controller.abort() }, done }
               },
-            })
+            }) } catch (error) { release(); throw error }
             return { kind: 'success', text: `Started ${id}; process-local job ${jobId}. Use /mgsd status ${id} or /mgsd output ${id}.` }
           }
           default: throw new Error('Unknown MGSD operation')

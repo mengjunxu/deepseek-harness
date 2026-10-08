@@ -1,5 +1,6 @@
 /** Real dsh Web commands with keyless Session replay and independent filesystem checks. */
 import { spawn, type ChildProcess } from 'node:child_process'
+import { execa } from 'execa'
 import { once } from 'node:events'
 import { existsSync } from 'node:fs'
 import { mkdir, mkdtemp, readFile, readdir, rm, writeFile } from 'node:fs/promises'
@@ -55,6 +56,10 @@ it('replays durable MGSD approval and execution through dsh web without a DSH mo
   let childClosed: Promise<unknown> | undefined
   try {
     await Promise.all([mkdir(sessions), mkdir(probe), mkdir(workspace)])
+    const git = async (...args: string[]) => (await execa('git', args, { cwd: workspace })).stdout
+    await git('init')
+    await git('-c', 'user.name=MGSD test', '-c', 'user.email=mgsd@example.invalid', 'commit', '--allow-empty', '-m', 'fixture')
+    const primaryIndex = await readFile(join(workspace, '.git', 'index'))
     const nodeConfig = join(root, 'node.json')
     await writeFile(nodeConfig, JSON.stringify({ nodeId: 'local', workspaceRoot: root, repos: { project: { path: workspace, defaultBaseRef: 'HEAD' } } }))
     const overlay = join(REPO_ROOT, 'apps/cli/config/examples/mgsd-local/cordis.patch.yml')
@@ -157,7 +162,14 @@ it('replays durable MGSD approval and execution through dsh web without a DSH mo
       if (mode !== 'replay') await writeFile(join(scenario, sessionFixtureName(0, SESSION_FORMAT_VERSION)), normalized)
       else expect(normalizeSessionSnapshots([normalized], { sessionIds: [], cwd: workspace })[0])
         .toBe(normalizeSessionSnapshots([expected], { sessionIds: [], cwd: workspace })[0])
-      expect(await captureWorkspaceSnapshot(workspace)).toEqual(await captureExpectedWorkspaceSnapshot(join(scenario, 'workspace.expected')))
+      const taskWorkspace = join(root, actualId, 'worktree')
+      const retained = JSON.parse(await readFile(join(root, actualId, 'workspace.json'), 'utf8')) as { baseCommit: string; cwd: string }
+      expect(retained.baseCommit).toMatch(/^[0-9a-f]{40,64}$/u)
+      expect(retained.cwd).toBe(taskWorkspace)
+      expect(await captureWorkspaceSnapshot(taskWorkspace, { ignoredRootEntries: ['.git'] }))
+        .toEqual(await captureExpectedWorkspaceSnapshot(join(scenario, 'workspace.expected')))
+      expect(await captureWorkspaceSnapshot(workspace, { ignoredRootEntries: ['.git'] })).toEqual([])
+      expect(await readFile(join(workspace, '.git', 'index'))).toEqual(primaryIndex)
     } catch (error) {
       await saveFailureShot(page, 'mgsd-local-browser-failure')
       throw error

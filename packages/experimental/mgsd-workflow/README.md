@@ -27,11 +27,11 @@ Callers can save local tasks, approve an exact plan revision, and retain executi
 
 The [local MGSD guide](../../../docs/user/guide/mgsd-local.md) configures the source-checkout adapter. Library consumers import `MgsdWorkflow` and `parseNodeConfig` from the package entry; [public declarations](src/index.ts) define the branded DSH identifiers. The independent [Core](src/core.ts) accepts consumer identifier types and imports only Node modules and its local records.
 
-Human requests select an existing repository alias, risk, and explicit attempt/expert-call/time budgets. The request snapshots its base ref and timestamp. Unknown JSON fields, unapproved execution, stale revisions, and illegal transitions fail. Budget exhaustion persists `needs_human`; elapsed time is measured from task creation, including planning.
+Human requests select an existing repository alias, risk, and explicit attempt/expert-call/time budgets. The request snapshots its base ref and timestamp; the adapter records the resolved commit with its retained worktree. Unknown JSON fields, unapproved execution, stale revisions, and illegal transitions fail. Preparation can settle only as failed, without execution facts. Budget exhaustion persists `needs_human`; elapsed time is measured from task creation, including planning.
 
 An execution requires a revision-and-digest-matching human approval and at least one independent check. Completion requires ordered executor/check exit facts with code zero and successful managed cleanup. Trivial tasks then complete; standard/high-risk tasks require review. A failed first review permits one fix execution; a second failure stops at `needs_human`. High-risk plans and reviews require `source: expert`, supplied by a trusted caller.
 
-Scope expansion revokes approval. An executing task first records cancellation intent and becomes `needs_replan` only after process settlement. Reopening incomplete active work records `interrupted`, revokes approval, and never respawns a job. `resume` requires a new plan and approval. Close storage only after awaiting owned processes.
+Scope expansion revokes approval. An executing task first records cancellation intent and becomes `needs_replan` only after process settlement. Preparation cancellation also remains pending until the adapter settles its managed processes. Reopening incomplete active work records `interrupted`, revokes approval, and never respawns a job. `resume` requires a new plan and approval. Close storage only after awaiting owned processes.
 
 -----
 

@@ -134,7 +134,7 @@ L2 provides a durable local workflow, not a complete isolated agent workspace. T
 - L4: automate trusted read-only planning/review and enforce the approved execution envelope.
 - Remote dispatch remains a second-stage extension, outside L2.
 
-Current `workspaceRoot` and `defaultBaseRef` do not create worktrees or pin commits. Preparation states do not establish Git isolation. Allowed files are approval data, not enforced filesystem restrictions; Codely receives the original immutable goal. The controller lease protects one database, not repositories across processes. Enable only one local executor overlay per project because the overlays have separate in-process admission maps.
+Core preparation states alone do not establish Git isolation; the [local adapter guide](user/guide/mgsd-local.md) owns worktree preparation and execution locks. Allowed files are approval data, not enforced filesystem restrictions; Codely receives the original immutable goal. The Core controller lease protects one database, not repositories across processes. Enable only one local executor overlay per project.
 
 <a id="dev-note"></a>
 ## Dev Note

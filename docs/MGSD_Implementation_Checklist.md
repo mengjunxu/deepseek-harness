@@ -86,7 +86,7 @@ Retain original numbers for traceability. Complete the local prerequisites befor
 | 4 — Node local config | Local subset complete | Alias mapping and local directories are validated; remote capabilities are deferred. |
 | 5 — Harness Core | Local subset complete | Immutable tasks, SQLite TaskStore, and independent Core exist; worktrees, context, and automated expert adapters belong to L3/L4. |
 | 6 — FSM | Local complete | Persistence, restart interruption, approval invalidation, budgets, and two-review limit are verified. |
-| 7 — Worktree service | Pending | Automatic task worktree creation, collision/failure handling, retention, and main-checkout protection; manual spike worktrees do not fulfill this phase. |
+| 7 — Worktree service | Partial | Automatic task branches/worktrees, commit pinning, collision/failure handling, retained records, and primary-checkout checks exist; authorized removal remains pending. |
 | 8 — Context Builder | Pending | Local file/history/log selection, output budgets, and reproducible context packet. |
 | 9 — Codex adapter | Pending | Read-only planner/reviewer, risk budgets, CLI/version checks, and mocked command coverage. |
 | 10 — Codely protocol | Partial | Repository context exists; enforce task state, approved plan, allowed files, and execution reporting. |
@@ -132,13 +132,13 @@ L2 acceptance passed on 2026-10-07: serialization/restart, invalid transitions, 
 
 ### L3 — Worktree and context (Phase 7–8; Section 23)
 
-- [ ] Resolve an allowed local repo alias, pin the base ref, and create one branch/worktree per task; fail on collisions and never fall back to the primary checkout.
-- [ ] Protect dirty main-checkout files and indices; add cross-process workspace ownership if multiple hosts/processes can write the same project.
+- [x] Resolve an allowed local repo alias, pin the base ref, and create one branch/worktree per task; fail on collisions and never fall back to the primary checkout.
+- [x] Keep dirty primary files and indices unchanged during isolated execution; acquire exclusive cross-process ownership for each task worktree. This is not OS confinement.
 - [ ] Account for `.codely-cli/auto-saves` before diff/allowed-file checks and retain appropriate audit evidence locally.
 - [ ] Build context using local Git/search/log tools with explicit file/log/byte budgets; defer embeddings and advanced indices.
-- [ ] Retain task worktrees for inspection; removal must verify result retention and explicit disposal authority.
+- [ ] **Partial:** task worktrees and workspace records are retained; no removal command or automatic cleanup is provided. Result-retention checks and explicit disposal authority remain pending.
 
-L3 acceptance: two disposable tasks have separate worktrees, primary files remain byte-identical, failed preparation spawns no executor, and context limits hold for large input.
+L3 worktree acceptance passes for separate disposable task worktrees, byte-identical dirty primary files/indices, failed preparation with no executor, and independent-process lock denial. Full L3 remains incomplete until context limits, auto-save auditing, and authorized disposal are covered; evidence belongs in the [local guide](user/guide/mgsd-local.md#dev-note).
 
 ### L4 — Plan, execution envelope, and Codely protocol (Phase 9–11)
 
@@ -212,8 +212,8 @@ Use docs/MGSD_Distributed_Agent_Harness_Architecture_and_Execution_Plan.md
 for the final architecture, and this checklist for current status and order.
 
 The user chose local DSH integration first and remote dispatch second.
-L1 and L2 acceptance passed on 2026-10-07; start L3, task worktrees and
-context. Read its unchecked acceptance items before designing changes.
+L1 and L2 acceptance passed on 2026-10-07; L3 worktrees are implemented.
+Continue its unchecked context, auto-save auditing, and disposal items.
 Inspect git status and preserve the uncommitted prototype and user files.
 Read the existing plugin, runner, overlay, tests, and local user guide.
 Read docs/user/guide/mgsd-local.md and the experimental MGSD Core README.

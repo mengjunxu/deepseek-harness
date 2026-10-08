@@ -111,6 +111,7 @@ function project<D extends TaskDomain>(request: TaskRequest<D>, facts: readonly 
         processExits.push(fact); break
       }
       case 'settled':
+        if (state === 'preparing' && fact.outcome === 'failed') { state = 'failed'; break }
         requireState(state, ['executing', 'cancel_requested'])
         if (fact.outcome === 'completed') {
           if (state === 'cancel_requested' || processExits.length !== checkCount + 1 || processExits.some(exit => exit.exitCode !== 0)) throw new Error('Successful independent validation required')
@@ -308,9 +309,9 @@ export class CoreWorkflow<D extends TaskDomain> {
   }
 
   /**
-   * Settle an execution after the runner's managed processes have stopped.
+   * Settle an execution after managed cleanup, or record a failed preparation without starting execution.
    * @param id - Task identifier.
-   * @param outcome - Runner outcome, independently checked against persisted exits.
+   * @param outcome - Runner outcome; only failed is admitted during preparation.
    * @param detail - Outcome detail including cleanup/interruption facts.
    * @returns Executed/completed, failed, or cancelled task.
    */
@@ -345,14 +346,14 @@ export class CoreWorkflow<D extends TaskDomain> {
   }
 
   /**
-   * Persist cancellation intent; non-running work can settle immediately.
+   * Persist cancellation intent; preparation and execution await managed settlement.
    * @param id - Task identifier.
    * @returns Cancelled task or an intent awaiting actual process cleanup.
    */
   cancel(id: D['taskId']): TaskRecord<D> {
     const previous = this.get(id).state
     const task = this.append(id, { kind: 'cancel_requested', at: this.clock() })
-    return previous === 'executing' ? task : this.append(id, { kind: 'cancelled', at: this.clock() })
+    return previous === 'executing' || previous === 'preparing' ? task : this.append(id, { kind: 'cancelled', at: this.clock() })
   }
 
   /** Close storage only after the adapter has awaited its owned processes. */

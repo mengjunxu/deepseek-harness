@@ -4,5 +4,6 @@
       "httpUrl": "https://ai-generator.tuanjie.cn/mcp"
     }
   },
-  "autoEditMemory": true
+  "autoEditMemory": true,
+  "model": "codely-core"
 }

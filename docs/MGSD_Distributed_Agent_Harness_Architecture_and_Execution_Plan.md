@@ -2285,7 +2285,11 @@ Plan + diff + tests + execution report + necessary context
 
 ---
 
-# 21. Codely 经济性设置
+# 21. 模型选型与经济性设置
+
+本节区分开发 MGSD 时使用的 Codex 模型与 MGSD 运行时使用的 Codely 执行模型。选型建议不是自动路由规则，不改变人工审批、独立验证或各组件职责。
+
+## 21.1 Codely 运行时设置
 
 Codely 当前支持 Main/Flash/Multimodal/DefaultAgent 等模型槽位。
 
@@ -2298,6 +2302,27 @@ Codely 当前支持 Main/Flash/Multimodal/DefaultAgent 等模型槽位。
 不要把所有子任务都交给最贵模型。
 
 具体模型名根据你当前 Codely 账户可用模型决定，不在仓库硬编码商业模型版本。
+
+<a id="mgsd-development-model-selection"></a>
+## 21.2 开发 MGSD 时的 Codex 模型建议
+
+针对 L2–L4 和后续远程拓展，建议默认使用 **GPT-6.1 Sol，推理强度 high** 完成实现与测试；不需要全程使用 GPT-6 Astra。明确的小改动或文档整理可使用 medium。以下是结合本项目风险与工作范围的工程建议，不是两种模型在 MGSD 上的实测性能结论。
+
+| 工作 | 建议模型 | 使用方式 |
+|---|---|---|
+| L2：Core/FSM、SQLite 记录、审批、预算与恢复的维护 | GPT-6.1 Sol / high | 按已定义语义实现，补齐聚焦测试和回归验证。 |
+| L3：worktree、Git 操作、上下文构建与执行报告 | GPT-6.1 Sol / high | 分小块实施，验证主工作区不变、失败不回退及资源限制。 |
+| L4：规划/Review 接线、风险策略与执行限制 | GPT-6.1 Sol / high | 在明确权限、输入输出及验收条件后实现。 |
+| 文档、配置整理及明确的小范围修复 | GPT-6.1 Sol / medium | 保留原有行为，执行对应检查。 |
+| 跨进程归属、取消/恢复竞态、审批绕过、凭据与远程权限设计 | GPT-6 Astra | 用于有界的架构分析或独立审查；不默认承担所有实现。 |
+
+出现以下情况时考虑升级到 Astra：设计存在多个相互冲突的约束；涉及难以恢复的数据或文件操作；跨进程竞态难以复现；补齐上下文与复现证据后仍无法确定根因。不要仅因第一次测试失败就切换模型；先排查环境、输入和失败证据。
+
+建议工作顺序：Sol 完成小范围实现与验证 → 按风险决定是否由 Astra 集中审查 → 将具体问题交回 Sol 修复 → 重跑受影响检查。审查输入应包含批准的 Plan、diff、实际测试结果及必要上下文；模型结论不能替代人工审批或独立检查。
+
+该分工仅指导开发者在 Codex 中选型，不会自动调用专家或切换模型。MGSD 运行时仍由 Codely 承担主要 Agent Loop，DSH 保持确定性 Harness；未来 Codex 专家调用须服从风险策略与预算，并使用部署配置，而非在 Core 中硬编码模型名。
+
+建议依据：截至 2026-10-09，[OpenAI 模型选择指南](https://developers.openai.com/api/docs/guides/model-selection)将 Sol 定位为兼顾复杂任务、时间与成本的选择，将 Astra 用于要求更高的分析；[GPT-6.1 Sol 官方说明](https://developers.openai.com/api/docs/models/gpt-6.1-sol)建议通过自身任务比较两者。可用模型、推理设置及额度以当前账户为准；本计划不承诺账户可用性、固定速度或固定成本。
 
 ---
 

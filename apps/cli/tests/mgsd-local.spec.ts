@@ -2,6 +2,12 @@
 import { fileURLToPath } from 'node:url'
 import { expect, it } from 'vitest'
 import { runLoaderSmoke } from '@deepseek-ai/dsh-loader-smoke'
+import { execa } from 'execa'
+
+it('pins isolated worktrees, rejects collisions, and holds cross-process execution ownership', async () => {
+  const tests = fileURLToPath(new URL('./fixtures/mgsd-local/workspace.test.mjs', import.meta.url))
+  expect((await execa(process.execPath, ['--test', tests])).exitCode).toBe(0)
+})
 
 it('executes approved tasks, independent checks, review limits, and replanning without a model', async () => {
   const driver = fileURLToPath(new URL('./fixtures/mgsd-local/driver.ts', import.meta.url))
