@@ -1,9 +1,10 @@
 # MGSD Distributed Agent Harness
 ## V2 架构与从 0 开始 Execute Plan
 
-> 版本：v2.0  
-> 日期：2026-10-08  
-> 适用环境：Windows / macOS + Unity/Tuanjie + Git + Codely CLI + Codex CLI + DeepSeek Harness (DSH) + GitHub  
+> 版本：v2.1；日期：2026-10-09；实施顺序：本地 DSH → GitHub remote task（两阶段交付，见第 0.2/0.3 节）。
+
+> 适用环境：Windows / macOS + Unity/Tuanjie + Git + Codely CLI + Codex CLI + DeepSeek Harness (DSH) + GitHub
+
 > 核心目标：在不重复构建 Agent Loop 的前提下，建立一套**可恢复、可审计、可多端协同、节约 Codex 配额、长期可演进**的工程 Agent Harness。
 
 ---
@@ -38,18 +39,36 @@ GitHub Runner
 → DSH
 ```
 
-V2 改为：
+V2 改为（v2.1 起按两阶段交付，见 0.3）：
 
 ```text
+第一阶段：本地 DSH 使用闭环
 Phase 0  基础工程/SQLite/Schema
 Phase 1  Shared Memory + Context Retrieval
 Phase 2  Agent Adapter + Durable Task FSM + Worktree
 Phase 3  Session/Event Tree + Checkpoint + Recovery
+DSH      DSH 本地集成 + 本地端到端验收
+
+第二阶段：GitHub 多端（第一阶段验收通过后才开始）
 Phase 4  GitHub 多端 Worker/Lease/Handoff
+
+MVP 后按需扩展
 Phase 5  Tool Search / Deferred Tools / DAG / Dashboard
 ```
 
-原因：多端协同只有建立在“Task、Session、Memory、Checkpoint 均可恢复”的基础上才可靠。否则只是把一个不稳定的单机 Agent 远程化。
+原因：多端协同只有建立在“Task、Session、Memory、Checkpoint 均可恢复”的基础上才可靠。否则只是把一个不稳定的单机 Agent 远程化。DSH 本地可用性同理属于第一阶段，不能推迟到 GitHub 远程接入之后。
+
+## 0.3 v2.1 更新：吸收 v1.1 的两阶段交付结论
+
+v2.0 把 DSH 集成放在 Phase 5 / Milestone D（多端之后）。v1.1 的实施结论是：先完成本地 DSH 使用闭环，验收通过后才开发 GitHub remote task。v2.1 采纳该结论：
+
+1. 交付分两个阶段。第一阶段完成单机 DSH 使用闭环：在本机 DSH 发起任务，查看任务、Plan、执行输出和 Review，按风险策略本地审批，取消正在执行的任务，并通过独立验证获得成功或失败结果；不需要 GitHub 账号、Control Repo 或 Runner。第二阶段只增加 GitHub 控制平面、Self-hosted Runner、多端派发、远程状态/审批/取消与数据上传策略，并复用已验证的本地执行流程。
+2. DSH 本地集成从 Phase 5 移入第一阶段：Phase 3 完成后、Phase 4 开始前实施；DSH 本地 Task/Plan/Execution/Review 视图随第一阶段一起验收（第 30 节）。
+3. 当前已有本地 Codely 执行原型，尚不等于第一阶段完成。已完成项、代码位置、历史验证结果和下一项待办以[实施 checklist 与 Codely 交接](MGSD_Implementation_Checklist.zh.md)为准；本地使用方式见[本地 Codely 使用说明](user/guide/codely-local.zh.md)。
+4. 新增开发期 Codex 模型选型建议（第 18.4 节），并把 MVP 完成定义拆成两阶段验收清单（第 36 节）。
+5. 当前交付项未通过验收，不进入依赖它的交付项；第一阶段未通过第 36.1 节验收，不开始第二阶段。Phase 编号是能力索引，实际开发顺序以第 38/45 节为准，不再按编号递增实施。
+
+V2 的架构本身不变：Task/Session 分离、SQLite 运行态、Memory Proposal、Lease/Fencing、Stored ≠ Retrieved ≠ Injected 等原则全部保留；本次变更的只是交付顺序、DSH 的归属阶段和验收口径。
 
 ---
 
@@ -1144,6 +1163,30 @@ STANDARD：默认 0 次，必要时 Plan 或 Review 1 次。
 
 HIGH_RISK：通常 Plan 1 次 + Review 1 次。
 
+## 18.4 开发期模型选型（实现 MGSD 时）
+
+本节区分开发 MGSD 时使用的 Codex 模型与 MGSD 运行时使用的 Codely 执行模型。选型建议不是自动路由规则，不改变人工审批、独立验证或各组件职责。
+
+Codely 运行时设置：主 Agent 使用稳定的主模型；Flash 用于 JSON、压缩和内部辅助判断；后续 repo-scout/test-runner 等 subagent 使用较轻量模型，不要把所有子任务都交给最贵模型。具体模型名根据当前 Codely 账户可用模型决定，不在仓库硬编码商业模型版本。
+
+针对 V2 各实施 Milestone（第 38 节），建议默认使用 **GPT-6.1 Sol，推理强度 high** 完成实现与测试；不需要全程使用 GPT-6 Astra。明确的小改动或文档整理可使用 medium。以下是结合本项目风险与工作范围的工程建议，不是两种模型在 MGSD 上的实测性能结论。
+
+| 工作 | 建议模型 | 使用方式 |
+|---|---|---|
+| Phase 0/1：SQLite、schema、Memory Proposal/FTS5 检索、Skill registry、ContextBundle 的实现与测试 | GPT-6.1 Sol / high | 按已定义语义实现，补齐聚焦测试和回归验证。 |
+| Phase 2/3：FSM、worktree、Session/Event、Checkpoint、Idempotency、恢复的实现 | GPT-6.1 Sol / high | 分小块实施，验证主工作区不变、失败不回退及资源限制。 |
+| DSH 集成与本地 E2E：Bundle、本地视图、入口、取消与清理 | GPT-6.1 Sol / high | 在明确权限、输入输出及验收条件后实现。 |
+| 文档、配置整理及明确的小范围修复 | GPT-6.1 Sol / medium | 保留原有行为，执行对应检查。 |
+| 跨进程归属、取消/恢复竞态、审批绕过、凭据与远程权限设计 | GPT-6 Astra | 用于有界的架构分析或独立审查；不默认承担所有实现。 |
+
+出现以下情况时考虑升级到 Astra：设计存在多个相互冲突的约束；涉及难以恢复的数据或文件操作；跨进程竞态难以复现；补齐上下文与复现证据后仍无法确定根因。不要仅因第一次测试失败就切换模型；先排查环境、输入和失败证据。
+
+建议工作顺序：Sol 完成小范围实现与验证 → 按风险决定是否由 Astra 集中审查 → 将具体问题交回 Sol 修复 → 重跑受影响检查。审查输入应包含批准的 Plan、diff、实际测试结果及必要上下文；模型结论不能替代人工审批或独立检查。
+
+该分工仅指导开发者在 Codex 中选型，不会自动调用专家或切换模型。MGSD 运行时仍由 Codely 承担主要 Agent Loop，DSH 保持确定性 Harness；未来 Codex 专家调用须服从风险策略与预算，并使用部署配置，而非在 Core 中硬编码模型名。
+
+建议依据：截至 2026-10-09，[OpenAI 模型选择指南](https://developers.openai.com/api/docs/guides/model-selection)将 Sol 定位为兼顾复杂任务、时间与成本的选择，将 Astra 用于要求更高的分析；[GPT-6.1 Sol 官方说明](https://developers.openai.com/api/docs/models/gpt-6.1-sol)建议通过自身任务比较两者。可用模型、推理设置及额度以当前账户为准；本计划不承诺账户可用性、固定速度或固定成本。
+
 ---
 
 # 19. Worktree / Execution Envelope
@@ -1886,7 +1929,7 @@ Session
 
 # 28. Phase 4 — Multi-device / GitHub Control Plane
 
-> 只有 Phase 0~3 全部通过后才开始。
+> 属于第二阶段。只有第一阶段（Phase 0~3 + DSH 本地集成）通过第 36.1 节验收后才开始。
 
 ## 28.1 创建 Private Control Repo
 
@@ -2160,7 +2203,7 @@ NEEDS_HUMAN
 
 ## 29.6 Dashboard / DSH UI
 
-展示：
+基础本地视图（Task/Plan/Execution/Review/Node state）属于第一阶段 DSH 集成（第 30 节）；本节是 MVP 后的扩展 Dashboard。展示：
 
 - Tasks。
 - Sessions。
@@ -2176,7 +2219,7 @@ DSH UI 不复制 Core FSM。
 
 # 30. DSH Integration
 
-DSH 放在 Core 稳定以后。
+DSH 本地集成属于第一阶段：Phase 3（Session/Checkpoint/Recovery）完成后、Phase 4（GitHub 多端）开始前实施；DSH 适配和本地界面不能推迟到 GitHub 远程接入之后。第二阶段的远程状态视图复用同一 DSH 层，不另做一套。
 
 职责：
 
@@ -2203,6 +2246,72 @@ tools/agent-harness/src/dsh/
 ```
 
 Core 不 import DSH/Cordis。
+
+## 30.1 DSH Bundle 形态
+
+创建：
+
+```text
+tools/agent-harness/dsh-bundle/
+├── package.json
+├── cordis.patch.yml
+└── dist/index.js
+```
+
+`package.json` 形式：
+
+```json
+{
+  "name": "dsh-mgsd-agent-harness",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "dist/index.js",
+  "files": [
+    "dist",
+    "cordis.patch.yml"
+  ],
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  }
+}
+```
+
+安装到 profile：
+
+```powershell
+dsh plugin --profile mgsd add ./tools/agent-harness/dsh-bundle
+```
+
+验证：
+
+```powershell
+dsh --profile mgsd --dump-config
+```
+
+使用当前安装的 DSH 版本及其官方 profile/bundle/plugin API，不要假设旧版 API。DSH plugin 只调用 Core Harness Service，不复制 FSM。
+
+## 30.2 DSH 第一版功能
+
+随第一阶段一起验收：
+
+```text
+Task status view
+Recent tasks
+Plan status
+Execution status
+Review result
+Node local state
+```
+
+并支持在本机 DSH 发起任务、查看执行输出、本地审批和取消正在执行的任务。
+
+暂时不做：
+
+- DSH 自己调用模型。
+- DSH 第二套 Agent Loop。
+- 自动多 Agent 编排。
 
 ---
 
@@ -2377,35 +2486,66 @@ attempt credential path collection
 
 ---
 
-# 36. MVP 完成定义（V2）
+# 36. 两阶段验收定义（V2）
 
-Phase 0~4 完成后必须全部满足：
+当前已有本地 Codely 执行原型和 L1/L2 验收，尚不等于第一阶段完成；原型冒烟测试只覆盖部分条件，不能代替本节完整验收。已通过项与证据以[实施 checklist](MGSD_Implementation_Checklist.zh.md)为准。
+
+## 36.1 第一阶段：本地 DSH MVP
+
+Phase 0~3 + DSH 本地集成完成后必须全部满足；它们是第二阶段启动的前置条件：
 
 ```text
-[ ] Codely 是唯一 Primary Agent Loop
-[ ] DSH 不直接调用 LLM
-[ ] Codex 仅按风险/升级调用
+[ ] Codely 是唯一 Primary Agent Loop；DSH 不直接调用 LLM
+[ ] Codex 仅按风险/升级调用；Review 最多两轮
+[ ] 本机通过受支持的 DSH profile 启动
+[ ] 在 DSH 发起 Codely 任务并查看状态、输出和取消结果
+[ ] 独立验证命令决定成功/失败，不只依赖 Codely 退出码或成功文本
 [ ] Task 与 Session 独立
-[ ] SQLite 保存 runtime/session/event
-[ ] Git 保存 approved durable knowledge
+[ ] SQLite 保存 runtime/session/event；Git 保存 approved durable knowledge
 [ ] Memory Proposal 不能直接变正式事实
 [ ] Stored != Retrieved != Injected 已通过测试体现
 [ ] Skills 按需加载
 [ ] ContextBundle 可重建
 [ ] Session 原始 event 不因 compaction 删除
-[ ] Task 有 checkpoint
-[ ] 外部副作用有 operationId
-[ ] Resume 不重复已完成 operation
-[ ] Remote Task 使用 worktree
-[ ] Multi-device 使用 lease + fencing token
-[ ] Home → Office dispatch 可用
-[ ] 断网/进程崩溃可恢复
+[ ] Task 有 checkpoint；外部副作用有 operationId
+[ ] Resume 不重复已完成 operation；kill/restart 后可恢复
+[ ] 工程任务创建独立 worktree；失败不回退主工作目录
+[ ] Plan 与执行范围明确，人工审批不可由执行器绕过
+[ ] HIGH_RISK 可按预算调用 Codex Plan/Review
+[ ] 执行、失败、超时、取消和清理有回归覆盖
+[ ] 本地任务状态和审计持久保存，重启后行为明确
+[ ] DSH 本地 Task/Plan/Execution/Review 视图可用
+[ ] 本地端到端验收、录制会话场景及使用文档完成
+[ ] 凭证留在本机；不依赖 GitHub 完成任务
+```
+
+## 36.2 第二阶段：GitHub 远程 MVP
+
+复用第一阶段结果，Phase 4 完成后必须全部满足：
+
+```text
+[ ] GitHub Private Control Repo 建立
+[ ] home-pc runner 在线
+[ ] office-pc runner 在线
+[ ] Home 可以 dispatch 到 Office
+[ ] Office 根据 repoAlias 找到本地工程
+[ ] Remote Task 使用 worktree；主工作目录不被远程任务修改
+[ ] Multi-device 使用 lease + fencing token，无双写
+[ ] 断网/进程崩溃可从 checkpoint 恢复
+[ ] Handoff 足以在另一节点继续任务
+[ ] Plan 阶段不修改业务代码；Human Approval Gate 存在
+[ ] Codely 能读取 Execution Envelope，只在 worktree 修改
+[ ] Tests 可执行；HIGH_RISK 能执行 Codex Review
+[ ] 凭证不上传 GitHub
 [ ] Restricted Mode 不上传敏感工程数据
+[ ] 远程状态接入第一阶段已有的 DSH 视图
 ```
 
 ---
 
 # 37. 明确不做（MVP）
+
+两个阶段的 MVP 均不包含以下能力。第一阶段额外排除 GitHub Control Repo、Runner、远程派发、跨节点审批/取消及数据上传；这些属于第二阶段，不是永久取消：
 
 ```text
 DSH LLM Agent Loop
@@ -2425,7 +2565,13 @@ ChatGPT Web 私有接口逆向
 
 # 38. 建议实施 Milestones
 
-## Milestone A — Foundation + Memory
+实施状态与下一项待办以[实施 checklist](MGSD_Implementation_Checklist.zh.md)为准；本节只给交付分组。Phase 编号是能力索引，不再按编号决定先后。
+
+## Milestone A — 第一阶段：本地原型收尾 + V2 delta review
+
+完成 checklist L3/L4 剩余项（上下文构建、自动保存审计、计划/envelope/协议），并把现有 mgsd-workflow Core 对照 V2 目录做 delta review，确定 SQLite/Session/Memory 的迁移面。
+
+## Milestone B — 第一阶段：Foundation + Memory
 
 ```text
 Phase 0
@@ -2438,7 +2584,7 @@ Phase 1
 agent-harness-v2-memory-foundation
 ```
 
-## Milestone B — Local Durable Task
+## Milestone C — 第一阶段：Local Durable Task
 
 ```text
 Phase 2
@@ -2451,28 +2597,45 @@ Phase 3
 agent-harness-v2-local-durable
 ```
 
-## Milestone C — Multi-device
+## Milestone D — 第一阶段：DSH 本地集成 + Local E2E
+
+对应 checklist L5：DSH Bundle、本地 Task/Plan/Execution/Review 视图、完整本地流程与验收矩阵；通过第 36.1 节后第一阶段完成。
+
+## Milestone E — 第二阶段：Multi-device
 
 ```text
 Phase 4
 ```
 
-验收后 commit：
+对应 checklist R0–R4。验收后 commit：
 
 ```text
 agent-harness-v2-multinode
 ```
 
-## Milestone D — Advanced / DSH UI
+## Milestone F — MVP 后：Advanced
 
 ```text
 Phase 5
-DSH integration
 ```
+
+每个 milestone：
+
+```text
+Plan
+→ 人工看 Plan
+→ Implement
+→ Test
+→ Commit checkpoint
+```
+
+当前交付项未通过验收，不进入依赖它的交付项；第一阶段未通过第 36.1 节验收，不开始第二阶段。
 
 ---
 
-# 39. 直接交给 Codex 的第一阶段执行 Prompt
+# 39. Codex Prompt：Phase 0 + Phase 1（Milestone B）
+
+每次只交给 Codex 一个 milestone；先完成第 38 节 Milestone A 的 delta review，再执行本节：
 
 ```text
 We are upgrading an existing Unity/Tuanjie engineering-agent harness to V2.
@@ -2579,7 +2742,7 @@ Then implement it.
 
 ---
 
-# 40. Codex 第二阶段 Prompt：Durable Local Task
+# 40. Codex Prompt：Phase 2 + Phase 3（Milestone C）
 
 ```text
 Continue the V2 agent harness implementation.
@@ -2619,11 +2782,61 @@ No DSH integration.
 
 ---
 
-# 41. Codex 第三阶段 Prompt：Multi-device
+# 41. Codex Prompt：DSH 本地集成（Milestone D，第一阶段收尾）
+
+在 Phase 2/3 验收后、Phase 4 开始前使用；它与第 39/40 节共同组成第一阶段，不是第三阶段：
+
+```text
+Integrate the existing stable local Agent Harness Core into DeepSeek Harness (DSH).
+
+This completes Stage 1: local DSH usability. GitHub remote tasks are Stage 2 and must not be implemented here.
+
+DSH is not the primary model-driven agent loop.
+Codely remains the primary executor.
+Codex remains an external scarce expert.
+
+DSH responsibilities:
+
+- expose task status
+- expose plan/execution/review state
+- expose local node status
+- provide audit/event visualization by subscribing to Core events (task.created, context.built, agent.started, agent.event, checkpoint.created, memory.proposed, review.completed, task.completed)
+- wrap existing Core Harness services (FSM, TaskStore, Session/Event store, ContextBuilder, Memory, Checkpoint); do not copy FSM logic
+- let the user start, approve and cancel local tasks through DSH
+- verify the full local workflow without GitHub, runners, or remote dispatch
+
+CRITICAL CONSTRAINT
+
+Do not duplicate FSM logic inside the DSH plugin.
+Do not import DSH/Cordis types into Core Harness.
+All DSH-specific code must stay under a dedicated adapter/bundle directory.
+Use the currently installed DSH version and its official profile/bundle/plugin APIs. Do not assume older APIs.
+
+Package the adapter as a local DSH bundle and document commands to:
+
+- install it into profile mgsd
+- dump effective config
+- launch and verify it
+
+Do not create a second AI agent loop in DSH.
+
+ACCEPTANCE
+
+- Start a local task from DSH, observe plan/execution/review status, and cancel a running task.
+- Independent verification commands decide success or failure, not exit codes or success text.
+- Existing kill/restart recovery tests still pass after the DSH layer is added.
+```
+
+---
+
+# 42. Codex Prompt：Phase 4 Multi-device（Milestone E，第二阶段）
+
+仅在第一阶段通过第 36.1 节验收后使用；不能仅凭 Core CLI 或 Codely 冒烟测试通过就启动本节：
 
 ```text
 Implement V2 Phase 4 multi-device coordination.
 
+Stage 1 local DSH usability has passed acceptance; reuse it and do not redesign or duplicate it.
 Existing local durable Task/Session/Checkpoint system is already working.
 Do not move runtime state into GitHub.
 
@@ -2662,7 +2875,7 @@ Simulate network interruption and worker restart, then resume from checkpoint wi
 
 ---
 
-# 42. Codex 第四阶段 Prompt：Advanced + DSH
+# 43. Codex Prompt：Phase 5 Advanced（Milestone F，MVP 后）
 
 ```text
 Add advanced harness capabilities after the V2 durable multi-node MVP is stable.
@@ -2675,18 +2888,18 @@ Implement incrementally:
 4. capability-based worker routing.
 5. task DAG only after single-task durability tests pass.
 6. budget/usage telemetry.
-7. DSH adapter/dashboard.
+7. extended dashboard views: memory proposals, workers/lease, context selection, Codex usage counters.
 
 DSH CONSTRAINT
 
-DSH consumes Core Harness services/events.
+DSH has consumed Core Harness services/events since Stage 1.
 DSH must not duplicate Task FSM, Session Store or Agent Loop.
 No DSH direct LLM API is required.
 ```
 
 ---
 
-# 43. Pi 借鉴点与本方案映射
+# 44. Pi 借鉴点与本方案映射
 
 | Pi 思想 | 本 Harness V2 |
 |---|---|
@@ -2703,7 +2916,7 @@ No DSH direct LLM API is required.
 
 ---
 
-# 44. 最终执行顺序速查
+# 45. 最终执行顺序速查
 
 ```text
 0. Backup / Git checkpoint
@@ -2714,50 +2927,55 @@ No DSH direct LLM API is required.
 5. 本地 Plan/Execute/Review smoke test
 6. Phase 3: Session events + Compaction + Checkpoint + Resume
 7. 做 kill/restart failure injection
-8. 只有恢复测试通过后进入 Phase 4
-9. GitHub Private Control Repo
-10. Self-hosted runners
-11. Worker Lease/Fencing
-12. Home → Office task test
-13. Offline/reconnect/resume test
-14. Restricted Mode security test
-15. 再做 Phase 5 Tool Search / DAG / DSH UI
+8. DSH 本地集成：Bundle + 本地 Task/Plan/Execution/Review 视图
+9. 本地端到端验收，通过第 36.1 节第一阶段验收
+10. 只有第一阶段验收通过后进入 Phase 4
+11. GitHub Private Control Repo
+12. Self-hosted runners
+13. Worker Lease/Fencing
+14. Home → Office task test
+15. Offline/reconnect/resume test
+16. Restricted Mode security test
+17. 再做 Phase 5 Tool Search / DAG / Advanced Dashboard
 ```
 
-**不要为了“看起来像多 Agent 平台”跳过 Memory、Checkpoint、Recovery。V2 的重点不是 Agent 数量，而是让每个任务能被可靠地理解、执行、暂停、恢复、交接和审计。**
+**不要为了“看起来像多 Agent 平台”跳过 Memory、Checkpoint、Recovery。V2 的重点不是 Agent 数量，而是让每个任务能被可靠地理解、执行、暂停、恢复、交接和审计。同样不要为了“多端”把本地 DSH 可用性推后；第一阶段先让单机闭环可用、可审批、可取消、可审计。**
 
 ---
 
-# 45. 当前建议立即执行
+# 46. 当前建议立即执行
 
-当前最合理的下一步：
+实施状态以[实施 checklist](MGSD_Implementation_Checklist.zh.md)为准：L1、L2 已于 2026-10-07 通过，L3 进行中。当前最合理的下一步：
 
 ```text
-1. 不先改 GitHub Runner。
-2. 把旧 Harness Core 对照 V2 目录做 delta review。
-3. 把本文件交给 Codex。
-4. 只执行第 39 节 Phase 0 + Phase 1 Prompt。
+1. 不先改 GitHub Runner；不创建 Control Repo，不注册 Runner。
+2. 完成 checklist L3/L4 剩余项：上下文构建、自动保存审计、计划/envelope/协议。
+3. 把现有 Harness Core 对照 V2 目录做 delta review，确定 SQLite/Session/Memory 迁移面。
+4. 把本文件交给 Codex，只执行第 39 节 Phase 0 + Phase 1 Prompt。
 5. 完成后检查：Memory / ContextBundle / Skill progressive loading 是否真的工作。
-6. 再进入 Durable Task / Session / Checkpoint。
+6. 按第 40 节进入 Durable Task / Session / Checkpoint，并做 kill/restart failure injection。
+7. 按第 41 节完成 DSH 本地集成与本地端到端验收，通过第 36.1 节。
+8. 第一阶段验收通过后，才执行第 42 节 Phase 4 GitHub remote task。
 ```
 
 ---
 
-# 46. 参考
+# 47. 参考
 
-- Pi Coding Agent repository  
-  https://github.com/earendil-works/pi
-- Pi Sessions / Context  
-  https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/sessions.md
-- Pi Compaction  
-  https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/compaction.md
-- Pi Skills  
-  https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/skills.md
-- DeepSeek Harness  
-  https://github.com/deepseek-ai/deepseek-harness
-- Codely CLI docs  
-  https://codely-docs.tuanjie.cn/
-- OpenAI Codex docs  
-  https://developers.openai.com/
-- GitHub Self-hosted runners  
-  https://docs.github.com/en/actions/how-tos/manage-runners/self-hosted-runners
+实施状态与交接（本仓库）：
+
+- [MGSD 实施 checklist 与 Codely 交接](MGSD_Implementation_Checklist.zh.md)
+- [本地 Codely 使用说明](user/guide/codely-local.zh.md)
+
+架构与工具（实施时以当前官方文档为准）：
+
+- [Pi Coding Agent repository](https://github.com/earendil-works/pi)
+- [Pi Sessions / Context](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/sessions.md)
+- [Pi Compaction](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/compaction.md)
+- [Pi Skills](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/skills.md)
+- [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness)
+- [Codely CLI docs](https://codely-docs.tuanjie.cn/)
+- [OpenAI Codex docs](https://developers.openai.com/)
+- [Using Codex with your ChatGPT plan](https://help.openai.com/en/articles/11369540-using-codex-with-your-chatgpt-plan)
+- [GitHub Self-hosted runners](https://docs.github.com/en/actions/how-tos/manage-runners/self-hosted-runners)
+- [GitHub Actions Self-hosted Runner Security](https://docs.github.com/en/actions/reference/security/secure-use)
