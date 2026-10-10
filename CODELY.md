@@ -66,7 +66,10 @@ Cached because they are not visible from the command surface; AGENTS.md owns the
 ### Feedback
 
 ### Project
+- [2026-10-09 15:53:07] MGSD planning docs (docs/MGSD_Distributed_Agent_Harness_Architecture_and_Execution_Plan.md and _v2.md) are intentionally Chinese-only planning artifacts: no .i18n.yaml pairing and not in scripts/doc-budgets.manifest.json; full doc-sync pairing/TS-sample failures for them are pre-existing and documented in MGSD_Implementation_Checklist. When editing them, keep the doc's own style and keep verify-md-links, verify-md-wrap (one physical line per paragraph) and git diff --check green — e.g. use blank-line-separated blockquote lines instead of trailing double spaces, and don't translate the docs to "fix" pairing.
+- [2026-10-09 15:53:09] This macOS checkout of deepseek-harness has no node_modules installed (MGSD prototype deps live on the Windows machine) and bash has no pnpm, but `corepack pnpm` (11.7.0) works. To run scripts/verify-md-links.ts / verify-md-wrap.ts without a full pnpm install (which would trigger postinstall/lefthook side effects): npm-install mdast-util-from-markdown, mdast-util-gfm, micromark-extension-gfm and mdast into a temp dir, copy node_modules into the repo's gitignored root, run `node --experimental-strip-types scripts/verify-*.ts`, then delete the temporary node_modules.
 
 ### Reference
 
-- MGSD continuation: read [the implementation checklist and handoff](docs/MGSD_Implementation_Checklist.zh.md) for the local Codely prototype, current working changes, verified results, original Phase mapping, and the next local milestone. Complete local DSH acceptance before remote dispatch.
+- [2026-10-09 15:53:04] - MGSD continuation: read [the implementation checklist and handoff](docs/MGSD_Implementation_Checklist.zh.md) for current status, verified results and the next local milestone; the V2 plan doc docs/MGSD_Distributed_Agent_Harness_Architecture_and_Execution_Plan_v2.md (v2.1, 2026-10-09) is the V2 architecture/order source — two stages (Stage 1 local DSH closure incl. DSH integration before Phase 4, then Stage 2 GitHub remote), prompts in §39–43, acceptance lists §36.1/36.2. Complete local DSH acceptance before remote dispatch.
+
