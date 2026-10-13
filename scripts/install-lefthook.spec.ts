@@ -191,9 +191,10 @@ function runInstaller(
   root: string,
   extraEnv: NodeJS.ProcessEnv = {},
   nodeArgs: string[] = [],
+  installerArgs: string[] = [],
 ): Promise<CommandResult> {
   return new Promise((resolveResult, reject) => {
-    const child = spawn(process.execPath, [...nodeArgs, installer], {
+    const child = spawn(process.execPath, [...nodeArgs, installer, ...installerArgs], {
       cwd: root,
       env: { ...fixture.env, ...extraEnv },
       stdio: ['ignore', 'pipe', 'pipe'],
@@ -541,6 +542,91 @@ syncBuiltinESMExports()
     expect(result.stderr).toContain('core.worktree is in the common config')
     expect(gitResult(fixture, fixture.main, ['config', '--get', 'extensions.worktreeConfig']).status).toBe(1)
     expect(existsSync(hooksPath(fixture, fixture.main))).toBe(false)
+  })
+
+  it('repairs a separate Git directory, preserves backups, and allows repeated repair', async () => {
+    const fixture = createFixture({ main: 'main with spaces' })
+    git(fixture, fixture.main, ['worktree', 'remove', '--force', fixture.linked])
+    const separate = join(fixture.container, 'git data')
+    git(fixture, fixture.main, ['init', '--separate-git-dir', separate])
+    git(fixture, fixture.main, ['config', '--local', 'core.worktree', '../main with spaces'])
+    const config = join(separate, 'config')
+    const before = readFileSync(config, 'utf8')
+    const statusBefore = git(fixture, fixture.main, ['status', '--porcelain'])
+
+    const repaired = await runInstaller(fixture, fixture.main, {}, [], ['--repair-worktree-config'])
+
+    expect(repaired.status, repaired.stderr).toBe(0)
+    const backup = repaired.stdout.split('\n').find(line => line.startsWith('Git configuration backup: '))
+      ?.slice('Git configuration backup: '.length)
+    expect(backup).toBeDefined()
+    expect(readFileSync(join(backup!, 'config'), 'utf8')).toBe(before)
+    expect(readFileSync(join(backup!, 'README.txt'), 'utf8')).toContain('absent')
+    expect(gitResult(fixture, fixture.main, ['config', '--file', config, '--get', 'core.worktree']).status).toBe(1)
+    expect(realpathSync(git(fixture, fixture.main, ['config', '--worktree', '--get', 'core.worktree'])))
+      .toBe(realpathSync(fixture.main))
+    expect(git(fixture, fixture.main, ['status', '--porcelain'])).toBe(statusBefore)
+    expect(existsSync(join(separate, 'dsh-hooks', 'pre-push'))).toBe(true)
+    const configAfter = readFileSync(config, 'utf8')
+
+    const repeated = await runInstaller(fixture, fixture.main, {}, [], ['--repair-worktree-config'])
+
+    expect(repeated.status, repeated.stderr).toBe(0)
+    expect(repeated.stdout).not.toContain('Git configuration backup: ')
+    expect(readFileSync(config, 'utf8')).toBe(configAfter)
+  })
+
+  it('repairs before dependency installation and runs the platform wrapper from another directory', () => {
+    const fixture = createFixture({ main: 'main with spaces' })
+    git(fixture, fixture.main, ['worktree', 'remove', '--force', fixture.linked])
+    rmSync(join(fixture.main, 'node_modules'), { recursive: true })
+    const common = commonDirectory(fixture)
+    git(fixture, fixture.main, ['config', '--local', 'core.worktree', fixture.main])
+    const scriptDirectory = join(fixture.main, 'scripts')
+    write(join(scriptDirectory, 'install-lefthook.mjs'), readFileSync(installer, 'utf8'))
+    const suffix = process.platform === 'win32' ? 'bat' : 'sh'
+    const wrapper = join(scriptDirectory, `repair-worktree-config.${suffix}`)
+    write(wrapper, readFileSync(new URL(`./repair-worktree-config.${suffix}`, import.meta.url), 'utf8'))
+    const result = process.platform === 'win32'
+      ? spawnSync(`"${wrapper}"`, { cwd: fixture.container, env: fixture.env, encoding: 'utf8', shell: true })
+      : spawnSync('sh', [wrapper], { cwd: fixture.container, env: fixture.env, encoding: 'utf8' })
+
+    expect(result.status, result.stderr).toBe(0)
+    expect(result.stdout).toContain('Install dependencies')
+    expect(git(fixture, fixture.main, ['config', '--get', 'extensions.worktreeConfig'])).toBe('true')
+    expect(gitResult(fixture, fixture.main, ['config', '--file', join(common, 'config'), '--get', 'core.worktree']).status).toBe(1)
+  })
+
+  for (const target of ['main', 'linked'] as const) {
+    it(`refuses repair from ${target} when linked worktrees are registered`, async () => {
+      const fixture = createFixture()
+      const config = join(commonDirectory(fixture), 'config')
+      git(fixture, fixture.main, ['config', '--local', 'core.worktree', fixture.main])
+      const before = readFileSync(config, 'utf8')
+
+      const result = await runInstaller(fixture, fixture[target], {}, [], ['--repair-worktree-config'])
+
+      expect(result.status).toBe(1)
+      expect(result.stderr).toContain(target === 'main' ? 'no linked worktrees' : 'main checkout')
+      expect(readFileSync(config, 'utf8')).toBe(before)
+      expect(existsSync(join(commonDirectory(fixture), 'config.worktree'))).toBe(false)
+    })
+  }
+
+  it('restores configuration when an unsupported repository extension prevents repair', async () => {
+    const fixture = createFixture()
+    git(fixture, fixture.main, ['worktree', 'remove', '--force', fixture.linked])
+    git(fixture, fixture.main, ['config', '--local', 'core.worktree', fixture.main])
+    git(fixture, fixture.main, ['config', '--local', 'extensions.dshunknown', 'true'])
+    const config = join(commonDirectory(fixture), 'config')
+    const before = readFileSync(config, 'utf8')
+
+    const result = await runInstaller(fixture, fixture.main, {}, [], ['--repair-worktree-config'])
+
+    expect(result.status).toBe(1)
+    expect(result.stderr).toContain('dormant repository extension')
+    expect(readFileSync(config, 'utf8')).toBe(before)
+    expect(existsSync(join(commonDirectory(fixture), 'config.worktree'))).toBe(false)
   })
 
   it.skipIf(process.platform === 'win32')('refuses a symlinked common repository config before writing through it', async () => {
