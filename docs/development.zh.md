@@ -41,6 +41,8 @@ node scripts/install-lefthook.mjs
 
 如果包装脚本拒绝现有 Git 配置或报告陈旧锁，请遵循其诊断和所链接的 Agent Note，不要凭猜测编辑 worktree 元数据。移动检出目录后，请重新运行包装脚本以重新生成自有路径。
 
+子模块检出遇到公共 `core.worktree` 错误时，使用[显式修复脚本](cookbook/repairing-worktree-config.zh.md)。
+
 新克隆后请先运行一次类型检查：
 
 ```sh
