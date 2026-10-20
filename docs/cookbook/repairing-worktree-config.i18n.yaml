@@ -1,0 +1,28 @@
+# Bilingual-pair consistency record for repairing-worktree-config.md (docs/i18n/README.md): per heading
+# section, a hash of its English and Chinese blocks outside code blocks and generated regions.
+# After editing either side, bring the other along and re-record with:
+#   pnpm run verify-translation-pairing --write docs/cookbook/repairing-worktree-config.md
+/:
+  en: 362187fb038f4c2a
+  zh: 7a1aba182b2628b6
+/cookbook-repairing-git-worktree-configuration:
+  en: 74b13d123d9cc2e6
+  zh: 86e712c9b808dd16
+/cookbook-repairing-git-worktree-configuration/summary:
+  en: 686a635b45c6c148
+  zh: 4db4b2da465b5226
+/cookbook-repairing-git-worktree-configuration/table-of-contents:
+  en: 222aabc0298c9619
+  zh: dd3eb916375129d8
+/cookbook-repairing-git-worktree-configuration/run-the-repair:
+  en: 330556de82717597
+  zh: 5cc2ee4b6b7ae627
+/cookbook-repairing-git-worktree-configuration/check-the-result:
+  en: 5fb962a2d4782f17
+  zh: 4c5acc33f9fe63be
+/cookbook-repairing-git-worktree-configuration/failure-and-recovery:
+  en: 42eb1212f9db3615
+  zh: d02776f64f6f25d8
+/cookbook-repairing-git-worktree-configuration/dev-note:
+  en: 1c79c42069ab7176
+  zh: 17a30a411f12d783

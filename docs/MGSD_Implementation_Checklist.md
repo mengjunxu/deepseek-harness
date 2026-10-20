@@ -8,7 +8,7 @@ English | [中文](MGSD_Implementation_Checklist.zh.md)
 
 ## Summary
 
-This checklist follows the [Generic Agent Harness v4 execution plan](Generic_Agent_Harness_Architecture_Execute_Plan_v4.md) (2026-10-10). DSH is the sole harness foundation; Codex and Codely each retain separate `subscription` and `external-agent` routes. Complete Phase 0S first, then accept Phases 0–8 in order; local work precedes remote dispatch. The older MGSD plan is only a historical mapping for existing L1–L5/R0–R4 identifiers.
+This checklist follows the Generic Agent Harness v4 execution plan `docs/Generic_Agent_Harness_Architecture_Execute_Plan_v4.md` (2026-10-10). DSH is the sole harness foundation; Codex and Codely each retain separate `subscription` and `external-agent` routes. Complete Phase 0S first, then accept Phases 0–8 in order; local work precedes remote dispatch. The older MGSD plan is only a historical mapping for existing L1–L5/R0–R4 identifiers.
 
 Checklist updated: 2026-10-10, Asia/Shanghai. Existing implementation evidence comes from earlier local acceptance; this documentation update does not rerun that acceptance. A checked item has implementation and recorded evidence; **partial** covers only the stated subset; **unverified** means this checklist has no evidence. Rerun after relevant code or environment changes. Accepted L1/L2 and partial L3 worktrees do not establish completion of corresponding v4 phases.
 
@@ -54,7 +54,7 @@ Preserve the existing `.codely-cli/settings.json` change and the current executi
 <a id="completed-local-work"></a>
 ## Completed local work
 
-These checks describe the local prototype, not completion of whole original phases. Detailed evidence belongs in the local guide and executor report linked above.
+These checks describe the local prototype, not completion of v4 phases. Detailed evidence belongs in the local guide and executor report linked above.
 
 - [x] Windows acceptance recorded Node `v26.10.0` and Git `2.42.0.windows.2`; inspect current-host versions separately.
 - [x] Non-interactive Codely file editing and JSON/stream output were tested on Windows.
@@ -118,7 +118,7 @@ L1 acceptance: CLI/Loader and browser paths show the same outcomes, failed check
 - [x] Enforce risk/budget decisions and at most two review/fix cycles; a second failed review ends in `needs_human`.
 - [x] Persist task/execution/validation/cancellation facts and distinguish task IDs from process-local job IDs.
 
-L2 acceptance passed on 2026-10-07: serialization/restart, invalid transitions, approval injection rejection, 43 Core cases with per-file 100% coverage, real Loader acceptance, and keyless Web replay. Exact commands/results belong to the [L2 guide](user/guide/mgsd-local.md#verification). `source: expert` is currently a trusted human attestation; automated experts and enforced file scope belong to L4.
+L2 acceptance passed on 2026-10-07: serialization/restart, invalid transitions, approval injection rejection, 43 Core cases with per-file 100% coverage, real Loader acceptance, and keyless Web replay. Exact commands/results belong to the [L2 guide](user/guide/mgsd-local.md#verification). `source: expert` is currently a trusted human attestation; automated experts and enforced file scope remain pending in M3–M4 (older L4).
 
 ### L3 — Worktree and context (existing evidence; v4 Phase 2/4)
 
@@ -194,12 +194,12 @@ After M4 local acceptance, enter v4 Phase 6, then complete Phase 7 release accep
 - [ ] Implement Durable Inbox, separate Task and Actions Attempt, stable deliveryId, and Reconciler; simulate redelivery after the 24h queue lifetime without losing the Task.
 - [ ] Implement send/status/approve/cancel/resume; approval binds Plan Hash and starts a new execute stage without occupying a Runner while awaiting a human.
 - [ ] Test running/queued cancellation, disconnection, repeated dispatch, stale workers/leases, and safe manual migration; first revoke old write authority, and never treat Actions concurrency as a strongly consistent lease.
-- [ ] Accept Standard/Restricted projections; never upload credentials, complete Sessions, source code, or sensitive logs to the coordination repository.
+- [ ] Accept Standard/Restricted projections; never upload credentials, complete Sessions, source code, or sensitive logs to the coordination repository. Restricted task text must reach the target locally or through an approved channel; a Task ID alone cannot supply its content.
 
 ### M6 — DSH UI and release (v4 Phase 7; follows L5)
 
 - [ ] Expose Task/Workflow/Memory/permission audit through DSH plugin services, reuse native Agent/Session/Tool and a single FSM, and verify installable bundle/profile artifacts.
-- [ ] Separate Model Selector from Agent/Role Selector; show measured readiness, Mode, Loop Owner, authentication status, capabilities, quota source, data destinations, and Task/Session/Attempt links for four routes.
+- [ ] Separate Model Selector from Agent/Role Selector; show measured readiness, Mode, Loop Owner, authentication status, capabilities, quota source, data destinations, and Task/Session/Attempt links for four routes; QuotaLedger records unknown when official quota signals are absent rather than inventing percentages.
 - [ ] Independently test text/tool round trips/reconnect/rejection/cancel and 401/429 for every ready route; run the five planned real test categories for authorized subscriptions, while unauthorized routes send no requests.
 - [ ] Verify Session replay, switch audit and ContextPacket, Checkpoint/Pause on quota/authentication failure, no paid fallback, and data retention after plugin disablement.
 - [ ] Complete contract/integration/security/recovery acceptance in two unrelated projects and record compatibility, installation, troubleshooting, upgrade, and rollback; alpha publication is an optional later action.
@@ -277,7 +277,7 @@ checks run, limitations, and rollback. Leave unverified items unchecked.
 <a id="maintenance"></a>
 ## Maintain this checklist
 
-After each implementation slice, retain stable L/R and original Phase identifiers, check only items with observed acceptance evidence, and update both language editions plus the pairing record. Store detailed runtime evidence in the local guide or task report rather than copying raw prompts/logs into this checklist. Record which milestone is next and why any dependency is blocked. When switching machines, verify that every referenced untracked implementation file transferred before continuing.
+After each implementation slice, use v4 Phase/M identifiers and retain the existing L/R evidence mapping, check only items with observed acceptance evidence, and update both language editions plus the pairing record. Store detailed runtime evidence in the local guide or task report rather than copying raw prompts/logs into this checklist. Record which milestone is next and why any dependency is blocked. When switching machines, verify that every referenced untracked implementation file transferred before continuing.
 
 ### Dev Note
 

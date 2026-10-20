@@ -6,15 +6,16 @@ import {
   fstatSync,
   lstatSync,
   mkdirSync,
+  mkdtempSync,
   openSync,
   readdirSync,
+  realpathSync,
   readFileSync,
   unlinkSync,
   writeFileSync,
 } from 'node:fs'
 import { spawnSync } from 'node:child_process'
 import { dirname, isAbsolute, join, resolve } from 'node:path'
-import lefthookPackage from 'lefthook/package.json' with { type: 'json' }
 
 const MINIMUM_GIT = [2, 26, 0]
 const HOOKS_DIRECTORY = 'dsh-hooks'
@@ -288,6 +289,68 @@ function applyWorktreeConfigMigration(root, commonConfigPath, migration) {
   if (directBare === false) {
     git(['config', '--file', commonConfigPath, '--unset-all', 'core.bare'], root)
   }
+}
+
+/** Explicitly migrate the main checkout's shared path, retaining byte-exact backups. */
+function repairCommonWorktreeConfig(root, commonDirectory, gitDirectory, commonConfigPath) {
+  const worktree = assertSingle(
+    directFileConfigValues(root, commonConfigPath, 'core.worktree'),
+    'core.worktree',
+  )
+  if (worktree === undefined) return
+  if (normalizedPath(commonDirectory) !== normalizedPath(gitDirectory)) {
+    throw new Error('run worktree configuration repair from the main checkout, not a linked worktree')
+  }
+  if (registeredWorktreeConfigPaths(commonDirectory).length !== 1) {
+    throw new Error('automatic repair requires no linked worktrees; migrate their configuration manually')
+  }
+  if (normalizedPath(realpathSync.native(resolve(commonDirectory, worktree)))
+    !== normalizedPath(realpathSync.native(root))) {
+    throw new Error('shared core.worktree does not identify the current checkout; refusing repair')
+  }
+  const worktreeConfigPath = join(commonDirectory, 'config.worktree')
+  if (includedFileConfigEntries(root, worktreeConfigPath, 'core.worktree').length !== 0) {
+    throw new Error('config.worktree already declares core.worktree; reconcile the paths manually')
+  }
+  const commonContent = readFileSync(commonConfigPath)
+  const worktreeContent = existsSync(worktreeConfigPath) ? readFileSync(worktreeConfigPath) : undefined
+  const backupDirectory = mkdtempSync(join(commonDirectory, 'dsh-worktree-config-backup-'))
+  writeFileSync(join(backupDirectory, 'config'), commonContent, { flag: 'wx', mode: 0o600 })
+  if (worktreeContent !== undefined) {
+    writeFileSync(join(backupDirectory, 'config.worktree'), worktreeContent, { flag: 'wx', mode: 0o600 })
+  }
+  writeFileSync(join(backupDirectory, 'README.txt'),
+    `Original config.worktree: ${worktreeContent === undefined ? 'absent' : 'backed up'}.\n`,
+    { flag: 'wx', mode: 0o600 })
+  console.log(`Git configuration backup: ${backupDirectory}`)
+  try {
+    git(['config', '--file', worktreeConfigPath, 'core.worktree', root], root)
+    git(['config', '--file', commonConfigPath, '--unset-all', 'core.worktree'], root)
+    const migration = planWorktreeConfigMigration(root, commonConfigPath)
+    applyWorktreeConfigMigration(root, commonConfigPath, migration)
+    const verifiedRoot = stripGitLineTerminator(git(['rev-parse', '--show-toplevel'], root).stdout)
+    if (normalizedPath(verifiedRoot) !== normalizedPath(root)) {
+      throw new Error('checkout path changed after configuration repair')
+    }
+  } catch (error) {
+    const rollbackErrors = []
+    try {
+      writeFileSync(commonConfigPath, commonContent)
+    } catch (rollbackError) {
+      rollbackErrors.push(rollbackError)
+    }
+    try {
+      if (worktreeContent !== undefined) writeFileSync(worktreeConfigPath, worktreeContent)
+      else if (existsSync(worktreeConfigPath)) unlinkSync(worktreeConfigPath)
+    } catch (rollbackError) {
+      rollbackErrors.push(rollbackError)
+    }
+    if (rollbackErrors.length > 0) {
+      throw new AggregateError([error, ...rollbackErrors], `repair rollback failed; backups: ${backupDirectory}`)
+    }
+    throw error
+  }
+  console.log('Moved shared core.worktree to the main config.worktree.')
 }
 
 function readInstallLock(lockPath) {
@@ -621,14 +684,22 @@ function refuseScopedHooksPath(entry) {
 }
 
 async function main() {
+  const args = process.argv.slice(2)
+  if (args.length > 1 || (args.length === 1 && args[0] !== '--repair-worktree-config')) {
+    throw new Error('usage: node scripts/install-lefthook.mjs [--repair-worktree-config]')
+  }
+  const repair = args[0] === '--repair-worktree-config'
   if (process.env.CI === 'true' || process.env.GITHUB_ACTIONS === 'true') return
-  if (typeof lefthookPackage.bin?.lefthook !== 'string') return
   const probe = spawnSync('git', ['rev-parse', '--show-toplevel'], { encoding: 'utf8' })
-  if (probe.status !== 0) return
+  if (probe.status !== 0) {
+    if (repair) throw commandFailure('git', ['rev-parse', '--show-toplevel'], probe)
+    return
+  }
   const root = stripGitLineTerminator(probe.stdout)
   const isWindows = process.platform === 'win32'
   const lefthook = join(root, 'node_modules', '.bin', isWindows ? 'lefthook.cmd' : 'lefthook')
-  if (!existsSync(lefthook)) return
+  const hasLefthook = existsSync(lefthook)
+  if (!hasLefthook && !repair) return
 
   assertSupportedGit(root)
   const gitDirectory = stripGitLineTerminator(git(['rev-parse', '--absolute-git-dir'], root).stdout)
@@ -693,6 +764,11 @@ async function main() {
           refuseInheritedHooksPath(effectiveEntry)
         }
       }
+    }
+    if (repair) repairCommonWorktreeConfig(root, commonDirectory, gitDirectory, commonConfigPath)
+    if (!hasLefthook) {
+      console.log('Git configuration checked. Install dependencies, then run node scripts/install-lefthook.mjs.')
+      return
     }
     const migration = planWorktreeConfigMigration(root, commonConfigPath)
     ownedHooksDirectory = ensureOwnedHooksDirectory(hooksPath)

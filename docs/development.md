@@ -39,6 +39,8 @@ node scripts/install-lefthook.mjs
 
 If the wrapper rejects existing Git configuration or reports a stale lock, follow its diagnostic and the linked Agent Note rather than editing worktree metadata speculatively. After moving a checkout, rerun the wrapper to regenerate the owned path.
 
+For the shared `core.worktree` error in a submodule checkout, use the [explicit repair scripts](cookbook/repairing-worktree-config.md).
+
 Run typecheck once after a fresh clone:
 
 ```sh

@@ -8,7 +8,7 @@ description: "对照 Generic Agent Harness v4 记录实施状态、四模式可�
 
 ## 概述
 
-本清单依据 [Generic Agent Harness v4 执行计划](Generic_Agent_Harness_Architecture_Execute_Plan_v4.md)（2026-10-10）安排实施与交接。DSH 是唯一 harness 底座；Codex/Codely 各保留 `subscription` 与 `external-agent` 两条独立接入路径。先完成 Phase 0S，再按 Phase 0–8 验收推进；本地工作先于远程派发。旧 MGSD 计划仅作为已有 L1–L5/R0–R4 标识的历史对照。
+本清单依据 Generic Agent Harness v4 执行计划 `docs/Generic_Agent_Harness_Architecture_Execute_Plan_v4.md`（2026-10-10）安排实施与交接。DSH 是唯一 harness 底座；Codex/Codely 各保留 `subscription` 与 `external-agent` 两条独立接入路径。先完成 Phase 0S，再按 Phase 0–8 验收推进；本地工作先于远程派发。旧 MGSD 计划仅作为已有 L1–L5/R0–R4 标识的历史对照。
 
 清单更新日期：2026-10-10，Asia/Shanghai。现有实现证据仍来自此前本地验收，本次文档更新不构成重新执行验收。已勾选表示具有实现及记录；**部分完成**仅表示所述子集；**未验证**表示本清单没有证据。相关代码或环境变化后须重验。L1/L2 已验收、L3 worktree 部分完成，不代表 v4 对应阶段完成。
 
@@ -54,7 +54,7 @@ description: "对照 Generic Agent Harness v4 记录实施状态、四模式可�
 <a id="completed-local-work"></a>
 ## 已完成的本地工作
 
-这些勾选项描述本地原型，不表示原计划整个 Phase 已完成。详细证据由上方链接的本地使用说明和执行器报告负责记录。
+这些勾选项描述本地原型，不表示 v4 阶段已完成。详细证据由上方链接的本地使用说明和执行器报告负责记录。
 
 - [x] Windows 验收记录中的 Node 为 `v26.10.0`，Git 为 `2.42.0.windows.2`；当前主机版本须另行检查。
 - [x] 已在 Windows 验证非交互式 Codely 文件修改及 JSON/流式输出。
@@ -118,7 +118,7 @@ L1 验收：CLI/Loader 与浏览器路径展示一致结果，检查失败不能
 - [x] 落实风险/预算决策及最多两次 review/fix；第二次评审失败进入 `needs_human`。
 - [x] 持久记录任务/执行/验收/取消事实，区分 Task ID 和进程内 job id。
 
-L2 验收于 2026-10-07 通过：序列化与重启、非法转换、审批注入拒绝、43 个 Core 用例的逐文件 100% 覆盖率、真实 Loader 验收和无密钥 Web 回放。具体命令及结果见 [L2 使用说明](user/guide/mgsd-local.zh.md#verification)。`source: expert` 当前是可信人工声明；自动专家与强制文件范围属于 L4。
+L2 验收于 2026-10-07 通过：序列化与重启、非法转换、审批注入拒绝、43 个 Core 用例的逐文件 100% 覆盖率、真实 Loader 验收和无密钥 Web 回放。具体命令及结果见 [L2 使用说明](user/guide/mgsd-local.zh.md#verification)。`source: expert` 当前是可信人工声明；自动专家与强制文件范围仍待 M3–M4（旧 L4）完成。
 
 ### L3 — Worktree 和上下文（已有证据；v4 Phase 2/4）
 
@@ -194,12 +194,12 @@ M4 本地验收后进入 v4 Phase 6，再完成 Phase 7 发布验收。旧 R0–
 - [ ] 实现 Durable Inbox、Task 与 Actions Attempt 分离、稳定 deliveryId 和 Reconciler；模拟超过 24h 排队寿命后重新派发且 Task 不丢。
 - [ ] 实现 send/status/approve/cancel/resume；批准绑定 Plan Hash 并启动新 execute 阶段，不占用 Runner 等待人工批准。
 - [ ] 运行中/排队取消、断网、重复派发、stale worker/lease 与安全手动迁移测试通过；先确认旧写权限撤销，不把 Actions concurrency 当强一致租约。
-- [ ] Standard/Restricted 数据投影验收；凭证、完整 Session、源码与敏感日志不上传协调仓库。
+- [ ] Standard/Restricted 数据投影验收；凭证、完整 Session、源码与敏感日志不上传协调仓库。Restricted 正文须先投递到目标节点或经批准的通道，不能仅凭 Task ID 推出内容。
 
 ### M6 — DSH UI 与发布（v4 Phase 7；承接 L5）
 
 - [ ] 通过 DSH 插件服务提供 Task/Workflow/Memory/权限审计，复用原生 Agent/Session/Tool 与唯一 FSM，验证可安装组合包/profile 产物。
-- [ ] Model Selector 与 Agent/Role Selector 分离；展示四路由真实 readiness、Mode、Loop Owner、认证状态、能力、配额来源、数据去向及 Task/Session/Attempt 关联。
+- [ ] Model Selector 与 Agent/Role Selector 分离；展示四路由真实 readiness、Mode、Loop Owner、认证状态、能力、配额来源、数据去向及 Task/Session/Attempt 关联；QuotaLedger 无官方配额信号时记为 unknown，不伪造百分比。
 - [ ] 每条 ready 路由独立验证文本/工具往返/重连/拒绝/取消及 401/429；订阅已授权路径按计划各做五类实测，未授权路径不能发请求。
 - [ ] 验证 Session 回放、切换审计和 ContextPacket、限额/认证失败 Checkpoint/Pause、无付费回退以及插件停用后数据保留。
 - [ ] 对两个无关工程完成约定/集成/安全/恢复验收，记录兼容矩阵、安装、故障处理、升级与回滚；alpha 发布为可选的后续操作。
