@@ -16,6 +16,7 @@ DeepSeek Harness (`dsh`) is DeepSeek AI's open-source agent harness: an all-plug
 - [.agents/skills/](.agents/skills/) — task-matched workflows: `dsh-pre-push-checks` (selecting outgoing checks), `dsh-code-review` (reviewing a PR), `dsh-doc` (any docs work), `dsh-prose-standard` (prose decisions), `dsh-client-ui-ux` (GUI behavior in `packages/client`), `dsh-ci-test-reliability` (nondeterministic tests), `dsh-trim-cot-leakage` (reasoning-transcript prose), `record-browser-gif` (GUI-change PR GIFs), `dsh-merging-stacked-prs` (stacked PRs), `dsh-archive-agent-notes` (Agent Notes lifecycle).
 - [.agents/notes/](.agents/notes/README.md) — durable decision rationale for implemented work. Archived notes are frozen; never treat them as current authority.
 - [docs/AGENTS.md](docs/AGENTS.md) — bilingual documentation conventions, word budgets, `*.i18n.yaml` pairing records.
+- [.ai/WORKFLOW.md](.ai/WORKFLOW.md) — shared Codex/Codely task handoff and recovery rules; follow the current task checkpoint when one applies.
 
 ## Layout
 
