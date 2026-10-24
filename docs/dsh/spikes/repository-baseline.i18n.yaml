@@ -1,0 +1,34 @@
+# Bilingual-pair consistency record for repository-baseline.md (docs/i18n/README.md): per heading
+# section, a hash of its English and Chinese blocks outside code blocks and generated regions.
+# After editing either side, bring the other along and re-record with:
+#   pnpm run verify-translation-pairing --write docs/dsh/spikes/repository-baseline.md
+/dsh-repository-baseline:
+  en: 95b037aa35af2787
+  zh: 8fb4919a1217d4ac
+/dsh-repository-baseline/scope:
+  en: fd5900783e854d81
+  zh: a36f274eaccb74ce
+/dsh-repository-baseline/toolchain-and-layout:
+  en: 5cc44141b32193fc
+  zh: bf456851f7c9cbe4
+/dsh-repository-baseline/verified-build-and-test-baseline:
+  en: 6eb3eea92bfca36c
+  zh: d58e0409064c6e6e
+/dsh-repository-baseline/git-state-at-baseline:
+  en: ef483c68e8ed042a
+  zh: c0114b0cf42e750c
+/dsh-repository-baseline/capability-mapping-to-the-plan:
+  en: 1e531b598db95477
+  zh: 42e0d7ee628d48e2
+/dsh-repository-baseline/mock-model-gateway-p0-02:
+  en: a7f35405b8ca7a76
+  zh: 465867be39ef2377
+/dsh-repository-baseline/gaps-that-p1-must-fill:
+  en: 8dd0040913594cb3
+  zh: 6f210835957a6b33
+/dsh-repository-baseline/constraints-for-later-work:
+  en: 936c4622acea3cf2
+  zh: d1c465fe7db64547
+/dsh-repository-baseline/reproduction:
+  en: ab87218e7f04d463
+  zh: 413e90cbaeecbb6a

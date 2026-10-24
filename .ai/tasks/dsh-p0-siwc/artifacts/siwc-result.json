@@ -1,0 +1,85 @@
+{
+  "started_at": "2026-10-22T16:45:36.247Z",
+  "stages": {
+    "discovery": {
+      "status": "PASS",
+      "issuer": "https://auth.openai.com"
+    },
+    "listener": {
+      "status": "STOPPED",
+      "origin": "http://127.0.0.1:63883",
+      "callback_path": "/auth/callback"
+    },
+    "authorization": {
+      "status": "PASS",
+      "issued_client_id_present": true
+    },
+    "identity": {
+      "status": "PASS",
+      "signature_issuer_audience_expiry_nonce_valid": true
+    },
+    "plan_permission": {
+      "status": "PASS",
+      "granted": true
+    },
+    "models": {
+      "status": "PASS",
+      "models": [
+        {
+          "slug": "gpt-6.1-sol",
+          "display_name": "GPT-6.1-Sol"
+        },
+        {
+          "slug": "gpt-6-astra",
+          "display_name": "GPT-6-Astra"
+        },
+        {
+          "slug": "gpt-6-sol",
+          "display_name": "GPT-6-Sol"
+        },
+        {
+          "slug": "gpt-6-luna",
+          "display_name": "GPT-6-Luna"
+        },
+        {
+          "slug": "gpt-5.6-sol",
+          "display_name": "GPT-5.6-Sol"
+        },
+        {
+          "slug": "gpt-5.6-terra",
+          "display_name": "GPT-5.6-Terra"
+        },
+        {
+          "slug": "gpt-5.6-luna",
+          "display_name": "GPT-5.6-Luna"
+        }
+      ]
+    },
+    "inference": {
+      "status": "PASS",
+      "model": "gpt-6.1-sol",
+      "terminal": "completed",
+      "output_matches": true,
+      "event_types": [
+        "response.created",
+        "response.in_progress",
+        "response.output_item.added",
+        "response.content_part.added",
+        "response.output_text.delta",
+        "response.metadata",
+        "response.output_text.done",
+        "response.content_part.done",
+        "response.output_item.done",
+        "response.completed"
+      ],
+      "usage": {
+        "input_tokens": 13,
+        "output_tokens": 7,
+        "total_tokens": 20
+      }
+    }
+  },
+  "tested_probe_sha256": "a95c41aa1f4bcba32c4cec75f4a18c7649add1467a194502bb989165f15a2286",
+  "retained_probe_sha256": "1a273255fe4450b8f6730fd1d8a4290ca077367e747574049bfb59ea3854b360",
+  "retained_probe_change": "After the live run, limit saved usage to aggregate token counts; authorization and inference requests are unchanged."
+}

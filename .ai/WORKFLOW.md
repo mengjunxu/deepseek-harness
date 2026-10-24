@@ -1,42 +1,177 @@
-# Shared Agent Workflow
+# Shared Agent Development Instructions
 
-This file defines the repository's manual Codex/Codely handoff process. Git owns code history, each task's `task.md` owns its scope and acceptance criteria, `plan.md` owns progress, and `handoff.md` owns the latest checkpoint. Confirmed design decisions remain in the active implemented Agent Notes under `.agents/notes/implemented/`.
+本项目使用 Codex 和 Codely 协同开发。所有 Agent 必须遵循统一的开发规则、架构决策、共享记忆和任务交接协议；[AGENTS.md](../AGENTS.md) 保留项目通用规则，[CODELY.md](../CODELY.md) 提供 Codely 入口，两者使用本文件的共享规范。
 
-## Start or resume a task
+共享文档沿用现有仓库结构；发现等价文件或目录时优先复用，不得未经用户确认新建平行规则体系。本流程管理仓库中的人工协作记录，不改变 DSH 产品的 Task、Session 或 Workflow 服务。
 
-1. Read `AGENTS.md`, `CODELY.md` when using Codely, this file, the task's `task.md`, `plan.md`, and `handoff.md`, plus relevant architecture docs and active Agent Notes.
-2. Check `git status --short --branch`, `git log -1 --oneline`, the task's declared branch and base, tracked diffs, untracked files, and remote synchronization when relevant.
-3. Compare the checkpoint with the actual files, Git history, and recorded verification. Treat repository state as authoritative when it disagrees with prose; record the mismatch before continuing.
-4. Confirm the previous writer has stopped and this task has one writer in this workspace. Mark the task `IN_PROGRESS`, record agent and time, and continue at the first incomplete, unblocked plan item.
-5. If task ownership, user changes, an applicable decision, or the checkpoint cannot be established safely, stop the affected work and report the evidence needed to resolve it.
+## 1. 共享文档职责
 
-## Create and update task records
+| 文件 | 职责 |
+|---|---|
+| [WORKFLOW.md](WORKFLOW.md) | 开发流程、Git 操作、任务状态、验证和 Agent 交接规范。 |
+| [ARCHITECTURE.md](ARCHITECTURE.md) | 架构及正式决策索引；产品架构由 [docs/architecture.md](../docs/architecture.md) 和相关模块文档维护。 |
+| [MEMORY.md](MEMORY.md) | 已验证、可复用的长期工程知识、历史经验及其索引。 |
+| [现有正式决策记录](../.agents/notes/implemented/) | 已确认并实施的架构决策及理由，承担 ADR 职责；不另建 `.ai/adr/`。提案和归档记录不作为当前正式决策依据。 |
+| `.ai/tasks/<task-id>/` | 当前任务目标、Plan、Checkpoint 和重要执行记录。 |
 
-Use `.ai/templates/` for new task records. Choose an unused task identifier that follows a repository convention when one exists; do not assume example identifiers are reserved. Keep task goals and acceptance criteria in `task.md`, verifiable work items and validation in `plan.md`, the latest handoff snapshot in `handoff.md`, and only durable execution facts in `log.md`. If repository policy prohibits raw commit identifiers in maintained prose, name the branch/ref and the command the receiver must use to verify its current commit.
+## 2. 上下文加载规则
 
-Update the plan when work advances. Record a verification result only after running that command, distinguish product-code verification from documentation-only changes, and name the exact code commit tested. `DONE` requires all acceptance criteria to have evidence. A handoff is `HANDOFF_READY` only after the outgoing writer has stopped.
+按需加载上下文，优先读取索引，再读取与任务相关的文档章节和代码。
 
-## Hand off a task
+### 2.1 日常聊天和简单问题
 
-1. Stop implementation and inspect the branch, HEAD, tracked diff, untracked files, and remote synchronization.
-2. Identify task-owned changes. List unrelated existing modifications separately and never stage, commit, or describe them as part of this task.
-3. Run relevant checks when useful. Record exact commands, outcomes, and tested code commit; use `NOT_RUN` with the reason otherwise.
-4. Update `plan.md`, `handoff.md`, and `log.md` only with verified facts. Check the records for credentials and unnecessary private data.
-5. Commit only task-owned files when repository policy permits. Push only when the user authorized it and a remote is configured. Otherwise state plainly that the changes remain local.
-6. Set `HANDOFF_READY`, name the next agent, record the handoff time and actual Git state, and stop writing in the task workspace.
+- 不强制读取所有共享文件，仅加载回答问题实际需要的上下文。
+- 不因普通问答修改共享文件。
 
-## Recover safely and resolve decisions
+### 2.2 开始开发任务
 
-Do not reset, clean, force-push, overwrite user files, or resolve unrelated conflicts as part of a handoff. Preserve the workspace and report the exact risk. Before a cross-device handoff, require the task commit to be pushed and confirm the receiving device fetched the matching commit.
+1. 读取 Agent 入口规则和本文件；Codely 同时读取 `CODELY.md`。
+2. 识别当前 Task ID；没有 Task 时，使用 [.ai/templates/](templates/) 创建记录，选择未使用且符合现有约定的标识，不得凭空假定任务状态或进度。
+3. 已存在的任务必须读取 `task.md`、`plan.md` 和 `handoff.md`。
+4. 检查真实 Git 分支、HEAD、任务声明的分支与基线、已跟踪 Diff 和未跟踪文件；涉及同步时检查远端状态。可用 `git status --short --branch` 和 `git log -1 --oneline` 核对现场。
+5. 确认当前任务的写入权、旧写入者已停止及下一步工作；记录 Agent 和时间，将任务设为 `IN_PROGRESS`，从第一个未完成且未阻塞的事项继续。
 
-Treat active implemented Agent Notes and owning architecture documents as decision sources. Do not replace a confirmed decision through a task checkpoint or proposal. If current requirements conflict with a decision, record the conflict and ask the user to choose before changing the design.
+无法安全确认写入权、用户修改、适用决策或 Checkpoint 时，暂停受影响的工作并报告缺少的证据。模型自己的 Checkpoint 不能单独证明旧 Agent 已停止写入。
 
-## User authorization
+### 2.3 架构设计或架构修改
 
-Follow repository policy for commits. Obtain explicit user authorization before pushing or performing destructive Git operations, deleting or overwriting user-owned data, or making other irreversible external changes. A model's own checkpoint does not establish that an earlier agent stopped writing.
+1. 通过 [ARCHITECTURE.md](ARCHITECTURE.md) 定位并读取相关架构章节。
+2. 读取适用的正式决策记录。
+3. 识别现有接口、模块职责和技术约束，优先复用现有架构，避免重复建设。
+
+不得自行覆盖已确认的架构决策。需要改变已确认决策时，先提出变更建议，经用户确认后再实施。
+
+### 2.4 功能实现和问题排查
+
+- 根据任务范围检查 [MEMORY.md](MEMORY.md)，只读取相关知识。
+- 优先验证知识是否仍适用于当前代码版本，不把 Memory 视作高于代码、测试或正式决策的绝对事实。
+- 发现历史知识失效时，标记并更新验证状态。
+
+### 2.5 接手其他 Agent 的任务
+
+1. 读取本文件、Task、Plan 和最新 Checkpoint。
+2. 检查真实 Git 状态和代码实现，核对 Checkpoint 与代码、历史和验证证据是否一致。
+3. 发现不一致时先记录差异；实现事实以实际仓库证据为准，不得仅根据 Checkpoint 声称功能已经完成。
+4. 确认旧 Agent 已停止写入并取得单一写入权，再按开始任务的步骤继续第一个未完成且未阻塞的事项。
+
+## 3. 共享文档更新规则
+
+规则、架构、长期知识和临时任务状态各有归属，更新时保留其职责。
+
+### 3.1 WORKFLOW.md
+
+- 记录跨 Agent 通用的开发和交接规范，不记录单次任务的特殊处理。
+- Agent 可以提出优化建议，正式规则变更需要用户确认；用户明确授权的规则整合可以直接执行。
+- 不允许 Codex 和 Codely 各自维护不同版本。
+
+### 3.2 ARCHITECTURE.md
+
+- 记录或索引当前有效的系统架构，只包含已确认或已实现并验证的架构事实。
+- 重要架构变更先遵循正式决策流程，批准后同步相关架构文档及索引。
+- 不记录未经验证的设计猜想，不用此文件绕过正式决策审查。
+
+### 3.3 MEMORY.md
+
+仅保存跨任务可复用的长期工程知识：已验证的技术结论、稳定项目约定、常见问题及可靠解决方案、关键实现注意事项，以及相关文档、决策和 Task 的索引。优先更新现有条目，避免重复积累；知识有现成文档时保留索引，不复制整段内容。
+
+禁止记录完整聊天历史、原始推理过程、临时任务进度、日常流水账、未经验证却被描述为事实的结论、未标记的过期知识，以及 API Key、Token、密码等敏感信息。
+
+新增知识条目应尽量包含：
+
+- Topic / Scope：主题与适用范围。
+- Finding：技术结论或可靠经验。
+- Evidence / Source：验证证据或来源。
+- Verification Status：当前验证状态及适用版本。
+- Related Task / ADR：相关任务或正式决策索引。
+
+### 3.4 Task / Plan / Checkpoint
+
+- `task.md` 记录目标、范围及验收标准。
+- `plan.md` 记录执行步骤、进度和验证安排。
+- `handoff.md` 记录最近一次可恢复的交接状态，即 Checkpoint。
+- `log.md` 记录重要执行事件和验证证据，不保存原始聊天流水账。
+
+Agent 可以更新进度、日志和 Checkpoint；重大需求范围变化必须经用户确认。执行命令后才能记录验证结果，产品代码验证与文档验证必须区分；未执行的检查标记 `NOT_RUN` 并解释原因，不得将未验证结果标为 `DONE`。
+
+验证记录必须准确标识被测代码版本。根目录规则禁止在维护文档中保存原始提交号，使用允许的稳定 tag/ref 或外部验证证据；可变分支名和 `HEAD` 查询只说明如何检查当前状态，不能充当固定版本证据。无法确定版本时明确留空或标为未验证，报告冲突，不得编造基线。
+
+## 4. 决策与冲突处理
+
+不同来源出现冲突时，先区分任务意图、正式约束与实现事实：
+
+1. 当前用户明确授权的要求决定任务意图，但不自动代表已批准修改全部架构约束。
+2. 已确认的正式决策记录决定架构约束。
+3. ARCHITECTURE 及其引用的架构文档描述当前架构状态。
+4. WORKFLOW 决定共享开发和交接流程。
+5. Task / Plan 决定当前任务范围与执行步骤。
+6. 实际代码、Git 和测试证据决定实现事实。
+7. MEMORY 提供辅助知识与历史参考。
+
+出现实质冲突时，明确报告冲突及可能影响，不得静默覆盖或自行选择有风险的方案。需要改变已确认决策时，先请用户确认；不能通过 Checkpoint、提案或 Memory 替换正式约束。
+
+## 5. Codex / Codely 交接协议
+
+同一 Task、同一 Workspace 同时只允许一个 Agent 拥有写入权。交接记录必须能与真实 Git 和文件状态核对。
+
+### 5.1 交接前
+
+1. 停止新增开发工作，检查 Git 分支、HEAD、Diff、未跟踪文件及远端同步状态。
+2. 区分任务内修改与既有或其他任务修改，后者单独列出，不得混入本任务提交。
+3. 更新 `plan.md` 的真实完成状态；按需执行相关检查，记录准确命令、实际结果和被测版本；未执行时标记 `NOT_RUN` 并说明原因。
+4. 更新 `handoff.md`，记录已完成工作、未完成工作、修改文件、验证命令与结果、已知问题、关键约束、Git 状态及下一步建议，并同步重要执行日志。
+5. 检查记录中没有凭证和不必要的私密信息，按仓库规则安全保存变更；明确是否已 Commit / Push，未同步时明确变更仍在本地。
+6. 完成交接记录后设为 `HANDOFF_READY`，记录接收 Agent 和时间，停止写入并释放写入权；此后不得继续修改任务工作区。
+
+### 5.2 接手后
+
+1. 验证 Checkpoint、Git 状态和已有实现是否一致。
+2. 确认没有其他 Agent 正在写入，记录接手 Agent 和时间，将 Task 更新为 `IN_PROGRESS`。
+3. 从剩余计划中第一个未完成且未阻塞的事项继续，不重复已完成且验证通过的工作。
+
+### 5.3 异常恢复
+
+- 不清理、不重置现有工作区，保留未提交修改。
+- 从 Git、Task、Plan 和最近有效 Checkpoint 重建实际状态。
+- 无法验证的完成项标为待验证。
+- 确认旧写入者已停止后才能继续工作。
+
+## 6. Git 安全规则
+
+- 修改前检查 Git 状态，不覆盖用户已有的未提交修改，不解决与本任务无关的冲突。
+- 不提交与当前 Task 无关的文件。
+- 不自动执行 `git reset --hard`、`git clean -fd` 或强制 Push；不得通过交接流程清理现场。
+- 跨设备交接必须确认远端同步状态：任务提交已推送，接收设备已获取并核对同一提交；本地 stash 不是跨设备共享状态。
+- 并行 Task 优先使用独立 Branch / Worktree。
+- Commit、Push、合并及历史重写遵循仓库授权规则；Push、破坏性 Git 操作、删除或覆盖用户数据及其他不可逆外部变更须有用户明确授权。
+
+## 7. 上下文与 Token 优化
+
+- 入口文件保持简洁，不在两个入口复制大量架构内容或维护不同的共享规则。
+- 不在每次启动时全文读取 MEMORY，只加载当前任务相关的正式决策、Memory 和代码。
+- 优先读取索引，再深入相关章节；长期知识进入 Memory，短期进度进入 Task / Checkpoint。
+- 原始日志保存在日志系统或对应任务记录中，不写入长期知识或入口文件。
+
+## 8. 工作完成要求
+
+完成任务时必须报告：
+
+1. 实际完成内容。
+2. 修改的文件和模块。
+3. 实际执行的验证及结果。
+4. 未完成事项与已知风险。
+5. Task / Plan / Checkpoint 更新情况。
+6. 是否需要更新 Architecture、Memory 或正式决策记录。
+
+只有验收条件满足且有相应证据时，才能将任务标记为 `DONE`。文档更新、工具安装或上下文摘要不能替代任务要求的真实功能或交接验收。
+
+## 9. 核心原则
+
+共享事实，不共享原生会话。以 Git 为代码事实来源，以正式决策记录为架构约束来源，以 Task / Plan 为任务执行依据，以 Checkpoint 为跨 Agent 恢复依据，以 Memory 为可复用知识来源。
+
+按需加载上下文，避免重复消耗 Token；保持单任务单写入者，所有交接可验证、可追溯、可恢复。
 
 ## Handoff prompts
 
-**Handoff:** Follow `.ai/WORKFLOW.md` for the current task. Stop implementation, inspect Git and the task's changes, record verified progress and validation in its plan and checkpoint, separate unrelated work, state synchronization accurately, then stop writing.
+**Handoff：** 遵循 `.ai/WORKFLOW.md`，停止新增开发，核对 Git 和文件归属，记录真实进度、验证结果及同步状态，更新 Plan / Checkpoint / Log，释放写入权并停止写入。
 
-**Resume:** Read the agent entry files, `.ai/WORKFLOW.md`, the current task records, and relevant decisions. Verify the checkpoint against Git and files, confirm the previous writer stopped, record yourself as the sole writer, then continue the first incomplete plan item. Preserve unrelated changes and report any conflict before changing a confirmed decision.
+**Resume：** 读取 Agent 入口、`.ai/WORKFLOW.md`、当前 Task / Plan / Checkpoint 和相关正式决策，核对实际 Git、实现与验证证据，确认旧写入者已停止，记录单一写入权后继续首个未完成且未阻塞事项，保留无关修改。

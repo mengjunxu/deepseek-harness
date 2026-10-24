@@ -4,6 +4,12 @@ DeepSeek Harness (`dsh`) is DeepSeek AI's open-source agent harness: an all-plug
 
 **[AGENTS.md](AGENTS.md) is the canonical agent instruction file** — commands, conventions, testing and PR policy. Read it before any code change; `CLAUDE.md` symlinks it. This file only maps the repository and caches traps that are not visible at a glance. Where the two disagree, AGENTS.md wins.
 
+## Shared Agent Development Instructions
+
+Codex 和 Codely 共同遵循 [AGENTS.md 的共享入口规则](AGENTS.md#shared-agent-development-instructions)与 [.ai/WORKFLOW.md](.ai/WORKFLOW.md) 的完整规范，使用相同的架构决策、共享 Memory 和任务记录。普通问答按需加载；开发前读取 WORKFLOW、识别或创建 Task、核对 Task / Plan / Checkpoint 和 Git 状态并确认单写入者；架构与 Memory 按相关索引加载，交接与完成按 WORKFLOW 更新记录。
+
+详细规则和知识使用 `.ai/` 及其引用的现有文档；不在两个入口重复维护，也不新建平行规则体系。
+
 ## Read-first pointers
 
 - [docs/architecture.md](docs/architecture.md) — read before changing anything under `packages/`: Cordis model, profiles/bundles, core packages, event domains.
@@ -16,7 +22,6 @@ DeepSeek Harness (`dsh`) is DeepSeek AI's open-source agent harness: an all-plug
 - [.agents/skills/](.agents/skills/) — task-matched workflows: `dsh-pre-push-checks` (selecting outgoing checks), `dsh-code-review` (reviewing a PR), `dsh-doc` (any docs work), `dsh-prose-standard` (prose decisions), `dsh-client-ui-ux` (GUI behavior in `packages/client`), `dsh-ci-test-reliability` (nondeterministic tests), `dsh-trim-cot-leakage` (reasoning-transcript prose), `record-browser-gif` (GUI-change PR GIFs), `dsh-merging-stacked-prs` (stacked PRs), `dsh-archive-agent-notes` (Agent Notes lifecycle).
 - [.agents/notes/](.agents/notes/README.md) — durable decision rationale for implemented work. Archived notes are frozen; never treat them as current authority.
 - [docs/AGENTS.md](docs/AGENTS.md) — bilingual documentation conventions, word budgets, `*.i18n.yaml` pairing records.
-- [.ai/WORKFLOW.md](.ai/WORKFLOW.md) — shared Codex/Codely task handoff and recovery rules; follow the current task checkpoint when one applies.
 
 ## Layout
 
@@ -68,9 +73,9 @@ Cached because they are not visible from the command surface; AGENTS.md owns the
 
 ### Project
 - [2026-10-09 15:53:07] MGSD planning docs (docs/MGSD_Distributed_Agent_Harness_Architecture_and_Execution_Plan.md and _v2.md) are intentionally Chinese-only planning artifacts: no .i18n.yaml pairing and not in scripts/doc-budgets.manifest.json; full doc-sync pairing/TS-sample failures for them are pre-existing and documented in MGSD_Implementation_Checklist. When editing them, keep the doc's own style and keep verify-md-links, verify-md-wrap (one physical line per paragraph) and git diff --check green — e.g. use blank-line-separated blockquote lines instead of trailing double spaces, and don't translate the docs to "fix" pairing.
-- [2026-10-09 15:53:09] This macOS checkout of deepseek-harness has no node_modules installed (MGSD prototype deps live on the Windows machine) and bash has no pnpm, but `corepack pnpm` (11.7.0) works. To run scripts/verify-md-links.ts / verify-md-wrap.ts without a full pnpm install (which would trigger postinstall/lefthook side effects): npm-install mdast-util-from-markdown, mdast-util-gfm, micromark-extension-gfm and mdast into a temp dir, copy node_modules into the repo's gitignored root, run `node --experimental-strip-types scripts/verify-*.ts`, then delete the temporary node_modules.
+- [2026-10-22 17:20:04] This macOS deepseek-harness checkout now has node_modules installed (as of 2026-10-22) and bash still has no `pnpm` on PATH, so use `corepack pnpm`. Doc and source gates run directly: `corepack pnpm exec tsx scripts/verify-md-links.ts`, `verify-md-wrap.ts`, `verify-translation-pairing.ts <pair...> [--write]`, `verify-doc-budgets.ts`; `corepack pnpm run typecheck` and `corepack pnpm exec vitest run <paths>` work without a full rebuild. Note the machine's Node v22.18.0 is below the declared `^22.19.0 || >=24` engine range even though commands succeed.
+- [2026-10-22 17:20:04] DSH v2 implementation status (docs/workflows/DSH_IMPLEMENTATION_PLAN.md + DSH_CHECKLIST.md): P0-01 baseline and P0-02 mock gateway are DONE via docs/dsh/spikes/repository-baseline.md; P0-03 provider matrix is BLOCKED for real accounts because this environment has no OPENAI_API_KEY and no ChatGPT subscription login, so only mock-backed verification (packages/llm/llm-pi-ai/tests/openai-route-matrix.spec.ts) exists. SIWC is not implemented; pi-ai's openai-codex route is a Codex subscription transport, not SIWC. Next task is P0-04.
 
 ### Reference
 
 - [2026-10-09 15:53:04] - MGSD continuation: read [the implementation checklist and handoff](docs/MGSD_Implementation_Checklist.zh.md) for current status, verified results and the next local milestone; the V2 plan doc docs/MGSD_Distributed_Agent_Harness_Architecture_and_Execution_Plan_v2.md (v2.1, 2026-10-09) is the V2 architecture/order source — two stages (Stage 1 local DSH closure incl. DSH integration before Phase 4, then Stage 2 GitHub remote), prompts in §39–43, acceptance lists §36.1/36.2. Complete local DSH acceptance before remote dispatch.
-
