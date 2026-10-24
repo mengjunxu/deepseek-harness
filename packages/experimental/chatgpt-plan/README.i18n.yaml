@@ -1,0 +1,34 @@
+# Bilingual-pair consistency record for README.md (docs/i18n/README.md): per heading
+# section, a hash of its English and Chinese blocks outside code blocks and generated regions.
+# After editing either side, bring the other along and re-record with:
+#   pnpm run verify-translation-pairing --write packages/experimental/chatgpt-plan/README.md
+/:
+  en: 4848c45c6f817f35
+  zh: 76126efb3dd594c6
+/deepseek-ai-dsh-experimental-chatgpt-plan:
+  en: a699f7b0b7fa0501
+  zh: 4b549b2faaa3e100
+/deepseek-ai-dsh-experimental-chatgpt-plan/summary:
+  en: 6adc31b1e82227d6
+  zh: d610773bd9433aa7
+/deepseek-ai-dsh-experimental-chatgpt-plan/table-of-contents:
+  en: d152484eb41ac6b4
+  zh: 09388d293f9be9cb
+/deepseek-ai-dsh-experimental-chatgpt-plan/use-this-package:
+  en: da4ca5def9055e96
+  zh: d752dfaaeaa5ab8d
+/deepseek-ai-dsh-experimental-chatgpt-plan/understand-the-implementation:
+  en: 3ec1ce1c61f755a3
+  zh: eab06e00f4e5f507
+/deepseek-ai-dsh-experimental-chatgpt-plan/further-exploration:
+  en: 12e93fe11065354b
+  zh: 1ea4fb4ff7fd494d
+/deepseek-ai-dsh-experimental-chatgpt-plan/model-experience:
+  en: f20093ccb829db9d
+  zh: 10563c5a3a2e86c4
+/deepseek-ai-dsh-experimental-chatgpt-plan/known-limitations-and-deferred-work:
+  en: a25deb5e68ab2683
+  zh: 76cc93ff4fca646a
+/deepseek-ai-dsh-experimental-chatgpt-plan/dev-note:
+  en: 8d6c9ddc286fdd8b
+  zh: 34051835b2d82b30

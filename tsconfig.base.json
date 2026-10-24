@@ -28,6 +28,8 @@
     // not declaration path aliases, keep each package/vendor source compiled
     // under its own tsconfig boundary.
     "paths": {
+      "@deepseek-ai/dsh-experimental-chatgpt-plan": ["./packages/experimental/chatgpt-plan/src/index.ts"],
+      "@deepseek-ai/dsh-experimental-chatgpt-plan/types": ["./packages/experimental/chatgpt-plan/src/types.ts"],
       "@deepseek-ai/dsh-experimental-mgsd-workflow": ["./packages/experimental/mgsd-workflow/src/index.ts"],
       "@deepseek-ai/dsh-client-product-analytics": ["./packages/client/product-analytics/src/index.ts"],
       "@deepseek-ai/dsh-client-product-analytics/types": ["./packages/client/product-analytics/src/events.ts"],

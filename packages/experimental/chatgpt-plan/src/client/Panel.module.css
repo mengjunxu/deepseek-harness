@@ -1,0 +1,5 @@
+.card { padding: 16px; border: 1px solid var(--dsw-alias-settings-card-stroke); border-radius: var(--dsw-radius-lg); color: var(--dsw-alias-label-primary); font-size: 13px; }
+.card h3 { font-size: 14px; font-weight: 500; margin: 0 0 12px; }
+.card p { margin: 0 0 12px; }
+.actions { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.actions a, .attribution { color: var(--dsw-alias-label-secondary); font-size: 13px; }
