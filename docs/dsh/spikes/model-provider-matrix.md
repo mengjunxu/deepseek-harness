@@ -2,7 +2,7 @@
 
 English | [中文](model-provider-matrix.zh.md)
 
-Provider capability record for the DSH implementation plan: Mock evidence from 2026-10-22 and SIWC live evidence from 2026-10-23. It separates what this checkout verifies with automated tests from what needs a real provider account, and it records the SIWC decision instead of assuming it.
+Provider capability record for the DSH implementation plan, updated by the 2026-10-26 source and evidence audit. It separates historical Mock/probe results, the experimental SIWC integration, and remaining real-account acceptance. Current work is tracked in the [SIWC task](../../../.ai/tasks/dsh-siwc-ui/handoff.md) and the [plan audit](../../../.ai/tasks/dsh-chatgpt-plan-update/handoff.md).
 
 ## Scope
 
@@ -15,6 +15,7 @@ The DSH plan requires two independent provider findings: an OpenAI API-key route
 | `deepseek` | `packages/llm/llm-deepseek` | Anthropic-compatible Messages | DeepSeek API key or official account |
 | `openai` | `packages/llm/llm-pi-ai` | OpenAI Responses at `https://api.openai.com/v1` | `OPENAI_API_KEY` through pi-ai ambient discovery |
 | `openai-codex` | `packages/llm/llm-pi-ai` | Codex Responses at `https://chatgpt.com/backend-api` | ChatGPT Plus/Pro OAuth |
+| `chatgpt-plan` (opt-in) | `packages/experimental/chatgpt-plan` | Public Responses at `https://api.openai.com/v1` | SIWC plan permission; `work_codex_shared` usage |
 | `azure-openai-responses` | `packages/llm/llm-pi-ai` | Azure Responses | pi-ai provider sign-in |
 | `anthropic` | `packages/llm/llm-pi-ai` | Anthropic Messages | API key or OAuth |
 | Hand-declared gateway | `packages/llm/llm-pi-ai` | `openai-completions` or `openai-responses` | `apiKeyEnv` reference |
@@ -99,20 +100,24 @@ The independent P0 probe **passed** on 2026-10-23 with the user's Plus account. 
 
 The account's `GET https://api.openai.com/v1/models` returned seven visible models. A synthetic request to `POST https://api.openai.com/v1/responses` using `gpt-6.1-sol`, `store: false` and `stream: true` returned the expected `SIWC_OK` text and `response.completed`; usage was 13 input and 7 output tokens. See the [sanitized evidence](../../../.ai/tasks/dsh-p0-siwc/artifacts/siwc-result.json), [probe source](../../../.ai/tasks/dsh-p0-siwc/artifacts/siwc-probe.mjs) and [execution record](../../../.ai/tasks/dsh-p0-siwc/plan.md). These results establish account feasibility, not a shipped DSH Provider integration.
 
-Integration must follow the [SIWC request restrictions](https://developers.openai.com/siwc/token-sharing-open-source/preview-limitations) and handle [subscription permission and usage failures](https://developers.openai.com/siwc/token-sharing-open-source/errors-and-recovery). The probe does not mount a Provider or exercise token refresh, revocation, exhausted subscription limits, or DSH-session replay. The existing pi-ai `openai-codex` transport uses ChatGPT's backend endpoint and remains separate from this public Responses route.
+The experimental `chatgpt-plan` Provider and Models settings extension are now implemented as an explicit opt-in. Source covers OAuth/OIDC, credentials, account models, refresh/revocation and pi-ai request/stream translation. The retained local Session evidence includes three completed conversation turns. The prior repair runs passed 19 focused tests, package Host/Client type checks, scoped lint and a Host plugin build; the current documentation audit does not rerun those product tests. See the [execution record](../../../.ai/tasks/dsh-siwc-ui/plan.md) for commands and limits.
+
+Integration follows the [SIWC request restrictions](https://developers.openai.com/siwc/token-sharing-open-source/preview-limitations) and [error guidance](https://developers.openai.com/siwc/token-sharing-open-source/errors-and-recovery). Local repairs add the required tool-namespace description, preserve rate-limit diagnostics, distinguish usage unavailability from quota exhaustion, extend the total stream deadline to 600000 ms and classify it as TIMEOUT, and stop fetching the model catalog before every inference. These repairs remain uncommitted and require live revalidation; Loader composition, recorded Session snapshots, GIF and complete network lifecycle/restart acceptance remain unfinished. The independent probe does not substitute for that acceptance. The pi-ai `openai-codex` transport remains a separate model route, not the Codex external-agent adapter.
+
+According to [OpenAI's plan-usage documentation](https://learn.chatgpt.com/docs/sign-in-with-chatgpt), SIWC requests use Codex / ChatGPT Work usage, classified by the merged plan as `work_codex_shared`; they do not use ordinary ChatGPT chat allowance or grant conversations/Memory access. Account and app limits can differ. This classification is documented, but UsageSource metadata, intent-aware routing, quota protection, paid-fallback consent and a Usage Ledger are target features in QR-01..06, not implemented guarantees. No confirmed ordinary-chat Provider is available to DSH's own UI; an optional ChatGPT → DSH MCP ingress would be a separate entry direction.
 
 Consequences for V0:
 
-- SIWC is feasible for this account; product integration and lifecycle coverage remain P1 work.
+- SIWC has an experimental product integration and local successful turns; complete product/lifecycle acceptance remains P1-05 work.
 - The API-key route requires its own real-account evidence; SIWC success does not clear that requirement.
-- DeepSeek and Mock remain fallback options when a chosen account route is unavailable.
+- DeepSeek and Mock remain configurable alternatives; automatic model or billing-source fallback requires the planned explicit policy and consent.
 
 ## Known limits
 
 - Real API-key access and billing, and SIWC subscription-limit behavior, remain unverified.
-- The verification covers text streaming and HTTP failure paths, not image input, tool-call round trips against OpenAI, or Responses reasoning items.
+- The evidence includes text streaming and local tool activity; real tool-call, image, reasoning and lifecycle coverage is not a complete Provider capability matrix.
 - Provider model identifiers and account eligibility change outside this repository; the matrix records route mechanics, not a frozen model list.
 
 ## Next task dependency
 
-P0-03 supplies the chat provider findings for P1-05. SIWC live feasibility passed; P0-03 remains BLOCKED on independent real API-key validation. Product SIWC integration also requires authorization, credential lifecycle, request compatibility and error handling through the existing DSH services.
+P0-03 remains BLOCKED on independent real API-key validation. P1-05 is Partial for the opt-in SIWC integration. The merged plan prioritizes CG1 quota-aware routing after the user approves that phase, retaining the remaining P0 probes and P1-05 product acceptance as separate evidence obligations.

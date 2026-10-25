@@ -15,20 +15,32 @@
   en: d152484eb41ac6b4
   zh: 09388d293f9be9cb
 /deepseek-ai-dsh-experimental-chatgpt-plan/use-this-package:
-  en: da4ca5def9055e96
-  zh: d752dfaaeaa5ab8d
+  en: cc7058a5a84bcc37
+  zh: 3e8d5800907d8402
 /deepseek-ai-dsh-experimental-chatgpt-plan/understand-the-implementation:
-  en: 3ec1ce1c61f755a3
-  zh: eab06e00f4e5f507
+  en: e697fce84e642ecb
+  zh: 0237965265077d40
 /deepseek-ai-dsh-experimental-chatgpt-plan/further-exploration:
   en: 12e93fe11065354b
   zh: 1ea4fb4ff7fd494d
 /deepseek-ai-dsh-experimental-chatgpt-plan/model-experience:
-  en: f20093ccb829db9d
-  zh: 10563c5a3a2e86c4
+  en: 215e7ba838619b7b
+  zh: a311da3843709f90
+/deepseek-ai-dsh-experimental-chatgpt-plan/model-experience/namespaced-tool-definitions:
+  en: 0ccc8198a08431f2
+  zh: ea96bba5115fb336
+/deepseek-ai-dsh-experimental-chatgpt-plan/model-experience/namespaced-tool-definitions/what-the-model-sees:
+  en: 6d6f189691739f9b
+  zh: 9a41607a26b5bee1
+/deepseek-ai-dsh-experimental-chatgpt-plan/model-experience/namespaced-tool-definitions/token-effect:
+  en: a3c2e9432f452047
+  zh: 2859afbd8ac2efd3
+/deepseek-ai-dsh-experimental-chatgpt-plan/model-experience/namespaced-tool-definitions/kv-cache-effect:
+  en: 236ab50c3e03ee3b
+  zh: f2a9338b26d15969
 /deepseek-ai-dsh-experimental-chatgpt-plan/known-limitations-and-deferred-work:
-  en: a25deb5e68ab2683
-  zh: 76cc93ff4fca646a
-/deepseek-ai-dsh-experimental-chatgpt-plan/dev-note:
-  en: 8d6c9ddc286fdd8b
-  zh: 34051835b2d82b30
+  en: e5257be8cf26b113
+  zh: 31ccf94149097b67
+/deepseek-ai-dsh-experimental-chatgpt-plan/known-limitations-and-deferred-work/dev-note:
+  en: 1e4bcd9e80c5c0de
+  zh: 8fb9a9d7b035b129

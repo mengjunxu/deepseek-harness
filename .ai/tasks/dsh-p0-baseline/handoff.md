@@ -28,12 +28,12 @@ P0-01 与 P0-02 已完成，P0-03 的 Mock 部分已完成。2026-10-23，Codex 
 ## Remaining
 
 - P0-03 真实 API Key 路线验证：仍需要可用的 `OPENAI_API_KEY`。
-- SIWC 独立探测已通过，产品 Provider 集成、刷新、撤销及订阅限额异常仍未验证；详见最新 SIWC 任务与供应商矩阵。
+- SIWC 独立探测已通过；后续实验 Provider 已实现并有真实 completed 轮次，但完整生命周期/长回复/Session 快照验收仍缺。当前状态见 [SIWC 检查点](../dsh-siwc-ui/handoff.md)与[计划审计](../dsh-chatgpt-plan-update/handoff.md)，不以本历史基线替代当前进度。
 - P0-04 及之后任务属于新任务，不在本任务范围内。
 
 ## Git state
 
-- 分支与 HEAD：`codely_bridge`，HEAD 为 `ad79fcfb4f`（本任务未提交）。
+- 历史分支：`codely_bridge`，当时本任务未提交；未留允许的固定代码版本证据，不以可变分支名证明被测版本。
 - 工作区：有未提交修改与未跟踪文件，见下。
 - 本任务文件：`docs/dsh/`、`packages/llm/llm-pi-ai/tests/openai-route-matrix.spec.ts`、`docs/workflows/DSH_CHECKLIST.md`、`.ai/tasks/dsh-p0-baseline/`、`AGENTS.md` 与 `.ai/MEMORY.md` 的增量。
 - 无关既有修改：`.ai/WORKFLOW.md`、`CODELY.md`、`scripts/doc-budgets.manifest.json`、`.ai/tasks/shared-agent-instructions/` 属于共享指令整合任务；`.codely-cli/settings.json` 属于用户环境；`docs/workflows/DSH_IMPLEMENTATION_PLAN.md` 属于既有未跟踪文档。

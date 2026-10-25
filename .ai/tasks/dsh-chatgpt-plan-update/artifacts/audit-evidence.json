@@ -1,0 +1,67 @@
+{
+  "auditDate": "2026-10-26",
+  "sourceDocumentSha256": "9b01dcc486287f7e38f52991173445f403ad6710588c70ad30b22bd4ad5120c8",
+  "sourceFiles": [
+    {
+      "file": "packages/experimental/chatgpt-plan/src/index.ts",
+      "sha256": "44cf835fe066ed67e40d70a8b71be6fa2aed8e4fc374b0477c11c0a271598c6d"
+    },
+    {
+      "file": "packages/experimental/chatgpt-plan/src/protocol.ts",
+      "sha256": "8e7b662e9934c3e3de10483842c7561a5227adfc2d0b1fc90e6df614040da122"
+    },
+    {
+      "file": "packages/experimental/chatgpt-plan/tests/provider.spec.ts",
+      "sha256": "9879cb6e7f7979963e96b8e70b2cee28268d8e08524266721e0ac5a7f68f1c9e"
+    },
+    {
+      "file": "packages/experimental/chatgpt-plan/tests/protocol.spec.ts",
+      "sha256": "8d42aac98a0d99872469b371798479b7cd7fed328463dcecc770301c8f64cb48"
+    },
+    {
+      "file": "packages/llm/llm-pi-ai/src/index.ts",
+      "sha256": "e13e3bfaecbb3dbac22054286105b7eb23e96b52d312cb29a53a9a14bb315589"
+    },
+    {
+      "file": "packages/subagent/subagent-codex/src/index.ts",
+      "sha256": "3adc9ab888a503e7063fdda990596901ac05abe3759f95b1f52f72307824f957"
+    },
+    {
+      "file": "packages/experimental/mgsd-workflow/src/core.ts",
+      "sha256": "82dbfecd50f0db4aef46e3da6b1c6455d9284934298f33ad729bfdd73240149c"
+    },
+    {
+      "file": "packages/experimental/mgsd-workflow/src/types.ts",
+      "sha256": "8f401ee42b2c4ff09cd701f068bf11672d0e635ef0380604475ce9548990a96f"
+    },
+    {
+      "file": "apps/cli/config/examples/codely-local/plugin.mjs",
+      "sha256": "f3f95d3b52d4d88918f3c491c4db6eb0700d579d17d88ad9f8904219e986f6ac"
+    },
+    {
+      "file": "apps/cli/config/examples/codely-local/run.mjs",
+      "sha256": "decda12d9a6e20492489d03471b28e2d8c0eeabb82bc553b111008cf8cfb252b"
+    }
+  ],
+  "localSessionObservation": {
+    "completedTurns": 3,
+    "failures": [
+      {
+        "turn": 3,
+        "code": "ABORTED"
+      },
+      {
+        "turn": 4,
+        "code": "RATE_LIMIT"
+      }
+    ],
+    "scope": "Selected local Session only; not a new live provider test"
+  },
+  "tests": "Previous SIWC repair turn: 19 focused tests passed; not rerun in this documentation task",
+  "limitations": [
+    "No credentials inspected",
+    "No new provider requests",
+    "No global private plugin installation audit",
+    "No P1-P5 product implementation in this task"
+  ]
+}

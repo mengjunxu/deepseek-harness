@@ -1,18 +1,30 @@
 import { afterEach, expect, it, vi } from 'vitest'
 import { generateKeyPair, exportJWK, SignJWT } from 'jose'
 import { createHash } from 'node:crypto'
-import { authorize, planPayload, refreshGrant } from '../src/protocol.ts'
+import { authorize, jsonRequest, planPayload, refreshGrant } from '../src/protocol.ts'
 
 const realFetch = globalThis.fetch
 const config = { appName: 'DeepSeek Harness', requestTimeoutMs: 10_000, attemptTimeoutMs: 60_000, contextWindow: 262144 }
 const controllers: AbortController[] = []
 afterEach(() => { for (const controller of controllers.splice(0)) controller.abort(); vi.unstubAllGlobals() })
 
+it.each([
+  [429, 'rate_limit_exceeded', 'RATE_LIMIT'],
+  [429, 'subscription_sharing_usage_limit_exceeded', 'QUOTA'],
+  [503, 'subscription_sharing_usage_unavailable', 'SERVER'],
+])('retains HTTP %s diagnostics for %s as %s', async (status, providerCode, code) => {
+  vi.stubGlobal('fetch', vi.fn(async () => Response.json({ error: { code: providerCode, message: 'Fixture failure' } }, { status })))
+  const failure = await jsonRequest('https://api.openai.com/v1/models', {}, 10_000).catch((error: unknown) => error)
+  expect(failure).toMatchObject({ code })
+  expect(failure).toHaveProperty('message', expect.stringContaining(providerCode))
+})
+
 it('preserves history and namespaced functions while omitting unsupported SIWC fields', () => {
   expect(planPayload({ model: 'test', input: [{ role: 'system', content: 'system' }, { role: 'user', content: 'hello' }],
     max_output_tokens: 9, temperature: 0, previous_response_id: 'old', tools: [{ type: 'function', name: 'read', parameters: {} }] }))
     .toEqual({ model: 'test', input: [{ role: 'developer', content: 'system' }, { role: 'user', content: 'hello' }],
-      store: false, stream: true, tools: [{ type: 'namespace', name: 'dsh', tools: [{ type: 'function', name: 'read', parameters: {} }] }] })
+      store: false, stream: true, tools: [{ type: 'namespace', name: 'dsh', description: 'Tools available in this DSH session.',
+        tools: [{ type: 'function', name: 'read', parameters: {} }] }] })
 })
 
 it.each(['openid profile chatgpt.tokens.use.direct', 'openid profile'])('validates callback state, PKCE, signed identity and granted plan scope: %s', async (scope) => {

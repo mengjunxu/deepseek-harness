@@ -2,7 +2,7 @@
 
 [English](repository-baseline.md) | 中文
 
-DSH 实施计划所需的基线记录，取自 2026-10-22 的 `deepseek-harness` 仓库 `codely_bridge` 分支提交 `ad79fcfb4f`。下列命令均在本工作区实际执行，结果为实际观察到的输出，不是估计值。
+DSH 实施计划的历史基线记录，取自 2026-10-22 的 `codely_bridge` 分支。下列命令与机器版本描述当时观察，不代表当前验收；允许的固定代码版本记录缺失。[当前计划审计](../../../.ai/tasks/dsh-chatgpt-plan-update/handoff.md)取代本记录作为当前能力映射依据，包括实验 SIWC 与可复用的 MGSD 任务状态。
 
 ## 范围
 

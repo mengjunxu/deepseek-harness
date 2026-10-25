@@ -3,8 +3,8 @@
 # After editing either side, bring the other along and re-record with:
 #   pnpm run verify-translation-pairing --write docs/dsh/spikes/repository-baseline.md
 /dsh-repository-baseline:
-  en: 95b037aa35af2787
-  zh: 8fb4919a1217d4ac
+  en: 303712f9049d0184
+  zh: f5c88727ea811c9c
 /dsh-repository-baseline/scope:
   en: fd5900783e854d81
   zh: a36f274eaccb74ce

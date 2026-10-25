@@ -25,7 +25,7 @@ export type Grant = z.infer<typeof Grant>
 export interface ProtocolOptions {
   /** Name shown in OpenAI consent. */
   appName: string
-  /** Maximum network request duration in milliseconds. */
+  /** Total deadline for each network request, including the full inference stream. */
   requestTimeoutMs: number
   /** Maximum complete browser attempt duration in milliseconds. */
   attemptTimeoutMs: number
@@ -42,8 +42,14 @@ export interface ProtocolOptions {
 export async function jsonRequest(url: string, options: RequestInit, timeoutMs: number): Promise<unknown> {
   const response = await fetch(url, { ...options, redirect: 'error',
     signal: options.signal ? AbortSignal.any([options.signal, AbortSignal.timeout(timeoutMs)]) : AbortSignal.timeout(timeoutMs) })
-  if (!response.ok) throw new LlmError(`ChatGPT request failed (HTTP ${response.status})`,
-    response.status === 401 || response.status === 403 ? 'AUTH' : response.status === 429 ? 'QUOTA' : 'SERVER')
+  if (!response.ok) {
+    const detail = await response.text()
+    const code = response.status === 401 || response.status === 403 ? 'AUTH'
+      : response.status === 429 ? detail.includes('subscription_sharing_usage_limit_exceeded') ? 'QUOTA' : 'RATE_LIMIT'
+        : 'SERVER'
+    const requestId = response.headers.get('x-request-id')
+    throw new LlmError(`ChatGPT request failed (${new URL(url).pathname}, HTTP ${response.status})${requestId ? ` [${requestId}]` : ''}: ${detail}`, code)
+  }
   return response.json()
 }
 
@@ -163,6 +169,8 @@ export function planPayload(raw: unknown): Record<string, unknown> {
     const entry = z.record(z.string(), z.unknown()).parse(item)
     return entry.role === 'system' ? { ...entry, role: 'developer' } : entry
   })
-  if (Array.isArray(value.tools) && value.tools.length) value.tools = [{ type: 'namespace', name: 'dsh', tools: value.tools }]
+  if (Array.isArray(value.tools) && value.tools.length) value.tools = [{
+    type: 'namespace', name: 'dsh', description: 'Tools available in this DSH session.', tools: value.tools,
+  }]
   return value
 }

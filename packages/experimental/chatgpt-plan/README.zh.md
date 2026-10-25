@@ -34,9 +34,13 @@ kind: "package-reference"
 | 字段 | 默认值 | 含义 |
 |---|---|---|
 | `appName` | `DeepSeek Harness` | 注册时显示的应用名称。 |
-| `requestTimeoutMs` | `120000` | 每次网络操作与推理请求的期限。 |
+| `requestTimeoutMs` | `600000` | 每次网络操作的总期限，包含完整的推理响应流。 |
 | `attemptTimeoutMs` | `600000` | 整个浏览器授权流程的期限。 |
 | `contextWindow` | `262144` | 上下文计量使用的后备容量，需按选用模型配置。 |
+
+模型发现查询账户目录。推理直接使用选定的模型 ID，不再查询目录，由 Responses 端点校验模型访问权限。目录限流可能阻止模型发现，但不会阻止对已选模型的请求。
+
+收到流式文字不代表请求完成。响应流必须在总期限前收到终止事件；否则适配器报告 TIMEOUT，保留部分输出，并提示调整 `requestTimeoutMs`。调用方取消仍报告 ABORTED，上游在终止事件前结束响应流仍报告 TRANSPORT。
 
 -----
 
@@ -48,7 +52,7 @@ kind: "package-reference"
 
 授权流程负责 PKCE、state、nonce 和临时回环监听器。OpenID Connect 校验签发者、签名、受众、有效期与账户身份后，通过现有授权服务提交授权记录。已签发的客户端 ID 和主机标识在退出后保留；access、refresh 和 ID token 不跨 Remote，也不进入 Session 事件。刷新使用凭据提供方的跨进程修改锁。
 
-适配器复用 pi-ai 的请求历史与流转换。SIWC 请求保留对话历史和系统指令，使用 `store: false` 与 `stream: true`，并把函数定义放入命名空间。订阅限额失败映射为不可重试的 QUOTA 错误，并附用量设置入口。携带凭据的 HTTP 请求拒绝重定向。
+适配器复用 pi-ai 的请求历史与流转换。SIWC 请求保留对话历史和系统指令，使用 `store: false` 与 `stream: true`，并把函数定义放入带有必填描述的命名空间。明确的订阅限额失败映射为 QUOTA；额度查询暂不可用映射为 SERVER，账户请求的其他 HTTP 429 响应映射为 RATE_LIMIT。账户请求失败保留端点路径、HTTP 状态、可用的请求 ID 和响应正文。账户仍有剩余额度时，本应用也可能触发单独限额；可在 ChatGPT 设置 → Usage 管理应用限额。携带凭据的 HTTP 请求拒绝重定向。
 
 本包不发布 `./invariant` 安装器：凭据记录是唯一账户权威，状态视图直接读取记录，框架负责注册，本包没有独立维护的索引可供比较。
 
@@ -69,10 +73,23 @@ kind: "package-reference"
 <a id="model-experience"></a>
 ## 模型体验
 
-本插件不添加工具或提示段。选定模型通过正常 LLM 服务接收已有的日志消息和工具 schema。传输改变计费授权方式，不改变对话历史的来源。凭据与账户标签不进入模型内容。
+### 命名空间工具定义
+
+#### 模型看到什么
+
+选定模型通过正常 LLM 服务接收已有的日志消息和工具 schema。有工具时，其定义放在 `dsh` 命名空间中，描述为 `Tools available in this DSH session.`；本插件不注册额外可调用工具或系统提示段。凭据与账户标签不进入模型内容。
+
+#### Token 影响
+
+有工具时，命名空间名称与描述增加请求 token。历史和单个工具 schema 的大小仍由各自产生者拥有；账户授权不添加对话内容。
+
+#### KV Cache 影响
+
+命名空间元数据在请求间重复。选定模型、保留历史或可用工具的变化可能改变可复用前缀；本插件不控制提供方缓存可用性。
+
+## 已知限制与延期工作
 
 <a id="known-limitations-and-deferred-work"></a>
-## 已知限制与延期工作
 
 当前集成为本地实验功能。
 
@@ -80,8 +97,9 @@ kind: "package-reference"
 - 输入仅支持文本，temperature、输出 token 上限、停止序列和显式推理控制均被拒绝。
 - 后备上下文容量按插件配置，尚未细分到各账户模型。
 - 真实提供方访问、订阅限制与可用模型取决于 OpenAI 和选定账户。
+- SIWC 使用 Codex / ChatGPT Work 用量，计划分类为 `work_codex_shared`，不是普通 ChatGPT 聊天额度；见 [OpenAI 说明](https://learn.chatgpt.com/docs/sign-in-with-chatgpt)。本插件未实现按意图的额度保护或 Usage Ledger。
 
 <a id="dev-note"></a>
-## 开发备注
+### 开发备注
 
 真实 UI 验收与录制状态见上述任务的 Checkpoint。

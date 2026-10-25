@@ -34,9 +34,13 @@ In Settings → Models, choose Continue with ChatGPT, then open the sign-in page
 | Field | Default | Meaning |
 |---|---|---|
 | `appName` | `DeepSeek Harness` | Application name displayed during registration. |
-| `requestTimeoutMs` | `120000` | Deadline for each network operation and inference request. |
+| `requestTimeoutMs` | `600000` | Total deadline for each network operation, including the complete inference stream. |
 | `attemptTimeoutMs` | `600000` | Complete browser-authorization deadline. |
 | `contextWindow` | `262144` | Fallback capacity used for context accounting; configure for the selected models. |
+
+Model discovery queries the account catalog. Inference uses the exact selected model ID without fetching that catalog again; the Responses endpoint validates model access. Catalog rate limits can block discovery but do not block requests to an already selected model.
+
+Streaming text does not complete a request. The stream must reach a terminal response event before its total deadline; otherwise the adapter reports TIMEOUT, preserves partial output, and identifies `requestTimeoutMs` as the setting to adjust. Caller cancellation remains ABORTED, and an upstream stream ending without a terminal event remains TRANSPORT.
 
 -----
 
@@ -48,7 +52,7 @@ In Settings → Models, choose Continue with ChatGPT, then open the sign-in page
 
 The authorization flow owns PKCE, state, nonce and the temporary loopback listener. OpenID Connect verification checks the issuer, signature, audience, expiry and account identity before committing the grant through the existing authorization service. The issued client ID and host identity survive sign-out; access, refresh and ID tokens never cross Remote or enter Session events. Refresh uses the credential provider’s cross-process mutation lock.
 
-The adapter reuses pi-ai request-history and stream conversion. The SIWC payload preserves conversation history and system instructions, uses `store: false` and `stream: true`, and groups function definitions in a namespace. Subscription-limit failures map to non-retryable QUOTA errors with the usage-settings destination. HTTP redirects are refused for credential-bearing requests.
+The adapter reuses pi-ai request-history and stream conversion. The SIWC payload preserves conversation history and system instructions, uses `store: false` and `stream: true`, and groups function definitions in a namespace with the required description. Explicit subscription-limit failures map to QUOTA; usage-check unavailability maps to SERVER, and other HTTP 429 responses from account requests map to RATE_LIMIT. Account-request failures retain the endpoint path, HTTP status, request ID when present, and response body. A subscription limit can apply to this app even when the account has remaining usage; manage app limits in ChatGPT settings → Usage. HTTP redirects are refused for credential-bearing requests.
 
 No `./invariant` installer is published: credential records are the sole account authority, state views read those records directly, and framework-owned registrations have no independent package-maintained index to compare.
 
@@ -69,10 +73,23 @@ No `./invariant` installer is published: credential records are the sole account
 <a id="model-experience"></a>
 ## Model Experience
 
-This plugin adds no tool or prompt section. The selected model receives existing logged messages and tool schemas through the normal LLM service. The transport changes billing authorization, not the source of conversation history. Credentials and account labels are excluded from model content.
+### Namespaced tool definitions
+
+#### What the model sees
+
+The selected model receives existing logged messages and tool schemas through the normal LLM service. When tools are present, their definitions are grouped under namespace `dsh` with description `Tools available in this DSH session.`; this plugin registers no additional callable tool or system-prompt section. Credentials and account labels are excluded from model content.
+
+#### Token effect
+
+The namespace name and description add request tokens whenever tools are present. History and individual tool-schema sizes remain owned by their producers; account authorization adds no conversation content.
+
+#### KV Cache effect
+
+Namespace metadata repeats across requests. Changes to the selected model, retained history or available tools can change the reusable prefix; provider-side cache availability is not controlled by this plugin.
+
+## Known Limitations and Deferred Work
 
 <a id="known-limitations-and-deferred-work"></a>
-## Known Limitations and Deferred Work
 
 The current integration is local and experimental.
 
@@ -80,8 +97,9 @@ The current integration is local and experimental.
 - Input is text-only. Temperature, output-token caps, stop sequences and explicit reasoning controls are refused.
 - A fallback context capacity is configured per plugin, rather than individually per account model.
 - Live provider access, subscription limits and supported models depend on OpenAI and the selected account.
+- SIWC uses Codex / ChatGPT Work usage, planned as `work_codex_shared`, not ordinary ChatGPT chat allowance; see [OpenAI's explanation](https://learn.chatgpt.com/docs/sign-in-with-chatgpt). Intent-aware quota protection and a Usage Ledger are not implemented by this plugin.
 
 <a id="dev-note"></a>
-## Dev Note
+### Dev Note
 
 Live UI acceptance and recording status belong in the linked task checkpoint.

@@ -4,7 +4,7 @@ task_id: dsh-siwc-ui
 title: "DSH UI 的 SIWC 登录与对话验证"
 status: IN_PROGRESS
 created_at: "2026-10-23T02:07:24+08:00"
-updated_at: "2026-10-24T22:37:00+08:00"
+updated_at: "2026-10-26T02:27:41+08:00"
 ---
 
 # Goal
@@ -32,4 +32,12 @@ Codex 为本 Workspace 唯一写入者；此前用户已确认 Codely 停止，�
 
 ## Current checkpoint
 
-实验插件及定向测试已实现，用户要求保存本地 Commit。用户已报告完成从 Models 页面发起的授权；DSH 账户状态、真实对话与重启复用尚未确认，任务保持 IN_PROGRESS。详细验证和恢复入口见 [Checkpoint](handoff.md)。
+2026-10-26（目录限流）：截图确认 `/v1/models` 429 `Rate limit exceeded`。移除每次推理元数据解析对目录的查询和成员校验，遵循 LlmAdapter 的目录仅用于发现原则；推理使用选定模型 ID，由 Responses 校验权限。目录 429 回归修复前失败、修复后通过。19 定向测试及类型、lint、配对、Host 构建通过；真实重启重试待验收。
+
+2026-10-26：用户报告有流式文字后缺少终止事件。只读 Session 核对发现前两轮成功，第三轮约 120.8 秒后以 ABORTED 结束，与默认整轮期限一致。默认 requestTimeoutMs 调整为 600000，期限触发明确报告 TIMEOUT。19 项定向测试通过，Host 插件已重建；真实长回复重试待验收。
+
+2026-10-26：用户报告 ChatGPT Usage 仍有额度但 DSH 提示用尽。本地两条 turn/end 记录仅保存 `ChatGPT request failed (HTTP 429)` / QUOTA，无法还原原始服务端错误。已修复账户 HTTP 429 与流内额度查询不可用的分类，保留请求诊断并完成 16 项定向测试；真实原因待重启重试确认。
+
+2026-10-25：用户报告真实请求被 `tools[0].description` 缺失拒绝。Codex 在本任务持续写入权下修复 SIWC 命名空间描述，补充实际 HTTP 请求回归断言并重建 Host 插件。用户的 `.codely-cli/settings.json`、`docs/.obsidian/workspace.json` 修改保留。真实重试验收仍待完成。
+
+实验插件已有本地检查点提交，后续修复未提交。本次审计的真实 Session 有三个 completed 轮次，前序 19 项定向测试通过；系统性真实长回复、Loader/Session 快照、重启复用、完整 UI/GIF 验收尚缺。本任务保持 IN_PROGRESS，对应合并计划 P1-05 Partial；CG1 的配额路由与 Ledger 尚未实现。详细证据和恢复入口见 [Checkpoint](handoff.md)。

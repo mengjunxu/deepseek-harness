@@ -215,10 +215,9 @@ class PlanAdapter extends LlmAdapter {
       provider: ROUTE, id: model.slug, name: model.display_name, inputModalities: ['text'] as const,
     }))
   }
-  override async resolveModel(provider: string, model: string): Promise<LlmResolvedModelInfo> {
-    const found = (await this.listModels()).find(entry => entry.id === model)
-    if (!found) throw new LlmError('This model is unavailable for the connected ChatGPT account', 'UNKNOWN_MODEL')
-    return { ...found, provider, context: { contextWindow: this.config.contextWindow } }
+  override resolveModel(provider: string, model: string): Promise<LlmResolvedModelInfo> {
+    return Promise.resolve({ provider, id: model, name: model, inputModalities: ['text'],
+      context: { contextWindow: this.config.contextWindow } })
   }
   override async *stream(options: GenerateOptions): AsyncIterable<StreamChunk> {
     if (options.stop !== undefined || options.temperature !== undefined || options.maxTokens !== undefined
@@ -233,16 +232,24 @@ class PlanAdapter extends LlmAdapter {
         maxTokens: this.config.contextWindow, cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
         compat: { supportsDeveloperRole: true, supportsMaxOutputTokens: false } }
       const context = toPiContext(options)
+      const timeout = AbortSignal.timeout(this.config.requestTimeoutMs)
+      const signal = AbortSignal.any([this.lifetime, consumer.signal, ...options.signal ? [options.signal] : [], timeout])
       const events = openAIResponsesApi().streamSimple(model, context, { apiKey, headers: attributionHeaders(),
-        signal: AbortSignal.any([this.lifetime, consumer.signal, ...options.signal ? [options.signal] : [],
-          AbortSignal.timeout(this.config.requestTimeoutMs)]),
+        signal,
         fetch: (input, init) => fetch(input, { ...init, redirect: 'error' }),
         onPayload: planPayload })
       for await (const chunk of toStreamChunks(events, model.contextWindow, options.signal, options.model)) {
-        if (chunk.type === 'finish' && chunk.reason.kind === 'error'
+        if (chunk.type === 'finish' && (chunk.reason.kind === 'error' || chunk.reason.kind === 'aborted')
+          && timeout.aborted && signal.reason === timeout.reason) {
+          yield { ...chunk, reason: { kind: 'error', failure: { code: 'TIMEOUT',
+            message: `ChatGPT response did not complete within ${this.config.requestTimeoutMs} ms. Increase requestTimeoutMs in the ChatGPT plan plugin configuration.`,
+          } } }
+        } else if (chunk.type === 'finish' && chunk.reason.kind === 'error'
         && /subscription_sharing_usage_(limit_exceeded|unavailable)/.test(chunk.reason.failure.message)) {
-          yield { ...chunk, reason: { kind: 'error', failure: { code: 'QUOTA',
-            message: 'ChatGPT usage limit reached. Manage usage at https://chatgpt.com/settings/usage' } } }
+          yield { ...chunk, reason: { kind: 'error', failure: {
+            code: chunk.reason.failure.message.includes('subscription_sharing_usage_unavailable') ? 'SERVER' : 'QUOTA',
+            message: chunk.reason.failure.message,
+          } } }
         } else yield chunk
       }
     } finally { consumer.abort() }
@@ -254,7 +261,7 @@ export const name = 'experimental-chatgpt-plan'
 export const inject = ['credentials', 'authorization', 'llm']
 /** Configurable deployment deadlines and undeclared model capacity. */
 export const Config = Schema.object({ appName: Schema.string().default('DeepSeek Harness'),
-  requestTimeoutMs: Schema.number().min(1).max(3_600_000).default(120_000),
+  requestTimeoutMs: Schema.number().min(1).max(3_600_000).default(600_000),
   attemptTimeoutMs: Schema.number().min(1).max(3_600_000).default(600_000),
   contextWindow: Schema.number().min(1).step(1).default(262_144) })
 /** Register account controls and the model adapter within this plugin's lifetime.

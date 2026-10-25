@@ -2,7 +2,7 @@
 
 [English](model-provider-matrix.md) | 中文
 
-DSH 实施计划所需的供应商能力记录：Mock 证据来自 2026-10-22，SIWC 真实证据来自 2026-10-23。它把本工作区通过自动化测试验证的内容，与需要真实供应商账户才能确认的内容分开，并记录 SIWC 的结论，而不是默认其可用。
+DSH 实施计划所需的供应商能力记录，经 2026-10-26 源码和证据审计更新。它区分历史 Mock/探测结果、实验 SIWC 集成和剩余真实账户验收。当前工作见 [SIWC 任务](../../../.ai/tasks/dsh-siwc-ui/handoff.md)与[计划审计](../../../.ai/tasks/dsh-chatgpt-plan-update/handoff.md)。
 
 ## 范围
 
@@ -15,6 +15,7 @@ DSH 计划要求两项独立结论：OpenAI API Key 路线，以及单独的 SIW
 | `deepseek` | `packages/llm/llm-deepseek` | Anthropic 兼容 Messages | DeepSeek API Key 或官方账户 |
 | `openai` | `packages/llm/llm-pi-ai` | `https://api.openai.com/v1` 上的 OpenAI Responses | 通过 pi-ai 环境发现的 `OPENAI_API_KEY` |
 | `openai-codex` | `packages/llm/llm-pi-ai` | `https://chatgpt.com/backend-api` 上的 Codex Responses | ChatGPT Plus/Pro OAuth |
+| `chatgpt-plan`（显式启用） | `packages/experimental/chatgpt-plan` | `https://api.openai.com/v1` 上的公共 Responses | SIWC 订阅权限；`work_codex_shared` 用量 |
 | `azure-openai-responses` | `packages/llm/llm-pi-ai` | Azure Responses | pi-ai 供应商登录 |
 | `anthropic` | `packages/llm/llm-pi-ai` | Anthropic Messages | API Key 或 OAuth |
 | 手写网关 | `packages/llm/llm-pi-ai` | `openai-completions` 或 `openai-responses` | `apiKeyEnv` 引用 |
@@ -99,20 +100,24 @@ corepack pnpm exec vitest run packages/llm/llm-pi-ai/tests/openai-route-matrix.s
 
 账户的 `GET https://api.openai.com/v1/models` 返回七个可见模型。合成请求使用 `gpt-6.1-sol`、`store: false` 和 `stream: true` 调用 `POST https://api.openai.com/v1/responses`，返回预期的 `SIWC_OK` 文本和 `response.completed`；用量为输入 13、输出 7 token。详见[脱敏证据](../../../.ai/tasks/dsh-p0-siwc/artifacts/siwc-result.json)、[探测源码](../../../.ai/tasks/dsh-p0-siwc/artifacts/siwc-probe.mjs)及[执行记录](../../../.ai/tasks/dsh-p0-siwc/plan.md)。这些结果确认账户可行性，不代表已交付 DSH Provider 集成。
 
-集成必须遵循 [SIWC 请求限制](https://developers.openai.com/siwc/token-sharing-open-source/preview-limitations)，并处理[订阅权限和用量失败](https://developers.openai.com/siwc/token-sharing-open-source/errors-and-recovery)。探测未挂载 Provider，未验证 token 刷新、撤销、订阅额度耗尽或 DSH Session 回放。现有 pi-ai `openai-codex` 传输使用 ChatGPT 后端端点，与本次公共 Responses 路线分开。
+实验 `chatgpt-plan` Provider 与 Models 设置扩展已实现，需要显式启用。源码包括 OAuth/OIDC、凭据、账户模型、刷新/撤销，以及 pi-ai 请求/流转换。留存的本地 Session 证据包含三个成功完成的对话轮次。前序修复运行已通过 19 个定向测试、包 Host/Client 类型检查、局部 lint 和 Host 插件构建；本次文档审计不重新运行这些产品测试。命令与限制见[执行记录](../../../.ai/tasks/dsh-siwc-ui/plan.md)。
+
+集成遵循 [SIWC 请求限制](https://developers.openai.com/siwc/token-sharing-open-source/preview-limitations)与[错误处理说明](https://developers.openai.com/siwc/token-sharing-open-source/errors-and-recovery)。本地修复补齐工具命名空间必填描述、保留限流诊断、区分额度查询不可用与额度耗尽、将流的总期限延长至 600000 ms 并报告 TIMEOUT，以及取消每次推理前的目录查询。这些修复仍未提交，真实重试待完成；Loader 组合、Session 录制快照、GIF 和完整网络生命周期/重启验收尚缺。独立探测不能替代这些验收。pi-ai `openai-codex` 传输仍是单独的模型路线，不是 Codex external-agent 适配器。
+
+根据 [OpenAI 订阅用量文档](https://learn.chatgpt.com/docs/sign-in-with-chatgpt)，SIWC 请求使用 Codex / ChatGPT Work 用量，合并计划分类为 `work_codex_shared`；它不使用普通 ChatGPT 聊天额度，也不获得原生对话/Memory。账户与应用限额可能不同。该分类已写入文档，但 UsageSource 元数据、按意图路由、额度保护、付费回退同意和 Usage Ledger 都是 QR-01..06 的目标功能，尚非已实施保证。DSH 自有 UI 没有已确认的普通聊天 Provider；可选 ChatGPT → DSH MCP 是另一种入口方向。
 
 对 V0 的结论：
 
-- 本账户的 SIWC 路线可行；产品集成和生命周期覆盖仍属于 P1 工作。
+- SIWC 已有实验产品集成与本地成功轮次；完整产品/生命周期验收仍属于 P1-05。
 - API Key 路线仍需独立的真实账户证据；SIWC 成功不免除该要求。
-- 选定账户路线不可用时，DeepSeek 和 Mock 仍是退路。
+- DeepSeek 和 Mock 仍是可配置替代；自动切换模型或费用来源需要规划中的明确政策与同意。
 
 ## 已知限制
 
 - 真实 API Key 权限与计费，以及 SIWC 订阅额度限制行为仍未验证。
-- 验证覆盖文本流式与 HTTP 失败路径，不覆盖图像输入、针对 OpenAI 的工具调用往返或 Responses 推理条目。
+- 证据包含文本流式与本地工具活动；真实工具调用、图像、推理和生命周期覆盖尚不构成完整的 Provider 能力矩阵。
 - 供应商模型标识与账户资格在本仓库之外变化；本矩阵记录路线机制，不是冻结的模型列表。
 
 ## 下一任务依赖
 
-P0-03 为 P1-05 提供聊天供应商结论。SIWC 真实可行性已通过；P0-03 仍因独立的真实 API Key 验证保持 BLOCKED。SIWC 产品集成还需通过现有 DSH 服务完成授权、凭据生命周期、请求兼容和错误处理。
+P0-03 仍因独立的真实 API Key 验证保持 BLOCKED。P1-05 对显式启用的 SIWC 集成为 Partial。合并计划在用户批准后优先进入 CG1 额度感知路由，同时保留剩余 P0 探测与 P1-05 产品验收的独立证据要求。

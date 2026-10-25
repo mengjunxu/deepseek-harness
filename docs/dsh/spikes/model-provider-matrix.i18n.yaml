@@ -3,14 +3,14 @@
 # After editing either side, bring the other along and re-record with:
 #   pnpm run verify-translation-pairing --write docs/dsh/spikes/model-provider-matrix.md
 /dsh-model-provider-matrix:
-  en: 294072467e24fae0
-  zh: 4146bf9be924510f
+  en: 5e574bd6f0bf5036
+  zh: 550b502469f73630
 /dsh-model-provider-matrix/scope:
   en: 886c2c8ee40c6bb8
   zh: c6a2375a39b418fe
 /dsh-model-provider-matrix/routes-present-in-this-checkout:
-  en: 84a0767cfdada0bb
-  zh: 1acbbe44f1aac401
+  en: 8e647dfd3be3b896
+  zh: fe59906698b5fea1
 /dsh-model-provider-matrix/openai-api-key-route:
   en: 3737ed0be02e8603
   zh: e85676be91768230
@@ -21,11 +21,11 @@
   en: 4f96686aa1b74065
   zh: 15d06f2d0080c00b
 /dsh-model-provider-matrix/siwc-status:
-  en: 6c2cf71b77445f8f
-  zh: 48398c7f295ee578
+  en: 6b933aa39968d3cf
+  zh: 3278e083e9017b2e
 /dsh-model-provider-matrix/known-limits:
-  en: b2df34377b92d604
-  zh: d4fc47a6a7123822
+  en: 90ac2b1a21380be5
+  zh: 37d5f2f1147a1b00
 /dsh-model-provider-matrix/next-task-dependency:
-  en: 209f727b192bbd95
-  zh: 9d138f5a2960b562
+  en: a37e0a94dc58456a
+  zh: eafd7e7fee235542

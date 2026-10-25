@@ -2,7 +2,7 @@
 
 English | [中文](repository-baseline.zh.md)
 
-Baseline record for the DSH implementation plan, taken on 2026-10-22 from the `codely_bridge` branch of `deepseek-harness` at commit `ad79fcfb4f`. Every command below was executed in this checkout; results are the observed output, not estimates.
+Historical baseline record for the DSH implementation plan, taken on 2026-10-22 from the `codely_bridge` branch. Commands and machine versions below describe that earlier observation, not current acceptance; an allowed fixed code-version record is unavailable. The [current plan audit](../../../.ai/tasks/dsh-chatgpt-plan-update/handoff.md) supersedes this record for current capability mapping, including experimental SIWC and reusable MGSD task state.
 
 ## Scope
 
