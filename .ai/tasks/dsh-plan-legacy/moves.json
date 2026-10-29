@@ -1,0 +1,182 @@
+[
+  {
+    "from": "docs/Generic_Agent_Harness_Architecture_Execute_Plan_v4.md",
+    "to": "docs/legacy/Generic_Agent_Harness_Architecture_Execute_Plan_v4.md",
+    "original_sha256": "f1566de4de4e8409dc2f3812669ebe4b49d80ba37fccb5fc914647fa27672efe",
+    "archived_sha256": "f1566de4de4e8409dc2f3812669ebe4b49d80ba37fccb5fc914647fa27672efe"
+  },
+  {
+    "from": "docs/Generic_Agent_Harness_v5_ACP_Architecture_Execute_Plan.md",
+    "to": "docs/legacy/Generic_Agent_Harness_v5_ACP_Architecture_Execute_Plan.md",
+    "original_sha256": "8d0d3ac445d2c472c514a08e472cf1affeaa65f231ac818440c0d99181efc450",
+    "archived_sha256": "8d0d3ac445d2c472c514a08e472cf1affeaa65f231ac818440c0d99181efc450"
+  },
+  {
+    "from": "docs/Generic_Agent_Harness_v5_1_CN_Technical_Design_and_Codex_Implementation_Plan.md",
+    "to": "docs/legacy/Generic_Agent_Harness_v5_1_CN_Technical_Design_and_Codex_Implementation_Plan.md",
+    "original_sha256": "7f71d7a72ef934423136f905d786e367191a6b11c1db68c24710e13c38942ae7",
+    "archived_sha256": "7f71d7a72ef934423136f905d786e367191a6b11c1db68c24710e13c38942ae7"
+  },
+  {
+    "from": "docs/MGSD_Distributed_Agent_Harness_Architecture_and_Execution_Plan.md",
+    "to": "docs/legacy/MGSD_Distributed_Agent_Harness_Architecture_and_Execution_Plan.md",
+    "original_sha256": "e5613a74040dbdd7f24a6866aab2a84c765277e035864b8ac92a190ef5a90f10",
+    "archived_sha256": "30accfa580b4fcabc9a8fa17e4fa4c9b80bb0ee0cecd2a4a40c062cdd8949deb"
+  },
+  {
+    "from": "docs/MGSD_Distributed_Agent_Harness_Architecture_and_Execution_Plan_v2.md",
+    "to": "docs/legacy/MGSD_Distributed_Agent_Harness_Architecture_and_Execution_Plan_v2.md",
+    "original_sha256": "1a3006bf07db838ebe983ab3ab52d34c3108ec4b923eecec66fa7823f6e136d1",
+    "archived_sha256": "43612ae6728ff113fd5b4e5d4f402f2303012391b7cbce561868e6fe2df19550"
+  },
+  {
+    "from": "docs/workflows/DSH：Codex 与 Codely 无缝切换工作流（V0–V2）.md",
+    "to": "docs/legacy/workflows/DSH：Codex 与 Codely 无缝切换工作流（V0–V2）.md",
+    "original_sha256": "f5012735fc3291721a58e8aa9198396331f880721f22a6de8a5b5e9537e6c9e3",
+    "archived_sha256": "f5012735fc3291721a58e8aa9198396331f880721f22a6de8a5b5e9537e6c9e3"
+  },
+  {
+    "from": "docs/workflows/DSH_CHECKLIST.md",
+    "to": "docs/legacy/workflows/DSH_CHECKLIST.md",
+    "original_sha256": "10e56fd644c8fc6643dad895dfc091d0b07169c87492fa8389b2f02580e0b373",
+    "archived_sha256": "7530e6beb6f3361a770d97ae4b765192906f8fc2cd904b9c845e9b9cf6f9cb67"
+  },
+  {
+    "from": "docs/myPlan/DSH_Implementation_Plan_vNext_4_2026-10-27.md",
+    "to": "docs/legacy/myPlan/DSH_Implementation_Plan_vNext_4_2026-10-27.md",
+    "original_sha256": "d91b107aff8e1a73672e44d2dece91c60f2a57f6a827cef2741b7c2105412ff8",
+    "archived_sha256": "f19b9d4adedfdb592aada119307e08a80c37bbb82a0f5a8597810f7d86f312ce"
+  },
+  {
+    "from": "docs/myPlan/AGENTS.md",
+    "to": "docs/legacy/myPlan/AGENTS.original.md",
+    "original_sha256": "d91b107aff8e1a73672e44d2dece91c60f2a57f6a827cef2741b7c2105412ff8",
+    "archived_sha256": "f19b9d4adedfdb592aada119307e08a80c37bbb82a0f5a8597810f7d86f312ce"
+  },
+  {
+    "from": "docs/MGSD_Implementation_Checklist.md",
+    "to": "docs/legacy/MGSD_Implementation_Checklist.md",
+    "original_sha256": "658984950e8db09a63ac898599df8b2ac98e23bd743bd04fb2d9157e64668eb5",
+    "archived_sha256": "7536aab00c24d03231ea59d46ff651601179758e0a70de828fd4ff46fdcbd52f"
+  },
+  {
+    "from": "docs/MGSD_Implementation_Checklist.zh.md",
+    "to": "docs/legacy/MGSD_Implementation_Checklist.zh.md",
+    "original_sha256": "ca5e50e46ce1aa2eb557154cd9ccbd31c4b8b09ce99ae2b0e0defe7eb52e8e42",
+    "archived_sha256": "2f10715dde27d12c401ef7899045240f9e47aeec00bacb5ee7c855c6022208e6"
+  },
+  {
+    "from": "docs/MGSD_Implementation_Checklist.i18n.yaml",
+    "to": "docs/legacy/MGSD_Implementation_Checklist.i18n.yaml",
+    "original_sha256": "a6ea839d7b0e7f6ee62c1f4547c34d30630797aec9d94e67f09b6ad4143ce898",
+    "archived_sha256": "f134f14867912422c9214f590e2f17d1a37667264ba499f18d6857386bff83cd"
+  },
+  {
+    "from": "docs/MGSD_L1_Local_DSH_Implementation_Summary.md",
+    "to": "docs/legacy/MGSD_L1_Local_DSH_Implementation_Summary.md",
+    "original_sha256": "5915e9f5210f84c38af6539e3a4b6c77002755d76f7a235994d9a66269e9aa8e",
+    "archived_sha256": "cbf7b3c9dd782ed5ceeeea49efc413a45a815d44488366074c5b2fb71499b6b4"
+  },
+  {
+    "from": "docs/MGSD_L1_Local_DSH_Implementation_Summary.zh.md",
+    "to": "docs/legacy/MGSD_L1_Local_DSH_Implementation_Summary.zh.md",
+    "original_sha256": "bbe07116a5c7a5bff424fad036841a382e33bfe9b52baa292b854b4a59b6afda",
+    "archived_sha256": "b0f6bd99c1f57282542f593a5f5d8d3a316832234da50fe1b8f357d8db7ab133"
+  },
+  {
+    "from": "docs/MGSD_L1_Local_DSH_Implementation_Summary.i18n.yaml",
+    "to": "docs/legacy/MGSD_L1_Local_DSH_Implementation_Summary.i18n.yaml",
+    "original_sha256": "b451d721ceed6fe2dfbbd66201fda47649403ce793663d7edc32eb19ce1cddb5",
+    "archived_sha256": "434185a6bd3d169d04ce7523057db1c500e841f828c85e20faadcac942603132"
+  },
+  {
+    "from": "docs/MGSD_L2_Local_DSH_Implementation_Summary.md",
+    "to": "docs/legacy/MGSD_L2_Local_DSH_Implementation_Summary.md",
+    "original_sha256": "f2f024aa3cfd72922508c21372b51d44e02ebaf8c7e621abd56a491d1427d363",
+    "archived_sha256": "39d55c59f362454dcdfee8ccd5cb09161625d717e7805da786ca380caaae58d8"
+  },
+  {
+    "from": "docs/MGSD_L2_Local_DSH_Implementation_Summary.zh.md",
+    "to": "docs/legacy/MGSD_L2_Local_DSH_Implementation_Summary.zh.md",
+    "original_sha256": "60bbae67ba9c20ae1536b581c676341fc73e750b6985bdeb1d8df2c9eed3d35f",
+    "archived_sha256": "a3f4eb165fb11a07cb8e9ada34ad698f7656f2a9ffc37e14fd9bf5be8a081f24"
+  },
+  {
+    "from": "docs/MGSD_L2_Local_DSH_Implementation_Summary.i18n.yaml",
+    "to": "docs/legacy/MGSD_L2_Local_DSH_Implementation_Summary.i18n.yaml",
+    "original_sha256": "c8ae2e059ff7e0c201426123986c3209ce3030c76978c2e35b972c41164750b3",
+    "archived_sha256": "224d6bad51405b551cdbf3f376c140a17523628ef749d9b814202af64ef0a7ea"
+  },
+  {
+    "from": "docs/dsh/spikes/CGW_REFERENCE_LOCK.i18n.yaml",
+    "to": "docs/legacy/dsh/spikes/CGW_REFERENCE_LOCK.i18n.yaml",
+    "original_sha256": "eaeefdc944633d6807db504a815894e9b3e493ac5e9a78842a7b47481858dd13",
+    "archived_sha256": "5b122503cdffbed6004d3d4c88603ab00a7ce87d1d08fee4623734434bda2740"
+  },
+  {
+    "from": "docs/dsh/spikes/CGW_REFERENCE_LOCK.md",
+    "to": "docs/legacy/dsh/spikes/CGW_REFERENCE_LOCK.md",
+    "original_sha256": "570303ee58aae4747f1a19e5260f13690411c3518aa6af9014614103c090c228",
+    "archived_sha256": "570303ee58aae4747f1a19e5260f13690411c3518aa6af9014614103c090c228"
+  },
+  {
+    "from": "docs/dsh/spikes/CGW_REFERENCE_LOCK.zh.md",
+    "to": "docs/legacy/dsh/spikes/CGW_REFERENCE_LOCK.zh.md",
+    "original_sha256": "b9c8862a7a233515a799e022b4ee60bca5a11d696b4ada8793014294997e81ca",
+    "archived_sha256": "b9c8862a7a233515a799e022b4ee60bca5a11d696b4ada8793014294997e81ca"
+  },
+  {
+    "from": "docs/dsh/spikes/DSH_VNEXT4_GAP_ANALYSIS.i18n.yaml",
+    "to": "docs/legacy/dsh/spikes/DSH_VNEXT4_GAP_ANALYSIS.i18n.yaml",
+    "original_sha256": "a9b139ba6896dbd72d967bc7d4568d042b89ce6657ab49a71a66cba1465a1181",
+    "archived_sha256": "56b6eef61f881d028291e885bb8919a81eccb7e3c834578ef5ba1cce2b3d57a7"
+  },
+  {
+    "from": "docs/dsh/spikes/DSH_VNEXT4_GAP_ANALYSIS.md",
+    "to": "docs/legacy/dsh/spikes/DSH_VNEXT4_GAP_ANALYSIS.md",
+    "original_sha256": "30fd0bf875c1fcc35d858ec797e24b89b77ad1b134c804df21f4511b0849ef64",
+    "archived_sha256": "c0ceaf115d8a4866267532308306e34e2562f1eb8a81e9b15b0db4093cdc2047"
+  },
+  {
+    "from": "docs/dsh/spikes/DSH_VNEXT4_GAP_ANALYSIS.zh.md",
+    "to": "docs/legacy/dsh/spikes/DSH_VNEXT4_GAP_ANALYSIS.zh.md",
+    "original_sha256": "d45f895ca7ad0ec31191130bcccfb2958390aaceb025be96ff690d06c4bf59cc",
+    "archived_sha256": "24e76c60fac4e38c20bf488fac706d8492f5b4a5ee3b73d30b85143bf7b8f4b5"
+  },
+  {
+    "from": "docs/dsh/spikes/model-provider-matrix.i18n.yaml",
+    "to": "docs/legacy/dsh/spikes/model-provider-matrix.i18n.yaml",
+    "original_sha256": "9068ea8b51ed409c94a795899cd51c144ecaf8a8688a4f6b811bfc10d27ac45e",
+    "archived_sha256": "c8c0ca7a10e8f38c6ca06793872529557f174e356a554dab31fbe0e577a9fc3e"
+  },
+  {
+    "from": "docs/dsh/spikes/model-provider-matrix.md",
+    "to": "docs/legacy/dsh/spikes/model-provider-matrix.md",
+    "original_sha256": "7513d147469c57bd96d36fa76ece4ff551d83274382791eaafbc9d2b688b2b87",
+    "archived_sha256": "e6d2c9694c32bc12e86b3bfbde0c322cdefec2bdd1ffda335d46acf83d0496ae"
+  },
+  {
+    "from": "docs/dsh/spikes/model-provider-matrix.zh.md",
+    "to": "docs/legacy/dsh/spikes/model-provider-matrix.zh.md",
+    "original_sha256": "3d4efeda0d7114d4e1b80e7609d58bd8de3cdb014953f397248fc5308c23ce3c",
+    "archived_sha256": "5c13434901a53f2cad75ea94da88fe7f80dedf2558a49df0d1c231aeeeb38f6c"
+  },
+  {
+    "from": "docs/dsh/spikes/repository-baseline.i18n.yaml",
+    "to": "docs/legacy/dsh/spikes/repository-baseline.i18n.yaml",
+    "original_sha256": "950c4df224d71377a50c33d28359979cc512f313b754b8163df9839f10eef45d",
+    "archived_sha256": "5da21030b67994deabdd3e26a8d0791be48149f325140e5a28d8cc0a49ce673b"
+  },
+  {
+    "from": "docs/dsh/spikes/repository-baseline.md",
+    "to": "docs/legacy/dsh/spikes/repository-baseline.md",
+    "original_sha256": "49bccfae9c5d5f525c227225c895d348c4923a9e560ba5e3e32e116ed785deb9",
+    "archived_sha256": "dc03736d2fbd69492fafbbfc7a14f2308e640105aeda3d64f47fb190c3c88cac"
+  },
+  {
+    "from": "docs/dsh/spikes/repository-baseline.zh.md",
+    "to": "docs/legacy/dsh/spikes/repository-baseline.zh.md",
+    "original_sha256": "da5bf121ef6a1428adf84c1927bb4531e973458b00277adc46d3224e6689b9d2",
+    "archived_sha256": "d9b2e3fa514603f7e19fd1373e38b66660586ba5172f3c9ade340a8247e37fea"
+  }
+]

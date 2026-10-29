@@ -54,7 +54,7 @@ SQLite 存储不可变请求与仅追加事实。事务在追加事实前验证�
 
 - [本地 MGSD 操作](../../../docs/user/guide/mgsd-local.zh.md) — 配置与人工命令。
 - [Codely 进程适配器](../../../docs/user/guide/codely-local.zh.md) — 可执行程序选择与独立检查。
-- [实现清单](../../../docs/MGSD_Implementation_Checklist.zh.md) — 本地里程碑依赖。
+- [实现清单](../../../docs/legacy/MGSD_Implementation_Checklist.zh.md) — 历史本地里程碑依赖。
 
 -----
 

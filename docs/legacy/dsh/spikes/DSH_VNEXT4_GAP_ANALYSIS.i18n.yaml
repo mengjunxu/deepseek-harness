@@ -1,0 +1,22 @@
+# Bilingual-pair consistency record for DSH_VNEXT4_GAP_ANALYSIS.md (docs/i18n/README.md): per heading
+# section, a hash of its English and Chinese blocks outside code blocks and generated regions.
+# After editing either side, bring the other along and re-record with:
+#   pnpm run verify-translation-pairing --write docs/legacy/dsh/spikes/DSH_VNEXT4_GAP_ANALYSIS.md
+/vnext-4-source-audit:
+  en: ea6c9a6b033bd4f4
+  zh: c7002ff0d89bfcaa
+/vnext-4-source-audit/scope-and-evidence:
+  en: 0f93640c702b3785
+  zh: 29fd9ff31421033d
+/vnext-4-source-audit/capability-matrix:
+  en: 7e23af6c7fe6c219
+  zh: d28f4bf150bd49e9
+/vnext-4-source-audit/historical-comparison:
+  en: 777ff7c7f87d06fa
+  zh: 25c3a78ca38579ce
+/vnext-4-source-audit/decisions-and-next-work:
+  en: 0c3f98a1ddd046d7
+  zh: 44f03060fa1d8d05
+/vnext-4-source-audit/v5-1-comparison:
+  en: 93f1cfe5000f820b
+  zh: f117f3ff6231d695

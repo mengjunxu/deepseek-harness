@@ -1,0 +1,49 @@
+{
+  "audited_at": "2026-10-28",
+  "branch": "codely_bridge",
+  "fixed_repository_ref": null,
+  "source_sha256": {
+    "packages/experimental/chatgpt-plan/src/index.ts": "44cf835fe066ed67e40d70a8b71be6fa2aed8e4fc374b0477c11c0a271598c6d",
+    "packages/experimental/chatgpt-plan/src/protocol.ts": "8e7b662e9934c3e3de10483842c7561a5227adfc2d0b1fc90e6df614040da122",
+    "packages/experimental/chatgpt-plan/tests/provider.spec.ts": "9879cb6e7f7979963e96b8e70b2cee28268d8e08524266721e0ac5a7f68f1c9e",
+    "packages/experimental/chatgpt-plan/tests/protocol.spec.ts": "8d42aac98a0d99872469b371798479b7cd7fed328463dcecc770301c8f64cb48",
+    "packages/experimental/mgsd-workflow/src/core.ts": "82dbfecd50f0db4aef46e3da6b1c6455d9284934298f33ad729bfdd73240149c",
+    "packages/experimental/mgsd-workflow/src/types.ts": "8f401ee42b2c4ff09cd701f068bf11672d0e635ef0380604475ce9548990a96f",
+    "packages/experimental/mgsd-workflow/tests/workflow.spec.ts": "6af121e6194ccd7a33f7cad834d788ccbe2a202116dfce25ec03d3943c666cc6",
+    "packages/subagent/subagent-codex/src/index.ts": "3adc9ab888a503e7063fdda990596901ac05abe3759f95b1f52f72307824f957",
+    "packages/subagent/subagent-codex/src/run.ts": "fd5c8bf5b1ca5db72199417c418c5002eca28ecef9911fa459e5f974a6036e4a",
+    "packages/subagent/subagent-codex/src/wire.ts": "317637b5ea9b42a9785240d28da9218d1fd40dfcce449c7dccb78e5c7f9be8d3",
+    "packages/client/ui-model-selection/src/client/catalog.ts": "751568938f6918a8e7734b44ab003bdf53e9390d7264dab6501fb582558a955d",
+    "packages/client/ui-model-selection/src/client/service.ts": "488f7634405fe666728ab9687d7bfe57b3d96e2309aebe5fb838e279718472f5",
+    "packages/credentials/credentials-local/src/index.ts": "4a130300330802a0dd0e8bc67a4f5199c0966ea916ef1ed9fc87954c13998793",
+    "apps/cli/config/examples/codely-local/run.mjs": "decda12d9a6e20492489d03471b28e2d8c0eeabb82bc553b111008cf8cfb252b",
+    "packages/core/session/src/index.ts": "711d4d071bdce9afb4ab2abcf36b5dfc79e4a956b3236aa880c8c019d73ab9e6",
+    "packages/workflow/workflow/src/index.ts": "0f1f90b03be0061955df9c0820442663f59ce6dcc92d752d337368ada89e13bd"
+  },
+  "input_sha256": {
+    "docs/myPlan/DSH_PRD_vNext_4_2026-10-27.md": "7cbc6134f2449f196c93d4dd7f3ff78be1c99dabeee5e300df8525510d34f4f8",
+    "docs/myPlan/DSH_Implementation_Plan_vNext_4_2026-10-27.md": "d91b107aff8e1a73672e44d2dece91c60f2a57f6a827cef2741b7c2105412ff8",
+    "docs/myPlan/AGENTS.md": "d91b107aff8e1a73672e44d2dece91c60f2a57f6a827cef2741b7c2105412ff8",
+    "docs/Generic_Agent_Harness_v5_1_CN_Technical_Design_and_Codex_Implementation_Plan.md": "7f71d7a72ef934423136f905d786e367191a6b11c1db68c24710e13c38942ae7"
+  },
+  "tests": {
+    "command": "pnpm exec vitest run packages/experimental/chatgpt-plan/tests/protocol.spec.ts packages/experimental/chatgpt-plan/tests/provider.spec.ts packages/experimental/mgsd-workflow/tests/workflow.spec.ts --reporter=dot",
+    "result": "PASS",
+    "files": 3,
+    "tests": 61,
+    "verification": "Re-run in this turn: 3 files, 61 tests passed."
+  },
+  "limitations": [
+    "No real account, browser automation, executor smoke, UI/GIF, migration or full product test run.",
+    "Original vNext.1/vNext.2/vNext.3 documents absent from current tracked/untracked file discovery."
+  ],
+  "ownership": "User confirmed previous agent stopped; Codex resumed as sole writer on 2026-10-28.",
+  "validation": {
+    "focused_pairing": "PASS: 3 named pairs",
+    "lint": "PASS",
+    "diff_check": "PASS",
+    "test_docs": "FAIL: 18 passed, 2 failed (pairing, wrap)",
+    "doc_sync": "FAIL: 34 passed, 8 failed; see handoff.md",
+    "node": "22.18.0 (below declared minimum)"
+  }
+}

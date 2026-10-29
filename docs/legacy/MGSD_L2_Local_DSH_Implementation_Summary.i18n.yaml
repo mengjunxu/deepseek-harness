@@ -1,0 +1,49 @@
+# Bilingual-pair consistency record for MGSD_L2_Local_DSH_Implementation_Summary.md (docs/i18n/README.md): per heading
+# section, a hash of its English and Chinese blocks outside code blocks and generated regions.
+# After editing either side, bring the other along and re-record with:
+#   pnpm run verify-translation-pairing --write docs/legacy/MGSD_L2_Local_DSH_Implementation_Summary.md
+/:
+  en: a16a4ae920a16589
+  zh: 519a0cf8cdf21800
+/mgsd-l2-local-task-workflow-implementation-summary:
+  en: 179afe1ed8dd275b
+  zh: adf546d12a1612b2
+/mgsd-l2-local-task-workflow-implementation-summary/summary:
+  en: 55eb7b8e593d43bf
+  zh: 7209f0673ec7fc06
+/mgsd-l2-local-task-workflow-implementation-summary/table-of-contents:
+  en: 2bfb2d06fef00d8f
+  zh: c4b47b266fe6cfc5
+/mgsd-l2-local-task-workflow-implementation-summary/delivered-scope:
+  en: 400c025b568199fa
+  zh: b6dccaecacab9d45
+/mgsd-l2-local-task-workflow-implementation-summary/execution-responsibilities:
+  en: 3468a6a6973e1a14
+  zh: 1120b3682f40530b
+/mgsd-l2-local-task-workflow-implementation-summary/implementation-design:
+  en: c2009fd6fc4acb9a
+  zh: b06e180e26524984
+/mgsd-l2-local-task-workflow-implementation-summary/implementation-design/independent-core-and-durable-facts:
+  en: 239ffe8591e55a5d
+  zh: 958c40b09c3bc4d6
+/mgsd-l2-local-task-workflow-implementation-summary/implementation-design/approval-and-risk:
+  en: 8cdaaf841d3d1eed
+  zh: f04da35972c971bc
+/mgsd-l2-local-task-workflow-implementation-summary/implementation-design/execution-facts-and-settlement:
+  en: b1c2f5c713f9c539
+  zh: 1009c933829804f7
+/mgsd-l2-local-task-workflow-implementation-summary/implementation-design/budgets-cancellation-and-restart:
+  en: 089bccd0392c9a1e
+  zh: 8cb2b8612d6f38cf
+/mgsd-l2-local-task-workflow-implementation-summary/acceptance:
+  en: a379029b1ef0c284
+  zh: 40f52be712de6bc5
+/mgsd-l2-local-task-workflow-implementation-summary/source-map:
+  en: 4f6e9633363c796f
+  zh: 71f662b1295ec6dc
+/mgsd-l2-local-task-workflow-implementation-summary/limits-and-l3-handoff:
+  en: a241b91f02ab3833
+  zh: b062af9b1cf20113
+/mgsd-l2-local-task-workflow-implementation-summary/dev-note:
+  en: 65a468529a9e3e5e
+  zh: ba81616e03508f19

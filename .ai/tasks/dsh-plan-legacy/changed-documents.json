@@ -1,0 +1,23 @@
+[
+  "docs/workflows/DSH_IMPLEMENTATION_PLAN.md",
+  ".ai/MEMORY.md",
+  ".ai/ARCHITECTURE.md",
+  "docs/legacy/MGSD_L1_Local_DSH_Implementation_Summary.zh.md",
+  "docs/legacy/MGSD_Distributed_Agent_Harness_Architecture_and_Execution_Plan.md",
+  "docs/legacy/MGSD_L2_Local_DSH_Implementation_Summary.zh.md",
+  "docs/legacy/MGSD_L1_Local_DSH_Implementation_Summary.md",
+  "docs/legacy/MGSD_L2_Local_DSH_Implementation_Summary.md",
+  "docs/legacy/dsh/spikes/model-provider-matrix.md",
+  "docs/legacy/dsh/spikes/repository-baseline.md",
+  "docs/legacy/dsh/spikes/repository-baseline.zh.md",
+  "docs/legacy/dsh/spikes/DSH_VNEXT4_GAP_ANALYSIS.zh.md",
+  "docs/legacy/dsh/spikes/model-provider-matrix.zh.md",
+  "docs/legacy/dsh/spikes/DSH_VNEXT4_GAP_ANALYSIS.md",
+  "docs/legacy/MGSD_Distributed_Agent_Harness_Architecture_and_Execution_Plan_v2.md",
+  "docs/legacy/workflows/DSH_CHECKLIST.md",
+  "docs/legacy/MGSD_Implementation_Checklist.md",
+  "docs/legacy/MGSD_Implementation_Checklist.zh.md",
+  "CODELY.md",
+  "packages/experimental/mgsd-workflow/README.md",
+  "packages/experimental/mgsd-workflow/README.zh.md"
+]

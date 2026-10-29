@@ -10,8 +10,9 @@
 
 ## Product planning lookup
 
-- [DSH implementation plan](../docs/workflows/DSH_IMPLEMENTATION_PLAN.md) section 10 owns the ChatGPT integration target, CG0–CG5 / V0–V2 mapping, source reuse matrix and Decision Log. Provider Router, Quota Policy, Usage Ledger and inbound Task MCP are planned additions, not shipped architecture facts.
-- [Provider matrix](../docs/dsh/spikes/model-provider-matrix.md) distinguishes model routes, the experimental SIWC integration and external-agent execution; source and task evidence determine completion.
+- [DSH implementation plan](../docs/workflows/DSH_IMPLEMENTATION_PLAN.md) sections 10–12 own the ChatGPT integration target, CG0–CG5 / V0–V2 and vNext.4 P1–P7 mapping, source reuse matrix and Decision Log. Provider Router, Quota Policy, Usage Ledger and inbound Task MCP are planned additions, not shipped architecture facts.
+- [vNext.4 audit](../docs/legacy/dsh/spikes/DSH_VNEXT4_GAP_ANALYSIS.zh.md) records source evidence and the v5.1 comparison; the [proposed ADR](../.agents/notes/proposed/architecture/2026-10-28-independent-chat-provider-executor.zh.md) covers independent Provider/Executor selection and optional planning/review. These are product targets, not shipped architecture.
+- [Provider matrix](../docs/legacy/dsh/spikes/model-provider-matrix.md) distinguishes model routes, the experimental SIWC integration and external-agent execution; source and task evidence determine completion.
 - Keep Session/Task state in its existing owner; Git/GitHub synchronizes code and shared instructions. Proposed interface names do not authorize parallel stores or a second Harness. Formal decisions continue through the existing Agent Notes process.
 
 ## Decision lookup

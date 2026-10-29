@@ -1,0 +1,31 @@
+# Bilingual-pair consistency record for model-provider-matrix.md (docs/i18n/README.md): per heading
+# section, a hash of its English and Chinese blocks outside code blocks and generated regions.
+# After editing either side, bring the other along and re-record with:
+#   pnpm run verify-translation-pairing --write docs/legacy/dsh/spikes/model-provider-matrix.md
+/dsh-model-provider-matrix:
+  en: 3c91f5587a40305c
+  zh: 191ca602eace9209
+/dsh-model-provider-matrix/scope:
+  en: 886c2c8ee40c6bb8
+  zh: c6a2375a39b418fe
+/dsh-model-provider-matrix/routes-present-in-this-checkout:
+  en: 8e647dfd3be3b896
+  zh: fe59906698b5fea1
+/dsh-model-provider-matrix/openai-api-key-route:
+  en: 3737ed0be02e8603
+  zh: e85676be91768230
+/dsh-model-provider-matrix/failure-classification:
+  en: 58a8028b693f3fcc
+  zh: 0a5ba87a96f6ec1c
+/dsh-model-provider-matrix/verification-record:
+  en: 4f96686aa1b74065
+  zh: 15d06f2d0080c00b
+/dsh-model-provider-matrix/siwc-status:
+  en: 725891697e29d123
+  zh: 841588014a200e47
+/dsh-model-provider-matrix/known-limits:
+  en: 90ac2b1a21380be5
+  zh: 37d5f2f1147a1b00
+/dsh-model-provider-matrix/next-task-dependency:
+  en: a37e0a94dc58456a
+  zh: eafd7e7fee235542

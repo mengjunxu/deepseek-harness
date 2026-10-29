@@ -54,7 +54,7 @@ No invariant companion is published because state is derived from the sole durab
 
 - [Local MGSD operations](../../../docs/user/guide/mgsd-local.md) — configuration and human commands.
 - [Codely process adapter](../../../docs/user/guide/codely-local.md) — executable selection and independent checks.
-- [Implementation checklist](../../../docs/MGSD_Implementation_Checklist.md) — local milestone dependencies.
+- [Implementation checklist](../../../docs/legacy/MGSD_Implementation_Checklist.md) — historical local milestone dependencies.
 
 -----
 

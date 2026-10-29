@@ -1,0 +1,16 @@
+# Bilingual-pair consistency record for CGW_REFERENCE_LOCK.md (docs/i18n/README.md): per heading
+# section, a hash of its English and Chinese blocks outside code blocks and generated regions.
+# After editing either side, bring the other along and re-record with:
+#   pnpm run verify-translation-pairing --write docs/legacy/dsh/spikes/CGW_REFERENCE_LOCK.md
+/external-reference-source-lock:
+  en: 1ddc20044c758315
+  zh: 1d7aa2f301d1a7ea
+/external-reference-source-lock/scope-and-evidence:
+  en: 37f78a98a83a7577
+  zh: 6e5b14d11dd6fdb9
+/external-reference-source-lock/selected-modules:
+  en: 8416460de8443a68
+  zh: 62b9e993c636c4fc
+/external-reference-source-lock/unverified-scope:
+  en: 0a9a0360c2af1922
+  zh: dd06a84d365a6343

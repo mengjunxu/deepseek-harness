@@ -1,0 +1,25 @@
+# Bilingual-pair consistency record for 2026-10-28-independent-chat-provider-executor.md (docs/i18n/README.md): per heading
+# section, a hash of its English and Chinese blocks outside code blocks and generated regions.
+# After editing either side, bring the other along and re-record with:
+#   pnpm run verify-translation-pairing --write .agents/notes/proposed/architecture/2026-10-28-independent-chat-provider-executor.md
+/agent-note-independent-chat-routing-and-adaptive-task-execution:
+  en: 081d8a55974dc583
+  zh: 9a4fcd484aa78104
+/agent-note-independent-chat-routing-and-adaptive-task-execution/problem:
+  en: 2c898321cfeeb238
+  zh: 7bb0f93a700fc77f
+/agent-note-independent-chat-routing-and-adaptive-task-execution/proposal:
+  en: 5c5018ae8f0a031b
+  zh: 01165048faae4e25
+/agent-note-independent-chat-routing-and-adaptive-task-execution/existing-decisions:
+  en: 79ca3145af46f441
+  zh: 75b54fb6f7a40c33
+/agent-note-independent-chat-routing-and-adaptive-task-execution/alternatives-considered:
+  en: 21777b65d979f25b
+  zh: 1ee6a6c13a751258
+/agent-note-independent-chat-routing-and-adaptive-task-execution/acceptance-criteria:
+  en: f69db4fb79d9f52b
+  zh: e81fd644bc6ff3c9
+/agent-note-independent-chat-routing-and-adaptive-task-execution/risks:
+  en: d27785bf3c4a5a61
+  zh: 64c2575f4d605529
