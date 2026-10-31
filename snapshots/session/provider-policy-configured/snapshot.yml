@@ -1,0 +1,10 @@
+version: 1
+scenario: provider-policy-configured
+profile: headless
+composition: provider-policy-configured
+recording: authored
+header:
+  class: provider-policy-configured
+  pin: true
+  systemPromptSource: text-turn
+  toolSchemasSource: text-turn

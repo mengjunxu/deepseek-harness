@@ -34,6 +34,9 @@ async function seed(ctx: Context, expiresAt = Date.now() + 3_600_000) {
 it('keeps secrets out of account state, advertises the account catalog and removes its route on disposal', async () => {
   const { ctx, fiber } = await fixture()
   expect(await ctx.chatgptPlan.getState()).toMatchObject({ connected: false })
+  expect(ctx.llm.listProviders()).toMatchObject([{ id: 'chatgpt-plan', policy: {
+    usageSource: 'work_codex_shared', balance: { status: 'unknown' }, capabilities: { vision: 'unsupported' },
+  } }])
   await expect(ctx.llm.listModels('chatgpt-plan')).rejects.toMatchObject({ code: 'MISSING_CREDENTIAL' })
   await seed(ctx)
   vi.stubGlobal('fetch', vi.fn(async () => Response.json({ models: [

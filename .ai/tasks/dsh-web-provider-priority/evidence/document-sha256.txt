@@ -1,0 +1,9 @@
+9a5c6e4d3de68f5bd842049e9f7551d520c89364938e31c2cd1c36618ae01405  .agents/notes/proposed/architecture/2026-10-28-independent-chat-provider-executor.i18n.yaml
+c9628a22a77f7eaee41d863ce46b4276ebcee226b98f2a073510576547880fe1  .agents/notes/proposed/architecture/2026-10-28-independent-chat-provider-executor.md
+e14ec509f38a3a50515837814911e1e530af0c46327f9ed9b60e6fc94402462b  .agents/notes/proposed/architecture/2026-10-28-independent-chat-provider-executor.zh.md
+2f1988c8fd4c90abf7b38ed12799d2ea8304321d63e27c0d5d26cd3161530d9d  .ai/ARCHITECTURE.md
+1f340886d6329d59c6ff580a10a3ad415a4c59385e9a9ed04ddda895774a0795  docs/myPlan/DSH_PRD_vNext_4_2026-10-27.md
+b71153b70957d5c8d824312760c56b6629ac367a7214618afc057c6653e7be05  docs/workflows/DSH_IMPLEMENTATION_PLAN.md
+781ca9a8c1eeba4d15cebb0d9a93d03f4f537b82351338a51105982271fd3db1  packages/core/agent-default-model/README.i18n.yaml
+f970c1a66c035baecf4842d66081e608358e7f72b8f6d81c5c3a0c0844b3e305  packages/core/agent-default-model/README.md
+1a6af661894d3b1f7946dd207f5abc03c087771437585cbd5478eb6ed1a62ab6  packages/core/agent-default-model/README.zh.md

@@ -1,0 +1,9 @@
+version: 1
+scenario: intent-routing-plan
+profile: sdk
+composition: sdk-intent-routing-plan
+recording: authored
+header:
+  class: intent-routing-plan
+  pin: true
+  toolSchemasSource: sdk/bash-tool

@@ -409,6 +409,42 @@ type Branded<B extends string> = string & { readonly [BRAND]: B }
 
 The two core IDs are `ToolCallId` (correlates a tool call with its result; dsh-llm) and `SessionId` (the shared live agent and durable session identity; dsh-session). Capability packages brand their own ids too, such as `JobId` in [jobs.md](jobs.md).
 
+## Explicit intent routing
+
+The optional `@deepseek-ai/dsh-agent-default-model/intent-routing` plugin captures one configured route per Turn. The [package README](../../packages/core/agent-default-model/README.md#use-this-package) owns configuration and interaction with entry-point model selection.
+
+```ts type-equiv
+/** One explicit route; omission of effort restores the chosen model's default. */
+interface IntentRoute {
+  /** Registered provider route. */
+  provider: string
+  /** Exact provider-owned model id. */
+  model: string
+  /** Provider-owned effort id, when explicitly selected. */
+  reasoningEffort?: string
+  /** Provider capabilities required before the route can prepare a request. */
+  requiredCapabilities?: LlmProviderCapability[]
+}
+```
+
+```ts type-equiv
+/** Complete operator policy; there is no implicit intent, route or fallback. */
+interface IntentRoutingPolicy {
+  /** Purpose captured for each new Turn. */
+  intent: LlmRequestIntent
+  /** An explicit provider/model pair for every conversational intent. */
+  routes: Record<LlmRequestIntent, IntentRoute>
+}
+```
+
+```ts type-equiv
+/** Live operator policy; a Turn captures one immutable value before prompt assembly. */
+interface Config {
+  /** Complete intent selection and route table, updated atomically by configuration. */
+  routing: Volatile<IntentRoutingPolicy>
+}
+```
+
 <!-- BEGIN GENERATED cordis-surface (gen-cordis-catalog.ts) — do not edit between markers -->
 
 <a id="cordis-surface"></a>

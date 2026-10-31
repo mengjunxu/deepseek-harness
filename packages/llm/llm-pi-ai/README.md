@@ -78,6 +78,7 @@ Each profile may set a `retryPolicy`; omission uses normal mode with five retrie
 |---|---|---|
 | `apiKeyEnv` | absent | Credential reference resolved per request; omission defers to pi-ai ambient discovery |
 | `displayName` | provider name | Label shown by selector surfaces |
+| `policy` | absent | Explicit usage source, capability and admission declarations; see [LLM policy](../llm/README.md#use-this-package) |
 | `api` | catalog protocol | Wire protocol; only needed for routes the catalog does not supply |
 | `baseURL` | catalog endpoint | Endpoint of every model on the route |
 | `models` | installed catalog | Replaces the route's catalog wholesale; each entry defaults from the installed model |
@@ -91,6 +92,8 @@ Each profile may set a `retryPolicy`; omission uses normal mode with five retrie
 | `retryPolicy` | normal, 5 retries | Provider-owned retry policy executed by `dsh-llm-retry` |
 
 The generated [configuration catalog](../../../docs/config-catalog.md#deepseek-aidsh-llm-pi-ai) is the exhaustive source for every accepted field and its JSDoc.
+
+A profile can declare `policy` in `cordis.yml` or through its existing settings section. Resolution rejects unavailable routes without `gateReason`, fabricated balances and experimental sources declared ready before activation or settings persistence. Policy changes update admission for new requests; a prepared call retains its captured policy and endpoint. Omission keeps the route’s existing behavior and declares no billing or capability facts. Policy declarations do not grant authentication, budget consent or real Web access.
 
 ### Sign in to a provider
 

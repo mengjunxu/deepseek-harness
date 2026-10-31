@@ -107,3 +107,30 @@ describe('request image policy bounds', () => {
     }).toThrow(message)
   })
 })
+
+describe('provider policy configuration', () => {
+  it('resolves partial admission declarations without inferring balance or capabilities', () => {
+    const config = Config({ providers: { openai: { policy: { usageSource: 'api_metered' } } } })
+    const profiles = resolveProfiles(structuredClone(config.providers.get()) as Options['providers'])
+    expect(profiles.get('openai')?.policy).toMatchObject({
+      usageSource: 'api_metered', availability: 'ready', balance: { status: 'unknown' },
+      capabilities: { tools: 'unknown', streaming: 'unknown' },
+    })
+    expect(resolveProfiles({ openai: {} }).get('openai')).not.toHaveProperty('policy')
+  })
+
+  it.each([
+    { usageSource: 'chatgpt_regular' },
+    { usageSource: 'chatgpt_web_unofficial', availability: 'ready' },
+    { availability: 'gated' },
+    { availability: 'gated', gateReason: '  ' },
+    { capabilities: { tools: true } },
+    { balance: { status: 'unknown', remaining: 12 } },
+  ])('refuses invalid policy input at schema or profile resolution: %j', (policy) => {
+    expect(() => {
+      const profile: Record<string, unknown> = { policy }
+      const value = Config({ providers: { openai: profile } })
+      resolveProfiles(structuredClone(value.providers.get()) as Options['providers'])
+    }).toThrow()
+  })
+})

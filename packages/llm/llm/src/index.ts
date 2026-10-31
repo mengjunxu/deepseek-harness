@@ -41,6 +41,7 @@ import {
 } from './content.ts'
 import type { FileAttachmentRef } from '@deepseek-ai/dsh-attachment'
 
+export * from './provider-policy.ts'
 export * from './attribution.ts'
 export * from './brand.ts'
 export * from './error.ts'
@@ -433,6 +434,9 @@ export class LlmRuntime extends TypertRemoteService {
     const unique = new Set<string>()
     const registrations: AdapterRegistration[] = []
     for (const provider of providers) {
+      if (provider === 'chatgpt_regular') {
+        throw new LlmError('chatgpt_regular is an external conversation source, not an inference provider', 'INVALID_ADAPTER')
+      }
       if (provider.length === 0) throw new LlmError('adapter provider names must be non-empty', 'INVALID_ADAPTER')
       if (unique.has(provider) || (this.adapters.has(provider) && !owned.has(provider))) {
         throw new LlmError(`an adapter for provider "${provider}" is already registered`, 'DUPLICATE_ADAPTER')
@@ -446,7 +450,8 @@ export class LlmRuntime extends TypertRemoteService {
         ?? resolveRetryPolicy(undefined, `llm: provider "${provider}" retryPolicy`)
       registrations.push({
         adapter,
-        provider: { id: info.id, name: info.name },
+        provider: deepFreeze({ id: info.id, name: info.name,
+          ...info.policy === undefined ? {} : { policy: structuredClone(info.policy) } }),
         retryPolicy,
       })
     }
@@ -476,7 +481,7 @@ export class LlmRuntime extends TypertRemoteService {
    */
   @Remote
   listProviders(): LlmProviderInfo[] {
-    return [...this.adapters.values()].map(({ provider }) => ({ ...provider }))
+    return [...this.adapters.values()].map(({ provider }) => structuredClone(provider))
   }
 
   /**
@@ -934,7 +939,8 @@ export class LlmRuntime extends TypertRemoteService {
    * @returns a prepared config and its registration-bound stream entry point.
    */
   async prepareCall(config: LlmCallConfig, signal?: AbortSignal): Promise<PreparedLlmCall> {
-    const registration = this.registration(config.provider)
+    const registration = this.requestRegistration(config)
+    this.assertProviderAdmission(registration, config)
     const adapterCall = await registration.adapter.prepareCall(config.provider, config.model, signal)
     const modelInfo = this.normalizeModelInfo(registration, config.model, adapterCall.model)
     const resolved = this.resolveCallWithInfo(config, modelInfo)
@@ -982,10 +988,31 @@ export class LlmRuntime extends TypertRemoteService {
     })
   }
 
-  private registration(provider: string): AdapterRegistration {
+  private registration(provider: string, missingCode = 'NO_ADAPTER'): AdapterRegistration {
     const registration = this.adapters.get(provider)
-    if (!registration) throw new LlmError(`no adapter registered for provider "${provider}"`, 'NO_ADAPTER')
+    if (!registration) throw new LlmError(`no adapter registered for provider "${provider}"`, missingCode)
     return registration
+  }
+
+  /** Policy-bearing calls require a registered Provider; the loop cannot delegate their admission to virtual-route middleware. */
+  private requestRegistration(config: LlmCallConfig): AdapterRegistration {
+    return this.registration(config.provider, config.intent === undefined && config.requiredCapabilities === undefined
+      ? 'NO_ADAPTER' : 'POLICY_ROUTE_UNAVAILABLE')
+  }
+
+  private assertProviderAdmission(registration: AdapterRegistration, config: LlmCallConfig): void {
+    const provider = registration.provider.id
+    const policy = registration.provider.policy
+    if (policy !== undefined && (policy.availability !== 'ready'
+      || policy.usageSource === 'chatgpt_web_unofficial' || policy.usageSource === 'experimental_unverified')) {
+      throw new LlmError(`Provider "${provider}" is unavailable: ${policy.gateReason ?? policy.availability}`, 'PROVIDER_UNAVAILABLE')
+    }
+    for (const capability of config.requiredCapabilities ?? []) {
+      const support = policy?.capabilities[capability] ?? 'unknown'
+      if (support !== 'supported') {
+        throw new LlmError(`Provider "${provider}" requires declared support for "${capability}"; observed ${support}`, 'UNSUPPORTED_PROVIDER_CAPABILITY')
+      }
+    }
   }
 
   /** Remove replay state whose historical route is owned by another adapter. */
@@ -1036,7 +1063,8 @@ export class LlmRuntime extends TypertRemoteService {
   ): AsyncGenerator<StreamChunk> {
     let iterator: AsyncIterator<StreamChunk>
     try {
-      const registration = prepared?.registration ?? this.registration(options.provider)
+      const registration = prepared?.registration ?? this.requestRegistration(options)
+      this.assertProviderAdmission(registration, options)
       const adapter = registration.adapter
       let modelInfo: LlmResolvedModelInfo
       let resolvedConfig: LlmCallConfig

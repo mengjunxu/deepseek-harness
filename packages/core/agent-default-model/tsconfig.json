@@ -25,6 +25,12 @@
     },
     {
       "path": "../../settings/settings"
+    },
+    {
+      "path": "../../util/values"
+    },
+    {
+      "path": "../system-prompt"
     }
   ]
 }

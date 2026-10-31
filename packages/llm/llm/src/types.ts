@@ -219,12 +219,48 @@ export interface LlmImageRequestPricing {
   priceImages(images: readonly ImageBlock[]): readonly LlmImageRequestPrice[]
 }
 
+/** Declared support for a capability; unknown is not permission to infer support. */
+export type LlmCapabilitySupport = 'supported' | 'unsupported' | 'unknown'
+
+/** Usage origin, independent of authentication mechanism or model name. */
+export type LlmUsageSource = 'work_codex_shared' | 'chatgpt_web_unofficial' | 'api_metered'
+  | 'third_party' | 'local' | 'experimental_unverified' | 'unknown'
+
+/** Route admission state; only ready routes may prepare or dispatch inference. */
+export type LlmProviderAvailability = 'ready' | 'unconfigured' | 'auth_required' | 'limited' | 'gated' | 'unavailable'
+
+/** Resolved policy captured with one adapter registration; it contains no credentials. */
+export interface LlmProviderPolicy {
+  /** Billing or usage origin explicitly declared by the provider owner. */
+  readonly usageSource: LlmUsageSource
+  /** Admission state, independent of advisory model catalog membership. */
+  readonly availability: LlmProviderAvailability
+  /** Operator-facing explanation when the route cannot be used. */
+  readonly gateReason?: string
+  /** Provider-wide declarations; model-specific support still requires exact-model metadata. */
+  readonly capabilities: Readonly<Record<'streaming' | 'tools' | 'structuredOutput' | 'vision' | 'resume', LlmCapabilitySupport>>
+  /** No service balance is inferred from local request counts or successful login. */
+  readonly balance: { readonly status: 'unknown' }
+}
+
+/** Explicit purpose of one conversational model request; independent of its executor. */
+export type LlmRequestIntent = 'chat' | 'plan' | 'review' | 'execute'
+
+/** Provider-wide capability that a request may explicitly require. */
+export type LlmProviderCapability = keyof LlmProviderPolicy['capabilities']
+
+/** Optional policy configuration; resolution supplies only unknown facts and ready admission defaults. */
+export type LlmProviderPolicyInput = Partial<Omit<LlmProviderPolicy, 'capabilities'>>
+  & { readonly capabilities?: Partial<LlmProviderPolicy['capabilities']> }
+
 /** Display metadata for one registered provider route. */
 export interface LlmProviderInfo {
   /** Provider route key used by {@link GenerateOptions.provider}. */
   id: string
   /** Human-readable provider name for selectors and diagnostics. */
   name: string
+  /** Explicit route policy; omission preserves legacy routing and declares no usage or capability facts. */
+  policy?: LlmProviderPolicy
 }
 
 /** Merge-extensible provider model modality vocabulary. */
@@ -512,6 +548,10 @@ export interface GenerateOptions {
   /** Registered provider route selecting the adapter instance. */
   provider: string
   model: string
+  /** Explicit conversational intent, recorded in the request header and hidden from model content. */
+  intent?: LlmRequestIntent
+  /** Provider-wide capabilities that must be declared supported before adapter preparation. */
+  requiredCapabilities?: LlmProviderCapability[]
   /** Adapter-owned reasoning effort selected for this exact model. */
   reasoningEffort?: ReasoningEffortId
   /**

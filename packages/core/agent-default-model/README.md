@@ -56,6 +56,27 @@ await ctx.agentDefaultModel.saveSelection({ provider, model, reasoningEffort: 'h
 
 Without a configuration editor, `saveSelection()` is a no-op. The service does not validate catalog membership; the consumer opening a model request owns availability diagnostics.
 
+### Route explicit intents
+
+The optional `@deepseek-ai/dsh-agent-default-model/intent-routing` plugin chooses a configured model for `chat`, `plan`, `review` or `execute`. Use it in headless or SDK scopes where this policy owns model selection. The plugin overrides the entry point's provider/model and clears inherited reasoning effort when its selected route omits effort; the interactive model selector does not edit this policy. `execute` classifies a model request and does not start an external executor.
+
+Declare all four routes and an intent explicitly. The following local fixture routes require matching Provider declarations, available in the [complete SDK composition](../../../snapshots/sdk/intent-routing-chat/cordis.yml):
+
+```yaml
+- id: agent-intent-routing
+  name: '@deepseek-ai/dsh-agent-default-model/intent-routing'
+  config:
+    routing:
+      intent: chat
+      routes:
+        chat: { provider: intent-chat, model: chat-fixture, requiredCapabilities: [tools] }
+        plan: { provider: intent-plan, model: plan-fixture, requiredCapabilities: [tools] }
+        review: { provider: intent-review, model: review-fixture, requiredCapabilities: [tools] }
+        execute: { provider: intent-execute, model: execute-fixture, requiredCapabilities: [tools] }
+```
+
+`routing` is one live configuration value. Each Turn captures its selected route before prompt assembly; changes affect a later Turn. The prompt's provider/model variables and the request header use that captured pair. An unavailable route fails at request preparation. Required capabilities must be declared supported by the Provider; unknown support rejects. An omitted requirement adds no capability restriction. The plugin never tries another intent's route after a limit, transport failure or interruption. The Session request header records intent, actual provider/model and requirements; no extra classification request is sent.
+
 -----
 
 <a id="understand-the-implementation"></a>
@@ -75,7 +96,7 @@ The service retains its validated Config references and samples them in `current
 | File | Role |
 |---|---|
 | [`src/index.ts`](src/index.ts) | Live default selection and profile-backed writes |
-| — | No invariant companion is published because Config references are the only owned values. |
+| [`src/intent-routing.ts`](src/intent-routing.ts) | Optional per-Turn intent selection and request routing |
 
 ### Behavior notes
 
@@ -100,11 +121,11 @@ The package-level contract is enough for most consumers; read these when you nee
 <a id="model-experience"></a>
 ## Model Experience
 
-Indirectly, through the `ModelSelection` the service supplies to an entry point; request assembly and the provider adapters own the model-visible request.
+Indirectly, through the model selection and prompt provider/model variables supplied to request assembly; intent and capability requirements remain metadata and add no classification call.
 
 #### KV Cache effect
 
-Changing the default affects only agents that subsequently resolve from it. An existing session whose request log already names a selection keeps that selection, so this service does not invalidate its established prefix.
+The default affects fresh agents; an existing session retains its selection. The optional intent router captures provider/model before assembly and can change the route on a later Turn. Changing a rendered model name or provider can alter input tokens and prevent prefix reuse; metadata with unchanged rendered input contributes no model-input tokens.
 
 ## Known Limitations and Deferred Work
 
@@ -113,6 +134,8 @@ Changing the default affects only agents that subsequently resolve from it. An e
 
 These limits define the service's scope. They are current package constraints, not a task backlog.
 
+- **Routing policy is separate from account and quota authorization** — provider capability declarations do not grant account access, reserve budget or authorize paid fallback; exact-model capability matching is not supplied by this plugin.
+- **No independent runtime invariant** — default selection has no derived registry; the routing plugin keeps one private captured value per Turn. LLM admission and request/log reconstruction remain checked by their owning services.
 - **One process-wide default** — the service owns a single default; per-session model selection remains the entry point's responsibility.
 - **Persistence requires a profile configuration editor** — without it, saving a default does not retain the selection.
 

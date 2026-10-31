@@ -419,6 +419,42 @@ type Branded<B extends string> = string & { readonly [BRAND]: B }
 
 两个核心 ID 是 `ToolCallId`（关联工具调用及其结果；dsh-llm）和 `SessionId`（活跃 agent 与持久会话共享的标识；dsh-session）。能力包也会品牌化各自的 id，例如 [jobs.md](jobs.zh.md) 中的 `JobId`。
 
+## 显式意图路由
+
+可选的 `@deepseek-ai/dsh-agent-default-model/intent-routing` 插件为每个 Turn 捕获一条配置路线。[包 README](../../packages/core/agent-default-model/README.zh.md#use-this-package)拥有其配置方式，以及与入口模型选择的关系。
+
+```ts type-equiv
+/** One explicit route; omission of effort restores the chosen model's default. */
+interface IntentRoute {
+  /** Registered provider route. */
+  provider: string
+  /** Exact provider-owned model id. */
+  model: string
+  /** Provider-owned effort id, when explicitly selected. */
+  reasoningEffort?: string
+  /** Provider capabilities required before the route can prepare a request. */
+  requiredCapabilities?: LlmProviderCapability[]
+}
+```
+
+```ts type-equiv
+/** Complete operator policy; there is no implicit intent, route or fallback. */
+interface IntentRoutingPolicy {
+  /** Purpose captured for each new Turn. */
+  intent: LlmRequestIntent
+  /** An explicit provider/model pair for every conversational intent. */
+  routes: Record<LlmRequestIntent, IntentRoute>
+}
+```
+
+```ts type-equiv
+/** Live operator policy; a Turn captures one immutable value before prompt assembly. */
+interface Config {
+  /** Complete intent selection and route table, updated atomically by configuration. */
+  routing: Volatile<IntentRoutingPolicy>
+}
+```
+
 <!-- BEGIN GENERATED cordis-surface (gen-cordis-catalog.ts) — do not edit between markers -->
 
 <a id="cordis-surface"></a>

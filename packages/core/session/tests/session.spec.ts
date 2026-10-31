@@ -523,6 +523,20 @@ describe('Session', () => {
     expect(() => adoptSessionEvent(malformed)).toThrow('message must have role "user"')
   })
 
+  it('round-trips explicit request intent and requirements, and rejects invalid durable policy fields', () => {
+    const event = {
+      type: 'request/header', seq: SessionSeq(0), time: 1,
+      data: { header: { config: { provider: 'mock', model: 'm', intent: 'review', requiredCapabilities: ['tools'] } }, reason: 'initial' },
+    } satisfies SessionEvent
+    expect(Session.create(SessionId('intent-policy'), [event]).requestHeader()?.config)
+      .toMatchObject({ intent: 'review', requiredCapabilities: ['tools'] })
+    for (const policy of [{ intent: 'guess' }, { intent: 12 }, { requiredCapabilities: ['guess'] }, { requiredCapabilities: true }]) {
+      const invalid = structuredClone(event)
+      Object.assign(invalid.data.header.config, policy)
+      expect(() => Session.create(SessionId('invalid-intent'), [invalid])).toThrow('Invalid LLM request policy')
+    }
+  })
+
   it('round-trips a non-empty reasoning effort and rejects invalid durable values', () => {
     const valid = {
       type: 'request/header',

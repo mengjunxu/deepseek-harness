@@ -16,6 +16,8 @@ Status: proposed
 
 Session 日志保持权威，先把任务语义映射到 MGSD facts、jobs 和 storage，再补缺失字段。改变 MGSD 执行路径前补持久化转移与回放证据。可撤销、按作用域授权的 Tool Bridge 保持可选，独立于工程执行。优先 DSH Tool Host；活动 Codex Native Host 须独立 PoC，否则返回 unsupported。额度政策阻止未授权付费或跨源回退，区分官方用量与估算。
 
+当前验证优先级为 Web ChatGPT Provider，按用户指定的计划第 15 节（`../../../../docs/workflows/DSH_IMPLEMENTATION_PLAN.md`）执行。以 [codex-chatgpt-web](https://github.com/miuuyy/codex-chatgpt-web) 为首要技术参考，先验证其 Browser-only 通路，不要求先有 Full Harness、MCP Tunnel 或外部 Executor。网页可行性、DSH Adapter 接入和生产准入分别记录；参考声明和 Mock/Manual 结果不等于真实 Web 成功。该优先级不改变整份提案的实施状态。
+
 ## Existing decisions
 
 保留[动态工作流](../../implemented/feature/2026-07-05-dynamic-workflows.zh.md)与[原生子代理后端](../../implemented/feature/2026-08-04-claude-code-and-codex-subagent-backends.zh.md)决策。它们拥有脚本工作流和产品进程生命周期；本提案补产品选择与任务政策，不取代这些决策。限定范围的取代检查未发现应归档的已实施记录。开发协作 WORKFLOW 与运行时模板政策保持独立。
@@ -34,4 +36,4 @@ Session 日志保持权威，先把任务语义映射到 MGSD facts、jobs 和 s
 
 ## Risks
 
-MGSD 的 Plan 批准与 Review 完成目前耦合。不增加版本化事实就放宽会破坏历史回放或移除授权。Web 账号准入、支持模型与活动 Codex 工具仍是未验证外部依赖；参考代码及其许可不提供账号访问授权。P0 仅更新文档，不批准 P1–P7 实施。
+MGSD 的 Plan 批准与 Review 完成目前耦合。不增加版本化事实就放宽会破坏历史回放或移除授权。Web 账号准入、支持模型与活动 Codex 工具仍是未验证外部依赖；参考代码及其许可不提供账号访问授权。阶段与账号授权以当前 Plan 为准；Web 优先验证的顺序不授予生产访问权限，也不代表其余验收已经完成。

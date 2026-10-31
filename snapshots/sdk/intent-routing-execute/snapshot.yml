@@ -1,0 +1,9 @@
+version: 1
+scenario: intent-routing-execute
+profile: sdk
+composition: sdk-intent-routing-execute
+recording: authored
+header:
+  class: intent-routing-execute
+  pin: true
+  toolSchemasSource: sdk/bash-tool

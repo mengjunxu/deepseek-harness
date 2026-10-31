@@ -1,0 +1,10 @@
+version: 1
+scenario: provider-policy-gated
+profile: headless
+composition: provider-policy-gated
+recording: authored
+header:
+  class: default
+  pin: true
+  systemPromptSource: text-turn
+  toolSchemasSource: text-turn

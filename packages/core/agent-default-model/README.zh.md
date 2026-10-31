@@ -56,6 +56,27 @@ await ctx.agentDefaultModel.saveSelection({ provider, model, reasoningEffort: 'h
 
 没有配置编辑器时，`saveSelection()` 不执行写入。此服务不验证目录成员资格；发起模型请求的消费者负责可用性诊断。
 
+### 路由显式意图
+
+可选的 `@deepseek-ai/dsh-agent-default-model/intent-routing` 插件为 `chat`、`plan`、`review` 或 `execute` 选择配置模型。将它用于由此政策拥有模型选择权的 headless 或 SDK 作用域。插件覆盖入口的 provider/model，所选路线省略推理强度时会清除继承值；交互式模型选择器不编辑此政策。`execute` 只分类模型请求，不启动外部执行器。
+
+显式声明四条路线和一个意图。以下本地 fixture 路线需要匹配的 Provider 声明，见[完整 SDK 组合](../../../snapshots/sdk/intent-routing-chat/cordis.yml)：
+
+```yaml
+- id: agent-intent-routing
+  name: '@deepseek-ai/dsh-agent-default-model/intent-routing'
+  config:
+    routing:
+      intent: chat
+      routes:
+        chat: { provider: intent-chat, model: chat-fixture, requiredCapabilities: [tools] }
+        plan: { provider: intent-plan, model: plan-fixture, requiredCapabilities: [tools] }
+        review: { provider: intent-review, model: review-fixture, requiredCapabilities: [tools] }
+        execute: { provider: intent-execute, model: execute-fixture, requiredCapabilities: [tools] }
+```
+
+`routing` 是一个实时配置值。每个 Turn 在提示词组装前捕获所选路线；配置变化影响后续 Turn。提示词的 provider/model 变量和请求头使用捕获的同一对值。不可用路线在准备请求时失败。要求的能力必须由 Provider 声明为支持；未知支持状态会拒绝。省略能力要求时不额外限制该能力。限额、传输失败或中断后，插件不会尝试其他意图的路线。Session 请求头记录意图、实际 provider/model 和能力要求；不会额外发送分类请求。
+
 -----
 
 <a id="understand-the-implementation"></a>
@@ -75,7 +96,7 @@ await ctx.agentDefaultModel.saveSelection({ provider, model, reasoningEffort: 'h
 | 文件 | 职责 |
 |---|---|
 | [`src/index.ts`](src/index.ts) | 即时默认选择与 profile 写入 |
-| — | 不发布 invariant 配套模块，因为 Config 引用是唯一由此包维护的值。 |
+| [`src/intent-routing.ts`](src/intent-routing.ts) | 可选的逐 Turn 意图选择与请求路由 |
 
 ### 行为说明
 
@@ -100,11 +121,11 @@ await ctx.agentDefaultModel.saveSelection({ provider, model, reasoningEffort: 'h
 <a id="model-experience"></a>
 ## 模型体验
 
-通过该服务提供给入口的 `ModelSelection` 间接影响；模型可见请求由请求组装与提供方适配器负责。
+通过提供给请求组装的模型选择和提示词 provider/model 变量间接影响；意图与能力要求仍是元数据，不增加分类调用。
 
 #### KV Cache 影响
 
-更改默认值只影响之后从它解析选择的 agent。请求日志已经指明选择的现有会话仍沿用该选择，因此本服务不会使其已建立的前缀失效。
+默认值影响新 agent；现有会话保留其选择。可选意图路由在组装前捕获 provider/model，并可在后续 Turn 改变路线。渲染的模型名或提供方变化可能改变输入 token 并阻止前缀复用；渲染输入不变时，元数据不产生模型输入 token。
 
 ## 已知限制与延期工作
 
@@ -113,6 +134,8 @@ await ctx.agentDefaultModel.saveSelection({ provider, model, reasoningEffort: 'h
 
 这些限制界定该服务的范围。它们是当前包约束，不是任务积压。
 
+- **路由政策与账户、额度授权分离**——提供方能力声明不授予账户访问，不预留预算，也不授权付费回退；本插件不提供精确到模型的能力匹配。
+- **没有独立运行时不变量**——默认选择没有派生注册表；路由插件为每个 Turn 保留一份私有捕获值。LLM 准入和请求/日志重建仍由各自服务检查。
 - **单一的进程级默认值**——该服务只拥有一个默认值；按会话的模型选择仍由入口负责。
 - **持久化需要 profile 配置编辑器**——没有编辑器时，保存默认值不会保留选择。
 

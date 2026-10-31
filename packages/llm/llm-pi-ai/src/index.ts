@@ -112,6 +112,7 @@ function registrationFacts(profiles: ReadonlyMap<string, ResolvedPiAiProviderPro
       provider,
       displayName: profile.displayName,
       retryPolicy: profile.retryPolicy,
+      policy: profile.policy,
     }))
     .sort((left, right) => left.provider.localeCompare(right.provider))
 }

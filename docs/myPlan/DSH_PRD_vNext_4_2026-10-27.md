@@ -3,11 +3,13 @@
 > **文档版本**：vNext.4 / 2026-10-27
 > **文档性质**：产品目标与验收基线（不是对现有代码完成情况的声明）
 > **适用范围**：独立、跨项目、跨设备的通用 Agent Harness（DSH）
-> **关联文档**：`DSH_Implementation_Plan_vNext_4_2026-10-27.md`
+> **关联文档**：[当前实施 Plan](../workflows/DSH_IMPLEMENTATION_PLAN.md)
 > **替代关系**：纠正 vNext.2/vNext.3 中“ChatGPT Web + Reverse Codex 是唯一核心主链路”的定位；保留此前 V0–V2 和有价值的可靠性、安全性方案。
 > **决定性约束**：**ChatGPT Web 与 SIWC 是 DSH UI 中平级、可选择的 Chat Provider；Planner/独立 LLM Reviewer 均不强制；Codex 与 Codely 是独立可选的工程执行 Agent。**
 
 ---
+
+**当前验证优先级（2026-10-31 用户决定）：Web ChatGPT Provider 是第一优先验证方案，以 [codex-chatgpt-web](https://github.com/miuuyy/codex-chatgpt-web) 为首要技术参考。先验证真实 Browser-only 最小往返和 DSH Adapter 可行性，再推进剩余账户/额度/Executor 产品化。参考、Mock/Manual、真实 PoC 和生产准入分别记录；详细顺序与验收见[实施 Plan 第 15 节](../workflows/DSH_IMPLEMENTATION_PLAN.md#15-当前第一优先web-chatgpt-provider-可行性验证)。**
 
 ## 0. 一页产品定义
 
@@ -177,7 +179,7 @@
 
 **FR-WEB-01（P0）**：作为独立 Provider 插件具备设置、模型信息、诊断、能力声明和单独启停；其不可用**不能影响** SIWC、任务存储或 Executor。
 
-**FR-WEB-02（P1/研究）**：参照 `codex-chatgpt-web` 的模型适配、Browser Session Lease、Context Envelope、回复投影和提交收据来设计 Adapter。真实自动收发需先通过使用授权、服务条款和安全审查；没有许可时仅实现 Mock/Manual/架构实验，不执行未授权自动化。
+**FR-WEB-02（当前第一优先验证）**：以 `codex-chatgpt-web` 的 Browser-only 为首要参考，先验证真实网页单轮收发、模型选择、完成判定及 DSH Adapter 接入；复核 Browser Session Lease、Context Envelope、回复投影、提交收据和失败/取消。Full Harness/MCP/反向 Codex 工具不作为最小验证前置。真实自动收发需先通过使用授权、服务条款和安全审查；没有许可时仅实现 Mock/Manual/架构实验，不执行未授权自动化。
 
 **FR-WEB-03（P1/研究）**：网页会话与 DSH Session/Turn 建立映射，但 DSH 是唯一权威历史；不能把 Web 的历史和 Memory 假设成可被 DSH 完整读取。
 
@@ -297,14 +299,15 @@
 
 | 版本 | 必须达到的产品能力 | 关键约束 |
 |---|---|---|
+| **M0 前置：Web Provider 可行性（第一优先）** | Browser-only 真实最小往返、DSH 请求/Session 适配及失败证据 | 不依赖完整 UI/Task/Executor/预算；Mock/Manual 不计真实通过，保留独立准入 |
 | **M0：产品基线与契约** | UI/Provider/Executor/Workflow 的独立选择；TaskSpec + 可选 Plan；清晰额度提示 | 不改动已有代码前先审计 |
 | **M1：正式基础闭环** | SIWC / 已有合法 Provider 聊天 + Codex/Codely 执行 + 确定性验证 | 不强制 Planner/LLM Review |
-| **M2：Web 平级 Provider 可插拔** | Web Adapter 契约、Mock/Manual、状态及诊断；通过合规门禁才实装真实自动访问 | 实验能力不阻塞正式运行 |
+| **M2：Web 平级 Provider 产品化** | 基于前置验证完善独立插件、平级 UI、状态/诊断及可靠性；生产真实访问单独准入 | M2 不用于推迟第一优先验证，也不以 PoC 替代产品验收 |
 | **M3：可靠性与多端** | ContextEpoch、Checkpoint、QuotaPolicy、Executor 切换、Worker | 状态可恢复且不乱执行 |
 | **M4：可选 Tool Bridge** | MCP Gateway、Scoped Broker、ChatGPT 反向工具能力、长任务 | Tool Bridge 与 Executor 区分 |
 | **后续 TODO** | Agent 动态生成 Workflow、更多 Agent/Provider、复杂跨设备调度策略 | 不回填首期强制需求 |
 
-> M0–M4 是产品能力里程碑，不直接替换历史 V0–V2 研发阶段编号；开发 Plan 要依据仓库实际完成情况做增量映射。
+> Web 前置验证先于剩余里程碑工作；其完成或明确不可行结论由实际证据判断。M0–M4 是产品能力里程碑，不直接替换历史 V0–V2 研发阶段编号；开发 Plan 要依据仓库实际完成情况做增量映射。
 
 ---
 
@@ -370,5 +373,6 @@
 | D-06 | 反向 MCP/Native Tool 借鉴为可选辅助能力，不绑定默认 Workflow 或 Codex 唯一执行器 |
 | D-07 | DSH 自行管理 Session/Memory/Task/Run/Checkpoint；额度来源、切换和权限透明 |
 | D-08 | 采用模板化自适应 Workflow + 用户 Override；Agent 动态 Workflow 属未来 TODO |
+| D-09 | Web ChatGPT Provider 的真实可行性是当前第一优先验证项；以 codex-chatgpt-web 为参考，Browser-only 不依赖 Full Harness/Executor，Mock 与真实结论分开 |
 
-**本 PRD 是产品设计基线；任何与 vNext.2/vNext.3 相反的流程图和优先级描述，应以本版 D-01～D-08 为准。**
+**本 PRD 是产品设计基线；任何与 vNext.2/vNext.3 相反的流程图和优先级描述，应以本版 D-01～D-09 为准。**

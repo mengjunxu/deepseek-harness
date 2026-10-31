@@ -78,6 +78,7 @@ kind: "package-reference"
 |---|---|---|
 | `apiKeyEnv` | 无 | 按请求解析的凭据引用；省略时交由 pi-ai 环境发现 |
 | `displayName` | 提供方名 | 选择器界面显示的标签 |
+| `policy` | 无 | 显式声明额度来源、能力与准入状态；参见 [LLM 政策](../llm/README.zh.md#use-this-package) |
 | `api` | 目录协议 | 协议格式；仅目录不提供的路由需要 |
 | `baseURL` | 目录端点 | 路由上所有模型的端点 |
 | `models` | 已安装目录 | 整体替换路由目录；每个条目从已安装模型取默认值 |
@@ -91,6 +92,8 @@ kind: "package-reference"
 | `retryPolicy` | normal，5 次重试 | 由 `dsh-llm-retry` 执行的提供方自有重试策略 |
 
 生成的[配置目录](../../../docs/config-catalog.zh.md#deepseek-aidsh-llm-pi-ai)是每个受支持字段及其 JSDoc 的穷尽式真源。
+
+profile 可在 `cordis.yml` 或既有设置分区声明 `policy`。解析会在激活或保存设置前拒绝缺少 `gateReason` 的不可用路线、虚构余额和声明为 ready 的实验来源。政策变更影响新请求的准入；已准备的调用保留捕获的政策与端点。省略政策时保留路线原有行为，不声明计费或能力事实。政策声明不授予认证、预算同意或真实 Web 访问权限。
 
 ### 登录提供方
 

@@ -1,0 +1,79 @@
+[
+  {
+    "method": "initialize",
+    "response": {
+      "jsonrpc": "2.0",
+      "id": 1,
+      "result": {
+        "protocolVersion": 1,
+        "authMethods": [
+          {
+            "id": "codely-oauth",
+            "name": "Codely OAuth",
+            "description": null
+          },
+          {
+            "id": "qwen-oauth",
+            "name": "Qwen OAuth",
+            "description": null
+          },
+          {
+            "id": "oauth-personal",
+            "name": "Google OAuth",
+            "description": null
+          },
+          {
+            "id": "gemini-api-key",
+            "name": "Gemini API",
+            "description": "Requires setting the `GEMINI_API_KEY` environment variable"
+          },
+          {
+            "id": "vertex-ai",
+            "name": "Vertex AI",
+            "description": null
+          },
+          {
+            "id": "cloud-shell",
+            "name": "Cloud Shell",
+            "description": null
+          },
+          {
+            "id": "openai",
+            "name": "OpenAI",
+            "description": "Requires setting the `OPENAI_API_KEY` environment variable"
+          }
+        ],
+        "agentCapabilities": {
+          "loadSession": false,
+          "promptCapabilities": {
+            "image": true,
+            "audio": true,
+            "embeddedContext": true
+          },
+          "mcpCapabilities": {
+            "http": true,
+            "sse": true
+          }
+        },
+        "agentInfo": {
+          "name": "@codely/cli",
+          "version": "1.0.0-nightly.53",
+          "title": "Codely CLI"
+        }
+      }
+    }
+  },
+  {
+    "method": "session/new",
+    "response": {
+      "jsonrpc": "2.0",
+      "id": 2,
+      "result": {
+        "sessionId": "7050856c-e79e-4efe-8306-9f0700ba7f9b"
+      }
+    }
+  },
+  {
+    "process_exit": -15
+  }
+]

@@ -6,6 +6,10 @@ The conversation and streaming types from [`packages/llm`](../../packages/llm/RE
 
 Source: [`packages/llm/llm/src/types.ts`](../../packages/llm/llm/src/types.ts)
 
+## Provider admission metadata
+
+`LlmProviderInfo.policy` carries a registration-owned `LlmProviderPolicy`: `LlmUsageSource`, `LlmProviderAvailability`, capability values of `LlmCapabilitySupport`, an optional `gateReason`, and `balance.status: unknown`. `resolveProviderPolicy` parses operator input, keeps undeclared facts unknown and freezes the result. Only ready declared policies admit inference; experimental sources remain gated. Catalog inspection is independent of admission. A prepared call retains the captured policy across route replacement. The [LLM README](../../packages/llm/llm/README.md) owns configuration use and limits.
+
 <a id="content-blocks-and-messages"></a>
 
 ## Content blocks and messages
@@ -459,12 +463,62 @@ interface AdapterRegistrationHandle {
 ```
 
 ```ts type-equiv
+/** Declared support for a capability; unknown is not permission to infer support. */
+type LlmCapabilitySupport = 'supported' | 'unsupported' | 'unknown'
+```
+
+```ts type-equiv
+/** Usage origin, independent of authentication mechanism or model name. */
+type LlmUsageSource = 'work_codex_shared' | 'chatgpt_web_unofficial' | 'api_metered'
+  | 'third_party' | 'local' | 'experimental_unverified' | 'unknown'
+```
+
+```ts type-equiv
+/** Route admission state; only ready routes may prepare or dispatch inference. */
+type LlmProviderAvailability = 'ready' | 'unconfigured' | 'auth_required' | 'limited' | 'gated' | 'unavailable'
+```
+
+```ts type-equiv
+/** Resolved policy captured with one adapter registration; it contains no credentials. */
+interface LlmProviderPolicy {
+  /** Billing or usage origin explicitly declared by the provider owner. */
+  readonly usageSource: LlmUsageSource
+  /** Admission state, independent of advisory model catalog membership. */
+  readonly availability: LlmProviderAvailability
+  /** Operator-facing explanation when the route cannot be used. */
+  readonly gateReason?: string
+  /** Provider-wide declarations; model-specific support still requires exact-model metadata. */
+  readonly capabilities: Readonly<Record<'streaming' | 'tools' | 'structuredOutput' | 'vision' | 'resume', LlmCapabilitySupport>>
+  /** No service balance is inferred from local request counts or successful login. */
+  readonly balance: { readonly status: 'unknown' }
+}
+```
+
+```ts type-equiv
+/** Explicit purpose of one conversational model request; independent of its executor. */
+type LlmRequestIntent = 'chat' | 'plan' | 'review' | 'execute'
+```
+
+```ts type-equiv
+/** Provider-wide capability that a request may explicitly require. */
+type LlmProviderCapability = keyof LlmProviderPolicy['capabilities']
+```
+
+```ts type-equiv
+/** Optional policy configuration; resolution supplies only unknown facts and ready admission defaults. */
+type LlmProviderPolicyInput = Partial<Omit<LlmProviderPolicy, 'capabilities'>>
+  & { readonly capabilities?: Partial<LlmProviderPolicy['capabilities']> }
+```
+
+```ts type-equiv
 /** Display metadata for one registered provider route. */
 interface LlmProviderInfo {
   /** Provider route key used by {@link GenerateOptions.provider}. */
   id: string
   /** Human-readable provider name for selectors and diagnostics. */
   name: string
+  /** Explicit route policy; omission preserves legacy routing and declares no usage or capability facts. */
+  policy?: LlmProviderPolicy
 }
 ```
 
@@ -600,6 +654,10 @@ interface GenerateOptions {
   /** Registered provider route selecting the adapter instance. */
   provider: string
   model: string
+  /** Explicit conversational intent, recorded in the request header and hidden from model content. */
+  intent?: LlmRequestIntent
+  /** Provider-wide capabilities that must be declared supported before adapter preparation. */
+  requiredCapabilities?: LlmProviderCapability[]
   /** Adapter-owned reasoning effort selected for this exact model. */
   reasoningEffort?: ReasoningEffortId
   /**
@@ -736,6 +794,8 @@ interface LlmDiscoveredModel {
 
 ### The request envelope: `LlmCallConfig` and the logged header
 
+`LlmCallConfig.intent` records an explicit chat, plan, review or execute purpose without adding model content. `requiredCapabilities` records the provider declarations needed for that request; unknown and unsupported declarations both fail before adapter preparation, including direct streams. The optional [intent-routing plugin](../../packages/core/agent-default-model/README.md#use-this-package) chooses routes on the existing Agent waterfalls.
+
 The loop builds each request from logged state. `EpochHeader` records call config, marks the fields supplied by adapter defaults, and records the authoritative returned tool order (configured by `toolOrder`, or lexicographic when unset) through full `request/header` snapshots. The rendered prompt is derived history — the `system/message` at surface node 0, plus any later system node an `in-history` route appended — so the header and the derived history together make the request reconstructable from the session log. See [session.md](session.md#the-request-header-event-requestheader) and the [reconstructability Agent Note](../../.agents/notes/implemented/architecture/2026-07-05-reconstructable-requests.md).
 
 `agent/request` receives a frozen call-config seed and may return a replacement to switch provider, model, reasoning effort, or sampling. Before the waterfall, the loop removes values marked as adapter defaults so exact-model preparation materializes the selected route's current values; unmarked explicit settings remain in the proposal. After the waterfall, preparation rejects unsupported explicit effort ids without clamping and logs the effective config plus the fields supplied by adapter defaults under the turn signal. On step admission, this waterfall and preparation run after assembly and `step/start` but before the system prompt and accepted user batch are committed; cancellation during either commits neither. The prepared capability governs prompt reconciliation, and the call keeps one adapter registration through dispatch. Requests reaching `llm/stream` are deep-frozen, so mutation throws, and carry a process-local loop identity so observers do not confuse separately logged frozen auxiliary calls with conversation requests.
@@ -745,8 +805,10 @@ On the wire, a loop-built request is the derived history alone: the rendered pro
 FIXME(call-config-shape): revisit which remaining fields are genuinely epoch-level for cache purposes (`model` and the model-owned reasoning effort are explicit; the sampling scalars sit here out of caution).
 
 ```ts type-equiv
+// TODO(call-config-shape): Revisit which fields are epoch-level for cache reuse
+// and where provider-specific request options belong.
 /**
- * Provider, model, reasoning effort, and sampling scalars of one conversation's
+ * Model controls and model-hidden intent/admission inputs for one conversation's
  * requests. Every field maps 1:1 onto the same-named `GenerateOptions` field;
  * the loop builds requests from the logged header rather than accepting these
  * per call.
@@ -754,6 +816,10 @@ FIXME(call-config-shape): revisit which remaining fields are genuinely epoch-lev
 interface LlmCallConfig {
   provider: string
   model: string
+  /** Explicit request purpose; omission preserves an unclassified request. */
+  intent?: LlmRequestIntent
+  /** Required provider declarations; unknown and unsupported both reject. */
+  requiredCapabilities?: LlmProviderCapability[]
   reasoningEffort?: ReasoningEffortId
   temperature?: number
   maxTokens?: number

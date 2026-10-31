@@ -10859,7 +10859,7 @@
       "kind": "event",
       "event": "request/header",
       "surface": false,
-      "digest": "4208123b50df5006b181481ab45fcf1cde807b88d3fd4d340090bc2e202fac41",
+      "digest": "ef3ef7d100d899c74a7def5af245cabb12b0bcea65e49cd4e920bb9602643b60",
       "schema": {
         "root": 0,
         "nodes": [
@@ -10878,17 +10878,17 @@
               },
               {
                 "name": "seq",
-                "type": 6,
+                "type": 11,
                 "optional": false
               },
               {
                 "name": "time",
-                "type": 6,
+                "type": 11,
                 "optional": false
               },
               {
                 "name": "type",
-                "type": 19,
+                "type": 30,
                 "optional": false
               }
             ],
@@ -10904,7 +10904,7 @@
               },
               {
                 "name": "reason",
-                "type": 14,
+                "type": 26,
                 "optional": false
               },
               {
@@ -10930,12 +10930,12 @@
               },
               {
                 "name": "system",
-                "type": 9,
+                "type": 21,
                 "optional": true
               },
               {
                 "name": "tools",
-                "type": 10,
+                "type": 22,
                 "optional": true
               }
             ],
@@ -10965,37 +10965,72 @@
             "kind": "object",
             "properties": [
               {
-                "name": "maxTokens",
+                "name": "intent",
                 "type": 6,
+                "optional": true
+              },
+              {
+                "name": "maxTokens",
+                "type": 11,
                 "optional": true
               },
               {
                 "name": "model",
-                "type": 7,
+                "type": 12,
                 "optional": false
               },
               {
                 "name": "provider",
-                "type": 7,
+                "type": 12,
                 "optional": false
               },
               {
                 "name": "reasoningEffort",
-                "type": 7,
+                "type": 12,
+                "optional": true
+              },
+              {
+                "name": "requiredCapabilities",
+                "type": 13,
                 "optional": true
               },
               {
                 "name": "stop",
-                "type": 8,
+                "type": 20,
                 "optional": true
               },
               {
                 "name": "temperature",
-                "type": 6,
+                "type": 11,
                 "optional": true
               }
             ],
             "indices": []
+          },
+          {
+            "kind": "union",
+            "types": [
+              7,
+              8,
+              9,
+              10
+            ]
+          },
+          {
+            "kind": "literal",
+            "value": "chat"
+          },
+          {
+            "kind": "literal",
+            "value": "execute"
+          },
+          {
+            "kind": "literal",
+            "value": "plan"
+          },
+          {
+            "kind": "literal",
+            "value": "review"
           },
           {
             "kind": "primitive",
@@ -11007,7 +11042,41 @@
           },
           {
             "kind": "array",
-            "element": 7
+            "element": 14
+          },
+          {
+            "kind": "union",
+            "types": [
+              15,
+              16,
+              17,
+              18,
+              19
+            ]
+          },
+          {
+            "kind": "literal",
+            "value": "resume"
+          },
+          {
+            "kind": "literal",
+            "value": "streaming"
+          },
+          {
+            "kind": "literal",
+            "value": "structuredOutput"
+          },
+          {
+            "kind": "literal",
+            "value": "tools"
+          },
+          {
+            "kind": "literal",
+            "value": "vision"
+          },
+          {
+            "kind": "array",
+            "element": 12
           },
           {
             "kind": "primitive",
@@ -11015,7 +11084,7 @@
           },
           {
             "kind": "array",
-            "element": 11
+            "element": 23
           },
           {
             "kind": "object",
@@ -11027,17 +11096,17 @@
               },
               {
                 "name": "description",
-                "type": 7,
+                "type": 12,
                 "optional": false
               },
               {
                 "name": "name",
-                "type": 7,
+                "type": 12,
                 "optional": false
               },
               {
                 "name": "parameters",
-                "type": 12,
+                "type": 24,
                 "optional": false
               }
             ],
@@ -11048,8 +11117,8 @@
             "properties": [],
             "indices": [
               {
-                "key": 7,
-                "value": 13
+                "key": 12,
+                "value": 25
               }
             ]
           },
@@ -11061,9 +11130,9 @@
             "kind": "union",
             "types": [
               15,
-              16,
-              17,
-              18
+              27,
+              28,
+              29
             ]
           },
           {
@@ -11072,15 +11141,11 @@
           },
           {
             "kind": "literal",
-            "value": "resume"
+            "value": "change"
           },
           {
             "kind": "literal",
             "value": "series"
-          },
-          {
-            "kind": "literal",
-            "value": "change"
           },
           {
             "kind": "literal",
@@ -22492,7 +22557,7 @@
         "packages/llm/llm/src/types.ts#ReplayEnvelope"
       ],
       "sources": [
-        "packages/llm/llm/src/types.ts:430"
+        "packages/llm/llm/src/types.ts:466"
       ]
     },
     {
@@ -22667,6 +22732,20 @@
       "sources": [
         "packages/subagent/tool-subagent/src/model-selection-state.ts:17"
       ]
+    },
+    {
+      "digest": "0e0c2e4d3cc973c306157134f073eb4b2ccaa96d3abbe722d30ea2fa0410d3f1",
+      "schema": {
+        "root": 0,
+        "nodes": [
+          {
+            "kind": "literal",
+            "value": "review"
+          }
+        ]
+      },
+      "names": [],
+      "sources": []
     },
     {
       "digest": "0e10d7c096b47e61defe372a5fc8bd37d835199410eac44367f95c45082498bd",
@@ -32963,7 +33042,7 @@
       },
       "names": [],
       "sources": [
-        "packages/llm/llm/src/types.ts:455"
+        "packages/llm/llm/src/types.ts:491"
       ]
     },
     {
@@ -34000,7 +34079,7 @@
         "packages/llm/llm/src/call-config.ts#LlmCallConfigAdapterDefaults"
       ],
       "sources": [
-        "packages/llm/llm/src/call-config.ts:36"
+        "packages/llm/llm/src/call-config.ts:40"
       ]
     },
     {
@@ -35057,6 +35136,271 @@
       "sources": []
     },
     {
+      "digest": "3657a036afc611a0489d3c3f879972260207bea15eca0052821caa8deea47ada",
+      "schema": {
+        "root": 0,
+        "nodes": [
+          {
+            "kind": "object",
+            "properties": [
+              {
+                "name": "header",
+                "type": 1,
+                "optional": false
+              },
+              {
+                "name": "reason",
+                "type": 25,
+                "optional": false
+              },
+              {
+                "name": "startsSeries",
+                "type": 3,
+                "optional": true
+              }
+            ],
+            "indices": []
+          },
+          {
+            "kind": "object",
+            "properties": [
+              {
+                "name": "adapterDefaults",
+                "type": 2,
+                "optional": true
+              },
+              {
+                "name": "config",
+                "type": 4,
+                "optional": false
+              },
+              {
+                "name": "system",
+                "type": 20,
+                "optional": true
+              },
+              {
+                "name": "tools",
+                "type": 21,
+                "optional": true
+              }
+            ],
+            "indices": []
+          },
+          {
+            "kind": "object",
+            "properties": [
+              {
+                "name": "maxTokens",
+                "type": 3,
+                "optional": true
+              },
+              {
+                "name": "reasoningEffort",
+                "type": 3,
+                "optional": true
+              }
+            ],
+            "indices": []
+          },
+          {
+            "kind": "literal",
+            "value": true
+          },
+          {
+            "kind": "object",
+            "properties": [
+              {
+                "name": "intent",
+                "type": 5,
+                "optional": true
+              },
+              {
+                "name": "maxTokens",
+                "type": 10,
+                "optional": true
+              },
+              {
+                "name": "model",
+                "type": 11,
+                "optional": false
+              },
+              {
+                "name": "provider",
+                "type": 11,
+                "optional": false
+              },
+              {
+                "name": "reasoningEffort",
+                "type": 11,
+                "optional": true
+              },
+              {
+                "name": "requiredCapabilities",
+                "type": 12,
+                "optional": true
+              },
+              {
+                "name": "stop",
+                "type": 19,
+                "optional": true
+              },
+              {
+                "name": "temperature",
+                "type": 10,
+                "optional": true
+              }
+            ],
+            "indices": []
+          },
+          {
+            "kind": "union",
+            "types": [
+              6,
+              7,
+              8,
+              9
+            ]
+          },
+          {
+            "kind": "literal",
+            "value": "chat"
+          },
+          {
+            "kind": "literal",
+            "value": "execute"
+          },
+          {
+            "kind": "literal",
+            "value": "plan"
+          },
+          {
+            "kind": "literal",
+            "value": "review"
+          },
+          {
+            "kind": "primitive",
+            "type": "number"
+          },
+          {
+            "kind": "primitive",
+            "type": "string"
+          },
+          {
+            "kind": "array",
+            "element": 13
+          },
+          {
+            "kind": "union",
+            "types": [
+              14,
+              15,
+              16,
+              17,
+              18
+            ]
+          },
+          {
+            "kind": "literal",
+            "value": "resume"
+          },
+          {
+            "kind": "literal",
+            "value": "streaming"
+          },
+          {
+            "kind": "literal",
+            "value": "structuredOutput"
+          },
+          {
+            "kind": "literal",
+            "value": "tools"
+          },
+          {
+            "kind": "literal",
+            "value": "vision"
+          },
+          {
+            "kind": "array",
+            "element": 11
+          },
+          {
+            "kind": "primitive",
+            "type": "never"
+          },
+          {
+            "kind": "array",
+            "element": 22
+          },
+          {
+            "kind": "object",
+            "properties": [
+              {
+                "name": "deferLoading",
+                "type": 3,
+                "optional": true
+              },
+              {
+                "name": "description",
+                "type": 11,
+                "optional": false
+              },
+              {
+                "name": "name",
+                "type": 11,
+                "optional": false
+              },
+              {
+                "name": "parameters",
+                "type": 23,
+                "optional": false
+              }
+            ],
+            "indices": []
+          },
+          {
+            "kind": "object",
+            "properties": [],
+            "indices": [
+              {
+                "key": 11,
+                "value": 24
+              }
+            ]
+          },
+          {
+            "kind": "opaque",
+            "reason": "unknown"
+          },
+          {
+            "kind": "union",
+            "types": [
+              14,
+              26,
+              27,
+              28
+            ]
+          },
+          {
+            "kind": "literal",
+            "value": "initial"
+          },
+          {
+            "kind": "literal",
+            "value": "series"
+          },
+          {
+            "kind": "literal",
+            "value": "change"
+          }
+        ]
+      },
+      "names": [],
+      "sources": [
+        "packages/core/session/src/types.ts:390"
+      ]
+    },
+    {
       "digest": "36d6a9a871d949ea4f3edd919d81d66aa69218bebef38899d2a1282c39420a1f",
       "schema": {
         "root": 0,
@@ -36078,7 +36422,7 @@
       },
       "names": [],
       "sources": [
-        "packages/llm/llm/src/types.ts:453"
+        "packages/llm/llm/src/types.ts:489"
       ]
     },
     {
@@ -36215,6 +36559,20 @@
       "sources": [
         "packages/core/tools/src/index.ts:700"
       ]
+    },
+    {
+      "digest": "3d1acee4beaece4720c724e9cb1e0930752aba92cb4c770992598d2ba1080051",
+      "schema": {
+        "root": 0,
+        "nodes": [
+          {
+            "kind": "literal",
+            "value": "vision"
+          }
+        ]
+      },
+      "names": [],
+      "sources": []
     },
     {
       "digest": "3d7d07060a7be77984feb651ea2bf1925d3e0477911d9d3ed86330d1e8ca6182",
@@ -41736,239 +42094,6 @@
       ]
     },
     {
-      "digest": "4208123b50df5006b181481ab45fcf1cde807b88d3fd4d340090bc2e202fac41",
-      "schema": {
-        "root": 0,
-        "nodes": [
-          {
-            "kind": "object",
-            "properties": [
-              {
-                "name": "data",
-                "type": 1,
-                "optional": false
-              },
-              {
-                "name": "ignorable",
-                "type": 4,
-                "optional": true
-              },
-              {
-                "name": "seq",
-                "type": 6,
-                "optional": false
-              },
-              {
-                "name": "time",
-                "type": 6,
-                "optional": false
-              },
-              {
-                "name": "type",
-                "type": 19,
-                "optional": false
-              }
-            ],
-            "indices": []
-          },
-          {
-            "kind": "object",
-            "properties": [
-              {
-                "name": "header",
-                "type": 2,
-                "optional": false
-              },
-              {
-                "name": "reason",
-                "type": 14,
-                "optional": false
-              },
-              {
-                "name": "startsSeries",
-                "type": 4,
-                "optional": true
-              }
-            ],
-            "indices": []
-          },
-          {
-            "kind": "object",
-            "properties": [
-              {
-                "name": "adapterDefaults",
-                "type": 3,
-                "optional": true
-              },
-              {
-                "name": "config",
-                "type": 5,
-                "optional": false
-              },
-              {
-                "name": "system",
-                "type": 9,
-                "optional": true
-              },
-              {
-                "name": "tools",
-                "type": 10,
-                "optional": true
-              }
-            ],
-            "indices": []
-          },
-          {
-            "kind": "object",
-            "properties": [
-              {
-                "name": "maxTokens",
-                "type": 4,
-                "optional": true
-              },
-              {
-                "name": "reasoningEffort",
-                "type": 4,
-                "optional": true
-              }
-            ],
-            "indices": []
-          },
-          {
-            "kind": "literal",
-            "value": true
-          },
-          {
-            "kind": "object",
-            "properties": [
-              {
-                "name": "maxTokens",
-                "type": 6,
-                "optional": true
-              },
-              {
-                "name": "model",
-                "type": 7,
-                "optional": false
-              },
-              {
-                "name": "provider",
-                "type": 7,
-                "optional": false
-              },
-              {
-                "name": "reasoningEffort",
-                "type": 7,
-                "optional": true
-              },
-              {
-                "name": "stop",
-                "type": 8,
-                "optional": true
-              },
-              {
-                "name": "temperature",
-                "type": 6,
-                "optional": true
-              }
-            ],
-            "indices": []
-          },
-          {
-            "kind": "primitive",
-            "type": "number"
-          },
-          {
-            "kind": "primitive",
-            "type": "string"
-          },
-          {
-            "kind": "array",
-            "element": 7
-          },
-          {
-            "kind": "primitive",
-            "type": "never"
-          },
-          {
-            "kind": "array",
-            "element": 11
-          },
-          {
-            "kind": "object",
-            "properties": [
-              {
-                "name": "deferLoading",
-                "type": 4,
-                "optional": true
-              },
-              {
-                "name": "description",
-                "type": 7,
-                "optional": false
-              },
-              {
-                "name": "name",
-                "type": 7,
-                "optional": false
-              },
-              {
-                "name": "parameters",
-                "type": 12,
-                "optional": false
-              }
-            ],
-            "indices": []
-          },
-          {
-            "kind": "object",
-            "properties": [],
-            "indices": [
-              {
-                "key": 7,
-                "value": 13
-              }
-            ]
-          },
-          {
-            "kind": "opaque",
-            "reason": "unknown"
-          },
-          {
-            "kind": "union",
-            "types": [
-              15,
-              16,
-              17,
-              18
-            ]
-          },
-          {
-            "kind": "literal",
-            "value": "initial"
-          },
-          {
-            "kind": "literal",
-            "value": "resume"
-          },
-          {
-            "kind": "literal",
-            "value": "series"
-          },
-          {
-            "kind": "literal",
-            "value": "change"
-          },
-          {
-            "kind": "literal",
-            "value": "request/header"
-          }
-        ]
-      },
-      "names": [],
-      "sources": []
-    },
-    {
       "digest": "42e0916e0dda5f6d1e7bb05d8514717147c036a79c9f36085683469516c1fd3f",
       "schema": {
         "root": 0,
@@ -43014,7 +43139,7 @@
         "packages/llm/llm/src/types.ts#StreamChunk"
       ],
       "sources": [
-        "packages/llm/llm/src/types.ts:452"
+        "packages/llm/llm/src/types.ts:488"
       ]
     },
     {
@@ -49963,6 +50088,137 @@
       ]
     },
     {
+      "digest": "56f3c74722d23d92a3227e5f54de8a390d7f36d276d04800557ce73ab1be07ed",
+      "schema": {
+        "root": 0,
+        "nodes": [
+          {
+            "kind": "object",
+            "properties": [
+              {
+                "name": "intent",
+                "type": 1,
+                "optional": true
+              },
+              {
+                "name": "maxTokens",
+                "type": 6,
+                "optional": true
+              },
+              {
+                "name": "model",
+                "type": 7,
+                "optional": false
+              },
+              {
+                "name": "provider",
+                "type": 7,
+                "optional": false
+              },
+              {
+                "name": "reasoningEffort",
+                "type": 7,
+                "optional": true
+              },
+              {
+                "name": "requiredCapabilities",
+                "type": 8,
+                "optional": true
+              },
+              {
+                "name": "stop",
+                "type": 15,
+                "optional": true
+              },
+              {
+                "name": "temperature",
+                "type": 6,
+                "optional": true
+              }
+            ],
+            "indices": []
+          },
+          {
+            "kind": "union",
+            "types": [
+              2,
+              3,
+              4,
+              5
+            ]
+          },
+          {
+            "kind": "literal",
+            "value": "review"
+          },
+          {
+            "kind": "literal",
+            "value": "chat"
+          },
+          {
+            "kind": "literal",
+            "value": "execute"
+          },
+          {
+            "kind": "literal",
+            "value": "plan"
+          },
+          {
+            "kind": "primitive",
+            "type": "number"
+          },
+          {
+            "kind": "primitive",
+            "type": "string"
+          },
+          {
+            "kind": "array",
+            "element": 9
+          },
+          {
+            "kind": "union",
+            "types": [
+              10,
+              11,
+              12,
+              13,
+              14
+            ]
+          },
+          {
+            "kind": "literal",
+            "value": "resume"
+          },
+          {
+            "kind": "literal",
+            "value": "streaming"
+          },
+          {
+            "kind": "literal",
+            "value": "structuredOutput"
+          },
+          {
+            "kind": "literal",
+            "value": "tools"
+          },
+          {
+            "kind": "literal",
+            "value": "vision"
+          },
+          {
+            "kind": "array",
+            "element": 7
+          }
+        ]
+      },
+      "names": [
+        "packages/llm/llm/src/call-config.ts#LlmCallConfig"
+      ],
+      "sources": [
+        "packages/llm/llm/src/call-config.ts:23"
+      ]
+    },
+    {
       "digest": "570e85022434613394418ad33e77e9f1f7a05699b33d0b62eae0677a638c3833",
       "schema": {
         "root": 0,
@@ -51603,6 +51859,50 @@
       },
       "names": [],
       "sources": []
+    },
+    {
+      "digest": "61e55d5fed8ce88d5cb946a3ad5839741cd1cba5045b833928f2c72ba6d04b7a",
+      "schema": {
+        "root": 0,
+        "nodes": [
+          {
+            "kind": "union",
+            "types": [
+              1,
+              2,
+              3,
+              4,
+              5
+            ]
+          },
+          {
+            "kind": "literal",
+            "value": "resume"
+          },
+          {
+            "kind": "literal",
+            "value": "streaming"
+          },
+          {
+            "kind": "literal",
+            "value": "structuredOutput"
+          },
+          {
+            "kind": "literal",
+            "value": "tools"
+          },
+          {
+            "kind": "literal",
+            "value": "vision"
+          }
+        ]
+      },
+      "names": [
+        "packages/llm/llm/src/types.ts#LlmProviderCapability"
+      ],
+      "sources": [
+        "packages/llm/llm/src/types.ts:250"
+      ]
     },
     {
       "digest": "6292bcbedaa97feaec5b48a03bb8144b581b93309d9d6c905f26da7a6a7a0a4f",
@@ -54657,7 +54957,7 @@
         "packages/llm/llm/src/types.ts#ToolSchema"
       ],
       "sources": [
-        "packages/llm/llm/src/types.ts:473"
+        "packages/llm/llm/src/types.ts:509"
       ]
     },
     {
@@ -54705,68 +55005,6 @@
       ],
       "sources": [
         "packages/skill/skill/src/index.ts:146"
-      ]
-    },
-    {
-      "digest": "67d5f73ceae82f5265258142ad6cf172de2c1fef93ba551b7f0454e0a93bffe0",
-      "schema": {
-        "root": 0,
-        "nodes": [
-          {
-            "kind": "object",
-            "properties": [
-              {
-                "name": "maxTokens",
-                "type": 1,
-                "optional": true
-              },
-              {
-                "name": "model",
-                "type": 2,
-                "optional": false
-              },
-              {
-                "name": "provider",
-                "type": 2,
-                "optional": false
-              },
-              {
-                "name": "reasoningEffort",
-                "type": 2,
-                "optional": true
-              },
-              {
-                "name": "stop",
-                "type": 3,
-                "optional": true
-              },
-              {
-                "name": "temperature",
-                "type": 1,
-                "optional": true
-              }
-            ],
-            "indices": []
-          },
-          {
-            "kind": "primitive",
-            "type": "number"
-          },
-          {
-            "kind": "primitive",
-            "type": "string"
-          },
-          {
-            "kind": "array",
-            "element": 2
-          }
-        ]
-      },
-      "names": [
-        "packages/llm/llm/src/call-config.ts#LlmCallConfig"
-      ],
-      "sources": [
-        "packages/llm/llm/src/call-config.ts:23"
       ]
     },
     {
@@ -59908,6 +60146,20 @@
       ]
     },
     {
+      "digest": "7a0587d0de453e011360fbe3028072d7fb2880fe48fff07cf889ec1c0d948cf3",
+      "schema": {
+        "root": 0,
+        "nodes": [
+          {
+            "kind": "literal",
+            "value": "structuredOutput"
+          }
+        ]
+      },
+      "names": [],
+      "sources": []
+    },
+    {
       "digest": "7a651f3b672c52fb615f22c0ce9cb3cc5b22aad92e6bbeefb0808fd7b9233a50",
       "schema": {
         "root": 0,
@@ -63223,7 +63475,7 @@
       },
       "names": [],
       "sources": [
-        "packages/llm/llm/src/types.ts:456"
+        "packages/llm/llm/src/types.ts:492"
       ]
     },
     {
@@ -63937,6 +64189,20 @@
       "sources": []
     },
     {
+      "digest": "90df3b9a8f08f4b0c97684f628845e4499aed106eb1c8f6af833ae2e257eb041",
+      "schema": {
+        "root": 0,
+        "nodes": [
+          {
+            "kind": "literal",
+            "value": "execute"
+          }
+        ]
+      },
+      "names": [],
+      "sources": []
+    },
+    {
       "digest": "930a6567a10bb62ddd157bd8abdf4b182810c8c3b49d91309b3b009a5fed9731",
       "schema": {
         "root": 0,
@@ -64293,7 +64559,7 @@
       },
       "names": [],
       "sources": [
-        "packages/llm/llm/src/types.ts:454"
+        "packages/llm/llm/src/types.ts:490"
       ]
     },
     {
@@ -65217,162 +65483,6 @@
       ],
       "sources": [
         "packages/workflow/tool-workflow/src/types.ts:20"
-      ]
-    },
-    {
-      "digest": "9a930283b91d493d6347146f2475bb107294b379415ca02162354f46a64164f7",
-      "schema": {
-        "root": 0,
-        "nodes": [
-          {
-            "kind": "object",
-            "properties": [
-              {
-                "name": "adapterDefaults",
-                "type": 1,
-                "optional": true
-              },
-              {
-                "name": "config",
-                "type": 3,
-                "optional": false
-              },
-              {
-                "name": "system",
-                "type": 7,
-                "optional": true
-              },
-              {
-                "name": "tools",
-                "type": 8,
-                "optional": true
-              }
-            ],
-            "indices": []
-          },
-          {
-            "kind": "object",
-            "properties": [
-              {
-                "name": "maxTokens",
-                "type": 2,
-                "optional": true
-              },
-              {
-                "name": "reasoningEffort",
-                "type": 2,
-                "optional": true
-              }
-            ],
-            "indices": []
-          },
-          {
-            "kind": "literal",
-            "value": true
-          },
-          {
-            "kind": "object",
-            "properties": [
-              {
-                "name": "maxTokens",
-                "type": 4,
-                "optional": true
-              },
-              {
-                "name": "model",
-                "type": 5,
-                "optional": false
-              },
-              {
-                "name": "provider",
-                "type": 5,
-                "optional": false
-              },
-              {
-                "name": "reasoningEffort",
-                "type": 5,
-                "optional": true
-              },
-              {
-                "name": "stop",
-                "type": 6,
-                "optional": true
-              },
-              {
-                "name": "temperature",
-                "type": 4,
-                "optional": true
-              }
-            ],
-            "indices": []
-          },
-          {
-            "kind": "primitive",
-            "type": "number"
-          },
-          {
-            "kind": "primitive",
-            "type": "string"
-          },
-          {
-            "kind": "array",
-            "element": 5
-          },
-          {
-            "kind": "primitive",
-            "type": "never"
-          },
-          {
-            "kind": "array",
-            "element": 9
-          },
-          {
-            "kind": "object",
-            "properties": [
-              {
-                "name": "deferLoading",
-                "type": 2,
-                "optional": true
-              },
-              {
-                "name": "description",
-                "type": 5,
-                "optional": false
-              },
-              {
-                "name": "name",
-                "type": 5,
-                "optional": false
-              },
-              {
-                "name": "parameters",
-                "type": 10,
-                "optional": false
-              }
-            ],
-            "indices": []
-          },
-          {
-            "kind": "object",
-            "properties": [],
-            "indices": [
-              {
-                "key": 5,
-                "value": 11
-              }
-            ]
-          },
-          {
-            "kind": "opaque",
-            "reason": "unknown"
-          }
-        ]
-      },
-      "names": [
-        "packages/core/session/src/types.ts#EpochHeader"
-      ],
-      "sources": [
-        "packages/core/session/src/types.ts:240"
       ]
     },
     {
@@ -68512,6 +68622,20 @@
       "sources": []
     },
     {
+      "digest": "9fab47b927fab6c71aa9fae6664d468409bb023ef74393e0586a99d2ca63e8ac",
+      "schema": {
+        "root": 0,
+        "nodes": [
+          {
+            "kind": "literal",
+            "value": "chat"
+          }
+        ]
+      },
+      "names": [],
+      "sources": []
+    },
+    {
       "digest": "a0a2e5c42e1c929445ecd1cd70f49be6b66441894ec72c08e8ae332821d4a3cb",
       "schema": {
         "root": 0,
@@ -69310,7 +69434,7 @@
       },
       "names": [],
       "sources": [
-        "packages/llm/llm/src/types.ts:459"
+        "packages/llm/llm/src/types.ts:495"
       ]
     },
     {
@@ -69517,6 +69641,20 @@
       "sources": [
         "packages/experimental/agent-team/src/types.ts:234"
       ]
+    },
+    {
+      "digest": "a52650126d512f287418a6691e22afeef590ce6a226d7b5098846f38c546a055",
+      "schema": {
+        "root": 0,
+        "nodes": [
+          {
+            "kind": "literal",
+            "value": "plan"
+          }
+        ]
+      },
+      "names": [],
+      "sources": []
     },
     {
       "digest": "a6567ccb2e530606b775371eb4fa31468d72084339968e8b0440a516a23b39dc",
@@ -70482,6 +70620,41 @@
       "sources": []
     },
     {
+      "digest": "aa13a3f969e8bcf51861b56fd279bbe980d922e9e7537f79f6cb5820a90fb8f5",
+      "schema": {
+        "root": 0,
+        "nodes": [
+          {
+            "kind": "union",
+            "types": [
+              1,
+              2,
+              3,
+              4
+            ]
+          },
+          {
+            "kind": "literal",
+            "value": "chat"
+          },
+          {
+            "kind": "literal",
+            "value": "execute"
+          },
+          {
+            "kind": "literal",
+            "value": "plan"
+          },
+          {
+            "kind": "literal",
+            "value": "review"
+          }
+        ]
+      },
+      "names": [],
+      "sources": []
+    },
+    {
       "digest": "aa2bf9e82b9fdeb94a42af20031fffa30e4e23f01f4ac39757427d4c64c407f0",
       "schema": {
         "root": 0,
@@ -70772,206 +70945,6 @@
       },
       "names": [],
       "sources": []
-    },
-    {
-      "digest": "ad0c38a0adb82a94c925456df41586d9b5f9202fca18593eae2213d4445b4585",
-      "schema": {
-        "root": 0,
-        "nodes": [
-          {
-            "kind": "object",
-            "properties": [
-              {
-                "name": "header",
-                "type": 1,
-                "optional": false
-              },
-              {
-                "name": "reason",
-                "type": 13,
-                "optional": false
-              },
-              {
-                "name": "startsSeries",
-                "type": 3,
-                "optional": true
-              }
-            ],
-            "indices": []
-          },
-          {
-            "kind": "object",
-            "properties": [
-              {
-                "name": "adapterDefaults",
-                "type": 2,
-                "optional": true
-              },
-              {
-                "name": "config",
-                "type": 4,
-                "optional": false
-              },
-              {
-                "name": "system",
-                "type": 8,
-                "optional": true
-              },
-              {
-                "name": "tools",
-                "type": 9,
-                "optional": true
-              }
-            ],
-            "indices": []
-          },
-          {
-            "kind": "object",
-            "properties": [
-              {
-                "name": "maxTokens",
-                "type": 3,
-                "optional": true
-              },
-              {
-                "name": "reasoningEffort",
-                "type": 3,
-                "optional": true
-              }
-            ],
-            "indices": []
-          },
-          {
-            "kind": "literal",
-            "value": true
-          },
-          {
-            "kind": "object",
-            "properties": [
-              {
-                "name": "maxTokens",
-                "type": 5,
-                "optional": true
-              },
-              {
-                "name": "model",
-                "type": 6,
-                "optional": false
-              },
-              {
-                "name": "provider",
-                "type": 6,
-                "optional": false
-              },
-              {
-                "name": "reasoningEffort",
-                "type": 6,
-                "optional": true
-              },
-              {
-                "name": "stop",
-                "type": 7,
-                "optional": true
-              },
-              {
-                "name": "temperature",
-                "type": 5,
-                "optional": true
-              }
-            ],
-            "indices": []
-          },
-          {
-            "kind": "primitive",
-            "type": "number"
-          },
-          {
-            "kind": "primitive",
-            "type": "string"
-          },
-          {
-            "kind": "array",
-            "element": 6
-          },
-          {
-            "kind": "primitive",
-            "type": "never"
-          },
-          {
-            "kind": "array",
-            "element": 10
-          },
-          {
-            "kind": "object",
-            "properties": [
-              {
-                "name": "deferLoading",
-                "type": 3,
-                "optional": true
-              },
-              {
-                "name": "description",
-                "type": 6,
-                "optional": false
-              },
-              {
-                "name": "name",
-                "type": 6,
-                "optional": false
-              },
-              {
-                "name": "parameters",
-                "type": 11,
-                "optional": false
-              }
-            ],
-            "indices": []
-          },
-          {
-            "kind": "object",
-            "properties": [],
-            "indices": [
-              {
-                "key": 6,
-                "value": 12
-              }
-            ]
-          },
-          {
-            "kind": "opaque",
-            "reason": "unknown"
-          },
-          {
-            "kind": "union",
-            "types": [
-              14,
-              15,
-              16,
-              17
-            ]
-          },
-          {
-            "kind": "literal",
-            "value": "initial"
-          },
-          {
-            "kind": "literal",
-            "value": "resume"
-          },
-          {
-            "kind": "literal",
-            "value": "series"
-          },
-          {
-            "kind": "literal",
-            "value": "change"
-          }
-        ]
-      },
-      "names": [],
-      "sources": [
-        "packages/core/session/src/types.ts:390"
-      ]
     },
     {
       "digest": "ad22a5ca5bbaab2e1440779cd3648e85ddfc6f73b5207394eda699555cf31430",
@@ -78027,7 +78000,7 @@
       },
       "names": [],
       "sources": [
-        "packages/llm/llm/src/types.ts:457"
+        "packages/llm/llm/src/types.ts:493"
       ]
     },
     {
@@ -78287,6 +78260,50 @@
           {
             "kind": "literal",
             "value": "fallback"
+          }
+        ]
+      },
+      "names": [],
+      "sources": []
+    },
+    {
+      "digest": "d81db9b4e7b507a4f1c334a8f6c2a61863ac026efc9e1e0f4de7303de3975c68",
+      "schema": {
+        "root": 0,
+        "nodes": [
+          {
+            "kind": "array",
+            "element": 1
+          },
+          {
+            "kind": "union",
+            "types": [
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          },
+          {
+            "kind": "literal",
+            "value": "resume"
+          },
+          {
+            "kind": "literal",
+            "value": "streaming"
+          },
+          {
+            "kind": "literal",
+            "value": "structuredOutput"
+          },
+          {
+            "kind": "literal",
+            "value": "tools"
+          },
+          {
+            "kind": "literal",
+            "value": "vision"
           }
         ]
       },
@@ -78613,6 +78630,231 @@
       },
       "names": [],
       "sources": []
+    },
+    {
+      "digest": "dc3dfd713d6028ca7f45e729d4efc75762fa20c57852a0aa4d174268d026b098",
+      "schema": {
+        "root": 0,
+        "nodes": [
+          {
+            "kind": "object",
+            "properties": [
+              {
+                "name": "adapterDefaults",
+                "type": 1,
+                "optional": true
+              },
+              {
+                "name": "config",
+                "type": 3,
+                "optional": false
+              },
+              {
+                "name": "system",
+                "type": 19,
+                "optional": true
+              },
+              {
+                "name": "tools",
+                "type": 20,
+                "optional": true
+              }
+            ],
+            "indices": []
+          },
+          {
+            "kind": "object",
+            "properties": [
+              {
+                "name": "maxTokens",
+                "type": 2,
+                "optional": true
+              },
+              {
+                "name": "reasoningEffort",
+                "type": 2,
+                "optional": true
+              }
+            ],
+            "indices": []
+          },
+          {
+            "kind": "literal",
+            "value": true
+          },
+          {
+            "kind": "object",
+            "properties": [
+              {
+                "name": "intent",
+                "type": 4,
+                "optional": true
+              },
+              {
+                "name": "maxTokens",
+                "type": 9,
+                "optional": true
+              },
+              {
+                "name": "model",
+                "type": 10,
+                "optional": false
+              },
+              {
+                "name": "provider",
+                "type": 10,
+                "optional": false
+              },
+              {
+                "name": "reasoningEffort",
+                "type": 10,
+                "optional": true
+              },
+              {
+                "name": "requiredCapabilities",
+                "type": 11,
+                "optional": true
+              },
+              {
+                "name": "stop",
+                "type": 18,
+                "optional": true
+              },
+              {
+                "name": "temperature",
+                "type": 9,
+                "optional": true
+              }
+            ],
+            "indices": []
+          },
+          {
+            "kind": "union",
+            "types": [
+              5,
+              6,
+              7,
+              8
+            ]
+          },
+          {
+            "kind": "literal",
+            "value": "execute"
+          },
+          {
+            "kind": "literal",
+            "value": "plan"
+          },
+          {
+            "kind": "literal",
+            "value": "review"
+          },
+          {
+            "kind": "literal",
+            "value": "chat"
+          },
+          {
+            "kind": "primitive",
+            "type": "number"
+          },
+          {
+            "kind": "primitive",
+            "type": "string"
+          },
+          {
+            "kind": "array",
+            "element": 12
+          },
+          {
+            "kind": "union",
+            "types": [
+              13,
+              14,
+              15,
+              16,
+              17
+            ]
+          },
+          {
+            "kind": "literal",
+            "value": "resume"
+          },
+          {
+            "kind": "literal",
+            "value": "streaming"
+          },
+          {
+            "kind": "literal",
+            "value": "structuredOutput"
+          },
+          {
+            "kind": "literal",
+            "value": "tools"
+          },
+          {
+            "kind": "literal",
+            "value": "vision"
+          },
+          {
+            "kind": "array",
+            "element": 10
+          },
+          {
+            "kind": "primitive",
+            "type": "never"
+          },
+          {
+            "kind": "array",
+            "element": 21
+          },
+          {
+            "kind": "object",
+            "properties": [
+              {
+                "name": "deferLoading",
+                "type": 2,
+                "optional": true
+              },
+              {
+                "name": "description",
+                "type": 10,
+                "optional": false
+              },
+              {
+                "name": "name",
+                "type": 10,
+                "optional": false
+              },
+              {
+                "name": "parameters",
+                "type": 22,
+                "optional": false
+              }
+            ],
+            "indices": []
+          },
+          {
+            "kind": "object",
+            "properties": [],
+            "indices": [
+              {
+                "key": 10,
+                "value": 23
+              }
+            ]
+          },
+          {
+            "kind": "opaque",
+            "reason": "unknown"
+          }
+        ]
+      },
+      "names": [
+        "packages/core/session/src/types.ts#EpochHeader"
+      ],
+      "sources": [
+        "packages/core/session/src/types.ts:240"
+      ]
     },
     {
       "digest": "dc4bd7ac827f4b1f9236f9a157a4b4cc171a0588064a611e43edd95f62c68130",
@@ -82919,6 +83161,20 @@
       "sources": []
     },
     {
+      "digest": "e704da6218847dab56255c1a19baf53ed1bb1ee88df9f829c84c1884076348d4",
+      "schema": {
+        "root": 0,
+        "nodes": [
+          {
+            "kind": "literal",
+            "value": "tools"
+          }
+        ]
+      },
+      "names": [],
+      "sources": []
+    },
+    {
       "digest": "e72269f931559e901e5e8fe1cfcbd0669fb795f43cc038ff39fba62f60403c33",
       "schema": {
         "root": 0,
@@ -86777,6 +87033,304 @@
       ]
     },
     {
+      "digest": "ef3ef7d100d899c74a7def5af245cabb12b0bcea65e49cd4e920bb9602643b60",
+      "schema": {
+        "root": 0,
+        "nodes": [
+          {
+            "kind": "object",
+            "properties": [
+              {
+                "name": "data",
+                "type": 1,
+                "optional": false
+              },
+              {
+                "name": "ignorable",
+                "type": 4,
+                "optional": true
+              },
+              {
+                "name": "seq",
+                "type": 11,
+                "optional": false
+              },
+              {
+                "name": "time",
+                "type": 11,
+                "optional": false
+              },
+              {
+                "name": "type",
+                "type": 30,
+                "optional": false
+              }
+            ],
+            "indices": []
+          },
+          {
+            "kind": "object",
+            "properties": [
+              {
+                "name": "header",
+                "type": 2,
+                "optional": false
+              },
+              {
+                "name": "reason",
+                "type": 26,
+                "optional": false
+              },
+              {
+                "name": "startsSeries",
+                "type": 4,
+                "optional": true
+              }
+            ],
+            "indices": []
+          },
+          {
+            "kind": "object",
+            "properties": [
+              {
+                "name": "adapterDefaults",
+                "type": 3,
+                "optional": true
+              },
+              {
+                "name": "config",
+                "type": 5,
+                "optional": false
+              },
+              {
+                "name": "system",
+                "type": 21,
+                "optional": true
+              },
+              {
+                "name": "tools",
+                "type": 22,
+                "optional": true
+              }
+            ],
+            "indices": []
+          },
+          {
+            "kind": "object",
+            "properties": [
+              {
+                "name": "maxTokens",
+                "type": 4,
+                "optional": true
+              },
+              {
+                "name": "reasoningEffort",
+                "type": 4,
+                "optional": true
+              }
+            ],
+            "indices": []
+          },
+          {
+            "kind": "literal",
+            "value": true
+          },
+          {
+            "kind": "object",
+            "properties": [
+              {
+                "name": "intent",
+                "type": 6,
+                "optional": true
+              },
+              {
+                "name": "maxTokens",
+                "type": 11,
+                "optional": true
+              },
+              {
+                "name": "model",
+                "type": 12,
+                "optional": false
+              },
+              {
+                "name": "provider",
+                "type": 12,
+                "optional": false
+              },
+              {
+                "name": "reasoningEffort",
+                "type": 12,
+                "optional": true
+              },
+              {
+                "name": "requiredCapabilities",
+                "type": 13,
+                "optional": true
+              },
+              {
+                "name": "stop",
+                "type": 20,
+                "optional": true
+              },
+              {
+                "name": "temperature",
+                "type": 11,
+                "optional": true
+              }
+            ],
+            "indices": []
+          },
+          {
+            "kind": "union",
+            "types": [
+              7,
+              8,
+              9,
+              10
+            ]
+          },
+          {
+            "kind": "literal",
+            "value": "chat"
+          },
+          {
+            "kind": "literal",
+            "value": "execute"
+          },
+          {
+            "kind": "literal",
+            "value": "plan"
+          },
+          {
+            "kind": "literal",
+            "value": "review"
+          },
+          {
+            "kind": "primitive",
+            "type": "number"
+          },
+          {
+            "kind": "primitive",
+            "type": "string"
+          },
+          {
+            "kind": "array",
+            "element": 14
+          },
+          {
+            "kind": "union",
+            "types": [
+              15,
+              16,
+              17,
+              18,
+              19
+            ]
+          },
+          {
+            "kind": "literal",
+            "value": "resume"
+          },
+          {
+            "kind": "literal",
+            "value": "streaming"
+          },
+          {
+            "kind": "literal",
+            "value": "structuredOutput"
+          },
+          {
+            "kind": "literal",
+            "value": "tools"
+          },
+          {
+            "kind": "literal",
+            "value": "vision"
+          },
+          {
+            "kind": "array",
+            "element": 12
+          },
+          {
+            "kind": "primitive",
+            "type": "never"
+          },
+          {
+            "kind": "array",
+            "element": 23
+          },
+          {
+            "kind": "object",
+            "properties": [
+              {
+                "name": "deferLoading",
+                "type": 4,
+                "optional": true
+              },
+              {
+                "name": "description",
+                "type": 12,
+                "optional": false
+              },
+              {
+                "name": "name",
+                "type": 12,
+                "optional": false
+              },
+              {
+                "name": "parameters",
+                "type": 24,
+                "optional": false
+              }
+            ],
+            "indices": []
+          },
+          {
+            "kind": "object",
+            "properties": [],
+            "indices": [
+              {
+                "key": 12,
+                "value": 25
+              }
+            ]
+          },
+          {
+            "kind": "opaque",
+            "reason": "unknown"
+          },
+          {
+            "kind": "union",
+            "types": [
+              15,
+              27,
+              28,
+              29
+            ]
+          },
+          {
+            "kind": "literal",
+            "value": "initial"
+          },
+          {
+            "kind": "literal",
+            "value": "change"
+          },
+          {
+            "kind": "literal",
+            "value": "series"
+          },
+          {
+            "kind": "literal",
+            "value": "request/header"
+          }
+        ]
+      },
+      "names": [],
+      "sources": []
+    },
+    {
       "digest": "ef4f00923b9edbae15c7ef05320280bf61147ca17146cf59690359bfd5e5da45",
       "schema": {
         "root": 0,
@@ -87244,7 +87798,7 @@
       },
       "names": [],
       "sources": [
-        "packages/llm/llm/src/types.ts:458"
+        "packages/llm/llm/src/types.ts:494"
       ]
     },
     {
@@ -87413,8 +87967,22 @@
         "packages/llm/llm/src/types.ts#SystemPromptUpdate"
       ],
       "sources": [
-        "packages/llm/llm/src/types.ts:396"
+        "packages/llm/llm/src/types.ts:432"
       ]
+    },
+    {
+      "digest": "f415878af6e38de372e37964330ac6db755946f64a33937c3566f050792efb48",
+      "schema": {
+        "root": 0,
+        "nodes": [
+          {
+            "kind": "literal",
+            "value": "streaming"
+          }
+        ]
+      },
+      "names": [],
+      "sources": []
     },
     {
       "digest": "f4a66f654996c093aae700ea4c434ff2ee3569fea9c0e5813ccf6afdccabd163",

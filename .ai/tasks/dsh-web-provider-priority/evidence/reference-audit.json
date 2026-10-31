@@ -1,0 +1,64 @@
+{
+  "checkedAt": "2026-10-31T23:57:42+08:00",
+  "repository": "https://github.com/miuuyy/codex-chatgpt-web",
+  "lockedTree": "https://github.com/miuuyy/codex-chatgpt-web/tree/860fa576eb47d9e20d7d8289235bfea94392d2fd",
+  "packageVersion": "6.1.17",
+  "reviewType": "scoped static source inspection; not runtime verification",
+  "modules": [
+    {
+      "path": "docs/architecture.md",
+      "source": "https://github.com/miuuyy/codex-chatgpt-web/blob/860fa576eb47d9e20d7d8289235bfea94392d2fd/docs/architecture.md",
+      "sha256": "0e3804d3e75718cdc855f75b0a6e0e2e4df543d2b9e24d1be1ba59813c63c44a",
+      "finding": "Browser-only 与 Full Harness 分离；launcher 持有浏览器 partition/lease，Codex Responses 为调用入口。"
+    },
+    {
+      "path": "src/adapters/chatgpt-web/index.ts",
+      "source": "https://github.com/miuuyy/codex-chatgpt-web/blob/860fa576eb47d9e20d7d8289235bfea94392d2fd/src/adapters/chatgpt-web/index.ts",
+      "sha256": "ff01fe03e5f280f7a2cf7856d0523be3b1c5951ebe115cbd359f6eee40ae5c0a",
+      "finding": "ChatGptWebAdapter 依赖 CodexParsedRequest、浏览器 worker 与 turn/session 控制，不能直接作为 DSH LlmAdapter 采用。"
+    },
+    {
+      "path": "src/adapters/chatgpt-web/browser-worker.ts",
+      "source": "https://github.com/miuuyy/codex-chatgpt-web/blob/860fa576eb47d9e20d7d8289235bfea94392d2fd/src/adapters/chatgpt-web/browser-worker.ts",
+      "sha256": "e27eaedf8ebf6c44c6537f99a9917099e84ef977de0547f98e3d00fca71dd0a3",
+      "finding": "Playwright UI 提交有显式发送/接受证据，并检查取消、页面关闭、会话失效和限额。仅抽查相关路径，未运行。"
+    },
+    {
+      "path": "src/adapters/chatgpt-web/conversation-key.ts",
+      "source": "https://github.com/miuuyy/codex-chatgpt-web/blob/860fa576eb47d9e20d7d8289235bfea94392d2fd/src/adapters/chatgpt-web/conversation-key.ts",
+      "sha256": "536c5de53852e4073ad7ddffc31b3cbf28bbfd292967154495a8812d8b978ca0",
+      "finding": "会话身份包含 Codex 请求/上下文身份，需映射到 DSH Session/Turn，不能将产品 ID 当作 DSH 权威。"
+    },
+    {
+      "path": "src/adapters/chatgpt-web/turn-execution.ts",
+      "source": "https://github.com/miuuyy/codex-chatgpt-web/blob/860fa576eb47d9e20d7d8289235bfea94392d2fd/src/adapters/chatgpt-web/turn-execution.ts",
+      "sha256": "1d5298973e6e22d8a48a06fc1ca249ca5ec906ee739ed67acb9e0542e479eb5f",
+      "finding": "独立 turn/text feed 与完成/取消状态，可参考流和终态处理；未证明真实账号可运行。"
+    },
+    {
+      "path": "src/chatgpt-ui/README.md",
+      "source": "https://github.com/miuuyy/codex-chatgpt-web/blob/860fa576eb47d9e20d7d8289235bfea94392d2fd/src/chatgpt-ui/README.md",
+      "sha256": "31a285c81ca7db486b800b978cfb0254cc8bf692b8a2aa7e07d2bd5de5ee9386",
+      "finding": "DOM 变化按组件识别，未知或歧义控件应拒绝，不能静默换模型/回合。"
+    },
+    {
+      "path": "LICENSE",
+      "source": "https://github.com/miuuyy/codex-chatgpt-web/blob/860fa576eb47d9e20d7d8289235bfea94392d2fd/LICENSE",
+      "sha256": "d8b06e8d802722749b8f09e4ed1f2439fde0995a09b7e47c65dca3cc54d43d6e",
+      "finding": "根许可为 MIT；本轮未复制实现代码到 packages，也未安装或运行参考软件。"
+    }
+  ],
+  "browserInventory": {
+    "observed": "native Edge application present; no connected Chrome/Edge browser extension; in-app browser has no tabs",
+    "navigation": "NOT_RUN",
+    "accountState": "UNKNOWN",
+    "realModelSubmission": "NOT_RUN"
+  },
+  "execution": {
+    "referenceInstallOrRun": "NOT_RUN",
+    "DSHAdapterPoC": "NOT_RUN",
+    "webSingleRoundTrip": "NOT_RUN",
+    "cookieExportOrGlobalCodexConfig": "NOT_RUN"
+  },
+  "nextValidation": "先核对 Browser-only 会话接入和账号条件，再做真实唯一文本标记往返及 DSH Adapter/Session 接入；按主 Plan 第 15 节独立验收。"
+}

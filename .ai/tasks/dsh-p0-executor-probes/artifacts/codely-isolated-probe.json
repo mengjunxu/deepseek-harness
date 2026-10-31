@@ -1,0 +1,35 @@
+[
+  {
+    "mode": "success",
+    "exit_code": 1,
+    "timeout": false,
+    "cancel_sent": false,
+    "duration_seconds": 1.5,
+    "requests": [],
+    "events": [],
+    "stderr_present": true,
+    "diagnostic": "Codely OAuth prerequisite blocks this isolated profile before model submission."
+  },
+  {
+    "mode": "unauthorized",
+    "exit_code": 1,
+    "timeout": false,
+    "cancel_sent": false,
+    "duration_seconds": 1.5,
+    "requests": [],
+    "events": [],
+    "stderr_present": true,
+    "diagnostic": "Codely OAuth prerequisite blocks this isolated profile before model submission."
+  },
+  {
+    "mode": "hang",
+    "exit_code": 1,
+    "timeout": false,
+    "cancel_sent": false,
+    "duration_seconds": 15.02,
+    "requests": [],
+    "events": [],
+    "stderr_present": true,
+    "diagnostic": "Codely OAuth prerequisite blocks this isolated profile before model submission."
+  }
+]

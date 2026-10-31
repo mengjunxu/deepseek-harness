@@ -6,6 +6,10 @@
 
 源码：[`packages/llm/llm/src/types.ts`](../../packages/llm/llm/src/types.ts)
 
+## Provider admission metadata
+
+`LlmProviderInfo.policy` 携带注册拥有的 `LlmProviderPolicy`：`LlmUsageSource`、`LlmProviderAvailability`、值为 `LlmCapabilitySupport` 的能力、可选 `gateReason` 和 `balance.status: unknown`。`resolveProviderPolicy` 解析运维输入，将未声明事实保持为 unknown，并冻结结果。声明政策时仅 ready 可准入推理，实验来源保持 gated。目录查询与准入独立。已准备调用在路线替换后保留捕获的政策。[LLM README](../../packages/llm/llm/README.zh.md)负责配置用法与限制。
+
 <a id="content-blocks-and-messages"></a>
 
 ## 内容块与消息
@@ -465,12 +469,62 @@ interface AdapterRegistrationHandle {
 ```
 
 ```ts type-equiv
+/** Declared support for a capability; unknown is not permission to infer support. */
+type LlmCapabilitySupport = 'supported' | 'unsupported' | 'unknown'
+```
+
+```ts type-equiv
+/** Usage origin, independent of authentication mechanism or model name. */
+type LlmUsageSource = 'work_codex_shared' | 'chatgpt_web_unofficial' | 'api_metered'
+  | 'third_party' | 'local' | 'experimental_unverified' | 'unknown'
+```
+
+```ts type-equiv
+/** Route admission state; only ready routes may prepare or dispatch inference. */
+type LlmProviderAvailability = 'ready' | 'unconfigured' | 'auth_required' | 'limited' | 'gated' | 'unavailable'
+```
+
+```ts type-equiv
+/** Resolved policy captured with one adapter registration; it contains no credentials. */
+interface LlmProviderPolicy {
+  /** Billing or usage origin explicitly declared by the provider owner. */
+  readonly usageSource: LlmUsageSource
+  /** Admission state, independent of advisory model catalog membership. */
+  readonly availability: LlmProviderAvailability
+  /** Operator-facing explanation when the route cannot be used. */
+  readonly gateReason?: string
+  /** Provider-wide declarations; model-specific support still requires exact-model metadata. */
+  readonly capabilities: Readonly<Record<'streaming' | 'tools' | 'structuredOutput' | 'vision' | 'resume', LlmCapabilitySupport>>
+  /** No service balance is inferred from local request counts or successful login. */
+  readonly balance: { readonly status: 'unknown' }
+}
+```
+
+```ts type-equiv
+/** Explicit purpose of one conversational model request; independent of its executor. */
+type LlmRequestIntent = 'chat' | 'plan' | 'review' | 'execute'
+```
+
+```ts type-equiv
+/** Provider-wide capability that a request may explicitly require. */
+type LlmProviderCapability = keyof LlmProviderPolicy['capabilities']
+```
+
+```ts type-equiv
+/** Optional policy configuration; resolution supplies only unknown facts and ready admission defaults. */
+type LlmProviderPolicyInput = Partial<Omit<LlmProviderPolicy, 'capabilities'>>
+  & { readonly capabilities?: Partial<LlmProviderPolicy['capabilities']> }
+```
+
+```ts type-equiv
 /** Display metadata for one registered provider route. */
 interface LlmProviderInfo {
   /** Provider route key used by {@link GenerateOptions.provider}. */
   id: string
   /** Human-readable provider name for selectors and diagnostics. */
   name: string
+  /** Explicit route policy; omission preserves legacy routing and declares no usage or capability facts. */
+  policy?: LlmProviderPolicy
 }
 ```
 
@@ -606,6 +660,10 @@ interface GenerateOptions {
   /** Registered provider route selecting the adapter instance. */
   provider: string
   model: string
+  /** Explicit conversational intent, recorded in the request header and hidden from model content. */
+  intent?: LlmRequestIntent
+  /** Provider-wide capabilities that must be declared supported before adapter preparation. */
+  requiredCapabilities?: LlmProviderCapability[]
   /** Adapter-owned reasoning effort selected for this exact model. */
   reasoningEffort?: ReasoningEffortId
   /**
@@ -742,6 +800,8 @@ interface LlmDiscoveredModel {
 
 ### 请求信封：`LlmCallConfig` 与记录的 header
 
+`LlmCallConfig.intent` 记录显式的 chat、plan、review 或 execute 用途，不向模型内容添加文字。`requiredCapabilities` 记录该请求要求的提供方能力声明；未知和不支持的声明都会在适配器准备前拒绝，直接流式调用也适用。可选的[意图路由插件](../../packages/core/agent-default-model/README.zh.md#use-this-package)通过既有 Agent 瀑布流选择路线。
+
 循环从已记录状态构建每个请求。`EpochHeader` 记录调用配置，标记由适配器默认值提供的字段，并通过完整的 `request/header` 快照记录权威返回工具顺序（由 `toolOrder` 配置；未配置时按字典序）。渲染后的提示词是派生历史——surface 第 0 号节点上的 `system/message`，加上 `in-history` 路由追加的任何后续系统节点——因此请求头与派生历史共同使请求可由会话日志重建。见 [session.md](session.zh.md#the-request-header-event-requestheader) 与[可重建性 Agent Note](../../.agents/notes/implemented/architecture/2026-07-05-reconstructable-requests.zh.md)。
 
 `agent/request` 接收冻结的调用配置种子，并可返回替代值以切换提供方、模型、推理强度或采样参数。waterfall（瀑布式事件）开始前，循环会移除标记为适配器默认值的值，使确切模型准备过程填入所选路由的当前值；未带标记的显式设置仍保留在提议中。waterfall 结束后，准备过程会在轮次信号控制下拒绝显式指定但不受支持的推理强度 ID（不自动调整），并记录生效配置以及由适配器默认值提供的字段。步骤准入时，该 waterfall 与准备过程在组装和 `step/start` 之后、系统提示词与已接纳用户批次提交之前运行；在任一阶段取消都不会提交这两者。已准备调用的能力决定提示词协调，调用直至分派完成始终持有同一项适配器注册。到达 `llm/stream` 的请求会被深度冻结，因此变更会抛异常；请求还携带进程本地循环标识，使观察者不会把单独记录的冻结辅助调用误认成对话请求。
@@ -751,8 +811,10 @@ interface LlmDiscoveredModel {
 FIXME(call-config-shape)：重新审视其余哪些字段出于缓存目的确实属于 epoch 层级（`model` 和模型持有的推理强度已明确属于；采样标量目前出于谨慎保留在此）。
 
 ```ts type-equiv
+// TODO(call-config-shape): Revisit which fields are epoch-level for cache reuse
+// and where provider-specific request options belong.
 /**
- * Provider, model, reasoning effort, and sampling scalars of one conversation's
+ * Model controls and model-hidden intent/admission inputs for one conversation's
  * requests. Every field maps 1:1 onto the same-named `GenerateOptions` field;
  * the loop builds requests from the logged header rather than accepting these
  * per call.
@@ -760,6 +822,10 @@ FIXME(call-config-shape)：重新审视其余哪些字段出于缓存目的确�
 interface LlmCallConfig {
   provider: string
   model: string
+  /** Explicit request purpose; omission preserves an unclassified request. */
+  intent?: LlmRequestIntent
+  /** Required provider declarations; unknown and unsupported both reject. */
+  requiredCapabilities?: LlmProviderCapability[]
   reasoningEffort?: ReasoningEffortId
   temperature?: number
   maxTokens?: number

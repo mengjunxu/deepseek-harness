@@ -1,0 +1,128 @@
+[
+  {
+    "mode": "success",
+    "exit_code": 0,
+    "timeout": false,
+    "cancel_sent": false,
+    "duration_seconds": 1.7,
+    "requests": [
+      {
+        "path": "/v1/chat/completions",
+        "stream": true,
+        "model": "p0-mock"
+      }
+    ],
+    "events": [
+      {
+        "type": "init",
+        "timestamp": "2026-10-29T16:54:18.150Z",
+        "session_id": "3f52509bf4264",
+        "model": "p0-mock"
+      },
+      {
+        "type": "message",
+        "timestamp": "2026-10-29T16:54:18.151Z",
+        "role": "user",
+        "content": "Reply exactly DSH_P0_OK. Do not call tools.",
+        "delta": false
+      },
+      {
+        "type": "message",
+        "timestamp": "2026-10-29T16:54:18.177Z",
+        "role": "assistant",
+        "content": "DSH_P0_OK",
+        "delta": true
+      },
+      {
+        "type": "result",
+        "timestamp": "2026-10-29T16:54:18.180Z",
+        "status": "success",
+        "stats": {
+          "total_tokens": 0,
+          "input_tokens": 0,
+          "output_tokens": 0,
+          "duration_ms": 30,
+          "tool_calls": 0,
+          "agent_calls": 0
+        }
+      }
+    ],
+    "stderr_present": false
+  },
+  {
+    "mode": "unauthorized",
+    "exit_code": 1,
+    "timeout": false,
+    "cancel_sent": false,
+    "duration_seconds": 1.69,
+    "requests": [
+      {
+        "path": "/v1/chat/completions",
+        "stream": true,
+        "model": "p0-mock"
+      }
+    ],
+    "events": [
+      {
+        "type": "init",
+        "timestamp": "2026-10-29T16:54:19.850Z",
+        "session_id": "af717fe928035",
+        "model": "p0-mock"
+      },
+      {
+        "type": "message",
+        "timestamp": "2026-10-29T16:54:19.851Z",
+        "role": "user",
+        "content": "Reply exactly DSH_P0_OK. Do not call tools.",
+        "delta": false
+      },
+      {
+        "type": "error",
+        "timestamp": "2026-10-29T16:54:19.870Z",
+        "severity": "error",
+        "message": "401 P0 mock authentication rejected"
+      },
+      {
+        "type": "result",
+        "timestamp": "2026-10-29T16:54:19.871Z",
+        "status": "error",
+        "error": {
+          "type": "MODEL_ERROR",
+          "message": "401 P0 mock authentication rejected"
+        }
+      }
+    ],
+    "stderr_present": true,
+    "diagnostic": "Loopback model returned HTTP 401; see sanitized stream error events."
+  },
+  {
+    "mode": "hang",
+    "exit_code": -15,
+    "timeout": false,
+    "cancel_sent": true,
+    "duration_seconds": 1.69,
+    "requests": [
+      {
+        "path": "/v1/chat/completions",
+        "stream": true,
+        "model": "p0-mock"
+      }
+    ],
+    "events": [
+      {
+        "type": "init",
+        "timestamp": "2026-10-29T16:54:21.550Z",
+        "session_id": "bf6482ea87dcb",
+        "model": "p0-mock"
+      },
+      {
+        "type": "message",
+        "timestamp": "2026-10-29T16:54:21.550Z",
+        "role": "user",
+        "content": "Reply exactly DSH_P0_OK. Do not call tools.",
+        "delta": false
+      }
+    ],
+    "stderr_present": false
+  }
+]

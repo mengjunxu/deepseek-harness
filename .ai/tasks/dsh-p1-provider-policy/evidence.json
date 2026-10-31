@@ -1,0 +1,19 @@
+{
+  "date": "2026-10-30",
+  "fixed_ref": null,
+  "source_sha256": {
+    "packages/llm/llm/src/types.ts": "79472f1972db4a0fde6bee9021883b9527af99780844673987a806f388fe0464",
+    "packages/llm/llm/src/index.ts": "4da4e0924e668460fa6c12d98f28d8397420e99820861f885b29f0644e78bde8",
+    "packages/llm/llm/src/provider-policy.ts": "7c4fd9c5b26edf329ae03defda0338003495ac4efd4bfa2223b4190f89c7c8ee",
+    "packages/llm/llm/tests/provider-policy.spec.ts": "ec91e8dd11160d6bf12fec40d01e344e39e279e014b72d60d49b3a43e8e8d5f1",
+    "packages/experimental/chatgpt-plan/src/index.ts": "abd7092cd505336a31e243f532ee3fea657f081c53e57635a4101e2329587073",
+    "snapshots/session/provider-policy-gated/session.v4.jsonl": "030e9b23e3c60b722d6a6d0dbda9cd8a6032deef2f6c2d05878bbe1ba2f22b64"
+  },
+  "tests": {
+    "unit": 115,
+    "keyless_profile_snapshot": 1,
+    "type_equivalence_blocks": 469,
+    "persistence_roots": 62
+  },
+  "scope": "QR-01 metadata/admission slice only; parent work remains PARTIAL"
+}

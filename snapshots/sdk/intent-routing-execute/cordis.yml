@@ -1,0 +1,99 @@
+# SDK snapshot-record composition without provider-specific upload metadata.
+
+- id: skill-filesystem
+  name: '@deepseek-ai/dsh-skill-filesystem'
+  config:
+    includeDefaultRoots: false
+
+- id: llm-deepseek
+  name: '@deepseek-ai/dsh-llm-deepseek-api-key'
+  config:
+    thinking: enabled
+    reasoningEffort: max
+
+- id: session-persistence-jsonl
+  name: '@deepseek-ai/dsh-session-persistence-jsonl'
+  config:
+    root: !!js dshHomePath('sessions')
+    compression: !!js "process.env.DSH_SNAPSHOT === undefined ? 'zstd' : 'none'"
+
+- id: tool-subagent
+  name: '@deepseek-ai/dsh-tool-subagent'
+  config:
+    provider: spawn
+    toolName: subagent
+    backgroundMode: one-shot
+    enableRunInBackground: false
+    maxDepth: 1
+
+- id: session-log-deepseek
+  config:
+    enabled: false
+
+- id: llm-pi-ai
+  name: '@deepseek-ai/dsh-llm-pi-ai'
+  config:
+    providers:
+      intent-chat:
+        api: openai-completions
+        baseURL: http://127.0.0.1:9/v1
+        models:
+          - id: chat-fixture
+        policy:
+          usageSource: local
+          capabilities:
+            tools: supported
+      intent-plan:
+        api: openai-completions
+        baseURL: http://127.0.0.1:9/v1
+        models:
+          - id: plan-fixture
+        policy:
+          usageSource: local
+          capabilities:
+            tools: supported
+      intent-review:
+        api: openai-completions
+        baseURL: http://127.0.0.1:9/v1
+        models:
+          - id: review-fixture
+        policy:
+          usageSource: local
+          capabilities:
+            tools: supported
+      intent-execute:
+        api: openai-completions
+        baseURL: http://127.0.0.1:9/v1
+        models:
+          - id: execute-fixture
+        policy:
+          usageSource: local
+          capabilities:
+            tools: supported
+- insert:
+    - id: agent-intent-routing
+      name: '@deepseek-ai/dsh-agent-default-model/intent-routing'
+      config:
+        routing:
+          intent: execute
+          routes:
+            chat:
+              provider: intent-chat
+              model: chat-fixture
+              requiredCapabilities:
+                - tools
+            plan:
+              provider: intent-plan
+              model: plan-fixture
+              requiredCapabilities:
+                - tools
+            review:
+              provider: intent-review
+              model: review-fixture
+              requiredCapabilities:
+                - tools
+            execute:
+              provider: intent-execute
+              model: execute-fixture
+              requiredCapabilities:
+                - tools

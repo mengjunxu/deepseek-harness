@@ -6,7 +6,7 @@ import { z } from 'zod'
 import { Remote, TypertRemoteService } from '@deepseek-ai/dsh-typert-protocol'
 import { credentialKey } from '@deepseek-ai/dsh-credentials'
 import type {} from '@deepseek-ai/dsh-authorization'
-import { LlmAdapter, LlmError, attributionHeaders } from '@deepseek-ai/dsh-llm'
+import { LlmAdapter, LlmError, attributionHeaders, resolveProviderPolicy } from '@deepseek-ai/dsh-llm'
 import type { GenerateOptions, LlmModelInfo, LlmResolvedModelInfo, StreamChunk } from '@deepseek-ai/dsh-llm'
 import { toPiContext, toStreamChunks } from '@deepseek-ai/dsh-llm-pi-ai'
 import { openAIResponsesApi } from '@earendil-works/pi-ai/api/openai-responses.lazy'
@@ -205,7 +205,10 @@ export class ChatgptPlan extends TypertRemoteService {
 class PlanAdapter extends LlmAdapter {
   constructor(private readonly account: ChatgptPlan, private readonly config: ProtocolOptions, private readonly lifetime: AbortSignal,
   ) { super() }
-  override providerInfo() { return { id: ROUTE, name: 'ChatGPT plan' } }
+  override providerInfo() { return { id: ROUTE, name: 'ChatGPT plan', policy: resolveProviderPolicy({
+    usageSource: 'work_codex_shared', capabilities: { streaming: 'supported', tools: 'supported',
+      vision: 'unsupported', resume: 'unsupported' },
+  }) } }
   override async listModels(): Promise<readonly LlmModelInfo[]> {
     const token = await this.account.accessToken()
     const catalog = catalogSchema.parse(await jsonRequest(`${RESOURCE}/models`, {

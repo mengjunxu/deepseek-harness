@@ -97,7 +97,7 @@ kind: "package-reference"
 - 输入仅支持文本，temperature、输出 token 上限、停止序列和显式推理控制均被拒绝。
 - 后备上下文容量按插件配置，尚未细分到各账户模型。
 - 真实提供方访问、订阅限制与可用模型取决于 OpenAI 和选定账户。
-- SIWC 使用 Codex / ChatGPT Work 用量，计划分类为 `work_codex_shared`，不是普通 ChatGPT 聊天额度；见 [OpenAI 说明](https://learn.chatgpt.com/docs/sign-in-with-chatgpt)。本插件未实现按意图的额度保护或 Usage Ledger。
+- SIWC 使用 Codex / ChatGPT Work 用量，在 Provider 政策中声明为 `work_codex_shared`，不是普通 ChatGPT 聊天额度；见 [OpenAI 说明](https://learn.chatgpt.com/docs/sign-in-with-chatgpt)。本插件未实现按意图的额度保护或 Usage Ledger。
 
 <a id="dev-note"></a>
 ### 开发备注

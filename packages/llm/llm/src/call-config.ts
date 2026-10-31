@@ -1,12 +1,12 @@
 /**
  * Conversation call configuration and freeze utilities. Provider routing,
- * model, reasoning effort, and sampling values are request-header state that
- * can affect cache reuse; request waterfalls replace them and the loop logs
+ * model, reasoning effort, sampling values, and explicit policy inputs are
+ * request-header state; request waterfalls replace them and the loop logs
  * changed snapshots instead of allowing silent per-call drift.
  * @module dsh-llm/call-config
  */
 
-import type { GenerateOptions } from './types.ts'
+import type { GenerateOptions, LlmRequestIntent, LlmProviderCapability } from './types.ts'
 import type { ReasoningEffortId } from './brand.ts'
 
 /** Process-local identities of request objects assembled by dsh-agent-loop. */
@@ -15,7 +15,7 @@ const AGENT_LOOP_REQUESTS = new WeakSet<GenerateOptions>()
 // TODO(call-config-shape): Revisit which fields are epoch-level for cache reuse
 // and where provider-specific request options belong.
 /**
- * Provider, model, reasoning effort, and sampling scalars of one conversation's
+ * Model controls and model-hidden intent/admission inputs for one conversation's
  * requests. Every field maps 1:1 onto the same-named `GenerateOptions` field;
  * the loop builds requests from the logged header rather than accepting these
  * per call.
@@ -23,6 +23,10 @@ const AGENT_LOOP_REQUESTS = new WeakSet<GenerateOptions>()
 export interface LlmCallConfig {
   provider: string
   model: string
+  /** Explicit request purpose; omission preserves an unclassified request. */
+  intent?: LlmRequestIntent
+  /** Required provider declarations; unknown and unsupported both reject. */
+  requiredCapabilities?: LlmProviderCapability[]
   reasoningEffort?: ReasoningEffortId
   temperature?: number
   maxTokens?: number
@@ -44,16 +48,21 @@ export interface LlmCallConfigAdapterDefaults {
  * logged header snapshot) or the held one restated.
  * @param a - one configuration.
  * @param b - the other.
- * @returns whether every field (including the `stop` list, element-wise) matches.
+ * @returns whether every field, including stop sequences and required capabilities, matches element-wise.
  */
 export function callConfigEquals(a: LlmCallConfig, b: LlmCallConfig): boolean {
   if (
     a.provider !== b.provider
     || a.model !== b.model
+    || a.intent !== b.intent
     || a.reasoningEffort !== b.reasoningEffort
     || a.temperature !== b.temperature
     || a.maxTokens !== b.maxTokens
   ) return false
+  if (a.requiredCapabilities === undefined || b.requiredCapabilities === undefined) {
+    if (a.requiredCapabilities !== b.requiredCapabilities) return false
+  } else if (a.requiredCapabilities.length !== b.requiredCapabilities.length
+    || a.requiredCapabilities.some((value, index) => value !== b.requiredCapabilities?.[index])) return false
   if (a.stop === undefined || b.stop === undefined) return a.stop === b.stop
   return a.stop.length === b.stop.length && a.stop.every((s, i) => s === b.stop?.[i])
 }

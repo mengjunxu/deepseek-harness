@@ -1,0 +1,50 @@
+{
+  "chat": {
+    "config": {
+      "provider": "intent-chat",
+      "model": "chat-fixture",
+      "intent": "chat",
+      "requiredCapabilities": [
+        "tools"
+      ]
+    },
+    "final_response": "INTENT_OK",
+    "finish_reason": "completed"
+  },
+  "plan": {
+    "config": {
+      "provider": "intent-plan",
+      "model": "plan-fixture",
+      "intent": "plan",
+      "requiredCapabilities": [
+        "tools"
+      ]
+    },
+    "final_response": "INTENT_OK",
+    "finish_reason": "completed"
+  },
+  "review": {
+    "config": {
+      "provider": "intent-review",
+      "model": "review-fixture",
+      "intent": "review",
+      "requiredCapabilities": [
+        "tools"
+      ]
+    },
+    "final_response": "INTENT_OK",
+    "finish_reason": "completed"
+  },
+  "execute": {
+    "config": {
+      "provider": "intent-execute",
+      "model": "execute-fixture",
+      "intent": "execute",
+      "requiredCapabilities": [
+        "tools"
+      ]
+    },
+    "final_response": "INTENT_OK",
+    "finish_reason": "completed"
+  }
+}

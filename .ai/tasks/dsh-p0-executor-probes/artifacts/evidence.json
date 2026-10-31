@@ -1,0 +1,56 @@
+{
+  "date": "2026-10-30",
+  "host_codex": "0.165.0-alpha.1.2",
+  "provider_codex": "0.153.4",
+  "codely": "1.0.0-nightly.53",
+  "tests": [
+    {
+      "command": "pnpm exec vitest run packages/subagent/subagent-codex/tests/real-product.spec.ts packages/subagent/subagent-codex/tests/subagent-codex.spec.ts packages/subagent/subagent-codex/tests/real-product-cleanup.spec.ts --reporter=dot",
+      "result": "PASS",
+      "files": 3,
+      "tests": 71
+    },
+    {
+      "command": "pnpm exec vitest run apps/cli/tests/codely-local.spec.ts --reporter=dot",
+      "result": "PASS",
+      "files": 1,
+      "tests": 3
+    },
+    {
+      "command": "pnpm exec vitest run --config vitest.e2e.config.ts packages/subagent/subagent-codex/tests/loader-composition.e2e.ts --reporter=dot",
+      "result": "PASS",
+      "files": 1,
+      "tests": 1
+    }
+  ],
+  "source_sha256": {
+    "packages/subagent/subagent-codex/src/run.ts": "fd5c8bf5b1ca5db72199417c418c5002eca28ecef9911fa459e5f974a6036e4a",
+    "packages/subagent/subagent-codex/src/wire.ts": "317637b5ea9b42a9785240d28da9218d1fd40dfcce449c7dccb78e5c7f9be8d3",
+    "packages/subagent/subagent-codex/package.json": "c788d2b5a5c0164d0b46adcad067ee3a827e16c7020637839ae397c1c889cc97",
+    "apps/cli/config/examples/codely-local/run.mjs": "decda12d9a6e20492489d03471b28e2d8c0eeabb82bc553b111008cf8cfb252b",
+    "apps/cli/tests/codely-local.spec.ts": "f0ee40e235152dd7ebc7eb68aeae96985c4f5167d24c7a3c1d05a04a760d4d40",
+    "packages/subagent/subagent-codex/tests/real-product.spec.ts": "0f62eab6a3ee95922b1fd31b470d5ff27bf237db1f648ff19d9ba1d3b9ef3725"
+  },
+  "limitations": [
+    "No real OpenAI API Key test: user exemption.",
+    "Isolated Codely HOME blocks model inference on required Codely OAuth; initial zero-request diagnostics retained.",
+    "User authorized the existing native login environment. Authenticated real CLI with loopback model passed text stream, 401 failure and SIGTERM cancellation; no production model inference or tool-write claim. ACP initialize/session-new succeeded, loadSession=false.",
+    "Codex keyless product uses fake loopback model; native product may also attempt optional public plugin metadata fetches with no real product login."
+  ],
+  "codely_native_smoke": {
+    "command": "python /tmp/dsh-p0-codely-authenticated.py",
+    "saved_runner": "codely-authenticated-probe.py",
+    "result": "PASS",
+    "success_exit": 0,
+    "http_401_exit": 1,
+    "cancel_exit": -15,
+    "stream_event_types": [
+      "init",
+      "message",
+      "error",
+      "result"
+    ],
+    "requests_per_case": 1,
+    "runtime_settings": "User-authorized native login, temporary workspace, fake local model/key, plan/strict, no agents, no automatic memory edits, no UPM, no telemetry, next-speaker check disabled, flash model fixed to local fixture."
+  }
+}

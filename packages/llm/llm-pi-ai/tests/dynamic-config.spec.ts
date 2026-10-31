@@ -310,3 +310,48 @@ describe('request-level dynamic profiles', () => {
     expect(ctx.llm.listProviders().map(provider => provider.id)).toEqual(before)
   })
 })
+
+describe('provider policy settings', () => {
+  it('captures policy changes for new requests while a prepared call keeps its admitted generation', async () => {
+    vi.stubEnv('PI_POLICY_FIXTURE_KEY', '')
+    const dir = await home()
+    await writeFile(join(dir, '.credentials.yaml'), 'version: 1\nrefs:\n  PI_POLICY_FIXTURE_KEY: fixture-only\n', { mode: 0o600 })
+    const server = await mockServer([{ events: textEvents }, { events: textEvents }])
+    const ctx = await boot(dir, { providers: { 'policy-fixture': {
+      api: 'openai-completions', baseURL: server.url, models: [{ id: 'policy-model' }],
+      apiKeyEnv: 'PI_POLICY_FIXTURE_KEY', policy: { usageSource: 'api_metered' },
+    } } })
+    const call = await ctx.llm.prepareCall({ provider: 'policy-fixture', model: 'policy-model' })
+    await configurations.get(ctx)!.update({ providers: { 'policy-fixture': {
+      policy: { availability: 'gated', gateReason: 'Operator closed this route' },
+    } } })
+    expect(ctx.llm.listProviders()).toMatchObject([{ id: 'policy-fixture', policy: {
+      usageSource: 'api_metered', availability: 'gated', gateReason: 'Operator closed this route',
+    } }])
+    await expect(ctx.llm.prepareCall({ provider: 'policy-fixture', model: 'policy-model' }))
+      .rejects.toMatchObject({ code: 'PROVIDER_UNAVAILABLE' })
+    expect((await assemble(ctx, { provider: 'policy-fixture', model: 'policy-model', messages: [] })).finish)
+      .toMatchObject({ kind: 'error', failure: { code: 'PROVIDER_UNAVAILABLE' } })
+    expect(server.requests).toHaveLength(0)
+    const received = []
+    for await (const chunk of call.stream({ ...call.config, messages: [] })) received.push(chunk)
+    expect(received).toContainEqual(expect.objectContaining({ type: 'text-delta', text: 'hello' }))
+    expect(server.requests).toHaveLength(1)
+    await configurations.get(ctx)!.update({ providers: { 'policy-fixture': { policy: { availability: 'ready' } } } })
+    expect((await assemble(ctx, { provider: 'policy-fixture', model: 'policy-model', messages: [] })).message.content)
+      .toEqual([{ type: 'text', text: 'hello' }])
+    expect(server.requests).toHaveLength(2)
+  })
+
+  it('rejects an unapproved policy update without changing registered policy', async () => {
+    const ctx = await boot(await home(), { providers: { openai: { policy: { usageSource: 'api_metered' } } } })
+    const before = ctx.llm.listProviders()
+    const stored: unknown = configurations.get(ctx)!.entry.options.config
+    await expect(configurations.get(ctx)!.update({ providers: { openai: {
+      policy: { usageSource: 'chatgpt_web_unofficial', availability: 'ready' },
+    } } })).rejects.toThrow('Invalid LLM provider policy')
+    expect(configurations.get(ctx)!.entry.options.config).toEqual(stored)
+    expect(ctx.llm.listProviders()).toEqual(before)
+    await expect(ctx.llm.prepareCall({ provider: 'openai', model: 'gpt-4o' })).resolves.toBeDefined()
+  })
+})

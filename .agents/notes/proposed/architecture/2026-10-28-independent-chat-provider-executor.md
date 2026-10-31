@@ -16,6 +16,8 @@ Create a minimal TaskSpec only for execution. Make PlanRevision and model Review
 
 Keep Session logs authoritative and map task semantics to existing MGSD facts, jobs and storage before adding missing fields. Add persistence transitions and replay evidence before changing MGSD execution paths. Keep a revocable, scoped Tool Bridge optional and independent of engineering execution. Prefer a DSH Tool Host; an active Codex Native Host requires its own PoC and otherwise reports unsupported. Quota policy must block unapproved paid or cross-source fallback and distinguish reported usage from estimates.
 
+The current validation priority is the Web ChatGPT Provider, following the user-directed order in plan section 15 (`../../../../docs/workflows/DSH_IMPLEMENTATION_PLAN.md`). Use [codex-chatgpt-web](https://github.com/miuuyy/codex-chatgpt-web) as the primary technical reference and validate its Browser-only path before requiring a Full Harness, MCP tunnel or external Executor. Keep browser feasibility, DSH adapter integration and production admission as separate results; reference claims and Mock/Manual runs do not establish real Web success. This priority does not change the proposal’s implementation status.
+
 ## Existing decisions
 
 Retain [dynamic workflows](../../implemented/feature/2026-07-05-dynamic-workflows.md) and [native subagent backends](../../implemented/feature/2026-08-04-claude-code-and-codex-subagent-backends.md). They own script workflows and product-process lifecycle; this proposal adds product selection and task policy without superseding those decisions. The scoped supersession audit found no implemented note to archive. Developer collaboration WORKFLOW remains separate from runtime template policy.
@@ -34,4 +36,4 @@ The `../../../../docs/workflows/DSH_IMPLEMENTATION_PLAN.md` maps implementation 
 
 ## Risks
 
-MGSD plan approval and review completion are coupled today. Loosening them without versioned facts could invalidate historical replay or remove authorization. Web account admission, supported models and active Codex tools remain unverified external dependencies; reference code and its license do not grant account access. P0 changes documentation only and does not approve P1–P7 implementation.
+MGSD plan approval and review completion are coupled today. Loosening them without versioned facts could invalidate historical replay or remove authorization. Web account admission, supported models and active Codex tools remain unverified external dependencies; reference code and its license do not grant account access. Stage and account authorization follow the current Plan; the Web-first validation order does not grant production access or complete the remaining acceptance criteria.

@@ -3,8 +3,11 @@
 # After editing either side, bring the other along and re-record with:
 #   pnpm run verify-translation-pairing --write docs/subsystems/llm-streaming.md
 /llm-streaming:
-  en: 989057ec9786a505
-  zh: 03e20367da473086
+  en: 607839c43380a8f5
+  zh: b535386aa9ffcf17
+/llm-streaming/provider-admission-metadata:
+  en: 5425f52832de0b1a
+  zh: c8be939927f6d96e
 /llm-streaming/content-blocks-and-messages:
   en: 365ecc228f756098
   zh: 396e68661a789854
@@ -39,8 +42,8 @@
   en: ddca84b082554567
   zh: 804ffb1cb0c94bfa
 /llm-streaming/the-model-request/the-request-envelope-llmcallconfig-and-the-logged-header:
-  en: 8b6e6b65ccea943f
-  zh: bce1edd6386e37b1
+  en: 0f83695e4a977ed9
+  zh: 244e628209bf08f5
 /llm-streaming/official-deepseek-request-extensions:
   en: b19f291f094157ed
   zh: 682f13a833e8bb52

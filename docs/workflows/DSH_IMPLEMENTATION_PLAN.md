@@ -1,6 +1,6 @@
 # DSH v2 — Codex / Codely 通用开发执行计划
 
-> 版本：vNext.4-merged-draft | 更新：2026-10-28 | 状态：**增量计划；现有基础可复用，完整产品尚未验收**
+> 版本：vNext.4-merged-draft | 更新：2026-11-01 | 状态：**增量计划；现有基础可复用，完整产品尚未验收**
 >
 > 产品需求：[vNext.4 PRD](../myPlan/DSH_PRD_vNext_4_2026-10-27.md)；有效任务状态与证据见第 12 节。历史文档集中在 [legacy](../legacy/README.zh.md)。
 >
@@ -8,7 +8,9 @@
 >
 > 归属：**独立、跨项目的 DSH（通用 Agent Harness 平台）**。不与 Unity、MGSD 或任何具体业务项目绑定。
 
-本计划已合并用户提供的《DSH ChatGPT Integration Plan vNext（2026-10-26）》。第 10 节规定当前阶段顺序、额度分类、复用矩阵和新增任务；原 `P0-*` 至 `P4-*` 编号保留，第 4 节描述原任务验收。新方案中的 P0–P5 在本仓库记为 CG0–CG5，避免与旧编号冲突。阶段不代表任务已完成，实际状态以 Checklist 和对应 Task 证据为准。本轮增量合并 [vNext.4 PRD](../myPlan/DSH_PRD_vNext_4_2026-10-27.md) 与 [Plan](../legacy/myPlan/DSH_Implementation_Plan_vNext_4_2026-10-27.md)，并对照 [v5.1 旧计划](../legacy/Generic_Agent_Harness_v5_1_CN_Technical_Design_and_Codex_Implementation_Plan.md)。第 11 节拥有本轮 VN4 任务映射；与前文阶段冲突时按第 11 节执行。本轮止于 P0 文档审计，后续业务实现须另行授权。
+本计划已合并用户提供的《DSH ChatGPT Integration Plan vNext（2026-10-26）》。第 10 节规定当前阶段顺序、额度分类、复用矩阵和新增任务；原 `P0-*` 至 `P4-*` 编号保留，第 4 节描述原任务验收。新方案中的 P0–P5 在本仓库记为 CG0–CG5，避免与旧编号冲突。阶段不代表任务已完成，实际状态以 Checklist 和对应 Task 证据为准。本轮增量合并 [vNext.4 PRD](../myPlan/DSH_PRD_vNext_4_2026-10-27.md) 与 [Plan](../legacy/myPlan/DSH_Implementation_Plan_vNext_4_2026-10-27.md)，并对照 [v5.1 旧计划](../legacy/Generic_Agent_Harness_v5_1_CN_Technical_Design_and_Codex_Implementation_Plan.md)。第 11 节拥有本轮 VN4 任务映射；当前验证优先级以第 15 节为准，其余任务映射按第 11 节执行。当前用户已授权进入 P1；QR-01 的 Provider 元数据、政策配置与显式意图输入已有验收证据；QR-03 的 opt-in 路由部分已实施，P2–P7 未启动。
+
+**当前第一优先（2026-10-31 用户决定）：先执行 WB-01 / VN4-06 的 Web ChatGPT Provider 可行性验证，再推进 QR-02、其余额度策略和 Executor 集成。第 15 节覆盖早先把 Web 排至 P4/M2 或可跳过研究的顺序；已有成果保留，验证启动不依赖完整 Task/Workflow、UI 或预算系统。**
 
 ## 0. 给执行 Agent 的第一条指令（必须遵循）
 
@@ -216,14 +218,14 @@ interface ExecutorAdapter {
 |---|---|---|---|
 | P0-01 | 审查目录/语言/包管理、现有服务、测试基线、Git 变更；建立 ADR 草案 | `docs/legacy/dsh/spikes/repository-baseline.md` | 真实可复现的 build/test 命令与结果 |
 | P0-02 | 跑通 `MockModel`：流式文本、工具调用、失败、断流 | ModelGateway mock + fixtures | 自动测试涵盖 complete/fail/interrupted |
-| P0-03 | 验证 OpenAI API Key 路线；另单独验证 SIWC 可用性、授权及权限限制；不可互为隐式前提 | `model-provider-matrix.md` | 成功/拒绝/额度不足/未配置路径；真实测试注明日期 |
+| P0-03 | 确认现有 OpenAI API Key 路线；API Key 测试由用户免除；SIWC 独立可行性沿用既有探测证据 | 现有 llm-pi-ai 接入及归档供应商矩阵 | API Key 于 2026-10-30 按用户要求免测验收；SIWC 独立授权/目录/流式探测已完成；产品完整验收归 P1-05 |
 | P0-04 | 检测 Codely 版本、`-p`、`stream-json` 的真实事件格式，进程退出/取消/权限问题；ACP 仅能力探测 | `codely-capabilities.md` + sanitized fixtures | 本机 smoke 记录；若不可用有 Mock 退路 |
 | P0-05 | 调研可用 Codex 本地集成接口，生成能力矩阵；选定优先适配方式但不假设与 Codely 命令行相同 | `codex-capabilities.md` | 版本号、最小执行样例/明确 Blocker |
 | P0-06 | 确定复用模块、存储与风险门禁；对待实现差异按现有 Agent Notes 流程提案 | 现有决策索引与第 10 节 Decision Log | 不另建 ADR 体系；实现前核对适用决策 |
 
 **P0 Gate**：Mock 端到端可行；至少一种真实 Chat Provider 路径可用或由配置降级；至少一种真实 Executor 路径可用或明确 Mock-only；接口不能建立在未经验证的私有 API 上。
 
-### P1 — V0：单机最小闭环（最优先完成）
+### P1 — V0：单机最小闭环（Web 前置验证后推进）
 
 **目标用户演示**：在 DSH UI 输入任务 → ChatGPT/Mock 提议 TaskSpec → 用户确认 → Codely/Mock 在隔离工作区执行 → DSH 跑真实验证 → ChatGPT/Mock 评审 → UI 显示最终结论；关掉 UI 后任务继续。
 
@@ -331,7 +333,7 @@ codely -p "先阅读 DSH_IMPLEMENTATION_PLAN.md（含第 12 节 Checklist），�
 
 ### 5.4 推荐提供给任意 Agent 的启动 Prompt
 
-> 你正在实现独立项目 DSH。读取 `docs/workflows/DSH_IMPLEMENTATION_PLAN.md` 和第 12 节 Checklist、第 11 节阶段顺序、当前 Task 与 Git 状态。只执行用户批准阶段中的一个可验证 ID；复用既有模块，不把 OAuth 当作额度分类，不自动转付费路线。阶段授权、真实账户和能力验证分别核对。结束时记录实际修改、检查结果、未验证项和下一项任务。
+> 你正在实现独立项目 DSH。读取 `docs/workflows/DSH_IMPLEMENTATION_PLAN.md` 和第 12 节 Checklist、第 15 节当前优先级、第 11 节阶段映射、当前 Task 与 Git 状态。只执行用户批准阶段中的一个可验证 ID；复用既有模块，不把 OAuth 当作额度分类，不自动转付费路线。阶段授权、真实账户和能力验证分别核对。结束时记录实际修改、检查结果、未验证项和下一项任务。
 
 ---
 
@@ -441,14 +443,15 @@ Provider capabilities 对 streaming/tools/structuredOutput/vision/resume 使用 
 ### 10.3 阶段依赖与任务归属
 
 ```text
-CG0 文档审计 / CG-00
-  └─ 用户批准 → CG1 额度感知路由 / QR-01..06 + P1-05 剩余验收
-       ├─ CG2 会话/上下文 / P1-06、P2-02（基础），P2-01（跨会话 Memory）
-       └─ CG3 单机执行闭环 / P1-01..04、07..13 → V0 Gate
-            └─ P2-01..07 剩余跨会话、恢复、双执行器能力 → V1 Gate
-                 └─ CG4 / P3-01..06 多 Worker → V2 Gate
-                    └─ 可选 P3-07/08 ChatGPT MCP 入站
-CG5 / WB-01 独立研究：可完全跳过，不是 CG1–CG4 前置
+CG0 文档审计 / CG-00（已完成）
+  └─ 当前第一优先：WB-01 / VN4-06 Web Provider 可行性验证
+       └─ 按验证结果继续 CG1 / QR-02..06 + P1-05 剩余验收
+            ├─ CG2 会话/上下文 / P1-06、P2-02（基础），P2-01（跨会话 Memory）
+            └─ CG3 单机执行闭环 / P1-01..04、07..13 → V0 Gate
+                 └─ P2-01..07 剩余跨会话、恢复、双执行器能力 → V1 Gate
+                      └─ CG4 / P3-01..06 多 Worker → V2 Gate
+                           └─ 可选 P3-07/08 ChatGPT MCP 入站
+CG5 的其他反向工具研究仍可选，不等同 Web Provider 验证
 ```
 
 CG2 的 Session/Context 基础与 CG3 按显式任务依赖交错实施；产品 Memory 等仍保留原 V1 验收，不把所有 CG2 作为 V0 前置。P0-04/05 的真实能力探测可在 CG1 的 Mock 契约工作旁独立完成，进入对应真实执行器验收前必须通过。Task、Provider 与协议字段先映射现有接口，不能因本计划里的 `IModelProvider` 等示意名称另建平行服务。
@@ -460,7 +463,7 @@ CG2 的 Session/Context 基础与 CG3 按显式任务依赖交错实施；产品
 | CG2（新 P2） | P1-06、P2-01/02；core/session、context、compaction、拟补作用域 Memory 拥有者 | 导入/Fork 仅为 DSH 上下文续聊，不恢复官方 Memory；简单聊天不强制 TaskSpec |
 | CG3（新 P3） | P1-01..04/07..13、P2-03..07；jobs、workflow、mgsd-workflow、subagent 与本地示例 | 先 TaskSpec/Run/Artifact/Review，再恢复与双 Agent 接力；保持 V0/V1 验收 |
 | CG4（新 P4） | P3-01..06；拟补 Worker 协调插件；P3-07/08 拟补任务 MCP Gateway/Tunnel | Gateway 依赖 Task API/权限/幂等，不绕过 Task Store；多 Worker 保持 V2；入站可选 |
-| CG5（新 P5） | WB-01；研究文档/风险记录 | 仅评估授权、失败语义和替代方案；不实现未授权提取，不作为生产前置 |
+| CG5（历史研究归类） | 其他可选反向工具研究；WB-01 已前移 | Web Provider 验证按第 15 节先行；Full Harness/MCP/活动 Codex Host 不是最小浏览器收发验证前置 |
 
 Secure MCP Tunnel 是 ChatGPT → DSH 的入站路径，不是反向普通 ChatGPT 推理接口。[官方 Tunnel 文档](https://developers.openai.com/api/docs/guides/secure-mcp-tunnels)的单次请求总期限为 120 秒，含排队与最终交付，进度通知不重置期限。P3-07/08 的 submit 立即返回 taskId，再查 status/result/cancel；不得同步等长任务完成。普通官方 ChatGPT 对话是否能使用该入口仍取决于产品、账户和工作区权限。
 
@@ -518,14 +521,14 @@ ChatToHarness 与 codex-chatgpt-web 的静态源码审阅范围见 [参考锁定
 | VN4-03 / P2 / M0 | P1-01..03、P2-07；MGSD TaskFact、Session | 最小 TaskSpec 与可空 PlanRevision；先确定批准和持久化版本映射，再增量扩展，保留旧任务回放 | T03/04/06/10/30；UAT-01/03/05 |
 | VN4-04 / P2 / M0 | P1-10/11、P2-07；workflow/MGSD、Client | 依赖 VN4-03；chat.direct/quick/standard/milestone/inspect 模板版本、Auto 与 Override、reviewerPolicy；none 不请求模型，验证仍必须运行 | T03/04/06/07/08；UAT-01/03/05/06 |
 | VN4-05 / P3 / M1 | P0-03..05、P1-05/07/08/10/12 | 依赖 VN4-01..04；SIWC Loader/快照/真实验证，Codex/Codely 驱动独立 probe、stream/cancel/result；resume 按驱动声明 | T05/11/13/14/15/30；UAT-01/03/04/13/15 |
-| VN4-06 / P4 / M2 | WB-01；llm、浏览器会话、Client | 依赖 VN4-01/02；Mock/Manual 与 Browser Lease/Receipt 设计、gated UI；真实访问独立 G-WEB 准入，不阻断 P3 | T11/12/16/27/29；UAT-07/08/15 |
+| VN4-06 / 当前第一优先验证 → M2 产品化 | WB-01；llm、浏览器会话、Client | 先验证参考 Browser-only 网页收发及 DSH Adapter 接入；已有 QR-01 基础可复用，不等待 VN4-02/P2/P3。Mock/Manual、实际往返和生产准入分别验收，详见第 15 节 | T11/12/16/27/29；UAT-07/08/15 |
 | VN4-07 / P5 / M3 | QR-04/05、P1-06、P2-02/04 | 依赖 P3 与 P4 Mock；TurnAttempt、SubmissionReceipt、工具完成屏障、ContextEpoch、预算预留/结算；未知提交不盲目重发 | T14/17/18/19/20/30；UAT-08/10/11/16 |
 | VN4-08 / P5 / M3 | P1-02、P2-01..05；Session/storage、context | Task/Run/MemorySnapshot/Checkpoint 引用；Import/Fork 和跨 Provider 恢复；不复制 Session 权威、不依赖官方网页历史 | T09/10/19/28；UAT-08/09/14 |
 | VN4-09 / P1–P7 | P1-09、P3-02/04；credentials/authorization、sandbox | 敏感字段脱敏、受保护存储评估、审批撤销/Workspace 隔离；文件权限不等同 Keychain；贯穿各阶段验收 | T21/26/29/30；UAT-07/12/14/16 |
 | VN4-10 / P6 / M4 | P3-07/08；MCP、Task API、authorization | 依赖 P1/P3 和 Task API/权限/幂等；可选入站 Gateway 与 Scope Broker，start/status/result/cancel；活动 Codex Host 独立 PoC，不可用即 unsupported | T18/21/22/23/24/27；UAT-12/13 |
 | VN4-11 / P7 / M3 | P3-01..06；jobs/subprocess/SSH、storage | 依赖 P5；Worker Registry/Lease fencing、离线取消/新 Run 接力、Drain/诊断/升级完整性；不复制 Cookie | T25/26/30；UAT-09/14/16 |
 
-阶段依赖：P0 → P1 → P2 → P3 → P5 → P7；P2 → P4 Mock → P5；P1/P3 与 Task API/权限就绪 → P6。真实 Web 准入与 Codex Native Host 分别阻塞各自实验能力。每个非平凡模型/产品行为变更补记录回放，事件/loop 变化同步两套 SDK；不把 61 项现有单测当作新 UAT 的通过证据。
+阶段依赖：已完成基础 → WB-01 / VN4-06 前置验证（当前最高优先）→ 剩余 P1 → P2 → P3 → P5 → P7；P2 → P4 Web 产品化 → P5；P1/P3 与 Task API/权限就绪 → P6。Web 的受控 PoC 和生产准入分别判断；Codex Native Host 只阻塞其自身工具桥，不阻塞 Browser-only 验证。每个非平凡模型/产品行为变更补记录回放，事件/loop 变化同步两套 SDK；不把 61 项现有单测当作新 UAT 的通过证据。
 
 ### 11.1 旧需求处理与决策冲突
 
@@ -540,7 +543,7 @@ ChatToHarness 与 codex-chatgpt-web 的静态源码审阅范围见 [参考锁定
 | vNext.4 §15 要求修改 WORKFLOW；ADAPT | 产品模板规则归本计划和 workflow 拥有者；.ai/WORKFLOW 是开发协作规范，不把运行时 Workflow 写入该文件 |
 | 已实施动态工作流 / Codex 子代理 ADR；KEEP | 仍拥有脚本执行与原生子代理循环的决策；新提案只补产品路由和任务政策，不宣称废弃现有实现 |
 
-推荐后续先领取 VN4-01/02 的契约与配置工单。P1–P7 尚未授权实施；缺失 vNext.1–3 原文、真实 Web 准入与活动 Codex Host 仍明确未验证。
+当前先领取 WB-01 / VN4-06 的 Web Provider 验证工单，再按结果继续 VN4-01/02 和 QR-02。P1 已获用户授权；其他 P2–P7 未启动；缺失 vNext.1–3 原文、真实 Web 准入与活动 Codex Host 仍明确未验证。
 
 
 ## 12. 有效 Checklist 与任务证据
@@ -551,24 +554,26 @@ ChatToHarness 与 codex-chatgpt-web 的静态源码审阅范围见 [参考锁定
 
 ### 12.1 P0：基线与可行性验证（Gate 0）
 
+2026-10-30 收尾：原 P0-01..06 共 6 项均 DONE，Gate 0 按技术可行性与明确 Mock 路线验收通过。VN4-00 DONE 仅指 vNext.4 文档审计与计划合并，执行器探测与 P0 实施选择另见第 13 节；本轮收尾不代表 P1 产品闭环完成。API Key 路线已按用户要求免测验收，不再作为 P0-03 阻塞项；本次调整与证据见[状态核对记录](../../.ai/tasks/dsh-p0-status/handoff.md)。
+
 - [x] **P0-01 [DONE]** 代码库审查：语言/框架/包管理/现有测试/Git 状态；落盘 `docs/legacy/dsh/spikes/repository-baseline.md`。
   - 验证：真实 build/test 命令可复现；若空仓库明确记录初始化选型。证据：`corepack pnpm run typecheck` 退出码 0；四个定向测试套件通过（81/6/78 项）；能力对照与缺口见 `docs/legacy/dsh/spikes/repository-baseline.md`。
 - [x] **P0-02 [DONE]** MockModel Gateway：正常流、工具调用、失败、断流事件 fixture。
   - 验证：4 类场景的自动化测试通过。证据：复用 `packages/test-support/llm-mock-server`（24 种脚本行为）与 `packages/llm/llm-retry/tests/transport-recovery.spec.ts`，共 78 项测试通过；场景与行为对照见 `docs/legacy/dsh/spikes/repository-baseline.md`。
-- [ ] **P0-03 [BLOCKED]** OpenAI Provider 能力矩阵：API Key 与 SIWC 分开验证；账户支持、授权、模型列表、流式完成和额度异常处理。
-  - 验证：Mock 路由和独立 SIWC 探测证据见 [供应商矩阵](../legacy/dsh/spikes/model-provider-matrix.md)。实验 `chatgpt-plan` UI/Provider 已实现，真实 Session 有 completed 轮次，19 项定向测试覆盖授权、流、限流和超时修复。API Key 真实验证仍缺；SIWC Loader、Session 快照、修复后的真实长回复、重启/网络生命周期完整验收未完成；P0-03 不因局部成功打勾。SIWC 分类为 `work_codex_shared`，不是普通聊天额度。
-- [ ] **P0-04 [TODO]** Codely 实际 `--version`、`-p`、`stream-json` 事件、进程取消、授权策略；ACP 仅做 probe。
-  - 验证：`docs/dsh/spikes/codely-capabilities.md`、脱敏日志、可重放 fixture。
-- [ ] **P0-05 [TODO]** Codex 可用 CLI/app-server/SDK 能力调研及最小执行样例。
-  - 验证：`docs/dsh/spikes/codex-capabilities.md`、可用/不可用 Capability 清单。
-- [ ] **P0-06 [TODO]** 定稿技术栈、目录、数据一致性、风险策略与初版 ADR。
-  - 验证：ADR 指向明确实施选择；PLAN 与实际结构一致。
+- [x] **P0-03 [DONE]** OpenAI 路线可行性：现有 API Key 接入按用户要求免测验收；SIWC 独立可行性探测已完成。
+  - 验收：2026-10-30 用户明确不要求 API Key 路线测试验证；本轮 API Key 测试为 NOT_RUN（用户免测），不记录为测试 PASS。现有实现入口为 `packages/llm/llm-pi-ai/src/index.ts`，历史 Mock 路由与独立 SIWC 探测见 [供应商矩阵](../legacy/dsh/spikes/model-provider-matrix.md)及 [SIWC 探测记录](../../.ai/tasks/dsh-p0-siwc/handoff.md)。SIWC Loader、Session 快照、真实长回复、重启/网络生命周期的产品完整验收仍归 P1-05 PARTIAL，不因本项完成而关闭。SIWC 分类为 `work_codex_shared`。
+- [x] **P0-04 [DONE]** Codely 本机版本/参数、真实进程的本地模型流事件、认证失败与取消探测完成；ACP initialize/session-new 成功。
+  - 证据：第 13 节与[本轮执行器探测](../../.ai/tasks/dsh-p0-executor-probes/handoff.md)。原生 stream-json 输出 init/message/result，成功 exit 0、模拟 401 exit 1、挂起请求 SIGTERM 后退出；DSH 适配器 3 项测试通过。隔离环境需要 Codely OAuth；经用户授权使用本机已有登录环境、临时工作区与 loopback 模型完成 smoke；不证明云服务或原生 resume。
+- [x] **P0-05 [DONE]** Codex 本机与包固定版本、官方 app-server 路径、能力矩阵和最小执行完成。
+  - 证据：第 13 节；固定产品/适配器/清理测试 71 项、Loader 组合 1 项通过；真实 Codex 产品使用本地模拟 Responses 模型，非真实云服务验证。适配器不提供 resume 或活动 Native Tool Host。
+- [x] **P0-06 [DONE]** P0 技术栈、模块复用、状态归属及权限/失败策略定稿于第 13 节；初版 ADR 提案与后续工单已有明确拥有者。
+  - 证据：[前序审计](../../.ai/tasks/dsh-vnext4-audit/handoff.md)与[ADR 提案](../../.agents/notes/proposed/architecture/2026-10-28-independent-chat-provider-executor.zh.md)。本项验收 P0 实施基线和初版提案，ADR 保持 proposed，实施及其回放/迁移验收属于 P1 以后。
 
-**Gate 0（全项复核）**
-- [ ] 本地 Mock Path 可重复运行，核心接口不依赖私有未验证 API。
-- [ ] 至少一种可用 Chat Provider 路径或明确可运行 Mock 降级。
-- [ ] 至少一种可用 Executor 路径或明确可运行 Mock 降级。
-- [ ] SIWC / ACP 未验证能力没有被当作 V0 必需依赖。
+**Gate 0（技术可行性，已复核；不等于 V0 产品验收）**
+- [x] 本地 Mock Path 可重复运行，核心接口不依赖私有未验证 API；本轮执行器真实进程/Loader 与模拟模型记录见第 13 节。
+- [x] 至少一种可用 Chat Provider 路径或明确可运行 Mock 降级；已有 SIWC 独立探测和 Mock 基线，API Key 用户免测。
+- [x] 至少一种可用 Executor 路径或明确可运行 Mock 降级；Codex 真实产品 + loopback 模型和 DSH Loader 已通过。
+- [x] SIWC / ACP 未验证能力没有被当作 V0 必需依赖；Codely 优先既有 CLI，ACP 仅能力探测，resume 不作前提。
 
 ### 12.2 P1 / V0：单机 MVP 闭环（最高优先）
 
@@ -670,10 +675,10 @@ ChatToHarness 与 codex-chatgpt-web 的静态源码审阅范围见 [参考锁定
 |---|---|---|---|---|---|
 | P0-01 | DONE | Codely | 历史基线记录，非当前工作区复验 | `corepack pnpm run typecheck` 退出 0；定向 vitest 81/6/78 项通过 | `docs/legacy/dsh/spikes/repository-baseline.md`；当时 Node v22.18.0 低于声明范围 |
 | P0-02 | DONE | Codely | 同上 | `vitest run packages/test-support/llm-mock-server/tests packages/llm/llm-retry/tests/transport-recovery.spec.ts` 78 项通过 | 复用现有 mock server，无新增代码 |
-| P0-03 | BLOCKED | Codely / Codex | 已有提交和本地未提交修复 | 历史 API Mock 与独立 SIWC 探测通过；SIWC 插件当前 19 测试通过（前序修复轮次） | API Key 真实验证仍缺；SIWC 集成 Partial，见 dsh-siwc-ui 检查点 |
-| P0-04 | TODO | — | — | — | — |
-| P0-05 | TODO | — | — | — | — |
-| P0-06 | TODO | — | — | — | — |
+| P0-03 | DONE | Codely / Codex | 既有源码与历史探测；2026-10-30 用户调整验收 | API Key 本轮 NOT_RUN（用户免测验收）；历史 API Mock 与 SIWC 独立探测有通过证据 | SIWC 产品集成仍为 P1-05 PARTIAL；不宣称 API Key 真实测试通过 |
+| P0-04 | DONE | Codex | 本轮源码摘要与本机版本 | Codely 原生 loopback 成功/401/取消、ACP 握手与 session-new；适配器 3 项测试通过 | 原生 resume/实际权限回调与云服务尚未验收，见第 13 节 |
+| P0-05 | DONE | Codex | 包固定 Codex 0.153.4；主机版本单列 | 产品/适配器/清理 71 测试、Loader 1 测试通过 | 模型为 loopback fixture；不代表主机 alpha 与固定产品可互换 |
+| P0-06 | DONE | Codex | P0 实施基线第 13 节 | 复用、状态、权限与错误策略定稿，初版 ADR 已登记 | proposed ADR 未冒充 shipped；P1 实现仍未启动 |
 | P1-01 | PARTIAL | — | 既有源码 | 本轮源码审计，非重新运行产品测试 | MGSD 类型已有，通用 TaskSpec 待补 |
 | P1-02 | PARTIAL | — | 既有源码 | 同上 | Session JSONL / SQLite 基础已有 |
 | P1-03 | PARTIAL | — | 既有源码 | 同上 | 状态转移已有，outbox/幂等待补 |
@@ -704,30 +709,30 @@ ChatToHarness 与 codex-chatgpt-web 的静态源码审阅范围见 [参考锁定
 
 任务说明、模块归属、阶段依赖与验收以本文件第 10–11 节为准。以下只是同一批任务的状态入口，不创建另一套实施计划。
 
-- [x] **CG-00 [DONE]** 新旧计划审计合并、Gap Matrix、Decision Log、实现证据与 Memory 同步；本轮仅文档。三组命名双语配对、局部链接/换行/文件结尾、全仓引用、22 文档标准测试通过；最终 test:docs 为 18/2，doc-sync 为 33/9（引用随后单独修复通过），剩余限制见 [检查点](../../.ai/tasks/dsh-chatgpt-plan-update/handoff.md)。业务阶段 CG1 未开始。
-- [ ] **QR-01 [TODO]** UsageSource、意图、capabilities tri-state、余额 unknown；CG1 获批后启动。
+- [x] **CG-00 [DONE]** 新旧计划审计合并、Gap Matrix、Decision Log、实现证据与 Memory 同步；本轮仅文档。三组命名双语配对、局部链接/换行/文件结尾、全仓引用、22 文档标准测试通过；最终 test:docs 为 18/2，doc-sync 为 33/9（引用随后单独修复通过），剩余限制见 [检查点](../../.ai/tasks/dsh-chatgpt-plan-update/handoff.md)。此为历史 CG0 记录；当前 P1/CG1 已获授权，进度以下列 QR 状态为准。
+- [x] **QR-01 [DONE]** LlmProviderInfo.policy、usageSource/能力三态/unknown 余额、实验准入、SIWC 共享来源、pi-ai 政策配置和显式意图/能力要求输入已有解析与验收证据。见[元数据任务](../../.ai/tasks/dsh-p1-provider-policy/handoff.md)、[配置任务](../../.ai/tasks/dsh-p1-provider-config/handoff.md)和[意图任务](../../.ai/tasks/dsh-p1-intent-routing/handoff.md)；不将 VN4-01/02 或 CG1 Gate 标完成。
 - [ ] **QR-02 [TODO]** Auth / Provider / Executor / 费用来源分离；核对旧插件名称和 Codex/Codely 双模式；依赖 QR-01。
-- [ ] **QR-03 [TODO]** chat/plan/review/execute 显式路由、能力拒绝、显式回退；依赖 QR-01/02。
+- [ ] **QR-03 [PARTIAL]** opt-in chat/plan/review/execute 显式 Provider/model 路由、逐 Turn 捕获、要求能力 unknown/unsupported 拒绝、失败不隐式跨路线已有证据；QR-02 接入、精确模型能力匹配、用户选择/显式回退与完整 Gate 待补。
 - [ ] **QR-04 [TODO]** 共享额度保护、预算和付费同意、reserve/settle/cancel；依赖 QR-03。
 - [ ] **QR-05 [TODO]** UsageRecord 与政策决定持久化、报告/估算分列、去重/脱敏；依赖 QR-01/04。
 - [ ] **QR-06 [TODO]** UI 显示来源和用量、预算同意与回退证据、真实 profile/Session 快照/GIF；依赖 QR-03/04/05。
 - [ ] **P3-07 [TODO]** 可选入站任务 MCP Gateway：submit/status/result/cancel、worker.list、artifact.get；复用 P1-04/08/09、P2-03 与对应 Worker 能力，不绕过 Task Store/权限。
 - [ ] **P3-08 [TODO]** 可选 Secure MCP Tunnel：单次总期限 120 秒、异步 TaskId 查询、断连不丢任务；依赖 P3-07 与真实工作区授权。
-- [ ] **WB-01 [TODO / DEFER]** 默认禁用的 Web Bridge 许可/安全/失败语义研究；真实 Web 访问准入前仅 Mock/Manual，无 Cookie 提取，不阻塞正式阶段。
+- [ ] **WB-01 [TODO / FIRST]** 当前最高优先：以 codex-chatgpt-web 为首要参考，验证 Browser-only 真实收发与 DSH Adapter 最小接入；记录账号/会话、模型选择、完成/失败/取消证据。Mock/Manual 不计真实可行性通过；生产默认门禁保留。不得因 QR-02 或完整 Executor/预算链路未完成而延后启动，详见第 15 节。
 
-CG1 Gate（待实施）：默认路由、能力不匹配、余额 unknown、限额、不可用、断流、回退和额外付费阻断逐项验证。SIWC 必须显示 `work_codex_shared`，`chatgpt_regular` 不得成为 DSH 主动模型 Provider；费用来源变化需要预设预算或当次明确同意。CG2/CG3 复用原 P1/P2 任务，CG4 保留 V2，CG5 可完全跳过。
+CG1 Gate（待实施）：默认路由、能力不匹配、余额 unknown、限额、不可用、断流、回退和额外付费阻断逐项验证。SIWC 必须显示 `work_codex_shared`，`chatgpt_regular` 不得成为 DSH 主动模型 Provider；费用来源变化需要预设预算或当次明确同意。CG2/CG3 复用原 P1/P2 任务，CG4 保留 V2，CG5 的其余反向工具研究可跳过；WB-01 前置验证不在可跳过范围。
 
 ### 12.9 vNext.4 增量 Checklist
 
 任务定义、依赖和 T01–T30 / UAT-01–16 映射见本文件第 11 节。本节的 DONE 仅表示 P0 文档交付；功能验收保持未勾选。
 
 - [x] **VN4-00 [DONE]** P0 源码审计、新旧对照、参考版本锁定、proposed ADR、主计划与本清单增量合并；验证和限制见[任务 Checkpoint](../../.ai/tasks/dsh-vnext4-audit/handoff.md)。
-- [ ] **VN4-01 [PARTIAL]** Provider 描述符、SIWC/Web 平级与 gated；已有 llm/目录，QR-01..03 缺口未实施。
+- [ ] **VN4-01 [PARTIAL]** Provider 描述符、政策配置、显式意图输入与 opt-in 路由已实施；SIWC/Web 平级 UI、QR-02/03 剩余验收尚未闭环。
 - [ ] **VN4-02 [TODO]** Provider/Executor/Workflow 独立选择与 Run 固定绑定；UI/回放/GIF 尚未验收。
 - [ ] **VN4-03 [PARTIAL]** TaskSpec、可选 Plan 与批准/版本映射；MGSD 现有执行仍要求批准 Plan。
 - [ ] **VN4-04 [PARTIAL]** 模板/Override/reviewerPolicy；已有脚本 Workflow，产品无 Plan/无模型 Review 分支待实现。
 - [ ] **VN4-05 [PARTIAL]** 官方 Chat + Codex/Codely；SIWC/Codex/本地 Codely 基础存在，三条产品链未验收。
-- [ ] **VN4-06 [TODO]** Web Mock/Manual、Lease/Receipt 和门禁；**真实自动访问 BLOCKED**，不阻断正式路线。
+- [ ] **VN4-06 [TODO / FIRST]** Web Provider 验证已前移为当前第一优先；先核对账号/接入与既有准入条件，完成受控往返和 DSH 适配证据。真实 PoC 为 NOT_RUN，不能以 Mock 或已有通用 gated 测试打勾；后续 M2 产品化另验收。
 - [ ] **VN4-07 [PARTIAL]** 终态/取消已有基础；统一 TurnAttempt/屏障/ContextEpoch、QR 预算政策待补。
 - [ ] **VN4-08 [PARTIAL]** Session/上下文/Fork 已有；Task/MemorySnapshot/Checkpoint 与跨 Provider 恢复待贯通。
 - [ ] **VN4-09 [PARTIAL]** 私有文件凭据/审批/沙箱已有；Keychain、统一授权与脱敏验收未完成。
@@ -735,3 +740,71 @@ CG1 Gate（待实施）：默认路由、能力不匹配、余额 unknown、限�
 - [ ] **VN4-11 [TODO]** 跨设备 Worker/fencing、Drain 和升级完整性；远程进程能力不代表产品完成。
 
 **OBSOLETE 需求**：v5.1 固定 Planner/Reviewer 流水线、统一 ACP 必需前提、固定 Codex 架构/Codely 执行、旧文档新建 Core 目录。替代条目和保留内容见主计划 §11.1；不删除历史输入，不将 obsolete 勾为功能 DONE。ADR 为 proposed，尚未提升为已实施决策。
+
+
+## 13. P0 执行器能力与实施基线（2026-10-30）
+
+本节集中 P0-04/05/06 的完成结论，不新建第三份有效计划。可重复探测脚本、脱敏事件、执行命令和源码摘要由[探测任务](../../.ai/tasks/dsh-p0-executor-probes/handoff.md)保存。技术可行性使用真实产品进程与本地模拟模型，真实云服务、工程任务完整验收与跨设备恢复不在本轮结论内。
+
+### 13.1 实际版本、协议与能力
+
+| 项目 | Codex | Codely |
+|---|---|---|
+| 本机版本 | codex-cli 0.165.0-alpha.1.2；仅版本/帮助探测 | 1.0.0-nightly.53；本轮原生进程探测 |
+| DSH 当前接入 | subagent-codex 固定 @openai/codex 0.153.4；加载不启动产品，单次 app-server/ephemeral thread/turn | apps/cli/config/examples/codely-local；非交互 CLI，已有 subprocess/jobs 和独立 checks |
+| 选择的 P1 复用路径 | 沿用包固定官方 app-server，不改为主机 PATH，也不以 CLI exec 取代既有 Provider | 优先既有 CLI 外部执行，ACP 暂不成为执行前提；native-model 尚无已验证拥有者 |
+| 最小成功执行 | 真实固定产品通过生产适配器返回 fixture sentinel；精确答案、终态与全树退出有测试 | 临时工作区、本机已有登录、假密钥、本地 chat/completions SSE；文本 DSH_P0_OK、result success、exit 0 |
+| 流/结果 | 原生 app-server 有协议事件；当前 DSH Provider 只对外给最终结果，不承诺 UI 进度流 | 原生 stream-json 实测 init、user message、assistant delta、result；当前本地适配器仅转发原始输出，尚无统一 Executor 事件归一化 |
+| 认证/错误 | 包测试覆盖原生权限、错误和失败诊断；真实产品失败测试通过 | 未设 CUSTOM_AUTH 拒绝自定义认证；隔离 HOME 即使设假 API Key 仍要求 Codely OAuth；使用已有登录后模拟 401 输出 error/result error，exit 1 |
+| 取消/清理 | 原生取消与生产 Provider dispose/全进程树退出测试通过 | 已接受挂起模型请求后向独立进程组发送 SIGTERM，exit -15，无成功 result；DSH 适配器取消/验证次序和清理测试另行通过 |
+| 权限 | 沿用现有 never/approve-for-me/dangerous-bypass 决策；实测 denied/bypass 仅在套件私有临时目录 | CLI 支持 approval-mode 与 path-policy；本轮只用 plan/strict，未实测危险工具写入/审批回调；当前示例为 auto_edit/strict，不能据此宣称有通用审批 UI |
+| Resume | 当前 DSH 一次性适配器不支持；产品其他原生续接能力不作为承诺 | help 有 resume 参数，但 ACP initialize 实际返回 loadSession=false；本轮未证明原生续接，DSH 不依赖它 |
+| ACP/活动工具 | 现有接入是 app-server；未证明活动 Codex Native Tool Host 可供反向桥调用 | ACP protocolVersion=1，initialize 与 session/new 成功；MCP http/sse、image/audio/embeddedContext 为握手声明，未逐项验收 |
+
+证据分层：Codex 3 个定向套件 71 测试通过（含真实固定产品、权限、取消、错误及清理）；公开 Loader 组合 1 测试通过；Codely 本地执行器套件 3 测试通过（包含底层 Node 测试与两个 Loader 场景）。原生 Codely smoke 三个场景为成功、模拟认证失败和接收请求后取消，不等同其真实云模型或文件工具验收。
+
+### 13.2 P0 定稿的实施选择
+
+| 主题 | 基线与后续义务 |
+|---|---|
+| 技术栈与启动 | 保留 Node/TypeScript strict/pnpm/Cordis 与既有 Host/Client；应用沿用 dsh profiles，不建立第二个 Harness 或平行启动器 |
+| Provider/Executor/Workflow | 扩展现有 llm、modelCatalog、settings、subagent，三个选择独立；下一 Turn/新 Run 生效；先 VN4-01/02 |
+| 状态权威 | Session log 拥有消息与模型可见输入；MGSD TaskFact/SQLite、Job、storage 先映射 TaskSpec/Run/Artifact/Checkpoint；不复制 Conversation 或 Task Store |
+| Task 与计划 | 工程执行才创建 TaskSpec；后续版本化扩展可空 Plan 和 reviewerPolicy；现有 MGSD Plan 批准/Review 完成规则在实现前不绕过 |
+| 审批与路径 | 保留现有 sandbox/authorization/interaction；批准绑定 TaskSpec/范围或显式 Plan；每个 worktree 单写者；无通用审批回调的驱动不得宣称支持 |
+| 失败与恢复 | 成功终态、检查通过、模型 Review 分别记录；非零退出、取消、未知提交与工具待完成不可当成功；native resume 未验证时只承诺后续 DSH Checkpoint/新 Run 设计 |
+| 额度与凭据 | QR-01..06 唯一承接路由/额度政策；不静默跨源或付费回退；API Key 按用户免测验收。凭据由现有原生产品/credentials 持有，不复制到 Memory、Task 或工件 |
+| 外部依赖 | Web 实际访问和活动 Codex Host 继续独立准入/PoC，不阻断正式模型与外部 Agent 路线；Codely 使用者须完成其原生认证 |
+| 决策生命周期 | 既有动态 workflow、subagent 与非交互权限 ADR 继续有效；独立路由/自适应任务提案保留 proposed，实施后凭代码/回放/迁移证据再转 implemented；P0-06 完成不等于这些能力已上线 |
+
+当前进入 P1 的 VN4-01/02，QR-01 已验收，QR-03 的 opt-in 显式路由部分已实施；P1-05 的 SIWC Loader、快照与生命周期，以及两执行器产品链路/权限验收继续保持 PARTIAL。P0 通过不替代 P1–P7 的阶段授权与产品测试。
+
+
+## 14. P1 当前实现范围
+
+QR-01 已完成：既有 LLM 服务提供可选 LlmProviderInfo.policy，解析 usageSource、能力三态、可用状态与 unknown 余额；拒绝 chatgpt_regular 推理路线和未准入实验来源。pi-ai 的 providers.<route>.policy 支持 Cordis 配置及既有设置热更新，非法设置不改变原配置。注册捕获政策副本，目录仍能查询 gated 路线；准备与直接分派在适配器 I/O 前执行准入，已准备调用保留原注册代次。
+
+显式 intent（chat/plan/review/execute）与 requiredCapabilities 进入既有 LlmCallConfig/GenerateOptions；请求头记录实际 Provider/model、意图及能力要求，不向模型内容添加政策文字。要求的 Provider 能力为 unknown/unsupported 时拒绝，携带政策的缺失路线以 POLICY_ROUTE_UNAVAILABLE 失败，不能借用旧循环的虚拟路线中间件分派。持久化只新增两个可选字段，兼容记录为[请求意图政策](../persistence-changes/2026-10-31-request-intent-policy.md)，保留既有 Session 格式与代际。
+
+可选的 @deepseek-ai/dsh-agent-default-model/intent-routing 插件通过既有提示词和 agent/request 瀑布流为四种意图选择显式 Provider/model。配置拥有该作用域的模型选择权；每个 Turn 捕获一份配置，后续变更影响下一 Turn。提示词变量与最终路线一致；限额、传输失败和中断不隐式尝试其他路线。它不自动分类文本，不启动 Executor，也不替代交互式模型选择器。证据见[意图任务](../../.ai/tasks/dsh-p1-intent-routing/handoff.md)：207 个定向单元测试与 1 个循环拒绝回归、TypeScript/Python SDK 各四条真实 profile 路线及持久化兼容验证。
+
+QR-03 与 VN4-01 保持 PARTIAL，VN4-02 仍 TODO。当前下一步按第 15 节先验证 Web ChatGPT Provider，再补 QR-02 的账户/Provider/Executor/费用来源分离和模式接入，以及精确模型能力匹配、显式用户选择/回退和独立选择 UI。额度预留/结算、预算同意、UsageRecord 和完整 CG1 Gate 尚未实现。生产 Web 路线仍默认 gated；受控验证按第 15 节执行，API Key 真实验证按用户要求免测；没有新增 Registry。
+
+
+## 15. 当前第一优先：Web ChatGPT Provider 可行性验证
+
+2026-10-31 用户明确将 Web ChatGPT Provider 指定为第一优先验证方案，并指定 [codex-chatgpt-web](https://github.com/miuuyy/codex-chatgpt-web) 为参考资料。本节覆盖第 10–11 节原有延后/可跳过安排。WB-01 / VN4-06 先于剩余 QR-02、额度/用量策略与 Executor 产品化启动；不撤销 QR-01 和已完成路由成果，也不把完整 P4/M2 产品化提前宣布完成。
+
+首选验证参考仓库的 Browser-only 自动收发路径：已有登录的网页会话 → 明确模型/effort → 提交最小请求 → 回复与终态 → DSH LLM Adapter/Session。Full Harness、MCP/Tunnel、反向 Codex 工具和活动 Native Host 独立可选，不作为该验证的前提。Zero Risk/Manual 结果单列，不视为自动 Web Provider 通过。参考版本及源码证据由[本次任务](../../.ai/tasks/dsh-web-provider-priority/handoff.md)保存，不改写 legacy 中的旧锁定记录。
+
+| 顺序 | 验证目标 | 通过证据 |
+|---|---|---|
+| 1 | 接入与会话 | 确定可运行的浏览器/launcher 通路、账号状态、隔离会话和适用准入；说明浏览器操作能力能否由 DSH 自身持有。只有本 Agent 能点网页不等于产品 Adapter 可运行 |
+| 2 | 真实最小往返 | 在已明确授权且满足既有准入条件的环境中提交无敏感信息的唯一文本标记；记录实际模型选择、发送是否确定、回复、完成条件及脱敏证据。流式能力单独测量，不能用最终文本推定 |
+| 3 | DSH 最小接入 | 复用既有 llm、Session、settings/credentials/authorization 和浏览器服务；将 DSH 请求/Turn 与浏览器会话关联，验证回复、错误与终态能进入 DSH 日志，不要求先有 TaskSpec 或 Executor |
+| 4 | 失败与生命周期 | 验证取消、超时、断连、登录失效、限额/模型不可用和提交结果不确定；不得盲重发、静默换模型或跨费用来源回退 |
+| 5 | 结论与后续 | 分别给出网页通路、DSH Adapter、Mock/Manual 和生产准入的 PASS/FAIL/NOT_RUN，列出可复现命令/操作、版本和已知限制；据真实证据决定后续 M2 产品化与其他路线顺序 |
+
+已有政策解析器和生产默认门禁保持有效。优先级调整不等于账号、使用条件或生产准入已经通过；缺少条件时先完成能独立进行的源码、接入和 Mock 检查，明确下一项外部动作。真实路线必须保持 chatgpt_web_unofficial 身份，不能伪标 local/api_metered 规避准入，也不能把 SIWC、官方 MCP 入站或模型同名当作 Web Provider 的实际成功。最小验证不执行全局 Codex 配置注入、不提取登录 Cookie，也不绕过验证码或产品限制。
+
+当前证据仅包含参考源码审阅和本机工具连接盘点；尚未启动参考应用或提交真实网页模型请求。本次规划任务只完成优先级、依赖和验收标准调整，不计 WB-01 / VN4-06 验证通过。

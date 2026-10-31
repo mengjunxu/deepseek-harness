@@ -1,0 +1,3 @@
+- insert:
+    - id: provider-policy-snapshot
+      name: '../../../packages/llm/llm/tests/fixtures/provider-policy.ts'

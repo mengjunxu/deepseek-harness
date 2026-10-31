@@ -60,6 +60,14 @@ After a successful mount, `ctx.llm.listProviders()` reports the registered route
 
 `GenerateOptions.messages` accepts durable `Message` values and request-only `RequestUserInput` values. Request-only inputs carry user-role content with no `id` or `source`; Session writes and Agent delivery still require durable messages. Callers keep auxiliary inputs unchanged until the stream settles. A caller that records its exact request, such as session-title generation, must use durable messages.
 
+Adapter configuration schemas can embed the optional `ProviderPolicySchema` and accept `LlmProviderPolicyInput`. The schema supplies configuration fields; `resolveProviderPolicy` enforces cross-field admission rules before the adapter publishes a resolved policy.
+
+Provider admission metadata is optional on `LlmProviderInfo.policy`. Adapter owners parse configuration with `resolveProviderPolicy(input)` before returning it. The parser keeps omitted usage source, capabilities and balance unknown, requires a reason for unavailable routes, and refuses experimental sources as ready. `chatgpt_regular` cannot register as an inference route. Registration captures detached policy; `listProviders()` returns detached copies. Existing adapters that omit policy retain their routing behavior without declaring billing or capability support.
+
+Only ready declared routes can prepare or dispatch inference. Gated routes remain discoverable and fail with `PROVIDER_UNAVAILABLE` before adapter preparation or I/O. Prepared calls retain their admitted registration generation across replacement. These fields do not implement quota reservation, consent, model-specific capability matching or automatic fallback; unknown balance is never a reported remaining allowance.
+
+Explicit request policy is optional on `LlmCallConfig` and `GenerateOptions`: `intent` records chat/plan/review/execute, while `requiredCapabilities` lists Provider capabilities that must be declared supported. Preparation and direct dispatch both reject unknown or unsupported requirements with `UNSUPPORTED_PROVIDER_CAPABILITY` before adapter preparation. Prepared calls bind these fields as well as model controls; callers cannot change them before dispatch. The loop records both fields in its existing request header; neither adds model content. Durable readers validate their values with `validateLlmRequestPolicy`. Policy-bearing calls require a registered Provider and fail with `POLICY_ROUTE_UNAVAILABLE` instead of delegating missing routes to legacy middleware.
+
 ### What you can do
 
 - **Stream one model call** — `ctx.llm.stream(options)` yields raw chunks (token-level deltas) for any registered provider and model; consumers assemble them with `BlockAssembler`.

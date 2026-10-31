@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, onTestFinished } from 'vitest'
 import { Context } from '@deepseek-ai/cordis'
 import LlmRuntime, { type RequestMessage, createUserMessage, ToolCallId, LlmError, MessageSource, ProviderRequestId, StreamChunk  } from '@deepseek-ai/dsh-llm'
 import type { ContextFormed } from '@deepseek-ai/dsh-llm'
@@ -437,6 +437,27 @@ describe('disposal leaves the two-state status contract balanced', () => {
 })
 
 describe('adapter registration, routing, and accepted-input ownership', () => {
+  it('rejects policy-bearing virtual routes before legacy middleware or header admission', async () => {
+    const ctx = await harness(new MockAdapter([]))
+    onTestFinished(() => ctx.fiber.dispose())
+    let streamed = 0
+    ctx.on('agent/request', async (_payload, next) => ({ ...await next(), intent: 'chat', requiredCapabilities: ['tools'] }))
+    ctx.on('llm/stream', async function* () {
+      streamed += 1
+      yield { type: 'finish', reason: { kind: 'stop' } }
+    })
+    const agent = await ctx.agentLoop.create(SessionId('policy-virtual'), { provider: 'virtual', model: 'fixture' })
+    const idle = waitForIdle(ctx, agent)
+    send(agent, 'go')
+    await idle
+    const events = agent.session.snapshotEvents()
+    expect(events.findLast(event => event.type === 'turn/end')).toMatchObject({
+      data: { reason: { kind: 'error', error: { code: 'POLICY_ROUTE_UNAVAILABLE' } } },
+    })
+    expect(events.some(event => event.type === 'request/header')).toBe(false)
+    expect(streamed).toBe(0)
+  })
+
   it('duplicate adapter registration is rejected', async () => {
     const ctx = new Context()
     await ctx.plugin(LlmRuntime)

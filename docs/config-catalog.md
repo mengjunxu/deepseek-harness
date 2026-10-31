@@ -937,6 +937,29 @@ export interface StagehandModelConfig {
 ```
 <!-- END GENERATED config-catalog:@deepseek-ai/dsh-experimental-browser-use-stagehand-native -->
 
+<!-- BEGIN GENERATED config-catalog:@deepseek-ai/dsh-experimental-chatgpt-plan -->
+<a id="deepseek-aidsh-experimental-chatgpt-plan"></a>
+
+## `@deepseek-ai/dsh-experimental-chatgpt-plan`
+
+- `inject`: `credentials` · `authorization` · `llm`
+- `source`: [`packages/experimental/chatgpt-plan/src/protocol.ts:25`](../packages/experimental/chatgpt-plan/src/protocol.ts)
+
+```ts config-catalog
+/** Validated deadlines and fallback catalog capacity for this deployment. */
+export interface ProtocolOptions {
+  /** Name shown in OpenAI consent. */
+  appName: string
+  /** Total deadline for each network request, including the full inference stream. */
+  requestTimeoutMs: number
+  /** Maximum complete browser attempt duration in milliseconds. */
+  attemptTimeoutMs: number
+  /** Context capacity when the account catalog omits it. */
+  contextWindow: number
+}
+```
+<!-- END GENERATED config-catalog:@deepseek-ai/dsh-experimental-chatgpt-plan -->
+
 <!-- BEGIN GENERATED config-catalog:@deepseek-ai/dsh-experimental-computer-use-cua-driver-mcp -->
 <a id="deepseek-aidsh-experimental-computer-use-cua-driver-mcp"></a>
 
@@ -1599,8 +1622,8 @@ export interface Config extends ProtocolConfig {
 ## `@deepseek-ai/dsh-llm-pi-ai`
 
 - `inject`: `llm`
-- `refs`: `Api` (`@earendil-works/pi-ai`) · `CacheRetention` (`@earendil-works/pi-ai`) · `Model` (`@earendil-works/pi-ai`) · `ModelThinkingLevel` (`@earendil-works/pi-ai`) · `OpenAICompletionsCompat` (`@earendil-works/pi-ai`) · [`RetryPolicyConfig`](../packages/llm/llm/src/index.ts) · `ThinkingBudgets` (`@earendil-works/pi-ai`) · `Transport` (`@earendil-works/pi-ai`) · `Volatile` (`@deepseek-ai/cordis`)
-- `source`: [`packages/llm/llm-pi-ai/src/config.ts:222`](../packages/llm/llm-pi-ai/src/config.ts)
+- `refs`: `Api` (`@earendil-works/pi-ai`) · `CacheRetention` (`@earendil-works/pi-ai`) · [`LlmProviderPolicyInput`](../packages/llm/llm/src/index.ts) · `Model` (`@earendil-works/pi-ai`) · `ModelThinkingLevel` (`@earendil-works/pi-ai`) · `OpenAICompletionsCompat` (`@earendil-works/pi-ai`) · [`RetryPolicyConfig`](../packages/llm/llm/src/index.ts) · `ThinkingBudgets` (`@earendil-works/pi-ai`) · `Transport` (`@earendil-works/pi-ai`) · `Volatile` (`@deepseek-ai/cordis`)
+- `source`: [`packages/llm/llm-pi-ai/src/config.ts:226`](../packages/llm/llm-pi-ai/src/config.ts)
 
 ```ts config-catalog
 /** Plugin configuration: the provider routes this instance owns. */
@@ -1619,6 +1642,8 @@ export interface PiAiProviderProfile {
   apiKeyEnv?: string
   /** Name shown by configuration surfaces; defaults to the route key. */
   displayName?: string
+  /** Explicit usage, capability and admission declarations; omission preserves legacy routing without inferring facts. */
+  policy?: LlmProviderPolicyInput | undefined
   /**
    * Wire protocol every model on this route speaks. Omission keeps each
    * installed catalog model's own protocol, which is why a catalog route needs

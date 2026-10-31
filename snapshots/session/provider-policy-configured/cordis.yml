@@ -1,0 +1,17 @@
+- id: llm-pi-ai
+  name: '@deepseek-ai/dsh-llm-pi-ai'
+  config:
+    providers:
+      policy-fixture:
+        api: openai-completions
+        baseURL: http://127.0.0.1:9/v1
+        models:
+          - id: fixture
+        policy:
+          usageSource: chatgpt_web_unofficial
+          availability: gated
+          gateReason: Web admission required
+
+- insert:
+    - id: provider-policy-configured-snapshot
+      name: '../../../packages/llm/llm/tests/fixtures/provider-policy-configured.ts'

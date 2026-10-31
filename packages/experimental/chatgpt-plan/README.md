@@ -97,7 +97,7 @@ The current integration is local and experimental.
 - Input is text-only. Temperature, output-token caps, stop sequences and explicit reasoning controls are refused.
 - A fallback context capacity is configured per plugin, rather than individually per account model.
 - Live provider access, subscription limits and supported models depend on OpenAI and the selected account.
-- SIWC uses Codex / ChatGPT Work usage, planned as `work_codex_shared`, not ordinary ChatGPT chat allowance; see [OpenAI's explanation](https://learn.chatgpt.com/docs/sign-in-with-chatgpt). Intent-aware quota protection and a Usage Ledger are not implemented by this plugin.
+- SIWC uses Codex / ChatGPT Work usage, declared in its provider policy as `work_codex_shared`, not ordinary ChatGPT chat allowance; see [OpenAI's explanation](https://learn.chatgpt.com/docs/sign-in-with-chatgpt). Intent-aware quota protection and a Usage Ledger are not implemented by this plugin.
 
 <a id="dev-note"></a>
 ### Dev Note

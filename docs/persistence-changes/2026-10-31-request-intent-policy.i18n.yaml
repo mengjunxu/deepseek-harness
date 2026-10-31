@@ -1,0 +1,28 @@
+# Bilingual-pair consistency record for 2026-10-31-request-intent-policy.md (docs/i18n/README.md): per heading
+# section, a hash of its English and Chinese blocks outside code blocks and generated regions.
+# After editing either side, bring the other along and re-record with:
+#   pnpm run verify-translation-pairing --write docs/persistence-changes/2026-10-31-request-intent-policy.md
+/:
+  en: 3d5a424ae7d7e46b
+  zh: c22a8e4a62d8cc1a
+/2026-10-31-request-intent-policy:
+  en: 832e59dda88063f6
+  zh: 7c7f8c920fc68686
+/2026-10-31-request-intent-policy/summary:
+  en: 41099126167d7810
+  zh: c7aa0ce549f6ac45
+/2026-10-31-request-intent-policy/table-of-contents:
+  en: 6cf314a069ceb451
+  zh: 9adff678e9ecab3b
+/2026-10-31-request-intent-policy/declaration:
+  en: 6907136f28e48c90
+  zh: 02f8298485f3d8e7
+/2026-10-31-request-intent-policy/compatibility:
+  en: ed916d6d36ea37b0
+  zh: b338a9c576e47e53
+/2026-10-31-request-intent-policy/verification:
+  en: 29feb80d9276734c
+  zh: 248e0bacbe177ac4
+/2026-10-31-request-intent-policy/dev-note:
+  en: b75c8458928b72b9
+  zh: 003ba4e17b4b5269
