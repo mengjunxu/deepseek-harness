@@ -1,0 +1,23 @@
+{
+  "scope": "keyless Mock adapter; real built DSH profile and Python SDK",
+  "first": {
+    "finishReason": "completed",
+    "reply": "VALIDATION_OK"
+  },
+  "second": {
+    "finishReason": "error",
+    "reply": "",
+    "turnEnd": [
+      {
+        "turn": 1,
+        "reason": {
+          "kind": "error",
+          "error": {
+            "message": "Web validation approval is absent, expired, revoked, exhausted or outside its scope",
+            "code": "VALIDATION_ADMISSION_DENIED"
+          }
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,13 @@
+{"kind":"started","scenario":"real","pid":66650,"capturedAt":"2026-11-01T16:15:04.279Z","request":{"model":"gpt-5.6-sol","effort":"high","prompt":"Reply with exactly DSHWEBBRIDGEF421814894F5.","threadId":"dsh_session-2a939d32117949f0953b99daf9070087","turnId":"dsh_turn_session-2a939d32117949f0953b99daf9070087_2af0125f-3af9-4939-b57f-0524728ef910","userAgent":"deepseek-harness/0.1.7-rc.2 (+https://github.com/deepseek-ai/deepseek-harness)","instructionsChars":213}}
+{"kind":"event","type":"heartbeat"}
+{"kind":"status","httpStatus":200}
+{"kind":"event","type":"assistant_boundary"}
+{"kind":"event","type":"text_delta","text":"> **Local tools unavailable**\n>\n> `ChatGPT Web High` cannot access the local Codex computer in this turn. The accumulated context does not contain local tool results yet: it will see instructions and attachments, but not workspace contents. ChatGPT-native capabilities such as web search remain available when the product provides them.\n>\n> **Action:** Open `MCP` in `Codex Web GPT` and connect the `Full` harness to give the selected ChatGPT Web model access to local tools.","phase":"commentary"}
+{"kind":"event","type":"assistant_boundary"}
+{"kind":"event","type":"assistant_boundary"}
+{"kind":"event","type":"thinking_delta","thinking":"ChatGPT is responding"}
+{"kind":"event","type":"heartbeat"}
+{"kind":"event","type":"text_delta","text":"DSHWEBBRIDGEF421814894F5","phase":"final_answer"}
+{"kind":"event","type":"done","stopReason":"stop","endTurn":true,"usage":{"inputTokens":8937,"outputTokens":24,"totalTokens":8961,"estimated":true}}
+{"kind":"wire","types":["response.created","response.output_item.added","response.content_part.added","response.output_text.delta","response.output_text.done","response.content_part.done","response.output_item.done","response.heartbeat","response.heartbeat","response.heartbeat","response.heartbeat","response.heartbeat","response.output_item.added","response.content_part.added","response.output_text.delta","response.output_text.done","response.content_part.done","response.output_item.done","response.completed"],"statuses":["in_progress","completed"]}
+{"kind":"exit","capturedAt":"2026-11-01T16:15:15.900Z","failure":null,"aborted":false,"abortCause":null,"activeTurns":0}

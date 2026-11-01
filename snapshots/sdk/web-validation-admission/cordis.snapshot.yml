@@ -1,0 +1,9 @@
+- id: llm-deepseek
+  disabled: true
+- id: session-persistence-jsonl
+  config:
+    root: !!js dshHomePath('sessions')
+    compression: none
+- insert:
+    - id: web-validation-fixture
+      name: '../../../packages/llm/llm/tests/fixtures/validation-admission.ts'

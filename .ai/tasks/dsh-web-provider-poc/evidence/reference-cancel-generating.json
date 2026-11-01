@@ -1,0 +1,49 @@
+{
+  "startedAt": "2026-10-31T16:36:15.316Z",
+  "completedAt": "2026-10-31T16:36:22.285Z",
+  "mode": "cancel-generating",
+  "evidenceClass": "reference Browser-only live request; not DSH runtime admission",
+  "model": "chatgpt-web/gpt-5.6-sol",
+  "effort": "high",
+  "prompt": "List the integers from 1 to 300, one per line. Add no other text.",
+  "usageSource": "chatgpt_web_unofficial",
+  "httpStatus": 200,
+  "abortCause": "first_generation_trace",
+  "signalAborted": true,
+  "observedTypes": [
+    "heartbeat",
+    "assistant_boundary",
+    "text_delta",
+    "assistant_boundary",
+    "assistant_boundary",
+    "thinking_delta",
+    "error"
+  ],
+  "commentaryDeltas": 1,
+  "textDeltas": 0,
+  "textChars": 0,
+  "wireTypes": [
+    "response.created",
+    "response.output_item.added",
+    "response.content_part.added",
+    "response.output_text.delta",
+    "response.output_text.done",
+    "response.content_part.done",
+    "response.output_item.done",
+    "response.heartbeat",
+    "response.heartbeat",
+    "response.heartbeat",
+    "response.failed"
+  ],
+  "wireStatuses": [
+    "in_progress",
+    "failed"
+  ],
+  "adapterErrors": [
+    {
+      "message": "ChatGPT web turn aborted"
+    }
+  ],
+  "failure": null,
+  "activeTurnsAfterCleanup": 0
+}

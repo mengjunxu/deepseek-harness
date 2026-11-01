@@ -1,0 +1,93 @@
+{
+  "referenceTree": "https://github.com/miuuyy/codex-chatgpt-web/tree/860fa576eb47d9e20d7d8289235bfea94392d2fd",
+  "packageVersion": "6.1.17",
+  "runtimes": {
+    "bun": "1.4.0",
+    "electron": "42.11.16"
+  },
+  "sourceChecks": [
+    {
+      "path": "docs/architecture.md",
+      "sha256": "0e3804d3e75718cdc855f75b0a6e0e2e4df543d2b9e24d1be1ba59813c63c44a",
+      "matchesPriorAudit": true
+    },
+    {
+      "path": "src/adapters/chatgpt-web/index.ts",
+      "sha256": "ff01fe03e5f280f7a2cf7856d0523be3b1c5951ebe115cbd359f6eee40ae5c0a",
+      "matchesPriorAudit": true
+    },
+    {
+      "path": "src/adapters/chatgpt-web/browser-worker.ts",
+      "sha256": "e27eaedf8ebf6c44c6537f99a9917099e84ef977de0547f98e3d00fca71dd0a3",
+      "matchesPriorAudit": true
+    },
+    {
+      "path": "src/adapters/chatgpt-web/conversation-key.ts",
+      "sha256": "536c5de53852e4073ad7ddffc31b3cbf28bbfd292967154495a8812d8b978ca0",
+      "matchesPriorAudit": true
+    },
+    {
+      "path": "src/adapters/chatgpt-web/turn-execution.ts",
+      "sha256": "1d5298973e6e22d8a48a06fc1ca249ca5ec906ee739ed67acb9e0542e479eb5f",
+      "matchesPriorAudit": true
+    },
+    {
+      "path": "src/chatgpt-ui/README.md",
+      "sha256": "31a285c81ca7db486b800b978cfb0254cc8bf692b8a2aa7e07d2bd5de5ee9386",
+      "matchesPriorAudit": true
+    },
+    {
+      "path": "LICENSE",
+      "sha256": "d8b06e8d802722749b8f09e4ed1f2439fde0995a09b7e47c65dca3cc54d43d6e",
+      "matchesPriorAudit": true
+    }
+  ],
+  "referenceTests": {
+    "launcherProfile": {
+      "passed": 3,
+      "failed": 0
+    },
+    "devProfileAndWorker": {
+      "passed": 153,
+      "failed": 0
+    }
+  },
+  "builds": {
+    "browserHelper": "PASS",
+    "launcherTypecheck": "PASS",
+    "launcherVite": "PASS"
+  },
+  "runtimeScope": {
+    "profile": "development",
+    "mode": "browser-only",
+    "purpose": "dev-harness",
+    "ResponsesListener": "NOT_STARTED",
+    "MCP": "NOT_STARTED",
+    "globalCodexIntegration": "NOT_INSTALLED"
+  },
+  "smoke": {
+    "request": "Reply with exactly: CODEX WEB GPT READY",
+    "response": "CODEX WEB GPT READY",
+    "visibleSelection": "5.6 High",
+    "pageCompleted": true,
+    "launcherAccepted": true
+  },
+  "results": {
+    "referenceBrowser": "PASS (GPT-5.6 High only)",
+    "referenceSSE": "PASS (single final answer delta observed)",
+    "referenceCancellation": "PASS (client terminal and local cleanup only)",
+    "DSHDefaultGateRejection": "PASS",
+    "DSHLiveAdapter": "NOT_RUN",
+    "productionAdmission": "GATED",
+    "realTimeoutDisconnectExpiredLoginLimitUnknownSubmission": "NOT_RUN"
+  },
+  "evidence": [
+    "reference-stream.json",
+    "reference-cancel.json",
+    "reference-cancel-generating.json",
+    "reference-preflight-rejection.json",
+    "reference-stream-unclassified.json",
+    "dsh-gated.json"
+  ],
+  "versionLimit": "Reference source is unchanged. The control probe evolved during preflight and phase-classification fixes; per-run summaries record actual outcomes, not a claim that every run used its final script."
+}

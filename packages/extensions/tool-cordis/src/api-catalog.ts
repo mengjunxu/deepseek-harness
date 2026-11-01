@@ -556,6 +556,55 @@ export const SERVICE_API: readonly ServiceApiEntry[] = [
     ],
   },
   {
+    key: 'chatgptPlan',
+    summary: 'Authenticated account controls; Remote methods expose no bearer credentials.',
+    description: 'Authenticated account controls; Remote methods expose no bearer credentials.',
+    methods: [
+      {
+        signature: '@Remote async getState(): Promise<ChatgptPlanState>',
+        description: 'Read account and pending-login status without credentials.',
+        parameters: [],
+        returns: 'the safe projection, including only the current attempt\'s browser URL.',
+      },
+      {
+        signature: '@Remote async acknowledgePlanUsage(): Promise<ChatgptPlanState>',
+        description: 'Persist acknowledgement of the first-sign-in plan-usage explanation.',
+        parameters: [],
+        returns: 'safe state after the acknowledgement commits.',
+      },
+      {
+        signature: '@Remote async startSignIn(): Promise<ChatgptPlanState>',
+        description: 'Start or join one browser attempt; completion is published through watch.',
+        parameters: [],
+        returns: 'initial status without waiting for browser consent.',
+      },
+      {
+        signature: '@Remote async cancelSignIn(): Promise<ChatgptPlanState>',
+        description: 'Cancel pending consent and wait for callback/network teardown.',
+        parameters: [],
+        returns: 'current safe state after the attempt settles.',
+      },
+      {
+        signature: '@Remote async signOut(): Promise<ChatgptPlanState>',
+        description: 'Revoke the renewable session before deleting its local token record.',
+        parameters: [],
+        returns: 'signed-out state; a revocation failure retains credentials for retry.',
+      },
+      {
+        signature: '@Remote({ mode: \'stream\' }) async *watch(signal: AbortSignal): AsyncIterable<ChatgptPlanState>',
+        description: 'Stream complete safe projections until the caller or plugin stops.',
+        parameters: [{ name: 'signal', description: 'subscription lifetime.' }],
+        returns: 'initial state and subsequent committed account/attempt changes.',
+      },
+      {
+        signature: 'async accessToken(): Promise<string>',
+        description: 'Resolve and refresh this account\'s token under the credential mutation lock.',
+        parameters: [],
+        returns: 'Host-only access credential, never exposed through Remote.',
+      },
+    ],
+  },
+  {
     key: 'clientModules',
     summary: 'The web plugin table service: incremental `dsh.client` scan + wire composition + bundle route + index injection rows.',
     description: 'The web plugin table service: incremental `dsh.client` scan + wire composition + bundle route + index injection rows. Construction runs the activation scan synchronously — a malformed declaration or missing bundle among the already-loaded entries aggregates into one loud throw (FAILED fiber; the boot activation audit reports it).',
@@ -1367,9 +1416,9 @@ export const SERVICE_API: readonly ServiceApiEntry[] = [
     description: 'The abstract `llm` service: an adapter registry plus a streaming model-call API, interceptable via the `llm/stream` waterfall.',
     methods: [
       {
-        signature: 'registerAdapter(providers: string[], adapter: LlmAdapter): AdapterRegistrationHandle',
+        signature: 'registerAdapter(providers: string[], adapter: LlmAdapter, validationAdmission?: LlmValidationAdmission): AdapterRegistrationHandle',
         description: 'Register an adapter for the given provider routes. Throws `LlmError` with code `DUPLICATE_ADAPTER` if any provider already has an adapter (all-or-nothing). Disposed with the fiber.',
-        parameters: [{ name: 'providers', description: 'every provider route this adapter should serve.' }, { name: 'adapter', description: 'the adapter that streams calls for those providers.' }],
+        parameters: [{ name: 'providers', description: 'every provider route this adapter should serve.' }, { name: 'adapter', description: 'the adapter that streams calls for those providers.' }, { name: 'validationAdmission', description: 'optional bounded Web-only approval for an isolated profile; unavailable to remote callers.' }],
         returns: 'the disposer, carrying {@link AdapterRegistrationHandle.replace}.',
       },
       {
@@ -4692,6 +4741,10 @@ export const TYPE_API: readonly TypeApiEntry[] = [
     declaration: 'export interface ChangeResult {\n    changed: boolean;\n    application: \'applied\' | \'restart-required\' | \'overridden\' | \'failed\' | \'cancelled\';\n    stage: \'install\' | \'enable\' | \'remove\';\n    target: string;\n    enabled?: boolean;\n    error?: ManagementError;\n    warnings?: string[];\n    packageResult?: PackageResult;\n    bundle?: string;\n    pendingBuilds?: string[];\n    approvedBuilds?: string[];\n    registries?: Registry[];\n    failedAt?: \'registry\' | \'spec-host\';\n}',
   },
   {
+    name: 'ChatgptPlanState',
+    declaration: 'export interface ChatgptPlanState {\n    connected: boolean;\n    needsWelcome?: boolean;\n    authorizing: boolean;\n    authorizationUrl?: string;\n    email?: string;\n    error?: string;\n}',
+  },
+  {
     name: 'ClientArtifactBaseline',
     declaration: 'export interface ClientArtifactBaseline {\n    readonly path: string;\n    readonly mtimeMs: number;\n    readonly ctimeMs: number;\n    readonly size: number;\n}',
   },
@@ -5237,7 +5290,7 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   },
   {
     name: 'GenerateOptions',
-    declaration: 'export interface GenerateOptions {\n    provider: string;\n    model: string;\n    reasoningEffort?: ReasoningEffortId;\n    messages: RequestMessage[];\n    system?: string;\n    tools?: ToolSchema[];\n    toolHistory?: ToolHistory;\n    temperature?: number;\n    maxTokens?: number;\n    stop?: string[];\n    signal?: AbortSignal;\n    sessionId?: Branded<\'SessionId\'>;\n    purpose?: \'compaction\' | \'session-title\';\n}',
+    declaration: 'export interface GenerateOptions {\n    provider: string;\n    model: string;\n    intent?: LlmRequestIntent;\n    requiredCapabilities?: LlmProviderCapability[];\n    reasoningEffort?: ReasoningEffortId;\n    messages: RequestMessage[];\n    system?: string;\n    tools?: ToolSchema[];\n    toolHistory?: ToolHistory;\n    temperature?: number;\n    maxTokens?: number;\n    stop?: string[];\n    signal?: AbortSignal;\n    sessionId?: Branded<\'SessionId\'>;\n    purpose?: \'compaction\' | \'session-title\';\n}',
   },
   {
     name: 'GenericCallView',
@@ -5421,7 +5474,7 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   },
   {
     name: 'JobEvent',
-    declaration: 'export type JobEvent = {\n    readonly type: \'registered\' | \'progress\' | \'stopping\' | \'removed\';\n    readonly job: JobView;\n} | {\n    readonly type: \'settled\';\n    readonly job: JobView;\n    readonly cause: JobSettleCause;\n    readonly awaited: boolean;\n} | {\n    readonly type: \'output\';\n    readonly id: JobId;\n    readonly owner?: SessionId;\n    readonly total: number;\n};',
+    declaration: 'export type JobEvent = {\n    readonly type: \'registered\' | \'progress\' | \'stopping\' | \'removed\';\n    readonly job: JobView;\n} | {\n    readonly type: \'settled\';\n    readonly job: JobView;\n    readonly cause: JobSettleCause;\n    readonly completionDelivery?: \'quiet\';\n    readonly awaited: boolean;\n} | {\n    readonly type: \'output\';\n    readonly id: JobId;\n    readonly owner?: SessionId;\n    readonly total: number;\n};',
   },
   {
     name: 'JobEventFilter',
@@ -5505,7 +5558,7 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   },
   {
     name: 'JobSpec',
-    declaration: 'export interface JobSpec {\n    kind: JobKind;\n    label: string;\n    owner?: SessionId;\n    outputLimitBytes?: number;\n    output?: readonly JobOutputSource[];\n    run(job: JobHandle): JobHooks;\n}',
+    declaration: 'export interface JobSpec {\n    kind: JobKind;\n    label: string;\n    owner?: SessionId;\n    completionDelivery?: \'quiet\';\n    outputLimitBytes?: number;\n    output?: readonly JobOutputSource[];\n    run(job: JobHandle): JobHooks;\n}',
   },
   {
     name: 'JobStatus',
@@ -5557,11 +5610,15 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   },
   {
     name: 'LlmCallConfig',
-    declaration: 'export interface LlmCallConfig {\n    provider: string;\n    model: string;\n    reasoningEffort?: ReasoningEffortId;\n    temperature?: number;\n    maxTokens?: number;\n    stop?: string[];\n}',
+    declaration: 'export interface LlmCallConfig {\n    provider: string;\n    model: string;\n    intent?: LlmRequestIntent;\n    requiredCapabilities?: LlmProviderCapability[];\n    reasoningEffort?: ReasoningEffortId;\n    temperature?: number;\n    maxTokens?: number;\n    stop?: string[];\n}',
   },
   {
     name: 'LlmCallConfigAdapterDefaults',
     declaration: 'export interface LlmCallConfigAdapterDefaults {\n    reasoningEffort?: true;\n    maxTokens?: true;\n}',
+  },
+  {
+    name: 'LlmCapabilitySupport',
+    declaration: 'export type LlmCapabilitySupport = \'supported\' | \'unsupported\' | \'unknown\';',
   },
   {
     name: 'LlmConfigurableProvider',
@@ -5600,12 +5657,28 @@ export const TYPE_API: readonly TypeApiEntry[] = [
     declaration: 'export interface LlmModelReasoningInfo {\n    efforts: readonly LlmReasoningEffortInfo[];\n    defaultEffort?: ReasoningEffortId;\n}',
   },
   {
+    name: 'LlmProviderAvailability',
+    declaration: 'export type LlmProviderAvailability = \'ready\' | \'unconfigured\' | \'auth_required\' | \'limited\' | \'gated\' | \'unavailable\';',
+  },
+  {
+    name: 'LlmProviderCapability',
+    declaration: 'export type LlmProviderCapability = keyof LlmProviderPolicy[\'capabilities\'];',
+  },
+  {
     name: 'LlmProviderInfo',
-    declaration: 'export interface LlmProviderInfo {\n    id: string;\n    name: string;\n}',
+    declaration: 'export interface LlmProviderInfo {\n    id: string;\n    name: string;\n    policy?: LlmProviderPolicy;\n}',
+  },
+  {
+    name: 'LlmProviderPolicy',
+    declaration: 'export interface LlmProviderPolicy {\n    readonly usageSource: LlmUsageSource;\n    readonly availability: LlmProviderAvailability;\n    readonly gateReason?: string;\n    readonly capabilities: Readonly<Record<\'streaming\' | \'tools\' | \'structuredOutput\' | \'vision\' | \'resume\', LlmCapabilitySupport>>;\n    readonly balance: {\n        readonly status: \'unknown\';\n    };\n}',
   },
   {
     name: 'LlmReasoningEffortInfo',
     declaration: 'export interface LlmReasoningEffortInfo {\n    id: ReasoningEffortId;\n    name: string;\n    description?: string;\n}',
+  },
+  {
+    name: 'LlmRequestIntent',
+    declaration: 'export type LlmRequestIntent = \'chat\' | \'plan\' | \'review\' | \'execute\';',
   },
   {
     name: 'LlmResolvedModelInfo',
@@ -5613,7 +5686,15 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   },
   {
     name: 'LlmRuntime',
-    declaration: 'export class LlmRuntime extends TypertRemoteService {\n    constructor(ctx: Context);\n    registerAdapter(providers: string[], adapter: LlmAdapter): AdapterRegistrationHandle;\n    @Remote\n    listProviders(): LlmProviderInfo[];\n    registerConfigurableProviders(entries: readonly LlmConfigurableProvider[]): DirectoryRegistrationHandle;\n    @Remote\n    listConfigurableProviders(): LlmConfigurableProvider[];\n    registerModelDiscovery(settingsNs: string, discover: (request: LlmModelDiscoveryRequest, signal?: AbortSignal) => Promise<readonly LlmDiscoveredModel[]>): () => void;\n    async discoverModels(settingsNs: string, request: LlmModelDiscoveryRequest, signal?: AbortSignal): Promise<LlmDiscoveredModel[]>;\n    @Remote(\'discoverModels\')\n    async remoteDiscoverModels(settingsNs: string, request: LlmModelDiscoveryRequest, signal: AbortSignal): Promise<LlmDiscoveredModel[]>;\n    providerRetryPolicy(provider: string): ResolvedRetryPolicy;\n    imageRequestPricing(provider: string, model: string): LlmImageRequestPricing | undefined;\n    fileRequestText(ref: FileAttachmentRef): string;\n    async listModels(provider: string): Promise<LlmModelInfo[]>;\n    async resolveModelInfo(provider: string, model: string, signal?: AbortSignal): Promise<LlmResolvedModelInfo>;\n    async resolveCallConfig(config: LlmCallConfig, signal?: AbortSignal): Promise<LlmCallConfig>;\n    async prepareCall(config: LlmCallConfig, signal?: AbortSignal): Promise<PreparedLlmCall>;\n    stream(options: GenerateOptions) /* …truncated — full shape in source */',
+    declaration: 'export class LlmRuntime extends TypertRemoteService {\n    constructor(ctx: Context);\n    registerAdapter(providers: string[], adapter: LlmAdapter, validationAdmission?: LlmValidationAdmission): AdapterRegistrationHandle;\n    @Remote\n    listProviders(): LlmProviderInfo[];\n    registerConfigurableProviders(entries: readonly LlmConfigurableProvider[]): DirectoryRegistrationHandle;\n    @Remote\n    listConfigurableProviders(): LlmConfigurableProvider[];\n    registerModelDiscovery(settingsNs: string, discover: (request: LlmModelDiscoveryRequest, signal?: AbortSignal) => Promise<readonly LlmDiscoveredModel[]>): () => void;\n    async discoverModels(settingsNs: string, request: LlmModelDiscoveryRequest, signal?: AbortSignal): Promise<LlmDiscoveredModel[]>;\n    @Remote(\'discoverModels\')\n    async remoteDiscoverModels(settingsNs: string, request: LlmModelDiscoveryRequest, signal: AbortSignal): Promise<LlmDiscoveredModel[]>;\n    providerRetryPolicy(provider: string): ResolvedRetryPolicy;\n    imageRequestPricing(provider: string, model: string): LlmImageRequestPricing | undefined;\n    fileRequestText(ref: FileAttachmentRef): string;\n    async listModels(provider: string): Promise<LlmModelInfo[]>;\n    async resolveModelInfo(provider: string, model: string, signal?: AbortSignal): Promise<LlmResolvedModelInfo>;\n    async resolveCallConfig(config: LlmCallConfig, signal?: AbortSignal): Promise<LlmCallConfig>;\n    async prepareCall(config: LlmCallConfig, signal?: AbortSignal): Promise<Prepared /* …truncated — full shape in source */',
+  },
+  {
+    name: 'LlmUsageSource',
+    declaration: 'export type LlmUsageSource = \'work_codex_shared\' | \'chatgpt_web_unofficial\' | \'api_metered\' | \'third_party\' | \'local\' | \'experimental_unverified\' | \'unknown\';',
+  },
+  {
+    name: 'LlmValidationAdmission',
+    declaration: 'export interface LlmValidationAdmission {\n    scope: \'isolated-web-poc\';\n    home: string;\n    provider: string;\n    models: readonly string[];\n    expiresAt: string;\n    maxCalls: number;\n}',
   },
   {
     name: 'LocalAtInput',

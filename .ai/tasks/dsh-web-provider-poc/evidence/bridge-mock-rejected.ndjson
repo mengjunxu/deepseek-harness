@@ -1,0 +1,4 @@
+{"kind":"started","scenario":"mock-rejected","pid":66626,"capturedAt":"2026-11-01T16:15:00.947Z","request":{"model":"gpt-5.6-sol","effort":"high","prompt":"This submission must be rejected by the mock bridge.","threadId":"dsh_session-82d09c5a95ae4e77be9a2d23ad8bedcb","turnId":"dsh_turn_session-82d09c5a95ae4e77be9a2d23ad8bedcb_9a219171-e32b-4f04-8cc0-a2db995a9376","userAgent":"deepseek-harness/0.1.7-rc.2 (+https://github.com/deepseek-ai/deepseek-harness)","instructionsChars":217}}
+{"kind":"status","httpStatus":400}
+{"kind":"event","type":"error","message":"Mock bridge preflight rejection: submission was not accepted","status":400,"errorType":"invalid_request_error","code":"invalid_request"}
+{"kind":"exit","capturedAt":"2026-11-01T16:15:00.947Z","failure":null,"aborted":false,"abortCause":null,"activeTurns":0}

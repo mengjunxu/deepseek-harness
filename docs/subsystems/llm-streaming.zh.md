@@ -10,6 +10,8 @@
 
 `LlmProviderInfo.policy` 携带注册拥有的 `LlmProviderPolicy`：`LlmUsageSource`、`LlmProviderAvailability`、值为 `LlmCapabilitySupport` 的能力、可选 `gateReason` 和 `balance.status: unknown`。`resolveProviderPolicy` 解析运维输入，将未声明事实保持为 unknown，并冻结结果。声明政策时仅 ready 可准入推理，实验来源保持 gated。目录查询与准入独立。已准备调用在路线替换后保留捕获的政策。[LLM README](../../packages/llm/llm/README.zh.md)负责配置用法与限制。
 
+`LlmValidationAdmission` 是进程内例外，限定显式选择的非默认 Harness home、单一 gated Web 路线、精确模型标识、绝对过期时间和有界准备额度。普通注册仍拒绝 gated 推理。替换共享额度并撤销旧代次；分派前重新检查过期和撤销状态。字段声明见 [validation-admission.ts](../../packages/llm/llm/src/validation-admission.ts)；[LLM README](../../packages/llm/llm/README.zh.md)负责配置及运行限制。
+
 <a id="content-blocks-and-messages"></a>
 
 ## 内容块与消息
@@ -480,7 +482,7 @@ type LlmUsageSource = 'work_codex_shared' | 'chatgpt_web_unofficial' | 'api_mete
 ```
 
 ```ts type-equiv
-/** Route admission state; only ready routes may prepare or dispatch inference. */
+/** Ordinary route admission state; bounded validation grants are checked separately. */
 type LlmProviderAvailability = 'ready' | 'unconfigured' | 'auth_required' | 'limited' | 'gated' | 'unavailable'
 ```
 
@@ -964,6 +966,52 @@ declare abstract class LlmAdapter {
 
 Generated from source by `scripts/gen-cordis-catalog.ts` (verified fresh by `pnpm run verify-cordis-catalog` in doc-sync; regenerate with `pnpm run gen-cordis-catalog`) — the language sides differ only in locale-specific paired document paths. Signature blocks use a `ts cordis-catalog` fence and keep the original source JSDoc; dispatch modes are defined in the [primer](../cordis-primer.zh.md#dispatch-modes), and the framework-inherited `ctx` API lives in [cordis-api/inherited.md](../cordis-api/inherited.md).
 
+<a id="ctxchatgptplan--chatgptplan"></a>
+
+### `ctx.chatgptPlan` — `ChatgptPlan`
+
+Authenticated account controls; Remote methods expose no bearer credentials.
+
+```ts cordis-catalog
+/** Read account and pending-login status without credentials.
+ * @returns the safe projection, including only the current attempt's browser URL.
+ */
+@Remote async getState(): Promise<ChatgptPlanState>
+
+/** Persist acknowledgement of the first-sign-in plan-usage explanation.
+ * @returns safe state after the acknowledgement commits.
+ */
+@Remote async acknowledgePlanUsage(): Promise<ChatgptPlanState>
+
+/** Start or join one browser attempt; completion is published through watch.
+ * @returns initial status without waiting for browser consent.
+ */
+@Remote async startSignIn(): Promise<ChatgptPlanState>
+
+/** Cancel pending consent and wait for callback/network teardown.
+ * @returns current safe state after the attempt settles.
+ */
+@Remote async cancelSignIn(): Promise<ChatgptPlanState>
+
+/** Revoke the renewable session before deleting its local token record.
+ * @returns signed-out state; a revocation failure retains credentials for retry.
+ */
+@Remote async signOut(): Promise<ChatgptPlanState>
+
+/** Stream complete safe projections until the caller or plugin stops.
+ * @param signal - subscription lifetime.
+ * @returns initial state and subsequent committed account/attempt changes.
+ */
+@Remote({ mode: 'stream' }) async *watch(signal: AbortSignal): AsyncIterable<ChatgptPlanState>
+
+/** Resolve and refresh this account's token under the credential mutation lock.
+ * @returns Host-only access credential, never exposed through Remote.
+ */
+async accessToken(): Promise<string>
+```
+
+Source: [`packages/experimental/chatgpt-plan/src/index.ts`](../../packages/experimental/chatgpt-plan/src/index.ts)
+
 <a id="ctxdeepseekllmapiextensions--deepseekllmapiextensionregistry"></a>
 
 ### `ctx.deepseekLlmApiExtensions` — `DeepSeekLlmApiExtensionRegistry`
@@ -1004,9 +1052,10 @@ The abstract `llm` service: an adapter registry plus a streaming model-call API,
  * Disposed with the fiber.
  * @param providers - every provider route this adapter should serve.
  * @param adapter - the adapter that streams calls for those providers.
+ * @param validationAdmission - optional bounded Web-only approval for an isolated profile; unavailable to remote callers.
  * @returns the disposer, carrying {@link AdapterRegistrationHandle.replace}.
  */
-registerAdapter(providers: string[], adapter: LlmAdapter): AdapterRegistrationHandle
+registerAdapter(providers: string[], adapter: LlmAdapter, validationAdmission?: LlmValidationAdmission): AdapterRegistrationHandle
 
 /**
  * Describe provider routes with a registered adapter.

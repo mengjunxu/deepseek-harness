@@ -1,0 +1,37 @@
+{
+  "startedAt": "2026-10-31T16:31:49.059Z",
+  "completedAt": "2026-10-31T16:31:49.065Z",
+  "mode": "stream",
+  "evidenceClass": "reference Browser-only live request; not DSH runtime admission",
+  "model": "chatgpt-web/gpt-5.6-sol",
+  "effort": "high",
+  "prompt": "Reply with exactly DSHWB01CF27BA8E3D7845F29171EDD325EDD48B.",
+  "usageSource": "chatgpt_web_unofficial",
+  "httpStatus": 200,
+  "abortCause": null,
+  "signalAborted": false,
+  "observedTypes": [
+    "heartbeat",
+    "error"
+  ],
+  "textDeltas": 0,
+  "textChars": 0,
+  "expectedMarker": "DSHWB01CF27BA8E3D7845F29171EDD325EDD48B",
+  "actualMarkdown": "",
+  "exactMarker": false,
+  "wireTypes": [
+    "response.created",
+    "response.failed"
+  ],
+  "wireStatuses": [
+    "in_progress",
+    "failed"
+  ],
+  "adapterErrors": [
+    {
+      "message": "ChatGPT web requires a current-turn user message for browser-session replay"
+    }
+  ],
+  "failure": null,
+  "activeTurnsAfterCleanup": 0
+}

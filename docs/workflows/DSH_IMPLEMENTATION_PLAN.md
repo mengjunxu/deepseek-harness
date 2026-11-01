@@ -718,7 +718,7 @@ ChatToHarness 与 codex-chatgpt-web 的静态源码审阅范围见 [参考锁定
 - [ ] **QR-06 [TODO]** UI 显示来源和用量、预算同意与回退证据、真实 profile/Session 快照/GIF；依赖 QR-03/04/05。
 - [ ] **P3-07 [TODO]** 可选入站任务 MCP Gateway：submit/status/result/cancel、worker.list、artifact.get；复用 P1-04/08/09、P2-03 与对应 Worker 能力，不绕过 Task Store/权限。
 - [ ] **P3-08 [TODO]** 可选 Secure MCP Tunnel：单次总期限 120 秒、异步 TaskId 查询、断连不丢任务；依赖 P3-07 与真实工作区授权。
-- [ ] **WB-01 [TODO / FIRST]** 当前最高优先：以 codex-chatgpt-web 为首要参考，验证 Browser-only 真实收发与 DSH Adapter 最小接入；记录账号/会话、模型选择、完成/失败/取消证据。Mock/Manual 不计真实可行性通过；生产默认门禁保留。不得因 QR-02 或完整 Executor/预算链路未完成而延后启动，详见第 15 节。
+- [x] **WB-01 [DONE]** Browser-only 真实收发与 DSH Adapter 最小接入验证完成：参考 DEV 唯一标记真实往返、客户端取消与本地清理有既序证据；2026-11-02 经受限准入的独立 worker 与桥接 Adapter 完成一次真实 DSH 请求，唯一标记精确回显、Responses completed、真实 usage（estimated 口径）、路由/无本地工具/thread-Turn 关联/attribution 与 worker 清理均有 Session 级证据；三次提交前失败有真实失败路径证据且未消耗模型用量。取消证据止步适配器层（SDK 无 wire-level cancel，文档明确）；生产默认门禁保持有效，未放开任何生产准入。证据：[dsh-web-real-request.json](../../.ai/tasks/dsh-web-provider-poc/evidence/dsh-web-real-request.json) 与[任务记录](../../.ai/tasks/dsh-web-provider-poc/handoff.md)。
 
 CG1 Gate（待实施）：默认路由、能力不匹配、余额 unknown、限额、不可用、断流、回退和额外付费阻断逐项验证。SIWC 必须显示 `work_codex_shared`，`chatgpt_regular` 不得成为 DSH 主动模型 Provider；费用来源变化需要预设预算或当次明确同意。CG2/CG3 复用原 P1/P2 任务，CG4 保留 V2，CG5 的其余反向工具研究可跳过；WB-01 前置验证不在可跳过范围。
 
@@ -732,7 +732,7 @@ CG1 Gate（待实施）：默认路由、能力不匹配、余额 unknown、限�
 - [ ] **VN4-03 [PARTIAL]** TaskSpec、可选 Plan 与批准/版本映射；MGSD 现有执行仍要求批准 Plan。
 - [ ] **VN4-04 [PARTIAL]** 模板/Override/reviewerPolicy；已有脚本 Workflow，产品无 Plan/无模型 Review 分支待实现。
 - [ ] **VN4-05 [PARTIAL]** 官方 Chat + Codex/Codely；SIWC/Codex/本地 Codely 基础存在，三条产品链未验收。
-- [ ] **VN4-06 [TODO / FIRST]** Web Provider 验证已前移为当前第一优先；先核对账号/接入与既有准入条件，完成受控往返和 DSH 适配证据。真实 PoC 为 NOT_RUN，不能以 Mock 或已有通用 gated 测试打勾；后续 M2 产品化另验收。
+- [x] **VN4-06 [DONE]** Web Provider 验证完成：参考 Browser-only 真实往返与客户端取消已有证据；受限 PoC 准入（独立 home、单路线/模型、到期、准备额度、撤销）经实现与 118 项聚焦测试、SDK keyless 回放验证；2026-11-02 独立 worker 与 DSH 桥接 Adapter 完成真实受控往返（唯一标记精确回显、completed、真实 usage），Mock/参考/DSH 三类证据分开保存。Session 级取消受 SDK 无 wire-level cancel 限制，证据止步适配器层并如实记录；后续 M2 产品化另验收，生产准入未放开。
 - [ ] **VN4-07 [PARTIAL]** 终态/取消已有基础；统一 TurnAttempt/屏障/ContextEpoch、QR 预算政策待补。
 - [ ] **VN4-08 [PARTIAL]** Session/上下文/Fork 已有；Task/MemorySnapshot/Checkpoint 与跨 Provider 恢复待贯通。
 - [ ] **VN4-09 [PARTIAL]** 私有文件凭据/审批/沙箱已有；Keychain、统一授权与脱敏验收未完成。
@@ -807,4 +807,6 @@ QR-03 与 VN4-01 保持 PARTIAL，VN4-02 仍 TODO。当前下一步按第 15 节
 
 已有政策解析器和生产默认门禁保持有效。优先级调整不等于账号、使用条件或生产准入已经通过；缺少条件时先完成能独立进行的源码、接入和 Mock 检查，明确下一项外部动作。真实路线必须保持 chatgpt_web_unofficial 身份，不能伪标 local/api_metered 规避准入，也不能把 SIWC、官方 MCP 入站或模型同名当作 Web Provider 的实际成功。最小验证不执行全局 Codex 配置注入、不提取登录 Cookie，也不绕过验证码或产品限制。
 
-当前证据仅包含参考源码审阅和本机工具连接盘点；尚未启动参考应用或提交真实网页模型请求。本次规划任务只完成优先级、依赖和验收标准调整，不计 WB-01 / VN4-06 验证通过。
+2026-11-01 的[验证任务](../../.ai/tasks/dsh-web-provider-poc/handoff.md)已完成参考隔离 DEV 的 Browser-only 真实收发：5.6 High、唯一标记精确回复、Responses completed，以及取消后的 failed 终态和本地清理；不推定服务器停止生成/额度返还或其他模型能力。156 项参考测试与构建另有证据。DSH SDK 负向探测仍在 Adapter I/O 前拒绝 Web 请求，DSH 实际接入和生产准入未通过，WB-01 / VN4-06 保持未勾选。参考 DEV 禁止 Responses listener；用户已批准受限 PoC 准入，注册授权实现及 Mock SDK 验证已有证据；真实 DSH 浏览器 worker 仍未实现，当前因 Codex 五小时余量 14% 按用户规则停止，接续点见该 Task。
+
+2026-11-02 Codely 接续同一任务并完成 DSH 实际接入：独立 Bun worker 复用参考进程内 responseRequest 与 Browser Adapter（不启动 Responses listener），桥接 Adapter 经受限准入注册 chatgpt_web_unofficial 路线，运行时 patch 禁用全部本地工具。适配器层 18 项与运行时层 Mock 验证通过后，经用户确认发起一次真实请求：唯一标记精确回显、Responses completed、真实 usage（estimated 口径）、request/header 路由与无工具正确、thread/Turn 关联真实 message id、attribution user-agent 上 wire、worker 干净退出。三次提交前失败定位为桥接协议缺陷（参考 console 日志混入协议 stdout）并修复，未消耗模型用量；生产默认门禁不变，生产准入未放开。取消证据止步适配器层（Python/TS SDK 无 wire-level cancel）。证据：[dsh-web-real-request.json](../../.ai/tasks/dsh-web-provider-poc/evidence/dsh-web-real-request.json)、[dsh-web-bridge-mock.json](../../.ai/tasks/dsh-web-provider-poc/evidence/dsh-web-bridge-mock.json) 与[任务记录](../../.ai/tasks/dsh-web-provider-poc/handoff.md)；WB-01 / VN4-06 经用户确认打勾。

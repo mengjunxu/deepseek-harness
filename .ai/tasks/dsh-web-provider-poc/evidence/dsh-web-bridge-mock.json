@@ -1,0 +1,79 @@
+{
+  "scope": "keyless mock bridge through the real built DSH sdk profile and admission",
+  "completion": {
+    "prompt": "Reply with exactly DSHWEBBRIDGEFFC6B44F451D.",
+    "finishReason": "completed",
+    "reply": "Reply with exactly DSHWEBBRIDGEFFC6B44F451D.",
+    "secondFinishReason": "error",
+    "secondTurnEnd": [
+      {
+        "turn": 1,
+        "reason": {
+          "kind": "error",
+          "error": {
+            "message": "Web validation approval is absent, expired, revoked, exhausted or outside its scope",
+            "code": "VALIDATION_ADMISSION_DENIED"
+          }
+        }
+      }
+    ],
+    "requestHeaders": [
+      {
+        "provider": "chatgpt_web_unofficial",
+        "model": "gpt-5.6-sol",
+        "tools": []
+      }
+    ],
+    "workerStarted": {
+      "model": "gpt-5.6-sol",
+      "effort": "high",
+      "prompt": "Reply with exactly DSHWEBBRIDGEFFC6B44F451D.",
+      "threadId": "dsh_session-94d40864148a470384489c0a6c0356e9",
+      "turnId": "dsh_turn_session-94d40864148a470384489c0a6c0356e9_b10bd4d9-e462-4afc-b6d6-602cfac9c267",
+      "userAgent": "deepseek-harness/0.1.7-rc.2 (+https://github.com/deepseek-ai/deepseek-harness)",
+      "instructionsChars": 217
+    },
+    "workerExit": {
+      "kind": "exit",
+      "capturedAt": "2026-11-01T16:15:00.113Z",
+      "failure": null,
+      "aborted": false,
+      "abortCause": null,
+      "activeTurns": 0
+    }
+  },
+  "rejected": {
+    "finishReason": "error",
+    "turnEnd": [
+      {
+        "turn": 1,
+        "reason": {
+          "kind": "error",
+          "error": {
+            "message": "Mock bridge preflight rejection: submission was not accepted",
+            "code": "invalid_request",
+            "status": 400
+          }
+        }
+      }
+    ],
+    "workerErrorEvents": [
+      {
+        "kind": "event",
+        "type": "error",
+        "message": "Mock bridge preflight rejection: submission was not accepted",
+        "status": 400,
+        "errorType": "invalid_request_error",
+        "code": "invalid_request"
+      }
+    ],
+    "workerExit": {
+      "kind": "exit",
+      "capturedAt": "2026-11-01T16:15:00.947Z",
+      "failure": null,
+      "aborted": false,
+      "abortCause": null,
+      "activeTurns": 0
+    }
+  }
+}

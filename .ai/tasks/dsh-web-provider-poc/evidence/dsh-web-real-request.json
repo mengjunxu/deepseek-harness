@@ -1,0 +1,73 @@
+{
+  "scope": "one real browser request through the DSH bridge admission; no retry",
+  "real": {
+    "prompt": "Reply with exactly DSHWEBBRIDGEF421814894F5.",
+    "finishReason": "completed",
+    "reply": "DSHWEBBRIDGEF421814894F5",
+    "exactMarker": true,
+    "turnEnd": [
+      {
+        "turn": 1,
+        "reason": {
+          "kind": "completed"
+        }
+      }
+    ],
+    "requestHeaders": [
+      {
+        "provider": "chatgpt_web_unofficial",
+        "model": "gpt-5.6-sol",
+        "tools": []
+      }
+    ],
+    "workerStarted": {
+      "model": "gpt-5.6-sol",
+      "effort": "high",
+      "prompt": "Reply with exactly DSHWEBBRIDGEF421814894F5.",
+      "threadId": "dsh_session-2a939d32117949f0953b99daf9070087",
+      "turnId": "dsh_turn_session-2a939d32117949f0953b99daf9070087_2af0125f-3af9-4939-b57f-0524728ef910",
+      "userAgent": "deepseek-harness/0.1.7-rc.2 (+https://github.com/deepseek-ai/deepseek-harness)",
+      "instructionsChars": 213
+    },
+    "httpStatus": 200,
+    "wireTypes": [
+      "response.created",
+      "response.output_item.added",
+      "response.content_part.added",
+      "response.output_text.delta",
+      "response.output_text.done",
+      "response.content_part.done",
+      "response.output_item.done",
+      "response.heartbeat",
+      "response.heartbeat",
+      "response.heartbeat",
+      "response.heartbeat",
+      "response.heartbeat",
+      "response.output_item.added",
+      "response.content_part.added",
+      "response.output_text.delta",
+      "response.output_text.done",
+      "response.content_part.done",
+      "response.output_item.done",
+      "response.completed"
+    ],
+    "wireStatuses": [
+      "in_progress",
+      "completed"
+    ],
+    "usage": {
+      "inputTokens": 8937,
+      "outputTokens": 24,
+      "totalTokens": 8961,
+      "estimated": true
+    },
+    "workerExit": {
+      "kind": "exit",
+      "capturedAt": "2026-11-01T16:15:15.900Z",
+      "failure": null,
+      "aborted": false,
+      "abortCause": null,
+      "activeTurns": 0
+    }
+  }
+}

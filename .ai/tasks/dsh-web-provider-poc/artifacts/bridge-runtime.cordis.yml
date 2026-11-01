@@ -1,0 +1,42 @@
+- id: llm-deepseek
+  disabled: true
+- id: session-persistence-jsonl
+  config:
+    root: !!js dshHomePath('sessions')
+    compression: none
+- id: tool-bash
+  disabled: true
+- id: tool-pwsh
+  disabled: true
+- id: tool-jobs
+  disabled: true
+- id: tool-fs
+  disabled: true
+- id: tool-fs-search
+  disabled: true
+- id: tool-skill
+  disabled: true
+- id: tool-subagent-control
+  disabled: true
+- id: tool-subagent-list-agents
+  disabled: true
+- id: tool-subagent
+  disabled: true
+- id: tool-subagent-fork
+  disabled: true
+- id: tool-workflow
+  disabled: true
+- id: tool-todo
+  disabled: true
+- id: tool-goal
+  disabled: true
+- id: tool-web
+  disabled: true
+- id: tool-ralph
+  disabled: true
+- id: plan-mode
+  disabled: true
+- insert:
+    - id: web-validation-bridge
+      name: '../../../../packages/llm/llm/tests/fixtures/web-bridge.ts'
+      config: {"scenario": "real", "command": ["python3", "/Users/x-dt/workspace/AI/Agents/deepseek-harness/.artifacts/cgw-cli.py", "--probe", "/Users/x-dt/workspace/AI/Agents/deepseek-harness/.ai/tasks/dsh-web-provider-poc/artifacts/web-validation-worker.ts"], "model": "gpt-5.6-sol", "maxCalls": 1, "expiryMinutes": 10, "evidencePath": "/Users/x-dt/workspace/AI/Agents/deepseek-harness/.ai/tasks/dsh-web-provider-poc/evidence/dsh-web-real.ndjson"}

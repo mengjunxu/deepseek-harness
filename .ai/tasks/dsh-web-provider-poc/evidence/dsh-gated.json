@@ -1,0 +1,21 @@
+{
+  "evidenceClass": "real DSH SDK profile admission rejection; no browser or model dispatch",
+  "provider": "web-poc",
+  "usageSource": "chatgpt_web_unofficial",
+  "model": "chatgpt-web/gpt-5.6-sol",
+  "finishReason": "error",
+  "finalResponse": "",
+  "requestHeaders": [],
+  "turnEnd": [
+    {
+      "turn": 1,
+      "reason": {
+        "kind": "error",
+        "error": {
+          "message": "Provider \"web-poc\" is unavailable: Controlled DSH Web validation admission has not been granted",
+          "code": "PROVIDER_UNAVAILABLE"
+        }
+      }
+    }
+  ]
+}

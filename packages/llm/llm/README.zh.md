@@ -64,7 +64,9 @@ for await (const chunk of ctx.llm.stream({
 
 `LlmProviderInfo.policy` 可选地提供准入元数据。适配器拥有者先通过 `resolveProviderPolicy(input)` 解析配置，再返回政策。解析器将未声明的额度来源、能力和余额保持为 unknown，要求不可用路线提供原因，并拒绝将实验来源设为 ready。`chatgpt_regular` 不能注册为推理路线。注册捕获独立政策副本，`listProviders()` 返回独立副本。省略政策的既有适配器保留原路由行为，不声明计费来源或能力支持。
 
-声明政策的路线只有 ready 才可准备或发送推理请求。gated 路线仍可发现，但在适配器准备和 I/O 前以 `PROVIDER_UNAVAILABLE` 拒绝。准备好的调用在注册替换后保留原已准入代次。这些字段不实现预算预留、同意、精确模型能力匹配或自动回退；unknown 余额不能显示为已报告的剩余额度。
+没有隔离验证授权时，声明政策的路线只有 ready 才可准备或发送推理请求。gated 路线仍可发现，但在适配器准备和 I/O 前以 `PROVIDER_UNAVAILABLE` 拒绝。准备好的调用在注册替换后保留原已准入代次。这些字段不实现预算预留、同意、精确模型能力匹配或自动回退；unknown 余额不能显示为已报告的剩余额度。
+
+隔离验证 profile 可以将 `LlmValidationAdmission` 作为 `registerAdapter` 的第三个参数。授权只允许其单一 gated `chatgpt_web_unofficial` 路线及精确模型白名单，并绑定启动器提供的 Harness home；默认 home 和不匹配的 home 均被拒绝。每次准备消耗一个有界额度，包括失败或未使用的准备。替换共享剩余额度并撤销旧的已准备调用；释放注册会撤销尚未开始的分派。分派前再次检查过期时间。元数据仍为 gated，所有出厂 profile 都不提供授权，普通注册保持默认拒绝。授权仅在当前进程有效，不含浏览器凭证；它不表示生产准入或已报告余额。
 
 `LlmCallConfig` 和 `GenerateOptions` 可选地携带显式请求政策：`intent` 记录 chat/plan/review/execute，`requiredCapabilities` 列出必须由 Provider 声明支持的能力。准备调用和直接分派都会在适配器准备前以 `UNSUPPORTED_PROVIDER_CAPABILITY` 拒绝未知或不支持的要求。已准备调用同时绑定这些字段和模型控制值；调用者不能在分派前更改它们。循环在既有请求头中记录这两个字段；它们不向模型内容添加文字。持久化读取方通过 `validateLlmRequestPolicy` 校验其值。 携带政策的调用必须使用已注册 Provider；缺失路线以 `POLICY_ROUTE_UNAVAILABLE` 失败，不委托给旧版中间件。
 

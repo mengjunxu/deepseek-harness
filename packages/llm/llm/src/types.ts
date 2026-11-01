@@ -226,7 +226,7 @@ export type LlmCapabilitySupport = 'supported' | 'unsupported' | 'unknown'
 export type LlmUsageSource = 'work_codex_shared' | 'chatgpt_web_unofficial' | 'api_metered'
   | 'third_party' | 'local' | 'experimental_unverified' | 'unknown'
 
-/** Route admission state; only ready routes may prepare or dispatch inference. */
+/** Ordinary route admission state; bounded validation grants are checked separately. */
 export type LlmProviderAvailability = 'ready' | 'unconfigured' | 'auth_required' | 'limited' | 'gated' | 'unavailable'
 
 /** Resolved policy captured with one adapter registration; it contains no credentials. */

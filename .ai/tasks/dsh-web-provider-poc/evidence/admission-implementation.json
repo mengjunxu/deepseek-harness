@@ -1,0 +1,26 @@
+{
+  "recordedAt": "2026-11-01T01:00:54+08:00",
+  "focusedTests": 118,
+  "SDKRefresh": "PASS",
+  "SDKReplay": "PASS",
+  "liveDSHAdapter": "NOT_RUN",
+  "sourceSha256": {
+    "packages/llm/llm/src/index.ts": "0df1c76fc6593a247aeed8cd3b1163f2bae5c7dc2b9d1c3a61cfd723b761a445",
+    "packages/llm/llm/src/validation-admission.ts": "9825a21a483a7a24d94f7324d95c99bd17dbae3a7b0458d1bae61abafc49cdaf",
+    "packages/llm/llm/tests/validation-admission.spec.ts": "eab4e5f6e3b85a60b661fc4b3e4551577dd71498e3c87e420470da9c5e8c05bd",
+    "packages/llm/llm/tests/fixtures/validation-admission.ts": "850631614d479bd6cc212e998ad1c3bcb11c2689326503679c8058f6923d9793"
+  },
+  "finalPrepareFailureCodeFix": "PASS (Python SDK preserves VALIDATION_ADMISSION_DENIED)",
+  "finalFocusedTests": 118,
+  "finalPythonMock": "PASS",
+  "remainingChecksAfterFinalFix": [
+    "repository lint",
+    "SDK replay",
+    "bilingual pairing"
+  ],
+  "quotaStop": {
+    "remainingPercent": 14,
+    "checkedAt": "2026-11-01T01:02:29+08:00",
+    "resetsAt": "2026-11-01T04:44:11+08:00"
+  }
+}

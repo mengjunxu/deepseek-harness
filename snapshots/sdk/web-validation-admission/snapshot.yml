@@ -1,0 +1,8 @@
+version: 1
+scenario: web-validation-admission
+profile: sdk
+composition: sdk-web-validation-admission
+recording: authored
+header:
+  class: web-validation-admission
+  pin: true

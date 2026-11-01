@@ -1,0 +1,8 @@
+{"kind":"started","scenario":"mock-complete","pid":66613,"capturedAt":"2026-11-01T16:15:00.113Z","request":{"model":"gpt-5.6-sol","effort":"high","prompt":"Reply with exactly DSHWEBBRIDGEFFC6B44F451D.","threadId":"dsh_session-94d40864148a470384489c0a6c0356e9","turnId":"dsh_turn_session-94d40864148a470384489c0a6c0356e9_b10bd4d9-e462-4afc-b6d6-602cfac9c267","userAgent":"deepseek-harness/0.1.7-rc.2 (+https://github.com/deepseek-ai/deepseek-harness)","instructionsChars":217}}
+{"kind":"status","httpStatus":200}
+{"kind":"event","type":"heartbeat"}
+{"kind":"event","type":"text_delta","text":"Bridge commentary stays separate from the final answer.","phase":"commentary"}
+{"kind":"event","type":"assistant_boundary"}
+{"kind":"event","type":"text_delta","text":"Reply with exactly DSHWEBBRIDGEFFC6B44F451D.","phase":"final_answer"}
+{"kind":"event","type":"done","stopReason":"stop","endTurn":true,"usage":{"inputTokens":12,"outputTokens":34,"totalTokens":46}}
+{"kind":"exit","capturedAt":"2026-11-01T16:15:00.113Z","failure":null,"aborted":false,"abortCause":null,"activeTurns":0}

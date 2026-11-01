@@ -32,6 +32,8 @@ import { resolveRetryPolicy } from './retry-policy.ts'
 import type { ResolvedRetryPolicy } from './retry-policy.ts'
 import type { ProviderRequestId } from './brand.ts'
 import { callConfigEquals } from './call-config.ts'
+import { ValidationAdmissionBudget } from './validation-admission.ts'
+import type { LlmValidationAdmission, ValidationGeneration, ValidationReservation } from './validation-admission.ts'
 import type { LlmCallConfig, LlmCallConfigAdapterDefaults } from './call-config.ts'
 import { HarnessError, INVALID_CREDENTIAL_CODE } from './error.ts'
 import { normalizeLlmFailure } from './adapter-failure.ts'
@@ -42,6 +44,7 @@ import {
 import type { FileAttachmentRef } from '@deepseek-ai/dsh-attachment'
 
 export * from './provider-policy.ts'
+export type { LlmValidationAdmission } from './validation-admission.ts'
 export * from './attribution.ts'
 export * from './brand.ts'
 export * from './error.ts'
@@ -392,9 +395,13 @@ export class LlmRuntime extends TypertRemoteService {
    * Disposed with the fiber.
    * @param providers - every provider route this adapter should serve.
    * @param adapter - the adapter that streams calls for those providers.
+   * @param validationAdmission - optional bounded Web-only approval for an isolated profile; unavailable to remote callers.
    * @returns the disposer, carrying {@link AdapterRegistrationHandle.replace}.
    */
-  registerAdapter(providers: string[], adapter: LlmAdapter): AdapterRegistrationHandle {
+  registerAdapter(providers: string[], adapter: LlmAdapter, validationAdmission?: LlmValidationAdmission): AdapterRegistrationHandle {
+    const locateHome = this.ctx.get('dshHomePath') as (() => string) | undefined
+    const budget = validationAdmission === undefined ? undefined
+      : new ValidationAdmissionBudget(validationAdmission, locateHome?.())
     // The routes this registration currently holds; `replace` rewrites it, and
     // the disposer releases whatever it holds at disposal time.
     const owned = new Set<string>()
@@ -403,10 +410,13 @@ export class LlmRuntime extends TypertRemoteService {
     let released = false
     const dispose = this.ctx.effect(function* (this: LlmRuntime) {
       if (providers.length === 0) throw new LlmError('an adapter must register at least one provider', 'INVALID_ADAPTER')
-      this.commitRoutes(owned, this.prepareRoutes(providers, adapter, owned))
+      this.commitRoutes(owned, this.prepareRoutes(providers, adapter, owned, budget))
       yield () => {
         released = true
-        for (const provider of owned) this.adapters.delete(provider)
+        for (const provider of owned) {
+          this.adapters.get(provider)?.validation?.revoke()
+          this.adapters.delete(provider)
+        }
         owned.clear()
         this.emitAdaptersUpdated()
       }
@@ -420,7 +430,7 @@ export class LlmRuntime extends TypertRemoteService {
       if (released) {
         throw new LlmError('a disposed adapter registration cannot replace its routes', 'REGISTRATION_DISPOSED')
       }
-      this.commitRoutes(owned, this.prepareRoutes(next, adapter, owned))
+      this.commitRoutes(owned, this.prepareRoutes(next, adapter, owned, budget))
     }
     return handle
   }
@@ -430,7 +440,9 @@ export class LlmRuntime extends TypertRemoteService {
    * registration already holds as available. Nothing is mutated: a rejected
    * candidate leaves the registry exactly as it was.
    */
-  private prepareRoutes(providers: string[], adapter: LlmAdapter, owned: ReadonlySet<string>): AdapterRegistration[] {
+  private prepareRoutes(
+    providers: string[], adapter: LlmAdapter, owned: ReadonlySet<string>, budget?: ValidationAdmissionBudget,
+  ): AdapterRegistration[] {
     const unique = new Set<string>()
     const registrations: AdapterRegistration[] = []
     for (const provider of providers) {
@@ -442,6 +454,10 @@ export class LlmRuntime extends TypertRemoteService {
         throw new LlmError(`an adapter for provider "${provider}" is already registered`, 'DUPLICATE_ADAPTER')
       }
       const info = adapter.providerInfo(provider)
+      if (budget !== undefined && (providers.length !== 1 || provider !== budget.provider
+        || info.policy?.usageSource !== 'chatgpt_web_unofficial' || info.policy.availability !== 'gated')) {
+        throw new LlmError('Validation approval requires its sole gated Web route', 'VALIDATION_ADMISSION_DENIED')
+      }
       if (typeof info.id !== 'string' || info.id !== provider || typeof info.name !== 'string' || info.name.length === 0) {
         throw new LlmError(`adapter metadata for provider "${provider}" must preserve its id and have a non-empty name`, 'INVALID_ADAPTER')
       }
@@ -453,6 +469,7 @@ export class LlmRuntime extends TypertRemoteService {
         provider: deepFreeze({ id: info.id, name: info.name,
           ...info.policy === undefined ? {} : { policy: structuredClone(info.policy) } }),
         retryPolicy,
+        ...budget === undefined ? {} : { validation: budget.generation() },
       })
     }
     return registrations
@@ -466,7 +483,10 @@ export class LlmRuntime extends TypertRemoteService {
    * exactly like a first registration.
    */
   private commitRoutes(owned: Set<string>, registrations: readonly AdapterRegistration[]): void {
-    for (const provider of owned) this.adapters.delete(provider)
+    for (const provider of owned) {
+      this.adapters.get(provider)?.validation?.revoke()
+      this.adapters.delete(provider)
+    }
     owned.clear()
     for (const registration of registrations) {
       this.adapters.set(registration.provider.id, registration)
@@ -940,7 +960,16 @@ export class LlmRuntime extends TypertRemoteService {
    */
   async prepareCall(config: LlmCallConfig, signal?: AbortSignal): Promise<PreparedLlmCall> {
     const registration = this.requestRegistration(config)
-    this.assertProviderAdmission(registration, config)
+    let validation: ValidationReservation | undefined
+    try {
+      this.assertProviderAdmission(registration, config)
+      validation = registration.validation?.reserve(config)
+    } catch (error) {
+      if (error instanceof HarnessError && error.code === 'VALIDATION_ADMISSION_DENIED') {
+        throw new LlmError(error.message, error.code, { cause: error })
+      }
+      throw error
+    }
     const adapterCall = await registration.adapter.prepareCall(config.provider, config.model, signal)
     const modelInfo = this.normalizeModelInfo(registration, config.model, adapterCall.model)
     const resolved = this.resolveCallWithInfo(config, modelInfo)
@@ -983,6 +1012,7 @@ export class LlmRuntime extends TypertRemoteService {
           config: resolvedConfig,
           modelInfo,
           dispatch: options => adapterCall.stream(options),
+          ...validation === undefined ? {} : { validation },
         })
       },
     })
@@ -1000,12 +1030,17 @@ export class LlmRuntime extends TypertRemoteService {
       ? 'NO_ADAPTER' : 'POLICY_ROUTE_UNAVAILABLE')
   }
 
-  private assertProviderAdmission(registration: AdapterRegistration, config: LlmCallConfig): void {
+  private assertProviderAdmission(registration: AdapterRegistration, config: LlmCallConfig, reservation?: ValidationReservation): void {
     const provider = registration.provider.id
     const policy = registration.provider.policy
     if (policy !== undefined && (policy.availability !== 'ready'
       || policy.usageSource === 'chatgpt_web_unofficial' || policy.usageSource === 'experimental_unverified')) {
-      throw new LlmError(`Provider "${provider}" is unavailable: ${policy.gateReason ?? policy.availability}`, 'PROVIDER_UNAVAILABLE')
+      if (policy.usageSource === 'chatgpt_web_unofficial' && policy.availability === 'gated' && registration.validation !== undefined) {
+        if (reservation === undefined) registration.validation.assert(config)
+        else reservation.assert()
+      } else {
+        throw new LlmError(`Provider "${provider}" is unavailable: ${policy.gateReason ?? policy.availability}`, 'PROVIDER_UNAVAILABLE')
+      }
     }
     for (const capability of config.requiredCapabilities ?? []) {
       const support = policy?.capabilities[capability] ?? 'unknown'
@@ -1064,7 +1099,8 @@ export class LlmRuntime extends TypertRemoteService {
     let iterator: AsyncIterator<StreamChunk>
     try {
       const registration = prepared?.registration ?? this.requestRegistration(options)
-      this.assertProviderAdmission(registration, options)
+      this.assertProviderAdmission(registration, options, prepared?.validation)
+      const validation = prepared?.validation ?? registration.validation?.reserve(options)
       const adapter = registration.adapter
       let modelInfo: LlmResolvedModelInfo
       let resolvedConfig: LlmCallConfig
@@ -1112,6 +1148,7 @@ export class LlmRuntime extends TypertRemoteService {
         }
         if (Object.isFrozen(resolvedOptions)) deepFreeze(projectedOptions)
       }
+      validation?.assert()
       const stream = dispatch(this.forAdapter(projectedOptions, adapter))
       iterator = stream[Symbol.asyncIterator]()
     } catch (error: unknown) {
@@ -1192,6 +1229,7 @@ interface AdapterRegistration {
   readonly adapter: LlmAdapter
   readonly provider: LlmProviderInfo
   readonly retryPolicy: ResolvedRetryPolicy
+  readonly validation?: ValidationGeneration
 }
 
 interface PreparedDispatch {
@@ -1199,6 +1237,7 @@ interface PreparedDispatch {
   readonly config: LlmCallConfig
   readonly modelInfo: LlmResolvedModelInfo
   readonly dispatch: (options: GenerateOptions) => AsyncIterable<StreamChunk>
+  readonly validation?: ValidationReservation
 }
 
 export default LlmRuntime
