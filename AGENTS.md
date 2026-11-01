@@ -6,7 +6,7 @@ DeepSeek Harness is an all-plugin Cordis agent harness. Read [docs/architecture.
 
 本项目使用 Codex 和 Codely 协同开发；所有 Agent 必须遵循统一的开发规则、架构决策、共享记忆和任务交接协议。两个入口的共享部分仅定义入口规则和上下文加载策略，详细规则以 [.ai/WORKFLOW.md](.ai/WORKFLOW.md) 及其引用的现有文档为准。
 
-普通问答按需加载上下文；开发前必须读取 WORKFLOW、识别或创建 Task、核对任务记录与真实 Git 状态，并确认同一 Task、同一 Workspace 只有一个写入者。架构和决策按 [.ai/ARCHITECTURE.md](.ai/ARCHITECTURE.md) 定位，长期知识按需查阅 [.ai/MEMORY.md](.ai/MEMORY.md)；交接和完成时按 WORKFLOW 更新 Task、Plan 和 Checkpoint。
+普通问答按需加载上下文；开发前必须读取 WORKFLOW、识别或创建 Task、核对任务记录与真实 Git 状态，并确认同一 Task、同一 Workspace 只有一个写入者。架构和决策按 [.ai/ARCHITECTURE.md](.ai/ARCHITECTURE.md) 定位，长期知识按需查阅 [.ai/MEMORY.md](.ai/MEMORY.md)；每步、阶段完成及交接时按 WORKFLOW 更新 Task、Plan、Checkpoint 和相关知识，并遵守其中的 Codex 额度停止规则。
 
 ## Pre-stable APIs and released Session data
 

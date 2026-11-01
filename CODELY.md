@@ -6,7 +6,7 @@ DeepSeek Harness (`dsh`) is DeepSeek AI's open-source agent harness: an all-plug
 
 ## Shared Agent Development Instructions
 
-Codex 和 Codely 共同遵循 [AGENTS.md 的共享入口规则](AGENTS.md#shared-agent-development-instructions)与 [.ai/WORKFLOW.md](.ai/WORKFLOW.md) 的完整规范，使用相同的架构决策、共享 Memory 和任务记录。普通问答按需加载；开发前读取 WORKFLOW、识别或创建 Task、核对 Task / Plan / Checkpoint 和 Git 状态并确认单写入者；架构与 Memory 按相关索引加载，交接与完成按 WORKFLOW 更新记录。
+Codex 和 Codely 共同遵循 [AGENTS.md 的共享入口规则](AGENTS.md#shared-agent-development-instructions)与 [.ai/WORKFLOW.md](.ai/WORKFLOW.md) 的完整规范，使用相同的架构决策、共享 Memory 和任务记录。普通问答按需加载；开发前读取 WORKFLOW、识别或创建 Task、核对 Task / Plan / Checkpoint 和 Git 状态并确认单写入者；架构与 Memory 按相关索引加载，每步、阶段完成及交接时按 WORKFLOW 更新记录，并读取其中适用的额度停止规则。
 
 详细规则和知识使用 `.ai/` 及其引用的现有文档；不在两个入口重复维护，也不新建平行规则体系。
 
@@ -73,7 +73,8 @@ Cached because they are not visible from the command surface; AGENTS.md owns the
 
 ### Project
 - [2026-10-09 15:53:07] MGSD planning docs (docs/legacy/MGSD_Distributed_Agent_Harness_Architecture_and_Execution_Plan.md and _v2.md) are intentionally Chinese-only planning artifacts: no .i18n.yaml pairing and not in scripts/doc-budgets.manifest.json; full doc-sync pairing/TS-sample failures for them are pre-existing and documented in MGSD_Implementation_Checklist. When editing them, keep the doc's own style and keep verify-md-links, verify-md-wrap (one physical line per paragraph) and git diff --check green — e.g. use blank-line-separated blockquote lines instead of trailing double spaces, and don't translate the docs to "fix" pairing.
-- [2026-10-22 17:20:04] This macOS deepseek-harness checkout now has node_modules installed (as of 2026-10-22) and bash still has no `pnpm` on PATH, so use `corepack pnpm`. Doc and source gates run directly: `corepack pnpm exec tsx scripts/verify-md-links.ts`, `verify-md-wrap.ts`, `verify-translation-pairing.ts <pair...> [--write]`, `verify-doc-budgets.ts`; `corepack pnpm run typecheck` and `corepack pnpm exec vitest run <paths>` work without a full rebuild. Note the machine's Node v22.18.0 is below the declared `^22.19.0 || >=24` engine range even though commands succeed.
+- [2026-11-02 00:19:14] This macOS deepseek-harness checkout now has node_modules installed (as of 2026-10-22) and bash still has no `pnpm` on PATH, so use `corepack pnpm`. Doc and source gates run directly: `corepack pnpm exec tsx scripts/verify-md-links.ts`, `verify-md-wrap.ts`, `verify-translation-pairing.ts <pair...> [--write]`, `verify-doc-budgets.ts`; `corepack pnpm run typecheck` and `corepack pnpm exec vitest run <paths>` work without a full rebuild. Python SDK probes run with `/opt/anaconda3/bin/python` plus `PYTHONPATH=python/sdk/src` (the interpreter the 2026-11 SDK probes used; plain `python3` unverified). Note the machine's Node v22.18.0 is below the declared `^22.19.0 || >=24` engine range even though commands succeed.
+
 - ChatGPT integration facts and limits belong to [.ai/MEMORY.md](.ai/MEMORY.md); current progress belongs to the [merged plan Checklist](docs/workflows/DSH_IMPLEMENTATION_PLAN.md#12-有效-checklist-与任务证据) and its linked Task records. Read the plan's section 11 phase mapping before selecting a task; do not infer quota type from OAuth or substitute historical machine notes for current evidence.
 
 ### Reference
