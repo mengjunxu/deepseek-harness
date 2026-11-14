@@ -1,0 +1,2 @@
+$ tsx scripts/verify-translation-pairing.ts --write packages/llm/llm/README.md
+verify-translation-pairing: 0 record(s) written; run the check to validate the pairs.

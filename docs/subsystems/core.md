@@ -409,13 +409,54 @@ type Branded<B extends string> = string & { readonly [BRAND]: B }
 
 The two core IDs are `ToolCallId` (correlates a tool call with its result; dsh-llm) and `SessionId` (the shared live agent and durable session identity; dsh-session). Capability packages brand their own ids too, such as `JobId` in [jobs.md](jobs.md).
 
+## Entry model selection
+
+The entry point owns mutable selection; routing policies capture the effective selection through `agent/model-selection`. See the [Agent package](../../packages/core/agent/README.md#use-this-package) for lifetime and request semantics.
+
+```ts type-equiv
+/** Complete provider, model, and optional reasoning effort selected for one live Agent. */
+interface ModelSelection {
+  /** Registered provider route. */
+  provider: string
+  /** Provider-owned model id. */
+  model: string
+  /** Adapter-owned reasoning effort, or provider/default behavior when absent. */
+  reasoningEffort?: ReasoningEffortId
+}
+```
+
+```ts type-equiv
+/** Mutable model selection plus the value captured for the current step. */
+interface ModelSelectionRef {
+  /** Model selected for the next step that enters prompt assembly. */
+  current: ModelSelection | undefined
+  /** Selection captured when the current step entered prompt assembly. */
+  assembled: ModelSelection | undefined
+}
+```
+
+```ts type-equiv
+/** Entry-owned selection access for policies that capture a route across several steps. */
+interface ModelSelectionCapture {
+  /** Detached entry choice; changing the assembled choice never changes this pending value. */
+  readonly current: Readonly<ModelSelection> | undefined
+  /**
+   * Set the selection used by request routing and model-switch notices for this assembly.
+   * @param selected - effective route captured by the request policy.
+   */
+  capture(selected: ModelSelection): void
+}
+```
+
 ## Explicit intent routing
 
-The optional `@deepseek-ai/dsh-agent-default-model/intent-routing` plugin captures one configured route per Turn. The [package README](../../packages/core/agent-default-model/README.md#use-this-package) owns configuration and interaction with entry-point model selection.
+The optional `@deepseek-ai/dsh-agent-default-model/intent-routing` plugin captures one route per Turn. The [package README](../../packages/core/agent-default-model/README.md#use-this-package) owns configuration and interaction with entry-point model selection.
 
 ```ts type-equiv
 /** One explicit route; omission of effort restores the chosen model's default. */
-interface IntentRoute {
+interface ConfiguredIntentRoute {
+  /** Fixed-route mode; omission preserves the configured route. */
+  selection?: 'configured'
   /** Registered provider route. */
   provider: string
   /** Exact provider-owned model id. */
@@ -428,11 +469,26 @@ interface IntentRoute {
 ```
 
 ```ts type-equiv
+/** Use the entry's current model selection while retaining this intent's requirements. */
+interface EntryIntentRoute {
+  /** Resolve through the installed entry selection owner; absence fails before a request. */
+  selection: 'entry'
+  /** Capabilities required of the user-selected route. */
+  requiredCapabilities?: LlmProviderCapability[]
+}
+```
+
+```ts type-equiv
+/** Explicit configured route or entry-owned model selection for one intent. */
+type IntentRoute = ConfiguredIntentRoute | EntryIntentRoute
+```
+
+```ts type-equiv
 /** Complete operator policy; there is no implicit intent, route or fallback. */
 interface IntentRoutingPolicy {
   /** Purpose captured for each new Turn. */
   intent: LlmRequestIntent
-  /** An explicit provider/model pair for every conversational intent. */
+  /** An explicit model selection mode for every conversational intent. */
   routes: Record<LlmRequestIntent, IntentRoute>
 }
 ```
@@ -952,6 +1008,27 @@ One message entered the live inbox.
 Types: [Scoped](scope.md) · [UserMessage](session.md)
 
 Source: [`packages/core/agent/src/runtime-types.ts`](../../packages/core/agent/src/runtime-types.ts)
+
+<a id="agentmodel-selection--bail"></a>
+
+#### `agent/model-selection` — bail
+
+Read the entry's model-selection capture access in the Agent scope. Absent means this entry has no installed selection owner. Scope-filtered dispatch (`@deepseek-ai/dsh-scope`): only this Agent's owner responds.
+
+```ts cordis-catalog
+/**
+ * Read the entry's model-selection capture access in the Agent scope.
+ * Absent means this entry has no installed selection owner.
+ * Scope-filtered dispatch (`@deepseek-ai/dsh-scope`): only this Agent's owner responds.
+ * @param payload.agent - Agent whose entry selection is queried.
+ * @mode bail
+ */
+'agent/model-selection'(this: Scoped<Agent>, payload: { agent: Agent }): ModelSelectionCapture | undefined
+```
+
+Types: [Scoped](scope.md)
+
+Source: [`packages/core/agent/src/model-selection.ts`](../../packages/core/agent/src/model-selection.ts)
 
 <a id="agentpre-step--waterfall"></a>
 

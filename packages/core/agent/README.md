@@ -62,6 +62,8 @@ await handle.agent.whenIdle()
 
 `Agent.ctx` is the agent's scoped context: registrations made through it (tools, prompt sections, variables, event listeners, restrictions) apply to that agent alone and unwind on disposal. The same mechanism is what agent presets use to give one session a different capability set without affecting its neighbors.
 
+Entry points use `installModelSelection` to keep prompt variables, request routing and model-switch notices consistent. The Agent-scoped `agent/model-selection` query returns detached pending selection and capture access for routing policies; capturing the effective assembled route leaves the user's pending choice intact. Disposing the owner removes this access.
+
 ### Intercept or observe work in flight
 
 The `agent/*` events let plugins act on live work without depending on the loop package. `agent/pre-step` can reject a proposed step or replace the messages entering it; `agent/request-error` lets a listener retry a failed model request; `agent/turn-stopping` runs before an otherwise completed turn closes and can steer to keep it open. `agent/assistant-stream` carries one process-local Assistant attempt's ordered start, transient chunk, and end frames. Start names the attempt's turn and step, chunk indexes are dense from zero, and `end.index` is the next chunk position. The loop commits the complete compact stream as one `assistant/message` or `assistant/attempt` before a committed end frame, so the live event remains presentation data rather than the replay source. `agent/status`, `agent/created`, and `agent/disposed` drive UI and coordination state, and the per-message `agent/inbox/*` notifications keep inbox projections in sync. Exact signatures, dispatch modes, and payload contracts live in the generated region of the [core subsystem page](../../../docs/subsystems/core.md#cordis-surface).
@@ -155,7 +157,7 @@ Accepted history and steering are append-only; a blocked submission sends no req
 
 #### What the model sees
 
-Registrations through `agent.ctx` can shadow prompt sections or tools and can install agent-only interceptors during unpublished setup, so one agent sees a different prompt and tool set than its neighbors. Model selection captures one provider/model/effort value before prompt assembly and applies it to the same step's request; a later concurrent change waits for another step.
+Registrations through `agent.ctx` can shadow prompt sections or tools and can install agent-only interceptors during unpublished setup, so one agent sees a different prompt and tool set than its neighbors. Entry model selection captures one provider/model/effort value before prompt assembly and applies it to the same step's request. A routing policy can capture that effective selection for a whole Turn through `agent/model-selection`; pending changes then wait for the next Turn.
 
 #### Token effect
 

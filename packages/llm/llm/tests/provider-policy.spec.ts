@@ -1,11 +1,16 @@
 import { afterEach, expect, it } from 'vitest'
 import { Context } from '@deepseek-ai/cordis'
 import LlmRuntime, { LlmAdapter, resolveProviderPolicy } from '../src/index.ts'
-import type { GenerateOptions, LlmProviderPolicy, StreamChunk } from '../src/index.ts'
+import type { GenerateOptions, LlmCapabilitySupport, LlmProviderPolicy, ModelModality, StreamChunk } from '../src/index.ts'
 
 const contexts: Context[] = []
 afterEach(async () => { for (const ctx of contexts.splice(0)) await ctx.fiber.dispose() })
-async function fixture(policy?: LlmProviderPolicy) {
+async function fixture(
+  policy?: LlmProviderPolicy,
+  modalities?: readonly ModelModality[],
+  toolSupport?: LlmCapabilitySupport,
+  streamingSupport?: LlmCapabilitySupport,
+) {
   const ctx = new Context()
   contexts.push(ctx)
   await ctx.plugin(LlmRuntime)
@@ -13,6 +18,12 @@ async function fixture(policy?: LlmProviderPolicy) {
   let dispatched = 0
   const adapter = new class extends LlmAdapter {
     override providerInfo(provider: string) { return { id: provider, name: provider, ...policy === undefined ? {} : { policy } } }
+    override resolveModel(provider: string, model: string) {
+      return Promise.resolve({ provider, id: model, name: model,
+        ...modalities === undefined ? {} : { inputModalities: modalities },
+        ...toolSupport === undefined ? {} : { toolSupport },
+        ...streamingSupport === undefined ? {} : { streamingSupport } })
+    }
     override prepareCall(provider: string, model: string, signal?: AbortSignal) {
       prepared += 1
       return super.prepareCall(provider, model, signal)
@@ -22,7 +33,13 @@ async function fixture(policy?: LlmProviderPolicy) {
       yield { type: 'finish', reason: { kind: 'stop' } }
     }
   }()
-  return { ctx, adapter, setPolicy: (value: LlmProviderPolicy) => { policy = value }, counts: () => ({ prepared, dispatched }) }
+  return {
+    ctx, adapter,
+    setToolSupport: (value: LlmCapabilitySupport) => { toolSupport = value },
+    setStreamingSupport: (value: LlmCapabilitySupport) => { streamingSupport = value },
+    setPolicy: (value: LlmProviderPolicy) => { policy = value },
+    counts: () => ({ prepared, dispatched }),
+  }
 }
 
 it('keeps undeclared usage, balance and capabilities unknown', () => {
@@ -104,7 +121,7 @@ it.each(['unknown', 'unsupported'] as const)('refuses a required %s capability b
 })
 
 it('requires an explicit declaration even on legacy routes, and binds policy fields to prepared calls', async () => {
-  const { ctx, adapter, counts, setPolicy } = await fixture()
+  const { ctx, adapter, counts, setPolicy } = await fixture(undefined, undefined, 'supported')
   const handle = ctx.llm.registerAdapter(['route'], adapter)
   await expect(ctx.llm.prepareCall({ provider: 'route', model: 'm', requiredCapabilities: ['tools'] }))
     .rejects.toMatchObject({ code: 'UNSUPPORTED_PROVIDER_CAPABILITY' })
@@ -129,4 +146,106 @@ it('refuses virtual routes for explicit policy without changing legacy middlewar
   for await (const chunk of ctx.llm.stream({ provider: 'virtual', model: 'm', intent: 'chat', messages: [] })) chunks.push(chunk)
   expect(chunks).toMatchObject([{ type: 'finish', reason: { kind: 'error', failure: { code: 'POLICY_ROUTE_UNAVAILABLE' } } }])
   await expect(ctx.llm.prepareCall({ provider: 'virtual', model: 'm' })).rejects.toMatchObject({ code: 'NO_ADAPTER' })
+})
+
+it.each([undefined, ['text'] as const])('rejects required vision for exact model modalities %j despite Provider support', async (modalities) => {
+  const { ctx, adapter, counts } = await fixture(resolveProviderPolicy({ capabilities: { vision: 'supported' } }), modalities)
+  ctx.llm.registerAdapter(['route'], adapter)
+  const config = { provider: 'route', model: 'same-name', requiredCapabilities: ['vision'] as ['vision'] }
+  await expect(ctx.llm.prepareCall(config)).rejects.toMatchObject({ code: 'UNSUPPORTED_MODEL_CAPABILITY' })
+  await expect(ctx.llm.resolveCallConfig(config)).rejects.toMatchObject({ code: 'UNSUPPORTED_MODEL_CAPABILITY' })
+  const chunks = []
+  for await (const chunk of ctx.llm.stream({ ...config, messages: [] })) chunks.push(chunk)
+  expect(chunks).toMatchObject([{ type: 'finish', reason: { kind: 'error', failure: { code: 'UNSUPPORTED_MODEL_CAPABILITY' } } }])
+  expect(counts()).toEqual({ prepared: 2, dispatched: 0 })
+})
+
+it('captures exact image support without borrowing it for another Provider with the same model id', async () => {
+  const policy = resolveProviderPolicy({ capabilities: { vision: 'supported' } })
+  const modalities: ModelModality[] = ['text', 'image']
+  const image = await fixture(policy, modalities)
+  const text = await fixture(policy, ['text'])
+  image.ctx.llm.registerAdapter(['image-route'], image.adapter)
+  image.ctx.llm.registerAdapter(['text-route'], text.adapter)
+  const config = { provider: 'image-route', model: 'same-name', requiredCapabilities: ['vision'] as ['vision'] }
+  const call = await image.ctx.llm.prepareCall(config)
+  await expect(image.ctx.llm.prepareCall({ ...config, provider: 'text-route' }))
+    .rejects.toMatchObject({ code: 'UNSUPPORTED_MODEL_CAPABILITY' })
+  modalities.splice(1, 1)
+  await expect(image.ctx.llm.prepareCall(config)).rejects.toMatchObject({ code: 'UNSUPPORTED_MODEL_CAPABILITY' })
+  const chunks = []
+  for await (const chunk of call.stream({ ...call.config, messages: [] })) chunks.push(chunk)
+  expect(chunks).toEqual([{ type: 'finish', reason: { kind: 'stop' } }])
+  expect(text.counts().dispatched).toBe(0)
+  expect(image.counts().dispatched).toBe(1)
+})
+
+it('still requires Provider vision admission when the exact model accepts images', async () => {
+  const { ctx, adapter, counts } = await fixture(resolveProviderPolicy({ capabilities: { vision: 'unknown' } }), ['image'])
+  ctx.llm.registerAdapter(['route'], adapter)
+  await expect(ctx.llm.prepareCall({ provider: 'route', model: 'm', requiredCapabilities: ['vision'] }))
+    .rejects.toMatchObject({ code: 'UNSUPPORTED_PROVIDER_CAPABILITY' })
+  expect(counts()).toEqual({ prepared: 0, dispatched: 0 })
+})
+
+it.each([undefined, 'unknown', 'unsupported'] as const)('rejects required tools for exact support %s despite Provider support', async (support) => {
+  const { ctx, adapter, counts } = await fixture(resolveProviderPolicy({ capabilities: { tools: 'supported' } }), undefined, support)
+  ctx.llm.registerAdapter(['route'], adapter)
+  const config = { provider: 'route', model: 'same-name', requiredCapabilities: ['tools'] as ['tools'] }
+  await expect(ctx.llm.prepareCall(config)).rejects.toMatchObject({ code: 'UNSUPPORTED_MODEL_CAPABILITY' })
+  await expect(ctx.llm.resolveCallConfig(config)).rejects.toMatchObject({ code: 'UNSUPPORTED_MODEL_CAPABILITY' })
+  const chunks = []
+  for await (const chunk of ctx.llm.stream({ ...config, messages: [] })) chunks.push(chunk)
+  expect(chunks).toMatchObject([{ type: 'finish', reason: { kind: 'error', failure: { code: 'UNSUPPORTED_MODEL_CAPABILITY' } } }])
+  expect(counts()).toEqual({ prepared: 2, dispatched: 0 })
+})
+
+it('captures exact tool support and does not borrow it from another Provider', async () => {
+  const policy = resolveProviderPolicy({ capabilities: { tools: 'supported' } })
+  const supported = await fixture(policy, undefined, 'supported')
+  const unsupported = await fixture(policy, undefined, 'unsupported')
+  supported.ctx.llm.registerAdapter(['supported'], supported.adapter)
+  supported.ctx.llm.registerAdapter(['unsupported'], unsupported.adapter)
+  const config = { provider: 'supported', model: 'same-name', requiredCapabilities: ['tools'] as ['tools'] }
+  const call = await supported.ctx.llm.prepareCall(config)
+  await expect(supported.ctx.llm.prepareCall({ ...config, provider: 'unsupported' }))
+    .rejects.toMatchObject({ code: 'UNSUPPORTED_MODEL_CAPABILITY' })
+  supported.setToolSupport('unknown')
+  await expect(supported.ctx.llm.prepareCall(config)).rejects.toMatchObject({ code: 'UNSUPPORTED_MODEL_CAPABILITY' })
+  const chunks = []
+  for await (const chunk of call.stream({ ...call.config, messages: [] })) chunks.push(chunk)
+  expect(chunks).toEqual([{ type: 'finish', reason: { kind: 'stop' } }])
+  expect(unsupported.counts().dispatched).toBe(0)
+})
+
+it.each([undefined, 'unknown', 'unsupported'] as const)('rejects required streaming for exact support %s despite Provider support', async (support) => {
+  const { ctx, adapter, counts } = await fixture(
+    resolveProviderPolicy({ capabilities: { streaming: 'supported' } }), undefined, undefined, support,
+  )
+  ctx.llm.registerAdapter(['route'], adapter)
+  const config = { provider: 'route', model: 'same-name', requiredCapabilities: ['streaming'] as ['streaming'] }
+  await expect(ctx.llm.prepareCall(config)).rejects.toMatchObject({ code: 'UNSUPPORTED_MODEL_CAPABILITY' })
+  await expect(ctx.llm.resolveCallConfig(config)).rejects.toMatchObject({ code: 'UNSUPPORTED_MODEL_CAPABILITY' })
+  const chunks = []
+  for await (const chunk of ctx.llm.stream({ ...config, messages: [] })) chunks.push(chunk)
+  expect(chunks).toMatchObject([{ type: 'finish', reason: { kind: 'error', failure: { code: 'UNSUPPORTED_MODEL_CAPABILITY' } } }])
+  expect(counts()).toEqual({ prepared: 2, dispatched: 0 })
+})
+
+it('captures exact streaming support and keeps same-name Provider capability independent', async () => {
+  const policy = resolveProviderPolicy({ capabilities: { streaming: 'supported' } })
+  const supported = await fixture(policy, undefined, undefined, 'supported')
+  const unsupported = await fixture(policy, undefined, undefined, 'unsupported')
+  supported.ctx.llm.registerAdapter(['supported'], supported.adapter)
+  supported.ctx.llm.registerAdapter(['unsupported'], unsupported.adapter)
+  const config = { provider: 'supported', model: 'same-name', requiredCapabilities: ['streaming'] as ['streaming'] }
+  const call = await supported.ctx.llm.prepareCall(config)
+  await expect(supported.ctx.llm.prepareCall({ ...config, provider: 'unsupported' }))
+    .rejects.toMatchObject({ code: 'UNSUPPORTED_MODEL_CAPABILITY' })
+  supported.setStreamingSupport('unknown')
+  await expect(supported.ctx.llm.prepareCall(config)).rejects.toMatchObject({ code: 'UNSUPPORTED_MODEL_CAPABILITY' })
+  const chunks = []
+  for await (const chunk of call.stream({ ...call.config, messages: [] })) chunks.push(chunk)
+  expect(chunks).toEqual([{ type: 'finish', reason: { kind: 'stop' } }])
+  expect(unsupported.counts().dispatched).toBe(0)
 })

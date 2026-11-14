@@ -738,6 +738,8 @@ describe('modelOverrides', () => {
         modelOverrides: {
           [target.id]: {
             name: 'DeepSeek (proxied)',
+            toolSupport: 'supported',
+            streamingSupport: 'supported',
             maxTokens: 4096,
             reasoningEfforts: { off: null, high: 'high' },
           },
@@ -756,6 +758,10 @@ describe('modelOverrides', () => {
     // An override's cap is explicit configuration, so it becomes the request
     // default exactly as a models entry's would.
     expect(resolved.get('deepseek')?.configuredMaxTokens.get(target.id)).toBe(4096)
+    expect(resolved.get('deepseek')?.configuredToolSupport.get(target.id)).toBe('supported')
+    expect(resolved.get('deepseek')?.configuredToolSupport.size).toBe(1)
+    expect(resolved.get('deepseek')?.configuredStreamingSupport.get(target.id)).toBe('supported')
+    expect(resolved.get('deepseek')?.configuredStreamingSupport.size).toBe(1)
     // A sibling the overrides do not name is byte-identical to the catalog.
     const sibling = models.find(model => model.id !== target.id)
     expect(sibling?.maxTokens).toBe(getBuiltinModels('deepseek').find(model => model.id === sibling?.id)?.maxTokens)

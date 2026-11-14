@@ -306,6 +306,8 @@ export class PiAiAdapter extends LlmAdapter {
     // Only a cap the deployment configured is a request default; the
     // catalog's `maxTokens` sizes the model and stops there.
     const configuredMaxTokens = profile.configuredMaxTokens.get(model)
+    const toolSupport = profile.configuredToolSupport.get(model)
+    const streamingSupport = profile.configuredStreamingSupport.get(model)
     return {
       provider,
       id: model,
@@ -313,6 +315,8 @@ export class PiAiAdapter extends LlmAdapter {
       inputModalities: [...resolvedModel.input],
       context: { contextWindow: resolvedModel.contextWindow },
       ...configuredMaxTokens === undefined ? {} : { defaultMaxTokens: configuredMaxTokens },
+      ...toolSupport === undefined ? {} : { toolSupport },
+      ...streamingSupport === undefined ? {} : { streamingSupport },
       ...reasoningInfo(resolvedModel, defaultLevel),
     }
   }

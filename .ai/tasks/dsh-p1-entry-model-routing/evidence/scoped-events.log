@@ -1,0 +1,17 @@
+$ node --max-old-space-size=4096 --import tsx/esm scripts/gen-scoped-events.ts --check
+/Users/x-dt/workspace/AI/Agents/deepseek-harness/scripts/gen-scoped-events.ts:77
+      throw new Error(
+            ^
+
+Error: gen-scoped-events: 1 scoped-event contract violation(s):
+  - event 'agent/model-selection' (packages/core/agent/src/model-selection.ts:60) has this: Scoped<...> but its JSDoc does not explain "Scope-filtered dispatch"
+    at ScopedEventGenerator.render (/Users/x-dt/workspace/AI/Agents/deepseek-harness/scripts/gen-scoped-events.ts:77:13)
+    at renderScopedEvents (/Users/x-dt/workspace/AI/Agents/deepseek-harness/scripts/gen-scoped-events.ts:377:71)
+    at main (/Users/x-dt/workspace/AI/Agents/deepseek-harness/scripts/gen-scoped-events.ts:382:19)
+    at <anonymous> (/Users/x-dt/workspace/AI/Agents/deepseek-harness/scripts/gen-scoped-events.ts:398:3)
+    at ModuleJob.run (node:internal/modules/esm/module_job:569:25)
+    at async node:internal/modules/esm/loader:650:26
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5)
+
+Node.js v26.5.0
+[ELIFECYCLE] Command failed with exit code 1.

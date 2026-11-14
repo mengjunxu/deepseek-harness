@@ -1,0 +1,9 @@
+The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
+
+ RUN  v4.1.8 /Users/x-dt/workspace/AI/Agents/deepseek-harness
+
+
+ Test Files  1 passed (1)
+      Tests  5 passed | 134 skipped (139)
+   Start at  22:57:59
+   Duration  3.32s (transform 555ms, setup 113ms, import 752ms, tests 2.39s, environment 0ms)

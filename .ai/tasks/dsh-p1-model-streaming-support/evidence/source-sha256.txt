@@ -1,0 +1,17 @@
+055504fe01946e37271137f2b4041c8f774e6514bc9148c1d8d09e23d9eae0fe  packages/llm/llm/src/index.ts
+5f5635da11d58336275a5c004b890ddb990fe32cd5d0869a368111deb48a062b  packages/llm/llm/src/types.ts
+11b95495dc663f1fcf044a43c90c67a350b689eecb4f68ea200d2cdc883b3200  packages/llm/llm/tests/provider-policy.spec.ts
+6f5a3eb1b98f3af657038de3dc2689e9d7cf369e1a0862d849460a0f182d1780  packages/llm/llm/tests/fixtures/model-streaming-required.ts
+045827d4d4e0cafa86c4e44695ec7e55efa8c74ec4eb676e8485de92ed0b1b06  packages/llm/llm-pi-ai/src/adapter.ts
+00f5975cd8240b82c20f1c3cb6234f176d0cb54129d4843d79365a0d01ee35f5  packages/llm/llm-pi-ai/src/catalog.ts
+6b12389ed42184b17e231591a5acbc7a2d680125389ad75f9d5625b7d225ba85  packages/llm/llm-pi-ai/src/config.ts
+b25ad50e8a50efbaa6ef85b288f838c4f5b8ee56f6006c3ac654e74284c96cc7  packages/llm/llm-pi-ai/tests/catalog.spec.ts
+fe393e2abc24160010ea87faed4818c943e3398364a8c9b357fa23dcae68bb99  packages/llm/llm-pi-ai/tests/config.spec.ts
+26167c2a0bd1720e962fe4da539d59e7d97874c1f520649796c76c7d117f90bf  packages/llm/llm-pi-ai/tests/loader-composition.spec.ts
+9602e95c0654d8746f4aab08e7fa8c64b8b72defa679d821ae729a4aa45544c0  packages/llm/llm/README.md
+0426f21c146ce32544cd31e83ac7409507964b4e870657dae582d63383c04977  packages/llm/llm-pi-ai/README.md
+e29933be331d191b5dba3164138579f01d3720a1357a3dcb6a530648158bb9b5  snapshots/session/model-streaming-required/cordis.snapshot.yml
+e960e64e08b04a4c76a52eb77ad41c98133d024d8baf2ac659ef64e9d2145ea3  snapshots/session/model-streaming-required/cordis.yml
+11a0962f74a28d62f4ce71f6fb0771d4a186b095e80cf0d199e55544fefaf8b4  snapshots/session/model-streaming-required/session.v3.jsonl
+ae0ad5bd761b9ea9bebb4f34fe4366f37f371440e1d955449b8e448ea99b9c0b  snapshots/session/model-streaming-required/session.v4.jsonl
+add3b0235a3c2c9bc1237baa340b8fd659e62657123ee2eff9da1721e289d74b  snapshots/session/model-streaming-required/snapshot.yml

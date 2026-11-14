@@ -2,7 +2,7 @@ import { mkdtempSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { Context } from '@deepseek-ai/cordis'
-import AgentRegistry from '@deepseek-ai/dsh-agent'
+import AgentRegistry, { agentCarrier } from '@deepseek-ai/dsh-agent'
 import type { Agent } from '@deepseek-ai/dsh-agent'
 import { agentPresetProjectionDefinition } from '@deepseek-ai/dsh-agent-preset-registry'
 import SessionStore, { SESSION_FORMAT_VERSION, SessionLogOffset, SessionId } from '@deepseek-ai/dsh-session'
@@ -294,6 +294,21 @@ describe('ApiSession model selection', () => {
     vi.spyOn(ctx.sessionProjections, 'stateOf').mockReturnValue(undefined)
 
     expect(() => agents.selectionFor(live)).toThrow('required modelSelection projection')
+  })
+
+  it('shares pending API selection with request-policy capture without consuming it', async () => {
+    const { ctx, agents } = await harness()
+    const live = agent(ctx, header('entry-capture'))
+    const selection = agents.selectionFor(live)
+    agents.selectForNextRequest(live, { provider: 'picked', model: 'm' })
+    const access = ctx.bail(agentCarrier(live), 'agent/model-selection', { agent: live })
+    expect(access?.current).toEqual({ provider: 'picked', model: 'm' })
+    access?.capture({ provider: 'active-turn', model: 'old' })
+    expect(selection.assembled).toEqual({ provider: 'active-turn', model: 'old' })
+    expect(selection.current).toEqual({ provider: 'picked', model: 'm' })
+    expect(ctx.sessionProjections.stateOf(live.session, 'modelSelection')).toMatchObject({
+      pending: { provider: 'picked', model: 'm' },
+    })
   })
 
   it('reads a reasoning-free request and consumes only the exact pending selection', async () => {

@@ -1,0 +1,2 @@
+$ tsx scripts/gen-config-catalog.ts
+gen-config-catalog: 3 artifact(s) computed, 0 written.

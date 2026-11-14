@@ -134,3 +134,22 @@ describe('provider policy configuration', () => {
     }).toThrow()
   })
 })
+
+describe.each(['toolSupport', 'streamingSupport'] as const)('exact model %s configuration', (field) => {
+  it.each(['supported', 'unsupported', 'unknown'] as const)('preserves explicit %s support without inferring it for siblings', (toolSupport) => {
+    const input: Options = { providers: { 'tool-fixture': {
+      api: 'openai-completions', baseURL: 'http://127.0.0.1:9',
+      models: [{ id: 'explicit', [field]: toolSupport }, { id: 'unknown' }],
+    } } }
+    expect(Config(input).providers.get()['tool-fixture']?.models?.[0]?.[field]).toBe(toolSupport)
+    expect(Config(input).providers.get()['tool-fixture']?.models?.[1]?.[field]).toBeUndefined()
+    const profile = resolveProfiles(input.providers).get('tool-fixture')
+    const supportMap = field === 'toolSupport' ? profile?.configuredToolSupport : profile?.configuredStreamingSupport
+    expect(supportMap?.get('explicit')).toBe(toolSupport)
+    expect(supportMap?.has('unknown')).toBe(false)
+  })
+
+  it.each([true, false, 1, 'yes'])('rejects invalid support %j in model configuration', (toolSupport) => {
+    expect(configWith({ [field]: toolSupport })).toThrow()
+  })
+})

@@ -1,0 +1,105 @@
+The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
+The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
+The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
+
+ RUN  v4.1.8 /Users/x-dt/workspace/AI/Agents/deepseek-harness
+
+-----------------------xxxx
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |thread-safe| packages/llm/llm/tests/provider-policy.spec.ts > rejects required tools for exact support undefined despite Provider support
+ FAIL  |thread-safe| packages/llm/llm/tests/provider-policy.spec.ts > rejects required tools for exact support unknown despite Provider support
+ FAIL  |thread-safe| packages/llm/llm/tests/provider-policy.spec.ts > rejects required tools for exact support unsupported despite Provider support
+AssertionError: promise resolved "{ config: { …(3) }, …(3) }" instead of rejecting
+
+- Expected
++ Received
+
+- Error {
+-   "message": "rejected promise",
++ {
++   "adapterDefaults": {},
++   "config": {
++     "model": "same-name",
++     "provider": "route",
++     "requiredCapabilities": [
++       "tools",
++     ],
++   },
++   "retryPolicy": {
++     "initialDelayMs": 500,
++     "jitterRatio": 0.1,
++     "maxDelayMs": 10000,
++     "maxRetries": 5,
++     "mode": "normal",
++     "retryableCodes": [
++       "EMPTY_RESPONSE",
++       "RATE_LIMIT",
++       "SERVER",
++       "TIMEOUT",
++       "TRANSPORT",
++     ],
++   },
++   "stream": [Function stream],
+  }
+
+ ❯ packages/llm/llm/tests/provider-policy.spec.ts:183:43
+    181|   ctx.llm.registerAdapter(['route'], adapter)
+    182|   const config = { provider: 'route', model: 'same-name', requiredCapa…
+    183|   await expect(ctx.llm.prepareCall(config)).rejects.toMatchObject({ co…
+       |                                           ^
+    184|   await expect(ctx.llm.resolveCallConfig(config)).rejects.toMatchObjec…
+    185|   const chunks = []
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ FAIL  |thread-safe| packages/llm/llm/tests/provider-policy.spec.ts > captures exact tool support and does not borrow it from another Provider
+AssertionError: promise resolved "{ config: { …(3) }, …(3) }" instead of rejecting
+
+- Expected
++ Received
+
+- Error {
+-   "message": "rejected promise",
++ {
++   "adapterDefaults": {},
++   "config": {
++     "model": "same-name",
++     "provider": "unsupported",
++     "requiredCapabilities": [
++       "tools",
++     ],
++   },
++   "retryPolicy": {
++     "initialDelayMs": 500,
++     "jitterRatio": 0.1,
++     "maxDelayMs": 10000,
++     "maxRetries": 5,
++     "mode": "normal",
++     "retryableCodes": [
++       "EMPTY_RESPONSE",
++       "RATE_LIMIT",
++       "SERVER",
++       "TIMEOUT",
++       "TRANSPORT",
++     ],
++   },
++   "stream": [Function stream],
+  }
+
+ ❯ packages/llm/llm/tests/provider-policy.spec.ts:199:85
+    197|   const config = { provider: 'supported', model: 'same-name', required…
+    198|   const call = await supported.ctx.llm.prepareCall(config)
+    199|   await expect(supported.ctx.llm.prepareCall({ ...config, provider: 'u…
+       |                                                                                     ^
+    200|     .rejects.toMatchObject({ code: 'UNSUPPORTED_MODEL_CAPABILITY' })
+    201|   supported.setToolSupport('unknown')
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  4 failed | 23 skipped (27)
+   Start at  13:45:56
+   Duration  376ms (transform 223ms, setup 118ms, import 159ms, tests 18ms, environment 0ms)

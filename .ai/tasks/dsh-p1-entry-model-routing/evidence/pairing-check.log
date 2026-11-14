@@ -1,0 +1,2 @@
+$ tsx scripts/verify-translation-pairing.ts packages/core/agent/README.md packages/core/agent-default-model/README.md docs/subsystems/core.md docs/config-catalog.md docs/persistence-catalog.md
+verify-translation-pairing: 5 named pair(s) consistent; the corpus-wide check still runs in doc-sync.

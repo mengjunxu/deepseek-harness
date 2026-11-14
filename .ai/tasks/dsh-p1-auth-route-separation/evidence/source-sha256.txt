@@ -1,0 +1,7 @@
+168bd92d6aca587cd5d86de7d5a9081c12fa69122908bc3b9a8fe75994af3c93  packages/llm/llm-pi-ai/tests/loader-composition.spec.ts
+c4a1b9df3e1e6bd70340a717ce9280102fca6c4570253443fc3cfa5350b74661  packages/llm/llm-pi-ai/README.md
+7379bf0b102d853e5f162cab67b93fe920afebf9ba0d704916987137821d3d73  packages/llm/llm-pi-ai/README.zh.md
+87abae7f7e1c64f53d3aab01a82ddbfc45ea73cd1285b3fc22d929e132400663  packages/llm/llm-pi-ai/src/index.ts
+50fbdd55f60a95bdc256edfbc2686a3d96e108b3b9d4a441c9649a2870ef9fee  packages/llm/llm-pi-ai/src/auth.ts
+2d96334b97e207ebac84b0e0ec1db04ad21c0aae83d73a457cfa8922d38ec573  packages/llm/llm-pi-ai/src/provider.ts
+abd7092cd505336a31e243f532ee3fea657f081c53e57635a4101e2329587073  packages/experimental/chatgpt-plan/src/index.ts

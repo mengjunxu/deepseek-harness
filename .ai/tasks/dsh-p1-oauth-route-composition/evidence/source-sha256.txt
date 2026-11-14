@@ -1,0 +1,8 @@
+8186558e3f424f95dcb8548188bec08364eb0912c1b3f3eb7a0f2429fabb4a40  packages/llm/llm-pi-ai/tests/loader-composition.spec.ts
+4a5b204aafdb06900fa91b6e0394ebdead1d34a7c8a3d29acd3300f04fc260e4  packages/llm/llm-pi-ai/src/provider.ts
+87abae7f7e1c64f53d3aab01a82ddbfc45ea73cd1285b3fc22d929e132400663  packages/llm/llm-pi-ai/src/index.ts
+50fbdd55f60a95bdc256edfbc2686a3d96e108b3b9d4a441c9649a2870ef9fee  packages/llm/llm-pi-ai/src/auth.ts
+c0480b5e3ababe91d7a7223512808ea81f46f6315d02edb1268e3a2d1101a571  packages/llm/llm-pi-ai/README.md
+d1b73d3ae84b56ac2b2e20dcbd542d2116beba67d45fb3c0625a7f94f7185ee8  packages/llm/llm-pi-ai/README.zh.md
+3adc9ab888a503e7063fdda990596901ac05abe3759f95b1f52f72307824f957  packages/subagent/subagent-codex/src/index.ts
+f099c75a8b105829463b992d607dcad7f1f700af5c01da833d2390f3beb02bab  apps/cli/config/examples/codely-local/cordis.patch.yml

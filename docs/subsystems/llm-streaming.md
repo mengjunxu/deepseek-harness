@@ -620,6 +620,10 @@ interface LlmModelReasoningInfo {
 ```ts type-equiv
 /** Exact-route model metadata resolved by its owning adapter. */
 interface LlmResolvedModelInfo extends LlmModelInfo {
+  /** Exact route support for incremental response content before the terminal result; absence is unknown. */
+  streamingSupport?: LlmCapabilitySupport
+  /** Exact model tool-call support; absence is unknown, independent of Provider declarations. */
+  toolSupport?: LlmCapabilitySupport
   /** Provider-owned context capacity when known. */
   context?: LlmModelContext
   /** Adapter-configured per-request output cap materialized when callers omit one. */
@@ -658,7 +662,7 @@ interface GenerateOptions {
   model: string
   /** Explicit conversational intent, recorded in the request header and hidden from model content. */
   intent?: LlmRequestIntent
-  /** Provider-wide capabilities that must be declared supported before adapter preparation. */
+  /** Required Provider declarations; vision, tools and streaming also need exact model support before streaming. */
   requiredCapabilities?: LlmProviderCapability[]
   /** Adapter-owned reasoning effort selected for this exact model. */
   reasoningEffort?: ReasoningEffortId
@@ -1156,7 +1160,8 @@ async resolveModelInfo( provider: string, model: string, signal?: AbortSignal, )
 /**
  * Validate a conversation call config against its exact model capability and
  * materialize adapter-configured defaults. Unsupported explicit efforts
- * reject before provider I/O; no clamping or aliasing is performed. This
+ * reject before provider I/O; required vision needs exact image-input metadata
+ * and required tools/streaming need exact support declarations. No clamping or aliasing is performed. This
  * standalone query does not bind a later dispatch; use {@link prepareCall}
  * when logging and streaming must share one adapter registration.
  * @param config - provider/model route and optional request controls.

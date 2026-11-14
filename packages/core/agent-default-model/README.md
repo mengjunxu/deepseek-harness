@@ -58,7 +58,7 @@ Without a configuration editor, `saveSelection()` is a no-op. The service does n
 
 ### Route explicit intents
 
-The optional `@deepseek-ai/dsh-agent-default-model/intent-routing` plugin chooses a configured model for `chat`, `plan`, `review` or `execute`. Use it in headless or SDK scopes where this policy owns model selection. The plugin overrides the entry point's provider/model and clears inherited reasoning effort when its selected route omits effort; the interactive model selector does not edit this policy. `execute` classifies a model request and does not start an external executor.
+The optional `@deepseek-ai/dsh-agent-default-model/intent-routing` plugin selects a model for `chat`, `plan`, `review` or `execute`. Each route either declares a fixed provider/model (the default, or `selection: configured`) or uses `selection: entry` to read the entry point's selected model and reasoning effort. Fixed routes override entry selection and clear inherited effort when omitted. `execute` classifies a model request and does not start an external executor.
 
 Declare all four routes and an intent explicitly. The following local fixture routes require matching Provider declarations, available in the [complete SDK composition](../../../snapshots/sdk/intent-routing-chat/cordis.yml):
 
@@ -74,6 +74,8 @@ Declare all four routes and an intent explicitly. The following local fixture ro
         review: { provider: intent-review, model: review-fixture, requiredCapabilities: [tools] }
         execute: { provider: intent-execute, model: execute-fixture, requiredCapabilities: [tools] }
 ```
+
+An entry route can be written as `chat: { selection: entry, requiredCapabilities: [tools] }`; it cannot also declare provider, model or reasoning effort. It requires an installed `installModelSelection` owner, as provided by Web/API sessions, headless and ACP. An entry without that owner, including the standalone SDK server, or without a selected model fails with `ENTRY_MODEL_SELECTION_UNAVAILABLE`. The intent's requirements still apply to the selected route. Entry changes during a Turn remain pending for the next Turn; the active request and model-switch notice use the captured selection. See the [headless composition](../../../snapshots/session/entry-model-routing/cordis.yml).
 
 `routing` is one live configuration value. Each Turn captures its selected route before prompt assembly; changes affect a later Turn. The prompt's provider/model variables and the request header use that captured pair. An unavailable route fails at request preparation. Required capabilities must be declared supported by the Provider; unknown support rejects. An omitted requirement adds no capability restriction. The plugin never tries another intent's route after a limit, transport failure or interruption. The Session request header records intent, actual provider/model and requirements; no extra classification request is sent.
 

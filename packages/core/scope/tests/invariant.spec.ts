@@ -47,6 +47,7 @@ describe('scoped-dispatch invariants', () => {
     const agentRows = {
       'agent/created': [{ agent, source: 'startup' }],
       'agent/disposed': [{ agent }],
+      'agent/model-selection': [{ agent }],
       'agent/status': [{ agent, status: 'idle' }],
       'agent/inbox/inserted': [{ agent, message }],
       'agent/inbox/claimed': [{ agent, message, turn: 1 }],

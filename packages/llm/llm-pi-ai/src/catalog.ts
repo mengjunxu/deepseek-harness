@@ -12,6 +12,7 @@
  * @module dsh-llm-pi-ai/catalog
  */
 
+import type { LlmCapabilitySupport } from '@deepseek-ai/dsh-llm'
 import { builtinProviders, getBuiltinModels, getBuiltinProviders } from '@earendil-works/pi-ai/providers/all'
 import type { BuiltinProvider } from '@earendil-works/pi-ai/providers/all'
 import type {
@@ -570,8 +571,12 @@ function assertOfferedCompatFields(
   }
 }
 
-/** One configured model entry: an id plus the catalog fields it overrides. */
+/** One configured model: catalog overrides and explicit tool/streaming metadata. */
 export interface PiAiModelProfile {
+  /** Incremental response support for this route/model; omission stays unknown without protocol or Provider inference. */
+  streamingSupport?: LlmCapabilitySupport
+  /** Exact model tool-call support; omitted means unknown and never inherits Provider policy or protocol defaults. */
+  toolSupport?: LlmCapabilitySupport
   /** Model id sent to the provider and accepted by {@link GenerateOptions.model}. */
   id: string
   /** Display name for selectors; defaults to the catalog name, then the id. */
@@ -814,6 +819,10 @@ export interface RouteCatalog {
    * picked, so only an explicit configuration lands here.
    */
   configuredMaxTokens: ReadonlyMap<string, number>
+  /** Explicit per-model tool support; omission leaves exact tool capability unknown. */
+  configuredToolSupport: ReadonlyMap<string, LlmCapabilitySupport>
+  /** Explicit per-model incremental response support; absence stays unknown. */
+  configuredStreamingSupport: ReadonlyMap<string, LlmCapabilitySupport>
 }
 
 /**
@@ -879,6 +888,8 @@ export function resolveRouteModels(
   assertOfferedCompatFields(provider, 'route', request.compat)
   const seen = new Set<string>()
   const configuredMaxTokens = new Map<string, number>()
+  const configuredToolSupport = new Map<string, LlmCapabilitySupport>()
+  const configuredStreamingSupport = new Map<string, LlmCapabilitySupport>()
   const resolveEntry = (entry: PiAiModelProfile): Model<Api> => {
     assertOfferedCompatFields(provider, `model "${entry.id}"`, entry.compat)
     if (entry.id.length === 0) invalid(provider, 'has a model with an empty id')
@@ -909,6 +920,8 @@ export function resolveRouteModels(
     // Only a value the profile named is a deployment choice; the catalog's is
     // the model's capability and stays out of request defaults.
     if (entry.maxTokens !== undefined) configuredMaxTokens.set(entry.id, entry.maxTokens)
+    if (entry.toolSupport !== undefined) configuredToolSupport.set(entry.id, entry.toolSupport)
+    if (entry.streamingSupport !== undefined) configuredStreamingSupport.set(entry.id, entry.streamingSupport)
     return {
       // The installed entry lays the floor, and the fields below override it.
       // Enumerating instead would silently drop every `Model` field this
@@ -953,5 +966,5 @@ export function resolveRouteModels(
     invalid(provider, `sets compat "${field}", but no model on the route speaks a protocol that takes it;`
       + ` it exists on ${takers.join(', ')}`)
   }
-  return { models: serviceableModels, configuredMaxTokens, modelErrors }
+  return { models: serviceableModels, configuredMaxTokens, configuredToolSupport, configuredStreamingSupport, modelErrors }
 }

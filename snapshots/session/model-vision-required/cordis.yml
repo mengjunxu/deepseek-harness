@@ -1,0 +1,19 @@
+- id: llm-pi-ai
+  name: '@deepseek-ai/dsh-llm-pi-ai'
+  config:
+    providers:
+      vision-fixture:
+        api: openai-completions
+        baseURL: http://127.0.0.1:9/v1
+        models:
+          - id: text-only
+            input:
+              - text
+        policy:
+          usageSource: local
+          capabilities:
+            vision: supported
+
+- insert:
+    - id: model-vision-required-snapshot
+      name: '../../../packages/llm/llm/tests/fixtures/model-vision-required.ts'

@@ -12,6 +12,8 @@ import {
 } from '@deepseek-ai/dsh-llm'
 import type { PreStepDecision } from './runtime-types.ts'
 import type { ContextFormed } from '@deepseek-ai/dsh-llm'
+import type { Scoped } from '@deepseek-ai/dsh-scope'
+import type { Agent } from './types.ts'
 declare module '@deepseek-ai/dsh-llm' {
   interface MessageSourceMap {
     'model-selection': { kind: 'model-selection' } & ContextFormed
@@ -34,6 +36,30 @@ export interface ModelSelectionRef {
   current: ModelSelection | undefined
   /** Selection captured when the current step entered prompt assembly. */
   assembled: ModelSelection | undefined
+}
+
+/** Entry-owned selection access for policies that capture a route across several steps. */
+export interface ModelSelectionCapture {
+  /** Detached entry choice; changing the assembled choice never changes this pending value. */
+  readonly current: Readonly<ModelSelection> | undefined
+  /**
+   * Set the selection used by request routing and model-switch notices for this assembly.
+   * @param selected - effective route captured by the request policy.
+   */
+  capture(selected: ModelSelection): void
+}
+
+declare module '@deepseek-ai/cordis' {
+  interface Events {
+    /**
+     * Read the entry's model-selection capture access in the Agent scope.
+     * Absent means this entry has no installed selection owner.
+     * Scope-filtered dispatch (`@deepseek-ai/dsh-scope`): only this Agent's owner responds.
+     * @param payload.agent - Agent whose entry selection is queried.
+     * @mode bail
+     */
+    'agent/model-selection'(this: Scoped<Agent>, payload: { agent: Agent }): ModelSelectionCapture | undefined
+  }
 }
 
 function sameRoute(left: ModelSelection, right: ModelSelection): boolean {
@@ -72,13 +98,23 @@ function modelSwitchNotice(previous: ModelSelection, selected: ModelSelection) {
  * admitted request. It compares the assembled selection with the latest
  * request header; effort-only changes and empty no-request decisions add no
  * notice. Failure before header persistence repeats the notice on the next
- * request.
+ * request. The scoped `agent/model-selection` query exposes a detached current
+ * choice and lets a routing policy capture its effective assembled selection
+ * without replacing the entry's pending choice.
  *
  * @param agentCtx - The selected Agent's scoped context.
  * @param selection - Mutable selection owned by the calling entry point.
- * @returns Disposer for all scoped waterfall listeners.
+ * @returns Disposer for the scoped query and waterfall listeners.
  */
 export function installModelSelection(agentCtx: Context, selection: ModelSelectionRef): () => void {
+  const access: ModelSelectionCapture = {
+    get current() {
+      const selected = selection.current
+      return selected === undefined ? undefined : { ...selected }
+    },
+    capture(selected) { selection.assembled = { ...selected } },
+  }
+  const disposeAccess = agentCtx.on('agent/model-selection', () => access)
   const disposeAssembly = agentCtx.on('system-prompt/assemble', async (_assembly, _context, next) => {
     const selected = selection.current
     const assembled = await next()
@@ -125,6 +161,7 @@ export function installModelSelection(agentCtx: Context, selection: ModelSelecti
     { prepend: true },
   )
   return () => {
+    disposeAccess()
     disposeAssembly()
     disposeRequest()
     disposeNotice()

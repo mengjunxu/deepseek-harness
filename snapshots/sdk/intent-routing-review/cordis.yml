@@ -39,6 +39,7 @@
         baseURL: http://127.0.0.1:9/v1
         models:
           - id: chat-fixture
+            toolSupport: supported
         policy:
           usageSource: local
           capabilities:
@@ -48,6 +49,7 @@
         baseURL: http://127.0.0.1:9/v1
         models:
           - id: plan-fixture
+            toolSupport: supported
         policy:
           usageSource: local
           capabilities:
@@ -57,6 +59,7 @@
         baseURL: http://127.0.0.1:9/v1
         models:
           - id: review-fixture
+            toolSupport: supported
         policy:
           usageSource: local
           capabilities:
@@ -66,6 +69,7 @@
         baseURL: http://127.0.0.1:9/v1
         models:
           - id: execute-fixture
+            toolSupport: supported
         policy:
           usageSource: local
           capabilities:

@@ -22557,7 +22557,7 @@
         "packages/llm/llm/src/types.ts#ReplayEnvelope"
       ],
       "sources": [
-        "packages/llm/llm/src/types.ts:466"
+        "packages/llm/llm/src/types.ts:470"
       ]
     },
     {
@@ -33042,7 +33042,7 @@
       },
       "names": [],
       "sources": [
-        "packages/llm/llm/src/types.ts:491"
+        "packages/llm/llm/src/types.ts:495"
       ]
     },
     {
@@ -36422,7 +36422,7 @@
       },
       "names": [],
       "sources": [
-        "packages/llm/llm/src/types.ts:489"
+        "packages/llm/llm/src/types.ts:493"
       ]
     },
     {
@@ -43139,7 +43139,7 @@
         "packages/llm/llm/src/types.ts#StreamChunk"
       ],
       "sources": [
-        "packages/llm/llm/src/types.ts:488"
+        "packages/llm/llm/src/types.ts:492"
       ]
     },
     {
@@ -54957,7 +54957,7 @@
         "packages/llm/llm/src/types.ts#ToolSchema"
       ],
       "sources": [
-        "packages/llm/llm/src/types.ts:509"
+        "packages/llm/llm/src/types.ts:513"
       ]
     },
     {
@@ -63475,7 +63475,7 @@
       },
       "names": [],
       "sources": [
-        "packages/llm/llm/src/types.ts:492"
+        "packages/llm/llm/src/types.ts:496"
       ]
     },
     {
@@ -64559,7 +64559,7 @@
       },
       "names": [],
       "sources": [
-        "packages/llm/llm/src/types.ts:490"
+        "packages/llm/llm/src/types.ts:494"
       ]
     },
     {
@@ -69434,7 +69434,7 @@
       },
       "names": [],
       "sources": [
-        "packages/llm/llm/src/types.ts:495"
+        "packages/llm/llm/src/types.ts:499"
       ]
     },
     {
@@ -78000,7 +78000,7 @@
       },
       "names": [],
       "sources": [
-        "packages/llm/llm/src/types.ts:493"
+        "packages/llm/llm/src/types.ts:497"
       ]
     },
     {
@@ -87798,7 +87798,7 @@
       },
       "names": [],
       "sources": [
-        "packages/llm/llm/src/types.ts:494"
+        "packages/llm/llm/src/types.ts:498"
       ]
     },
     {

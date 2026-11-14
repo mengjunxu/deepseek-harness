@@ -1,8 +1,10 @@
 import { describe, expect, it } from 'vitest'
 import { Context } from '@deepseek-ai/cordis'
 import SystemPrompt from '@deepseek-ai/dsh-system-prompt'
+import { createScope } from '@deepseek-ai/dsh-scope'
 import {
   agentEvents,
+  agentCarrier,
   installModelSelection,
   type Agent,
   type ModelSelection,
@@ -188,4 +190,44 @@ describe('installModelSelection()', () => {
     })
     await ctx.fiber.dispose()
   })
+})
+
+it('exposes detached entry selection and captures only the assembled choice until disposal', async () => {
+  const ctx = new Context()
+  await ctx.plugin(SystemPrompt)
+  const selection: ModelSelectionRef = { current: { provider: 'pending', model: 'm' }, assembled: undefined }
+  const dispose = installModelSelection(ctx, selection)
+  const agent = createAgent()
+  const access = ctx.bail(agentCarrier(agent), 'agent/model-selection', { agent })
+  expect(access?.current).toEqual(selection.current)
+  expect(access?.current).not.toBe(selection.current)
+  access?.capture({ provider: 'captured', model: 'other' })
+  expect(selection.assembled).toEqual({ provider: 'captured', model: 'other' })
+  expect(selection.current).toEqual({ provider: 'pending', model: 'm' })
+  dispose()
+  expect(ctx.bail(agentCarrier(agent), 'agent/model-selection', { agent })).toBeUndefined()
+  await ctx.fiber.dispose()
+})
+
+it('keeps selection capture access in its owning Agent scope', async () => {
+  const ctx = new Context()
+  await ctx.plugin(SystemPrompt)
+  const left = createAgent()
+  const right = createAgent()
+  const leftScope = createScope(ctx, left)
+  const rightScope = createScope(ctx, right)
+  const leftSelection: ModelSelectionRef = { current: { provider: 'left', model: 'm1' }, assembled: undefined }
+  const rightSelection: ModelSelectionRef = { current: { provider: 'right', model: 'm2' }, assembled: undefined }
+  installModelSelection(leftScope.ctx, leftSelection)
+  installModelSelection(rightScope.ctx, rightSelection)
+  const leftAccess = ctx.bail(agentCarrier(left), 'agent/model-selection', { agent: left })
+  const rightAccess = ctx.bail(agentCarrier(right), 'agent/model-selection', { agent: right })
+  expect(leftAccess?.current).toEqual(leftSelection.current)
+  expect(rightAccess?.current).toEqual(rightSelection.current)
+  leftAccess?.capture({ provider: 'captured', model: 'm3' })
+  expect(rightSelection.assembled).toBeUndefined()
+  await leftScope.dispose()
+  expect(ctx.bail(agentCarrier(left), 'agent/model-selection', { agent: left })).toBeUndefined()
+  expect(ctx.bail(agentCarrier(right), 'agent/model-selection', { agent: right })?.current).toEqual(rightSelection.current)
+  await ctx.fiber.dispose()
 })

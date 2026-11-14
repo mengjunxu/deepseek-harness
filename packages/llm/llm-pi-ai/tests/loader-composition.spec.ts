@@ -110,6 +110,143 @@ describe('llm-pi-ai real dormant composition', () => {
     expect(server.headers[0]?.authorization).toBe('Bearer key-from-store')
   })
 
+  // Four real profile reloads include coordinator polling beyond the default five-second test budget.
+  it('keeps credentials independent of usage policy through profile updates', async () => {
+    vi.stubEnv('PI_COMPOSITION_KEY', '')
+    vi.stubEnv('PI_SECOND_KEY', 'second-account-key')
+    vi.stubEnv('PI_ABSENT_KEY', '')
+    const server = await mockServer(Array.from({ length: 3 }, () => ({ events: textEvents })))
+    const { ctx, settingsPath } = await loadComposition()
+    const update = async (ref: string, usageSource: 'api_metered' | 'work_codex_shared'): Promise<void> => {
+      await writeFile(settingsPath, [
+        '- id: llm-pi-ai',
+        '  config:',
+        '    providers:',
+        '      deepseek:',
+        `        apiKeyEnv: ${ref}`,
+        `        baseURL: ${server.url}`,
+        '        policy:',
+        `          usageSource: ${usageSource}`,
+        '',
+      ].join('\n'))
+      await vi.waitFor(() => {
+        expect(ctx.settings.describe().find(entry => entry.ns === 'llm-pi-ai')?.value)
+          .toMatchObject({ providers: { deepseek: { apiKeyEnv: ref, policy: { usageSource } } } })
+        expect(ctx.llm.listProviders()).toMatchObject([{ id: 'deepseek', policy: { usageSource } }])
+      }, { timeout: 5000 })
+    }
+    const request = () => assemble(ctx, { provider: 'deepseek', model: 'deepseek-v4-flash', messages: [] })
+
+    await update('PI_COMPOSITION_KEY', 'api_metered')
+    expect((await request()).finish).toEqual({ kind: 'stop' })
+    await update('PI_SECOND_KEY', 'api_metered')
+    expect((await request()).finish).toEqual({ kind: 'stop' })
+    await update('PI_SECOND_KEY', 'work_codex_shared')
+    expect((await request()).finish).toEqual({ kind: 'stop' })
+    expect(server.headers.map(headers => headers.authorization)).toEqual([
+      'Bearer key-from-store', 'Bearer second-account-key', 'Bearer second-account-key',
+    ])
+
+    await update('PI_ABSENT_KEY', 'work_codex_shared')
+    expect((await request()).finish).toMatchObject({ kind: 'error', failure: { code: 'MISSING_CREDENTIAL' } })
+    expect(server.requests).toHaveLength(3)
+    expect(ctx.llm.listProviders()).toMatchObject([{ policy: {
+      usageSource: 'work_codex_shared', balance: { status: 'unknown' },
+    } }])
+  }, 20_000)
+
+  it('reads replaced OAuth grants on the next request and refuses after local deletion', async () => {
+    const server = await mockServer([{ events: textEvents }, { events: textEvents }])
+    const { ctx } = await loadComposition()
+    // Retain the installed OAuth resolver while using a loopback protocol; no native Codex endpoint is exercised.
+    await ctx.settings.update('llm-pi-ai', { providers: { 'openai-codex': {
+      api: 'openai-completions', baseURL: server.url, models: [{ id: 'oauth-fixture' }],
+      policy: { usageSource: 'work_codex_shared' },
+    } } })
+    const key = LlmPiAi.recordKeyFor('openai-codex')
+    const expires = Date.now() + 86_400_000
+    const request = () => assemble(ctx, { provider: 'openai-codex', model: 'oauth-fixture', messages: [] })
+    const policy = ctx.llm.listProviders()[0]?.policy
+    expect(policy).toMatchObject({ usageSource: 'work_codex_shared', balance: { status: 'unknown' } })
+
+    for (const account of ['first-account', 'second-account']) {
+      await ctx.credentials.modifyRecord(key, () => Promise.resolve({ kind: 'grant', payload: {
+        type: 'oauth', access: account, refresh: 'unused-refresh', expires,
+      } }))
+      expect((await request()).finish).toEqual({ kind: 'stop' })
+      expect(ctx.llm.listProviders()[0]?.policy).toEqual(policy)
+    }
+    expect(server.headers.map(headers => headers.authorization)).toEqual([
+      'Bearer first-account', 'Bearer second-account',
+    ])
+    await ctx.credentials.deleteRecord(key)
+    expect((await request()).finish).toMatchObject({ kind: 'error' })
+    expect(server.requests).toHaveLength(2)
+    expect(ctx.llm.listProviders()[0]?.policy).toEqual(policy)
+  })
+
+  it('honors an explicit key over stored OAuth and refuses a missing key without OAuth fallback', async () => {
+    vi.stubEnv('PI_ABSENT_KEY', '')
+    const server = await mockServer([{ events: textEvents }])
+    const { ctx } = await loadComposition()
+    const key = LlmPiAi.recordKeyFor('openai-codex')
+    const grant = { kind: 'grant' as const, payload: {
+      type: 'oauth', access: 'stored-account', refresh: 'unused-refresh', expires: Date.now() + 86_400_000,
+    } }
+    await ctx.credentials.modifyRecord(key, () => Promise.resolve(grant))
+    await ctx.settings.update('llm-pi-ai', { providers: { 'openai-codex': {
+      api: 'openai-completions', baseURL: server.url, models: [{ id: 'oauth-fixture' }],
+      apiKeyEnv: 'PI_COMPOSITION_KEY',
+    } } })
+    const request = () => assemble(ctx, { provider: 'openai-codex', model: 'oauth-fixture', messages: [] })
+    expect((await request()).finish).toEqual({ kind: 'stop' })
+    expect(server.headers[0]?.authorization).toBe('Bearer key-from-store')
+    expect(ctx.llm.listProviders()[0]?.policy).toBeUndefined()
+    await expect(ctx.credentials.readRecord(key)).resolves.toEqual(grant)
+
+    await ctx.settings.update('llm-pi-ai', { providers: { 'openai-codex': { apiKeyEnv: 'PI_ABSENT_KEY' } } })
+    expect((await request()).finish).toMatchObject({ kind: 'error', failure: { code: 'MISSING_CREDENTIAL' } })
+    expect(server.requests).toHaveLength(1)
+    await expect(ctx.credentials.readRecord(key)).resolves.toEqual(grant)
+    expect(ctx.llm.listProviders()[0]?.policy).toBeUndefined()
+  })
+
+  it.each(['tools', 'streaming'] as const)('binds exact %s support and rejects invalid updates', async (capability) => {
+    const field = capability === 'tools' ? 'toolSupport' : 'streamingSupport'
+    const server = await mockServer([{ events: textEvents }, { events: textEvents }])
+    const { ctx } = await loadComposition()
+    await ctx.settings.update('llm-pi-ai', { providers: { 'capability-fixture': {
+      api: 'openai-completions', baseURL: server.url, apiKeyEnv: 'PI_COMPOSITION_KEY',
+      models: [{ id: 'supported', [field]: 'supported' }, { id: 'unsupported', [field]: 'unsupported' }, { id: 'unknown' }],
+      policy: { capabilities: { [capability]: 'supported' } },
+    } } })
+    const config = { provider: 'capability-fixture', model: 'supported', requiredCapabilities: [capability] }
+    const prepared = await ctx.llm.prepareCall(config)
+    await expect(ctx.settings.update('llm-pi-ai', { providers: { 'capability-fixture': {
+      models: [{ id: 'supported', [field]: true }],
+    } } })).rejects.toThrow()
+    await expect(ctx.llm.resolveModelInfo('capability-fixture', 'supported')).resolves.toMatchObject({ [field]: 'supported' })
+    for (const model of ['unsupported', 'unknown']) {
+      expect((await assemble(ctx, { ...config, model, messages: [] })).finish)
+        .toMatchObject({ kind: 'error', failure: { code: 'UNSUPPORTED_MODEL_CAPABILITY' } })
+    }
+    expect(server.requests).toHaveLength(0)
+    await ctx.settings.update('llm-pi-ai', { providers: { 'capability-fixture': {
+      models: [{ id: 'supported', [field]: 'unsupported' }],
+    } } })
+    await expect(ctx.llm.prepareCall(config)).rejects.toMatchObject({ code: 'UNSUPPORTED_MODEL_CAPABILITY' })
+    const chunks = []
+    for await (const chunk of prepared.stream({ ...prepared.config, messages: [] })) chunks.push(chunk)
+    expect(chunks.slice(0, -1)).toContainEqual(expect.objectContaining({ type: 'block-start' }))
+    expect(chunks.at(-1)).toMatchObject({ type: 'finish', reason: { kind: 'stop' } })
+    expect(server.headers[0]?.authorization).toBe('Bearer key-from-store')
+    await ctx.settings.update('llm-pi-ai', { providers: { 'capability-fixture': {
+      models: [{ id: 'supported', [field]: 'supported' }],
+    } } })
+    expect((await assemble(ctx, { ...config, messages: [] })).finish).toEqual({ kind: 'stop' })
+    expect(server.requests).toHaveLength(2)
+  })
+
   it('uses settings-only route headers for model discovery', async () => {
     vi.stubEnv('PI_COMPOSITION_KEY', '')
     const server = await mockServer([{ body: JSON.stringify({ data: [{ id: 'acme-private' }] }) }])

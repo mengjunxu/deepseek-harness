@@ -20,7 +20,7 @@ import { credentialRef } from '@deepseek-ai/dsh-credentials'
 import type { CredentialRef } from '@deepseek-ai/dsh-credentials'
 import { MAX_TIMER_DELAY_MS } from '@deepseek-ai/dsh-timeout'
 import { resolveRetryPolicy, RetryPolicySchema, resolveProviderPolicy, ProviderPolicySchema } from '@deepseek-ai/dsh-llm'
-import type { ResolvedRetryPolicy, RetryPolicyConfig, LlmProviderPolicyInput, LlmProviderPolicy } from '@deepseek-ai/dsh-llm'
+import type { ResolvedRetryPolicy, RetryPolicyConfig, LlmProviderPolicyInput, LlmProviderPolicy, LlmCapabilitySupport } from '@deepseek-ai/dsh-llm'
 import { deepEqualJson } from '@deepseek-ai/dsh-util-values'
 import {
   CACHE_CONTROL_FORMATS,
@@ -220,6 +220,10 @@ export interface ResolvedPiAiProviderProfile
    * own, so a catalog capability must not appear here.
    */
   configuredMaxTokens: ReadonlyMap<string, number>
+  /** Exact model tool support explicitly declared by models or modelOverrides. */
+  configuredToolSupport: ReadonlyMap<string, LlmCapabilitySupport>
+  /** Exact model incremental response support explicitly declared by models or modelOverrides. */
+  configuredStreamingSupport: ReadonlyMap<string, LlmCapabilitySupport>
 }
 
 /** Plugin configuration: the provider routes this instance owns. */
@@ -305,6 +309,8 @@ const reasoningEfforts = z.dict(
 
 /** The fields a `models` entry and a `modelOverrides` value share; only the id's home differs. */
 const modelFields = {
+  toolSupport: z.union(['supported', 'unsupported', 'unknown']),
+  streamingSupport: z.union(['supported', 'unsupported', 'unknown']),
   name: z.string(),
   contextWindow: z.number().step(1).min(1),
   maxTokens: z.number().step(1).min(1),
@@ -507,6 +513,8 @@ export function resolveProfiles(
       ...rest.headers === undefined ? {} : { headers: { ...rest.headers } },
       ...rest.thinkingBudgets === undefined ? {} : { thinkingBudgets: { ...rest.thinkingBudgets } },
       configuredMaxTokens: catalog?.configuredMaxTokens ?? new Map(),
+      configuredToolSupport: catalog?.configuredToolSupport ?? new Map(),
+      configuredStreamingSupport: catalog?.configuredStreamingSupport ?? new Map(),
       modelErrors: catalog?.modelErrors ?? new Map(),
       ...piProvider === undefined ? {} : { piProvider },
       ...catalogError === undefined ? {} : { catalogError },

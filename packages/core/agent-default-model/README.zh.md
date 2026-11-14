@@ -58,7 +58,7 @@ await ctx.agentDefaultModel.saveSelection({ provider, model, reasoningEffort: 'h
 
 ### 路由显式意图
 
-可选的 `@deepseek-ai/dsh-agent-default-model/intent-routing` 插件为 `chat`、`plan`、`review` 或 `execute` 选择配置模型。将它用于由此政策拥有模型选择权的 headless 或 SDK 作用域。插件覆盖入口的 provider/model，所选路线省略推理强度时会清除继承值；交互式模型选择器不编辑此政策。`execute` 只分类模型请求，不启动外部执行器。
+可选的 `@deepseek-ai/dsh-agent-default-model/intent-routing` 插件为 `chat`、`plan`、`review` 或 `execute` 选择模型。每条路线可以声明固定 provider/model（默认模式，或 `selection: configured`），也可以通过 `selection: entry` 读取入口所选模型和推理强度。固定路线覆盖入口选择，省略推理强度时清除继承值。`execute` 只分类模型请求，不启动外部执行器。
 
 显式声明四条路线和一个意图。以下本地 fixture 路线需要匹配的 Provider 声明，见[完整 SDK 组合](../../../snapshots/sdk/intent-routing-chat/cordis.yml)：
 
@@ -74,6 +74,8 @@ await ctx.agentDefaultModel.saveSelection({ provider, model, reasoningEffort: 'h
         review: { provider: intent-review, model: review-fixture, requiredCapabilities: [tools] }
         execute: { provider: intent-execute, model: execute-fixture, requiredCapabilities: [tools] }
 ```
+
+入口路线可写为 `chat: { selection: entry, requiredCapabilities: [tools] }`，不能同时声明 provider、model 或推理强度。它要求已安装 `installModelSelection` 拥有者，Web/API 会话、headless 与 ACP 均提供该拥有者。缺少拥有者（包括独立 SDK server）或尚未选择模型的入口会以 `ENTRY_MODEL_SELECTION_UNAVAILABLE` 失败。该意图的能力要求仍约束所选路线。Turn 期间改变入口选择会保留给下一 Turn；当前请求和模型切换提示使用捕获的选择。见 [headless 组合](../../../snapshots/session/entry-model-routing/cordis.yml)。
 
 `routing` 是一个实时配置值。每个 Turn 在提示词组装前捕获所选路线；配置变化影响后续 Turn。提示词的 provider/model 变量和请求头使用捕获的同一对值。不可用路线在准备请求时失败。要求的能力必须由 Provider 声明为支持；未知支持状态会拒绝。省略能力要求时不额外限制该能力。限额、传输失败或中断后，插件不会尝试其他意图的路线。Session 请求头记录意图、实际 provider/model 和能力要求；不会额外发送分类请求。
 

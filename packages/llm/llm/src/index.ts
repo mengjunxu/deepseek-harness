@@ -840,6 +840,8 @@ export class LlmRuntime extends TypertRemoteService {
       name: resolved.name,
       ...resolved.description === undefined ? {} : { description: resolved.description },
       ...inputModalities === undefined ? {} : { inputModalities },
+      ...resolved.toolSupport === undefined ? {} : { toolSupport: resolved.toolSupport },
+      ...resolved.streamingSupport === undefined ? {} : { streamingSupport: resolved.streamingSupport },
       ...context === undefined ? {} : { context: { contextWindow: context.contextWindow } },
       ...defaultMaxTokens === undefined ? {} : { defaultMaxTokens },
       ...resolved.systemPromptUpdate === undefined ? {} : { systemPromptUpdate: resolved.systemPromptUpdate },
@@ -893,7 +895,8 @@ export class LlmRuntime extends TypertRemoteService {
   /**
    * Validate a conversation call config against its exact model capability and
    * materialize adapter-configured defaults. Unsupported explicit efforts
-   * reject before provider I/O; no clamping or aliasing is performed. This
+   * reject before provider I/O; required vision needs exact image-input metadata
+   * and required tools/streaming need exact support declarations. No clamping or aliasing is performed. This
    * standalone query does not bind a later dispatch; use {@link prepareCall}
    * when logging and streaming must share one adapter registration.
    * @param config - provider/model route and optional request controls.
@@ -918,6 +921,21 @@ export class LlmRuntime extends TypertRemoteService {
     config: LlmCallConfig,
     info: LlmResolvedModelInfo,
   ): { config: LlmCallConfig; context?: LlmModelContext; modelInfo: LlmResolvedModelInfo } {
+    const vision = info.inputModalities === undefined ? 'unknown'
+      : info.inputModalities.includes('image') ? 'supported' : 'unsupported'
+    const modelSupport = [
+      ['vision', vision],
+      ['tools', info.toolSupport ?? 'unknown'],
+      ['streaming', info.streamingSupport ?? 'unknown'],
+    ] as const
+    for (const [capability, support] of modelSupport) {
+      if (config.requiredCapabilities?.includes(capability) && support !== 'supported') {
+        throw new LlmError(
+          `Provider "${config.provider}" model "${config.model}" requires declared support for "${capability}"; observed ${support}`,
+          'UNSUPPORTED_MODEL_CAPABILITY',
+        )
+      }
+    }
     const defaulted = config.maxTokens === undefined && info.defaultMaxTokens !== undefined
       ? { ...config, maxTokens: info.defaultMaxTokens }
       : config

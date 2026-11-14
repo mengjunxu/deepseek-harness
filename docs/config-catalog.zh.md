@@ -1624,8 +1624,8 @@ export interface Config extends ProtocolConfig {
 ## `@deepseek-ai/dsh-llm-pi-ai`
 
 - `inject`: `llm`
-- `refs`: `Api` (`@earendil-works/pi-ai`) · `CacheRetention` (`@earendil-works/pi-ai`) · [`LlmProviderPolicyInput`](../packages/llm/llm/src/index.ts) · `Model` (`@earendil-works/pi-ai`) · `ModelThinkingLevel` (`@earendil-works/pi-ai`) · `OpenAICompletionsCompat` (`@earendil-works/pi-ai`) · [`RetryPolicyConfig`](../packages/llm/llm/src/index.ts) · `ThinkingBudgets` (`@earendil-works/pi-ai`) · `Transport` (`@earendil-works/pi-ai`) · `Volatile` (`@deepseek-ai/cordis`)
-- `source`: [`packages/llm/llm-pi-ai/src/config.ts:226`](../packages/llm/llm-pi-ai/src/config.ts)
+- `refs`: `Api` (`@earendil-works/pi-ai`) · `CacheRetention` (`@earendil-works/pi-ai`) · [`LlmCapabilitySupport`](../packages/llm/llm/src/index.ts) · [`LlmProviderPolicyInput`](../packages/llm/llm/src/index.ts) · `Model` (`@earendil-works/pi-ai`) · `ModelThinkingLevel` (`@earendil-works/pi-ai`) · `OpenAICompletionsCompat` (`@earendil-works/pi-ai`) · [`RetryPolicyConfig`](../packages/llm/llm/src/index.ts) · `ThinkingBudgets` (`@earendil-works/pi-ai`) · `Transport` (`@earendil-works/pi-ai`) · `Volatile` (`@deepseek-ai/cordis`)
+- `source`: [`packages/llm/llm-pi-ai/src/config.ts:230`](../packages/llm/llm-pi-ai/src/config.ts)
 
 ```ts config-catalog
 /** Plugin configuration: the provider routes this instance owns. */
@@ -1734,8 +1734,12 @@ export interface PiAiProviderProfile {
   retryPolicy?: RetryPolicyConfig
 }
 
-/** One configured model entry: an id plus the catalog fields it overrides. */
+/** One configured model: catalog overrides and explicit tool/streaming metadata. */
 export interface PiAiModelProfile {
+  /** Incremental response support for this route/model; omission stays unknown without protocol or Provider inference. */
+  streamingSupport?: LlmCapabilitySupport
+  /** Exact model tool-call support; omitted means unknown and never inherits Provider policy or protocol defaults. */
+  toolSupport?: LlmCapabilitySupport
   /** Model id sent to the provider and accepted by {@link GenerateOptions.model}. */
   id: string
   /** Display name for selectors; defaults to the catalog name, then the id. */

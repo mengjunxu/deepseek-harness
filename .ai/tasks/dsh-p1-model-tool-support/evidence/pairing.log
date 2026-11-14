@@ -1,0 +1,4 @@
+$ tsx scripts/verify-translation-pairing.ts --write packages/llm/llm/README.md packages/llm/llm-pi-ai/README.md docs/subsystems/llm-streaming.md docs/config-catalog.md docs/persistence-catalog.md
+verify-translation-pairing: recorded packages/llm/llm-pi-ai/README.i18n.yaml
+verify-translation-pairing: recorded packages/llm/llm/README.i18n.yaml
+verify-translation-pairing: 2 record(s) written; run the check to validate the pairs.

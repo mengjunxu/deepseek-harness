@@ -1,0 +1,189 @@
+$ tsx scripts/run-gates.ts doc-quick
+run-gates: doc-quick running 20 gate(s) with 4 worker(s) from 16 available CPU(s), doc-quick cap 4.
+run-gates: start markdown links
+run-gates: start type equivalence
+run-gates: start translation pairing
+run-gates: start markdown wrap
+
+== FAILED markdown wrap (8.95s) ==
+command: pnpm run verify-md-wrap
+outcome: exit 1
+$ tsx scripts/verify-md-wrap.ts
+verify-md-wrap: hard-wrapped prose paragraphs found (write one physical line per paragraph):
+  docs/legacy/Generic_Agent_Harness_Architecture_Execute_Plan_v4.md:3  > **版本**：v4.0（DSH 原生 Harness + Codex/Codely 双模式接入）
+  docs/legacy/Generic_Agent_Harness_v5_ACP_Architecture_Execute_Plan.md:12  -   DSH owns UI, Session, Workflow, Memory, Permission, Tool Registry
+  docs/legacy/myPlan/AGENTS.original.md:3  > **版本**：vNext.4 / 2026-10-27
+  docs/legacy/myPlan/DSH_Implementation_Plan_vNext_4_2026-10-27.md:3  > **版本**：vNext.4 / 2026-10-27
+  docs/legacy/workflows/DSH：Codex 与 Codely 无缝切换工作流（V0–V2）.md:3  > **用途**：本文档用于指导 Codex 在现有 DSH
+  docs/legacy/workflows/DSH：Codex 与 Codely 无缝切换工作流（V0–V2）.md:15  请先阅读本文档，再检查当前仓库中的
+  docs/legacy/workflows/DSH：Codex 与 Codely 无缝切换工作流（V0–V2）.md:19  本次实施的目标不是立即开发一个临时 Agent
+  docs/legacy/workflows/DSH：Codex 与 Codely 无缝切换工作流（V0–V2）.md:22  1.  **V0：共享事实**------用仓库文件保存工作流规则、任务计划、长期记忆和交接
+  docs/legacy/workflows/DSH：Codex 与 Codely 无缝切换工作流（V0–V2）.md:24  2.  **V1：降低操作成本**------提供跨平台校验/初始化工具与 Agent 专用
+  docs/legacy/workflows/DSH：Codex 与 Codely 无缝切换工作流（V0–V2）.md:26  3.  **V2：DSH 原生接管**------把任务、会话、Checkpoint、Agent
+  docs/legacy/workflows/DSH：Codex 与 Codely 无缝切换工作流（V0–V2）.md:29  **本轮默认先完成 V0**，并把 V1/V2
+  docs/legacy/workflows/DSH：Codex 与 Codely 无缝切换工作流（V0–V2）.md:39  DSH 尚未完成期间，Codex 和 Codely
+  docs/legacy/workflows/DSH：Codex 与 Codely 无缝切换工作流（V0–V2）.md:43  -   新 Agent
+  docs/legacy/workflows/DSH：Codex 与 Codely 无缝切换工作流（V0–V2）.md:50  -   将来由 DSH 统一管理 Task、Session、Checkpoint 和 Agent
+  docs/legacy/workflows/DSH：Codex 与 Codely 无缝切换工作流（V0–V2）.md:61  -   不把 DSH 与 Unity、MGSD
+  docs/legacy/workflows/DSH：Codex 与 Codely 无缝切换工作流（V0–V2）.md:87  -   DSH 原生能力完成后，DSH 的 Task/Checkpoint Store
+  docs/legacy/workflows/DSH：Codex 与 Codely 无缝切换工作流（V0–V2）.md:94  Agent 在开始任务前必须先检查项目约定、Task 状态、Git 状态和最近
+  docs/legacy/workflows/DSH：Codex 与 Codely 无缝切换工作流（V0–V2）.md:102  -   同一仓库的不同 Task
+  docs/legacy/workflows/DSH：Codex 与 Codely 无缝切换工作流（V0–V2）.md:116  1.  查看仓库根目录和 `docs/`、`.ai/`、`scripts/`、`.github/`
+  docs/legacy/workflows/DSH：Codex 与 Codely 无缝切换工作流（V0–V2）.md:118  2.  检查 `AGENTS.md`、`CODELY.md`、README、贡献指南、开发规范、现有
+  docs/legacy/workflows/DSH：Codex 与 Codely 无缝切换工作流（V0–V2）.md:120  3.  检查当前分支、HEAD、`git status --short`、未提交
+  docs/legacy/workflows/DSH：Codex 与 Codely 无缝切换工作流（V0–V2）.md:129  -   如果 `AGENTS.md` 或 `CODELY.md`
+  docs/legacy/workflows/DSH：Codex 与 Codely 无缝切换工作流（V0–V2）.md:131  -   如果现有项目把 Agent
+  docs/legacy/workflows/DSH：Codex 与 Codely 无缝切换工作流（V0–V2）.md:134  -   不得为了"让工作区干净"而运行 `git reset --hard`、`git clean -fd`
+  docs/legacy/workflows/DSH：Codex 与 Codely 无缝切换工作流（V0–V2）.md:138  -   不得假定 `codely` 的 CLI 命令、会话恢复参数或 Skill
+  docs/legacy/workflows/DSH：Codex 与 Codely 无缝切换工作流（V0–V2）.md:190  `AGENTS.md` 和 `CODELY.md`
+  docs/legacy/workflows/DSH：Codex 与 Codely 无缝切换工作流（V0–V2）.md:205  注意： - 入口文件应符合对应 Agent 的真实加载规则。 - 如果 Codely
+  docs/legacy/workflows/DSH：Codex 与 Codely 无缝切换工作流（V0–V2）.md:262  模板里的 Task
+  docs/legacy/workflows/DSH：Codex 与 Codely 无缝切换工作流（V0–V2）.md:291  计划项应尽可能小且可验证。完成状态必须依据代码或验证证据，而不是仅依据
+  docs/legacy/workflows/DSH：Codex 与 Codely 无缝切换工作流（V0–V2）.md:354  规则： - 不要在 `handoff.md` 内写入 API
+  docs/legacy/workflows/DSH：Codex 与 Codely 无缝切换工作流（V0–V2）.md:378  不要复制完整 Agent 对话或大量重复日志。若日志由脚本/CI
+  docs/legacy/workflows/DSH：Codex 与 Codely 无缝切换工作流（V0–V2）.md:411  约束： - `DONE` 不是"Agent 说做完了"，而是验收标准通过并有证据。 -
+  docs/legacy/workflows/DSH：Codex 与 Codely 无缝切换工作流（V0–V2）.md:423  不用新服务、不依赖额外 API、不依赖跨产品会话恢复，只靠仓库文件和 Git
+  docs/legacy/workflows/DSH：Codex 与 Codely 无缝切换工作流（V0–V2）.md:439  4.  创建或适配 `.ai/ARCHITECTURE.md` 和
+  docs/legacy/workflows/DSH：Codex 与 Codely 无缝切换工作流（V0–V2）.md:457  5.  更新
+  docs/legacy/workflows/DSH：Codex 与 Codely 无缝切换工作流（V0–V2）.md:462  8.  只对本 Task 相关文件进行明确的 WIP/Checkpoint
+  docs/legacy/workflows/DSH：Codex 与 Codely 无缝切换工作流（V0–V2）.md:464  9.  对跨设备交接，若有授权且远程已配置，Push
+  docs/legacy/workflows/DSH：Codex 与 Codely 无缝切换工作流（V0–V2）.md:466  10. 最后把状态改为 `HANDOFF_READY`，明确旧 Agent
+  docs/legacy/workflows/DSH：Codex 与 Codely 无缝切换工作流（V0–V2）.md:469  **Git 安全规则：** - 不运行强制 Push。 - 不运行
+  docs/legacy/workflows/DSH：Codex 与 Codely 无缝切换工作流（V0–V2）.md:479  2.  读取对应 Task 的 `task.md`、`plan.md`、`handoff.md`，只按需读取相关
+  docs/legacy/workflows/DSH：Codex 与 Codely 无缝切换工作流（V0–V2）.md:481  3.  检查当前工作区、分支和 HEAD；跨设备时先
+  docs/legacy/workflows/DSH：Codex 与 Codely 无缝切换工作流（V0–V2）.md:499  交接提示词应由 `.ai/WORKFLOW.md` 作为权威版本维护，避免每个 Agent
+  docs/legacy/workflows/DSH：Codex 与 Codely 无缝切换工作流（V0–V2）.md:504  > 按项目共享工作流交接当前 Task。停止新增开发；检查 Git
+  docs/legacy/workflows/DSH：Codex 与 Codely 无缝切换工作流（V0–V2）.md:513  > 接手当前 Task。先读取 Agent
+  docs/legacy/workflows/DSH：Codex 与 Codely 无缝切换工作流（V0–V2）.md:527  -   最稳妥方式：在同一 Task 分支上提交一个交接 Checkpoint，再启动另一
+  docs/legacy/workflows/DSH：Codex 与 Codely 无缝切换工作流（V0–V2）.md:529  -   如果暂时不能提交，必须明确记录工作区 Diff，并确认新 Agent
+  docs/legacy/workflows/DSH：Codex 与 Codely 无缝切换工作流（V0–V2）.md:531  -   切换前关闭/停止旧 Agent 的写入操作，避免两个 Agent
+  docs/legacy/workflows/DSH：Codex 与 Codely 无缝切换工作流（V0–V2）.md:542  GitHub 上的文件可共享，不代表本地未提交修改自动同步。没有 Commit/Push
+  docs/legacy/workflows/DSH：Codex 与 Codely 无缝切换工作流（V0–V2）.md:578  V0
+  docs/legacy/workflows/DSH：Codex 与 Codely 无缝切换工作流（V0–V2）.md:583  先检查项目现有脚本语言和工具链。优先使用仓库已经采用的跨平台方案；若无约定，可使用
+  docs/legacy/workflows/DSH：Codex 与 Codely 无缝切换工作流（V0–V2）.md:611  -   V1 初期不要求采用复杂 YAML
+  docs/legacy/workflows/DSH：Codex 与 Codely 无缝切换工作流（V0–V2）.md:616  -   输出 Git 分支、HEAD、工作区是否干净、Diff
+  docs/legacy/workflows/DSH：Codex 与 Codely 无缝切换工作流（V0–V2）.md:639  在确认 Codex 与当前 Codely
+  docs/legacy/workflows/DSH：Codex 与 Codely 无缝切换工作流（V0–V2）.md:646  Skill 的核心逻辑应引用仓库内的 `.ai/WORKFLOW.md`，不要在两个 Agent 的
+  docs/legacy/workflows/DSH：Codex 与 Codely 无缝切换工作流（V0–V2）.md:649  如果某个 Agent 不支持相同的 Skill
+  docs/legacy/workflows/DSH：Codex 与 Codely 无缝切换工作流（V0–V2）.md:658  -   解析 Markdown/YAML
+  docs/legacy/workflows/DSH：Codex 与 Codely 无缝切换工作流（V0–V2）.md:681  V2 不应只是给 V1 脚本套一个 UI，而是将经过验证的交接协议变成 DSH
+  docs/legacy/workflows/DSH：Codex 与 Codely 无缝切换工作流（V0–V2）.md:684  遵循 DSH 的既定方向： - DSH 是唯一入口，拥有
+  docs/legacy/workflows/DSH：Codex 与 Codely 无缝切换工作流（V0–V2）.md:693  以下是职责划分建议，不是要求按这些名字新建类或服务。先映射现有 DSH
+  docs/legacy/workflows/DSH：Codex 与 Codely 无缝切换工作流（V0–V2）.md:698  Task / Plan Manager    创建任务、拆分计划、维护状态和验收标准
+  docs/legacy/workflows/DSH：Codex 与 Codely 无缝切换工作流（V0–V2）.md:708  模块名称可以不同。关键是职责清晰，避免 Task 状态、Checkpoint 和 Agent
+  docs/legacy/workflows/DSH：Codex 与 Codely 无缝切换工作流（V0–V2）.md:762  统一接收： - Task 与当前计划的快照； - 当前 Checkpoint； -
+  docs/legacy/workflows/DSH：Codex 与 Codely 无缝切换工作流（V0–V2）.md:766  统一返回： - 执行状态； - 实际修改文件； - Commit / Diff 引用； -
+  docs/legacy/workflows/DSH：Codex 与 Codely 无缝切换工作流（V0–V2）.md:770  适配器不得假设不同 Agent
+  docs/legacy/workflows/DSH：Codex 与 Codely 无缝切换工作流（V0–V2）.md:779  -   Owner 至少记录
+  docs/legacy/workflows/DSH：Codex 与 Codely 无缝切换工作流（V0–V2）.md:782  -   不能仅因为心跳丢失就立即让第二个 Agent
+  docs/legacy/workflows/DSH：Codex 与 Codely 无缝切换工作流（V0–V2）.md:785  -   状态更新应具备并发冲突检测，防止旧 Session 的迟到结果覆盖新
+  docs/legacy/workflows/DSH：Codex 与 Codely 无缝切换工作流（V0–V2）.md:799  8.  为 Agent B 生成统一的任务输入，包含 Task、Plan、Checkpoint、相关 ADR
+  docs/legacy/workflows/DSH：Codex 与 Codely 无缝切换工作流（V0–V2）.md:814  4.  若发现 Checkpoint
+  docs/legacy/workflows/DSH：Codex 与 Codely 无缝切换工作流（V0–V2）.md:817  6.  若工作区可能仍被旧 Agent
+  docs/legacy/workflows/DSH：Codex 与 Codely 无缝切换工作流（V0–V2）.md:841  事件应包含 Task、Session、Agent、时间、结果、关联 Commit/Checkpoint
+  docs/legacy/workflows/DSH：Codex 与 Codely 无缝切换工作流（V0–V2）.md:852  7.  最后才考虑更深度的 Agent 启动/停止集成；具体执行能力由现有 DSH
+  docs/legacy/workflows/DSH：Codex 与 Codely 无缝切换工作流（V0–V2）.md:855  不要在一次迁移中同时更改 Task 状态模型、存储、Agent 接口和 Git
+  docs/legacy/workflows/DSH：Codex 与 Codely 无缝切换工作流（V0–V2）.md:930  两个 Agent 同时修改同一工作区       V0 手动停止旧 Agent；V2 通过 Owner/Lease
+  docs/legacy/workflows/DSH：Codex 与 Codely 无缝切换工作流（V0–V2）.md:933  Checkpoint 与代码不一致             接手时核对 Git
+  docs/legacy/workflows/DSH：Codex 与 Codely 无缝切换工作流（V0–V2）.md:936  共享 Memory 膨胀                    只保留稳定知识；Task
+  docs/legacy/workflows/DSH：Codex 与 Codely 无缝切换工作流（V0–V2）.md:941  自动脚本误改文件                    V1 默认只读校验；写操作限定范围并展示
+  docs/legacy/workflows/DSH：Codex 与 Codely 无缝切换工作流（V0–V2）.md:944  跨设备代码没有同步                  显式记录 Push 状态；新设备必须验证
+  docs/legacy/workflows/DSH：Codex 与 Codely 无缝切换工作流（V0–V2）.md:947  Agent 异常退出                      保留现场、从 Git 与最近有效 Checkpoint
+  docs/legacy/workflows/DSH：Codex 与 Codely 无缝切换工作流（V0–V2）.md:950  V2 过度设计                         先验证 V0/V1
+  docs/legacy/workflows/DSH：Codex 与 Codely 无缝切换工作流（V0–V2）.md:961  -   V2：先停用自动调度/交接入口，再恢复人工工作流；保留 Task、Checkpoint
+  docs/legacy/workflows/DSH：Codex 与 Codely 无缝切换工作流（V0–V2）.md:971  **交付物：** - 共享工作流文档； - 适配后的 Agent 入口文件； -
+  docs/legacy/workflows/DSH：Codex 与 Codely 无缝切换工作流（V0–V2）.md:975  **完成定义：** V0 验收清单通过，至少完成一次 Codex -\> Codely 与一次
+  docs/legacy/workflows/DSH：Codex 与 Codely 无缝切换工作流（V0–V2）.md:980  根据 V0
+  docs/legacy/workflows/DSH：Codex 与 Codely 无缝切换工作流（V0–V2）.md:983  **交付物：** - 小型跨平台工作流工具； - 对应测试； - Codex 与 Codely
+  docs/legacy/workflows/DSH：Codex 与 Codely 无缝切换工作流（V0–V2）.md:1001  **完成定义：** V2 验收清单通过，且现有 DSH
+  docs/legacy/workflows/DSH：Codex 与 Codely 无缝切换工作流（V0–V2）.md:1010  1.  **先侦察，不要直接创建文件。** 检查仓库结构、Git 状态、Agent
+  docs/legacy/workflows/DSH：Codex 与 Codely 无缝切换工作流（V0–V2）.md:1013  3.  先实施 V0；V1/V2
+  docs/legacy/workflows/DSH：Codex 与 Codely 无缝切换工作流（V0–V2）.md:1018  7.  使用一个真实、范围可控的任务试点交接；如果当前无法启动 Codely
+  docs/legacy/workflows/DSH：Codex 与 Codely 无缝切换工作流（V0–V2）.md:1020  8.  更新
+  docs/legacy/workflows/DSH：Codex 与 Codely 无缝切换工作流（V0–V2）.md:1023  10. 最终回复应包括：变更文件列表、关键设计选择、执行过的验证及结果、未完成项、风险、V1/V2
+  docs/legacy/workflows/DSH：Codex 与 Codely 无缝切换工作流（V0–V2）.md:1048  **接手前：读取规则 → 读取 Task/Plan/Checkpoint → 检查 Git → 核对事实 →
+  docs/legacy/workflows/DSH：Codex 与 Codely 无缝切换工作流（V0–V2）.md:1051  **交接前：停止修改 → 检查 Diff/未跟踪文件 → 验证并记录结果 → 更新
+  docs/legacy/workflows/DSH：Codex 与 Codely 无缝切换工作流（V0–V2）.md:1054  **异常恢复：不清理现场 → 核对 Git 与最近有效 Checkpoint →
+  docs/legacy/workflows/DSH：Codex 与 Codely 无缝切换工作流（V0–V2）.md:1062  -   **Handoff**：停止旧写入者、保存状态、验证代码事实并把任务交给新
+  docs/legacy/workflows/DSH：Codex 与 Codely 无缝切换工作流（V0–V2）.md:1065  -   **Owner / Lease**：当前被允许写入某 Task/Workspace
+  docs/legacy/workflows/DSH：Codex 与 Codely 无缝切换工作流（V0–V2）.md:1068  -   **Shared
+  docs/myPlan/DSH_PRD_vNext_4_2026-10-27.md:3  > **文档版本**：vNext.4 / 2026-10-27；任务工作台增补：2026-11-11
+  docs/myPlan/DeepSeek_Harness_Taskboard_PRD_v0.1.md:5  **版本：** v0.1
+  docs/myPlan/DeepSeek_Harness_Taskboard_PRD_v0.1.md:476  - **[S01 · DeepSeek Harness 官方仓库](https://github.com/deepseek-ai/deepseek-harnes…
+  docs/myPlan/DeepSeek_Harness_Taskboard_PRD_v0.1.md:479  - **[S02 · DeepSeek Harness TypeScript SDK](https://github.com/deepseek-ai/deeps…
+  docs/myPlan/DeepSeek_Harness_Taskboard_PRD_v0.1.md:482  - **[S03 · DeepSeek Harness SDK Server](https://github.com/deepseek-ai/deepseek-…
+  docs/myPlan/DeepSeek_Harness_Taskboard_PRD_v0.1.md:485  - **[S04 · DeepSeek Harness SDK Protocol](https://github.com/deepseek-ai/deepsee…
+  docs/myPlan/DeepSeek_Harness_Taskboard_PRD_v0.1.md:488  - **[S05 · DeepSeek Harness User Approval](https://deepseek-harness.github.io/de…
+  docs/myPlan/DeepSeek_Harness_Taskboard_PRD_v0.1.md:491  - **[S06 · DeepSeek Harness Web Client Slots](https://deepseek-harness.github.io…
+  docs/myPlan/DeepSeek_Harness_Taskboard_PRD_v0.1.md:494  - **[S07 · DeepSeek Harness MCP](https://github.com/deepseek-ai/deepseek-harness…
+  docs/myPlan/DeepSeek_Harness_Taskboard_PRD_v0.1.md:497  - **[S08 · dashi taskboard 中文说明](https://github.com/chuspeeism/dashi-taskboard/b…
+  docs/myPlan/DeepSeek_Harness_Taskboard_PRD_v0.1.md:500  - **[S09 · KanDev 官方产品页](https://kandev.ai/)**
+  docs/myPlan/DeepSeek_Harness_Taskboard_PRD_v0.1.md:503  - **[S10 · Vibe Kanban 上手教程与维护变更](https://www.vibekanban.com/docs/getting-starte…
+  docs/myPlan/DeepSeek_Harness_Taskboard_PRD_v0.1.md:506  - **[S10a · Vibe Kanban 官方关闭公告](https://www.vibekanban.com/blog/shutdown)**
+  docs/myPlan/DeepSeek_Harness_Taskboard_PRD_v0.1.md:509  - **[S11 · Multica Issues 文档](https://multica.ai/docs/issues)**
+  docs/myPlan/DeepSeek_Harness_Taskboard_PRD_v0.1.md:512  - **[S12 · Emdash Classic 官方产品页](https://emdash.com/classic)**
+  docs/myPlan/DeepSeek_Harness_Taskboard_PRD_v0.1.md:515  - **[S13 · dashi 的 DSH 集成固定提交](https://github.com/chuspeeism/dashi-taskboard/tre…
+  docs/myPlan/DeepSeek_Harness_Taskboard_PRD_v0.1.md:518  - **[S14 · cloader 的社区 Harness 任务插件](https://github.com/cloader/dsh-taskboard)**
+  docs/myPlan/DeepSeek_Harness_Taskboard_PRD_v0.1.md:521  - **[S15 · DeepSeek Harness Process Sandbox](https://deepseek-harness.github.io/…
+[ELIFECYCLE] Command failed with exit code 1.
+run-gates: start npm dependency catalog
+run-gates: PASS type equivalence (9.18s)
+run-gates: start Session format references
+run-gates: PASS npm dependency catalog (0.45s)
+run-gates: start public repository links
+run-gates: PASS public repository links (3.29s)
+run-gates: start repository references
+run-gates: PASS Session format references (4.25s)
+run-gates: start concrete terms
+run-gates: PASS concrete terms (1.38s)
+run-gates: start doc refs
+run-gates: PASS doc refs (0.86s)
+run-gates: start package README Summaries
+run-gates: PASS package README Summaries (0.52s)
+run-gates: start package README model experience
+run-gates: PASS markdown links (16.87s)
+run-gates: start agent note classification
+run-gates: PASS agent note classification (0.45s)
+run-gates: start agent note format
+run-gates: PASS agent note format (0.46s)
+run-gates: start archived agent notes
+run-gates: PASS archived agent notes (0.61s)
+run-gates: start skill invocation metadata
+run-gates: PASS repository references (5.91s)
+run-gates: start translation prompt
+run-gates: PASS skill invocation metadata (0.41s)
+run-gates: start doc budgets
+run-gates: PASS translation prompt (0.40s)
+run-gates: start documentation standard tests
+run-gates: PASS doc budgets (0.40s)
+run-gates: start package README limitations
+run-gates: PASS documentation standard tests (1.06s)
+run-gates: PASS package README model experience (4.15s)
+run-gates: PASS package README limitations (3.84s)
+
+== FAILED translation pairing (29.61s) ==
+command: pnpm run verify-translation-pairing
+outcome: exit 1
+$ tsx scripts/verify-translation-pairing.ts
+verify-translation-pairing: bilingual pairing rules violated (see docs/i18n/README.md):
+  docs/legacy/Generic_Agent_Harness_Architecture_Execute_Plan_v4.md: in-scope documentation must merge bilingual (docs/i18n/README.md); add the counterpart and record the pair
+  docs/legacy/Generic_Agent_Harness_v5_1_CN_Technical_Design_and_Codex_Implementation_Plan.md: in-scope documentation must merge bilingual (docs/i18n/README.md); add the counterpart and record the pair
+  docs/legacy/Generic_Agent_Harness_v5_ACP_Architecture_Execute_Plan.md: in-scope documentation must merge bilingual (docs/i18n/README.md); add the counterpart and record the pair
+  docs/legacy/MGSD_Distributed_Agent_Harness_Architecture_and_Execution_Plan.md: in-scope documentation must merge bilingual (docs/i18n/README.md); add the counterpart and record the pair
+  docs/legacy/MGSD_Distributed_Agent_Harness_Architecture_and_Execution_Plan_v2.md: in-scope documentation must merge bilingual (docs/i18n/README.md); add the counterpart and record the pair
+  docs/legacy/myPlan/AGENTS.original.md: in-scope documentation must merge bilingual (docs/i18n/README.md); add the counterpart and record the pair
+  docs/legacy/myPlan/DSH_Implementation_Plan_vNext_4_2026-10-27.md: in-scope documentation must merge bilingual (docs/i18n/README.md); add the counterpart and record the pair
+  docs/legacy/workflows/DSH_CHECKLIST.md: in-scope documentation must merge bilingual (docs/i18n/README.md); add the counterpart and record the pair
+  docs/legacy/workflows/DSH：Codex 与 Codely 无缝切换工作流（V0–V2）.md: in-scope documentation must merge bilingual (docs/i18n/README.md); add the counterpart and record the pair
+  docs/myPlan/DSH_PRD_vNext_4_2026-10-27.md: in-scope documentation must merge bilingual (docs/i18n/README.md); add the counterpart and record the pair
+  docs/myPlan/DeepSeek_Harness_Taskboard_PRD_v0.1.md: in-scope documentation must merge bilingual (docs/i18n/README.md); add the counterpart and record the pair
+  docs/workflows/DSH_IMPLEMENTATION_PLAN.md: in-scope documentation must merge bilingual (docs/i18n/README.md); add the counterpart and record the pair
+[ELIFECYCLE] Command failed with exit code 1.
+
+run-gates: 18 passed, 2 failed, 0 skipped in 29.62s.
+run-gates: unsuccessful gates:
+  - FAILED translation pairing (29.61s, exit 1)
+    pnpm run verify-translation-pairing
+  - FAILED markdown wrap (8.95s, exit 1)
+    pnpm run verify-md-wrap
+[ELIFECYCLE] Command failed with exit code 1.

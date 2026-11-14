@@ -1,0 +1,10 @@
+$ tsx scripts/gen-cordis-catalog.ts
+gen-cordis-catalog: 119 artifact(s) computed, 3 written.
+$ tsx scripts/gen-config-catalog.ts
+gen-config-catalog: 3 artifact(s) computed, 2 written.
+$ tsx scripts/gen-persistence-catalog.ts
+gen-persistence-catalog: wrote docs/persistence-catalog.md.
+gen-persistence-catalog: wrote docs/persistence-catalog.zh.md.
+gen-persistence-catalog: wrote docs/persistence-catalog.i18n.yaml.
+gen-persistence-catalog: wrote packages/core/session/src/known-event-types.ts.
+gen-persistence-catalog: wrote docs/persistence-schema.json.

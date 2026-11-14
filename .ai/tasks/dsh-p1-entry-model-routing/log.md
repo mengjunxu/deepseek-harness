@@ -1,0 +1,11 @@
+# Execution log
+
+User continued after asking to return to actual selection flow. Existing fixed intent routes intentionally override entry selection; new entry variant makes that ownership explicit. Router freezes a Turn choice, while installModelSelection normally captures each step. The integration must update only the assembled choice after entry assembly, preserving pending current selection for the next Turn and avoiding misleading switch notices.
+
+Implementation checkpoint: PASS 38 focused tests after awaiting invariant readiness in new scoped fixture. PASS target tsc/host build; PASS headless refresh 1, replay 4, TypeScript SDK replay 4. Commands/raw results in evidence/*.log. The first replay command included two nonexistent SDK filenames and only selected headless cases; separate sdk.snapshot.ts run supplies actual SDK evidence. Quota source get_usage_limits: only weekly window (57% used), required five-hour window UNKNOWN; user informed. No long-term knowledge or shared-rule update needed.
+
+Integration checkpoint: PASS Python SDK 4; PASS existing consumer tests 80; PASS target tsc including API host; PASS type-equiv 480; generators and pairing write complete. ESLint wrong-run FAIL (no eslint.config), replaced by repository Oxlint; do not report that invocation as a lint pass. Documentation aggregates not yet run at this checkpoint.
+
+Documentation checkpoint: first doc-sync 36/6, including new test TypeScript errors (not attributed to old debt). Fixed parser input typing and exhaustive scope event inventory. Rerun 16 intent/scope tests PASS, whole host tsc PASS. test:docs 18/2 in prior pairing/wrap categories. Five named pairs PASS. Raw initial failed doc-sync preserved; rerun doc-typecheck next. No Architecture/Memory/WORKFLOW changes.
+
+Final: PASS whole host build/typecheck after both task-owned type errors corrected; affected doc-typecheck rerun fails only legacy documents. PASS final scoped lint and source diff whitespace. 121 unique focused tests, 12 replay cases, 480 type-equiv blocks, 5 named pairs. Task/Plan DONE for backend increment; parent QR-03 PARTIAL. Evidence and source fingerprints saved. Quota final only weekly 57% used, five-hour UNKNOWN. No architecture/memory/shared-rule update, commit/push/fetch or real-model call. Codex released ownership and stopped.

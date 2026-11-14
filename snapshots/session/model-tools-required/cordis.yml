@@ -1,0 +1,20 @@
+- id: llm-pi-ai
+  name: '@deepseek-ai/dsh-llm-pi-ai'
+  config:
+    providers:
+      tools-fixture:
+        api: openai-completions
+        baseURL: http://127.0.0.1:9/v1
+        models:
+          - id: no-tools
+            toolSupport: unsupported
+            input:
+              - text
+        policy:
+          usageSource: local
+          capabilities:
+            tools: supported
+
+- insert:
+    - id: model-tools-required-snapshot
+      name: '../../../packages/llm/llm/tests/fixtures/model-tools-required.ts'

@@ -1,0 +1,10 @@
+version: 1
+scenario: model-streaming-required
+profile: headless
+composition: model-streaming-required
+recording: authored
+header:
+  class: default
+  pin: true
+  systemPromptSource: text-turn
+  toolSchemasSource: text-turn

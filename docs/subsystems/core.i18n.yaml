@@ -35,6 +35,9 @@
 /core/repo-wide-type-patterns/branded-ids:
   en: 10f8ac0f97e7c54a
   zh: 75cd2311aabfe464
+/core/entry-model-selection:
+  en: 9c3d8d7cf905568d
+  zh: 9b26e44b7380587c
 /core/explicit-intent-routing:
-  en: 75f745db7b8f7c07
-  zh: 76e61ae60657a094
+  en: 630a89cdd787c503
+  zh: de0cdce7303922c0

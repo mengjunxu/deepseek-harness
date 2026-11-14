@@ -1490,7 +1490,7 @@ export const SERVICE_API: readonly ServiceApiEntry[] = [
       },
       {
         signature: 'async resolveCallConfig(config: LlmCallConfig, signal?: AbortSignal): Promise<LlmCallConfig>',
-        description: 'Validate a conversation call config against its exact model capability and materialize adapter-configured defaults. Unsupported explicit efforts reject before provider I/O; no clamping or aliasing is performed. This standalone query does not bind a later dispatch; use prepareCall when logging and streaming must share one adapter registration.',
+        description: 'Validate a conversation call config against its exact model capability and materialize adapter-configured defaults. Unsupported explicit efforts reject before provider I/O; required vision needs exact image-input metadata and required tools/streaming need exact support declarations. No clamping or aliasing is performed. This standalone query does not bind a later dispatch; use prepareCall when logging and streaming must share one adapter registration.',
         parameters: [{ name: 'config', description: 'provider/model route and optional request controls.' }, { name: 'signal', description: 'optional cancellation for adapter-owned capability lookup.' }],
         returns: 'a detached config only when a default must be materialized.',
       },
@@ -3853,6 +3853,14 @@ export const EVENT_API: readonly EventApiEntry[] = [
     parameters: [{ name: 'payload', description: '.message - the inserted message. Scope-filtered dispatch (`@deepseek-ai/dsh-scope`): agent-scoped listeners receive only that agent.' }],
   },
   {
+    name: 'agent/model-selection',
+    mode: 'bail',
+    signature: '\'agent/model-selection\'(this: Scoped<Agent>, payload: { agent: Agent }): ModelSelectionCapture | undefined',
+    summary: 'Read the entry\'s model-selection capture access in the Agent scope.',
+    description: 'Read the entry\'s model-selection capture access in the Agent scope. Absent means this entry has no installed selection owner. Scope-filtered dispatch (`@deepseek-ai/dsh-scope`): only this Agent\'s owner responds.',
+    parameters: [{ name: 'payload', description: '.agent - Agent whose entry selection is queried.' }],
+  },
+  {
     name: 'agent/pre-step',
     mode: 'waterfall',
     signature: '\'agent/pre-step\'(this: Scoped<Agent>, payload: { agent: Agent; messages: UserMessage[]; turn: number; step: number; signal: AbortSignal }, next: () => Promise<PreStepDecision>): Promise<PreStepDecision>',
@@ -5682,7 +5690,7 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   },
   {
     name: 'LlmResolvedModelInfo',
-    declaration: 'export interface LlmResolvedModelInfo extends LlmModelInfo {\n    context?: LlmModelContext;\n    defaultMaxTokens?: number;\n    reasoning?: LlmModelReasoningInfo;\n    systemPromptUpdate?: SystemPromptUpdate;\n    toolUpdate?: ToolUpdate;\n}',
+    declaration: 'export interface LlmResolvedModelInfo extends LlmModelInfo {\n    streamingSupport?: LlmCapabilitySupport;\n    toolSupport?: LlmCapabilitySupport;\n    context?: LlmModelContext;\n    defaultMaxTokens?: number;\n    reasoning?: LlmModelReasoningInfo;\n    systemPromptUpdate?: SystemPromptUpdate;\n    toolUpdate?: ToolUpdate;\n}',
   },
   {
     name: 'LlmRuntime',
@@ -5887,6 +5895,10 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   {
     name: 'ModelReasoningEffort',
     declaration: 'export interface ModelReasoningEffort {\n    readonly id: string;\n    readonly name: string;\n    readonly description?: string;\n}',
+  },
+  {
+    name: 'ModelSelectionCapture',
+    declaration: 'export interface ModelSelectionCapture {\n    readonly current: Readonly<ModelSelection> | undefined;\n    capture(selected: ModelSelection): void;\n}',
   },
   {
     name: 'NativeFileApplication',

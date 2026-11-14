@@ -2386,6 +2386,31 @@
       "doc": "docs/subsystems/core.md",
       "symbol": "Config",
       "source": "packages/core/agent-default-model/src/intent-routing.ts"
+    },
+    {
+      "doc": "docs/subsystems/core.md",
+      "symbol": "ConfiguredIntentRoute",
+      "source": "packages/core/agent-default-model/src/intent-routing.ts"
+    },
+    {
+      "doc": "docs/subsystems/core.md",
+      "symbol": "EntryIntentRoute",
+      "source": "packages/core/agent-default-model/src/intent-routing.ts"
+    },
+    {
+      "doc": "docs/subsystems/core.md",
+      "symbol": "ModelSelection",
+      "source": "packages/core/agent/src/model-selection.ts"
+    },
+    {
+      "doc": "docs/subsystems/core.md",
+      "symbol": "ModelSelectionRef",
+      "source": "packages/core/agent/src/model-selection.ts"
+    },
+    {
+      "doc": "docs/subsystems/core.md",
+      "symbol": "ModelSelectionCapture",
+      "source": "packages/core/agent/src/model-selection.ts"
     }
   ]
 }

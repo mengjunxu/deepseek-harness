@@ -444,6 +444,10 @@ export type ToolUpdate = 'in-history' | 'addition-only'
 
 /** Exact-route model metadata resolved by its owning adapter. */
 export interface LlmResolvedModelInfo extends LlmModelInfo {
+  /** Exact route support for incremental response content before the terminal result; absence is unknown. */
+  streamingSupport?: LlmCapabilitySupport
+  /** Exact model tool-call support; absence is unknown, independent of Provider declarations. */
+  toolSupport?: LlmCapabilitySupport
   /** Provider-owned context capacity when known. */
   context?: LlmModelContext
   /** Adapter-configured per-request output cap materialized when callers omit one. */
@@ -550,7 +554,7 @@ export interface GenerateOptions {
   model: string
   /** Explicit conversational intent, recorded in the request header and hidden from model content. */
   intent?: LlmRequestIntent
-  /** Provider-wide capabilities that must be declared supported before adapter preparation. */
+  /** Required Provider declarations; vision, tools and streaming also need exact model support before streaming. */
   requiredCapabilities?: LlmProviderCapability[]
   /** Adapter-owned reasoning effort selected for this exact model. */
   reasoningEffort?: ReasoningEffortId

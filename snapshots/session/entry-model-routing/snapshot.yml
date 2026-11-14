@@ -1,0 +1,9 @@
+version: 1
+scenario: entry-model-routing
+profile: headless
+composition: entry-model-routing
+recording: authored
+header:
+  class: entry-model-routing
+  pin: true
+  toolSchemasSource: text-turn

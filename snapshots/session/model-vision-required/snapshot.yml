@@ -1,0 +1,10 @@
+version: 1
+scenario: model-vision-required
+profile: headless
+composition: model-vision-required
+recording: authored
+header:
+  class: default
+  pin: true
+  systemPromptSource: text-turn
+  toolSchemasSource: text-turn
