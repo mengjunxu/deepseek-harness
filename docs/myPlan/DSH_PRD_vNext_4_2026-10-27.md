@@ -1,11 +1,62 @@
 # DSH 产品需求文档（PRD）vNext.4
 
-> **文档版本**：vNext.4 / 2026-10-27
+> **文档版本**：vNext.4 / 2026-10-27；任务工作台增补：2026-11-11
 > **文档性质**：产品目标与验收基线（不是对现有代码完成情况的声明）
 > **适用范围**：独立、跨项目、跨设备的通用 Agent Harness（DSH）
-> **关联文档**：[当前实施 Plan](../workflows/DSH_IMPLEMENTATION_PLAN.md)
+> **关联文档**：[当前实施 Plan](../workflows/DSH_IMPLEMENTATION_PLAN.md)、[任务工作台 PRD v0.1（待评审）](DeepSeek_Harness_Taskboard_PRD_v0.1.md)
+> **编号速查**：[任务、阶段与验收编号](#任务阶段与验收编号)；[功能需求模块前缀](#功能需求模块前缀)。
+> **实施与进度**：[唯一实施 Plan](../workflows/DSH_IMPLEMENTATION_PLAN.md)；[总进度与证据](../workflows/DSH_IMPLEMENTATION_PLAN.md#12-有效-checklist-与任务证据)；[Taskboard 任务映射](../workflows/DSH_IMPLEMENTATION_PLAN.md#16-taskboard-增量实施计划)；[Taskboard 进度](../workflows/DSH_IMPLEMENTATION_PLAN.md#1210-taskboard-增量-checklist)。PRD 定义需求，Plan Checklist 记录实现与验收状态，文档合并不代表功能完成。
 > **替代关系**：纠正 vNext.2/vNext.3 中“ChatGPT Web + Reverse Codex 是唯一核心主链路”的定位；保留此前 V0–V2 和有价值的可靠性、安全性方案。
 > **决定性约束**：**ChatGPT Web 与 SIWC 是 DSH UI 中平级、可选择的 Chat Provider；Planner/独立 LLM Reviewer 均不强制；Codex 与 Codely 是独立可选的工程执行 Agent。**
+
+
+## 编号与缩写速查
+
+### 任务、阶段与验收编号
+
+本表汇总本 PRD、[实施 Plan](../workflows/DSH_IMPLEMENTATION_PLAN.md)和[Taskboard 专题 PRD](DeepSeek_Harness_Taskboard_PRD_v0.1.md)的编号。需求编号用于关联目标，任务编号用于跟踪实施，验收编号用于关联证据；编号本身不表示功能已完成。QR 按 Plan 中 Quota-aware Router 的上下文解释；CG、WB 未规定固定英文全称，以下使用其对应章节的职责名称。
+
+| 前缀 | 含义 | 用途与示例 |
+|---|---|---|
+| QR | 额度感知路由任务，按上下文对应 Quota-aware Router | Provider、路由、预算与用量；如 QR-03 路由、QR-04 预算保护 |
+| CG | ChatGPT 接入增量计划编号 | CG0–CG5 表示增量阶段；CG-00 是计划审计合并任务 |
+| VN4 | vNext.4 版本的增量实施任务 | 如 VN4-02 是 Provider／Executor／Workflow 独立选择 |
+| WB | Web Provider 验证任务 | WB-01 是浏览器 ChatGPT 与 DSH 接入的可行性验证 |
+| TBOARD | Taskboard，任务工作台 | 如 TBOARD-07 是看板、详情与待处理交互 |
+| FR | Functional Requirement，功能需求 | 产品必须具备的功能；如 FR-CP-01 |
+| NFR | Non-functional Requirement，非功能需求 | 性能、可靠性、安全与兼容性；如专题 NFR02 交互性能 |
+| UAT | User Acceptance Test，用户验收测试 | 从用户操作角度验证功能；如 UAT-03 简单任务交给 Codex |
+| AC | Acceptance Criteria，验收标准／用例 | Taskboard 的 AC01–AC20；具体场景见专题 PRD |
+| T | Test，测试案例 | 如 T01 数据校验；具体范围以所在测试表为准 |
+| M | Milestone，产品里程碑 | M0 产品基线、M1 正式闭环、M2 Web 产品化等 |
+| V | Version，历史研发阶段／版本 | V0 单机闭环、V1 记忆与接力、V2 多 PC 协作 |
+| P | Priority 或 Phase，按所在文档和位置区分 | PRD 需求后的（P0）表示优先级；Plan 的 P1-05 是阶段内任务编号 |
+| G | 主 PRD 中为 Goal；Taskboard 中为阶段关卡 | 主 PRD 的 G1–G7 是产品目标；Taskboard 的 G0–G4 是接入、闭环、恢复、扩展、协作阶段 |
+| NG | Non-goal，非目标 | 明确当前不做什么；如 NG4 不承诺读取 ChatGPT 官方 Memory |
+| S | Scenario，使用场景 | 主 PRD 中 S1 为普通聊天、S2 为简单开发等 |
+| D | Decision，设计决策 | D-01–D-10 是本版产品设计基线 |
+| ADR | Architecture Decision Record，架构决策记录 | 保存架构选择、理由和约束；本仓库由 Agent Notes 承担 |
+
+同名编号必须保留所属文档：主 PRD 的 P0 优先级不等于 Plan 的 P0 阶段，也不等于 Taskboard 自身的 P0 范围；主 PRD 的 G1 产品目标不等于 Taskboard 的 G1 任务闭环。M0–M4、历史 V0–V2、CG0–CG5 和 Taskboard G0–G4 分别描述不同划分，关联关系以实施 Plan 的映射为准。
+
+### 功能需求模块前缀
+
+FR 后的第二段标识需求所属模块；例如 FR-CP-01 表示 Chat Provider 模块的第 01 条功能需求。
+
+| 需求前缀 | 模块含义 |
+|---|---|
+| FR-CP | Chat Provider：模型接入途径、菜单、账户与模型选择 |
+| FR-SIWC | Sign in with ChatGPT：官方 ChatGPT 授权接入 |
+| FR-WEB | Web Provider：浏览器 ChatGPT 接入 |
+| FR-EX | Executor：Codex／Codely 工程执行器 |
+| FR-TB | Tool Bridge：MCP／Tunnel／工具桥接 |
+| FR-MEM | Memory：记忆、会话与上下文管理 |
+| FR-Q | Quota：额度、预算与费用透明 |
+| FR-RL | Reliability：可靠性、终态、恢复与防重复执行 |
+| FR-SEC | Security：凭据、授权、隔离与安全 |
+| FR-TASK | Taskboard 任务管理：需求版本、运行、交付和人工验收 |
+
+FR-TB 指工具桥；TBOARD 和 FR-TASK 指任务工作台。专题 PRD 的 FR01–FR14 使用其自己的编号，不是主 PRD 中某个 FR 模块的简写。
 
 ---
 
@@ -209,6 +260,8 @@
 
 **FR-EX-09（P1）**：ChatGPT Reviewer 可以要求修正，但不能绕过 DSH 自动无限递归调度执行；设置明确上限/人工停止门槛。
 
+**FR-EX-10（Taskboard MVP）**：任务工作台中的完成状态由用户接受指定 Delivery 产生；运行成功、验证通过或模型 Review 的 accept 均不能替代人工验收。模型 Review 继续按需执行，权限审批与交付验收分别记录。
+
 ---
 
 ## 6. 可选的反向工具与官方 MCP 入口
@@ -274,6 +327,8 @@
 
 ## 9. UI 信息架构与关键交互
 
+任务看板、任务详情、执行与恢复、交付及人工验收的详细设计见[任务工作台 PRD v0.1](DeepSeek_Harness_Taskboard_PRD_v0.1.md)（待评审）。
+
 ### 9.1 DSH Chat UI 最小信息架构
 
 1. 顶部：Workspace / Session 选择。
@@ -281,7 +336,7 @@
 3. 执行设置：默认 Executor（Codex/Codely）、执行模式（外部 Agent / 既有原生模型集成）。
 4. Workflow：`Auto`（按需任务化）、`Quick`、`Standard`、`Milestone`、`Chat only`；用户可以 Override。
 5. 对话区：消息、工具事件、可选 Plan、任务卡、执行阶段和状态。
-6. 任务区：Task、ExecutionRun、Checkpoint、Artifacts、验收/Review、审计。
+6. 任务区：项目导航、任务看板/列表和详情；关联 Task、ExecutionRun、Checkpoint、Delivery、Artifacts、人工验收及审计；详细范围见第 9.3 节。
 7. 设置区：账号、配额、工具权限、Worker、诊断、实验功能门禁。
 
 ### 9.2 交互要求
@@ -292,6 +347,33 @@
 - 当生成 Plan 时以可编辑/可确认的版本对象显示；简单任务不出现空 Plan 页面。
 - Review 若未执行，状态显示“未请求模型审查”，不能显示“ChatGPT 已验收”。
 - 任何自动付费切换、危险工具操作和跨工作空间写入都要明确授权。
+
+
+### 9.3 任务工作台 MVP
+
+本节采用[Taskboard PRD v0.1](DeepSeek_Harness_Taskboard_PRD_v0.1.md)的产品要求；原始输入为[Word 文档](DeepSeek_Harness_Taskboard_PRD_v0.1.docx)。FR01–FR14、AC01–AC20、NFR01–NFR09 与 G0–G4 的详细定义保留在该专题 PRD；下表仅归纳主产品要求。专题文档中的 P0/P1/P2 表示工作台自身的 MVP/扩展优先级，不等同于本 PRD 或主 Plan 的同名阶段。
+
+首版面向本地单操作者，手动开始、停止、重试和恢复，默认仅一个活动任务。用户从项目导航进入看板或列表，再打开需求、执行、变更和验收详情；卡片显示真实状态、最近事件和待处理数量。任务可由手动创建或已确认的聊天需求产生；普通聊天仍不强制任务化。
+
+| 主需求 | MVP 产品要求 | 详细需求与验收 |
+|---|---|---|
+| FR-TASK-01 | 项目目录与接入检查；任务字段、排序、搜索、筛选和受状态规则约束的拖拽；启动前有目标和至少一条验收标准 | FR01–FR02；AC01、AC15、AC19 |
+| FR-TASK-02 | 需求修改产生版本；Run 固定输入快照；评论、历史执行和更正可追溯，重试不覆盖旧记录 | FR03–FR04；AC03–AC04 |
+| FR-TASK-03 | 启动幂等；同一任务、Session 和工作目录只有一个活动所有者；每次 Run 独占 runtime，停止须确认其退出；重试和继续均创建新 Run | FR05、FR07–FR09；AC02、AC11–AC13、AC15、AC17–AC18 |
+| FR-TASK-04 | 真实事件驱动进度；待回答、待审批与连接状态分别展示；去重、乱序及重启对账不回退终态，未知输入接纳结果不盲目重发 | FR06、FR08、FR13；AC09–AC10、AC13–AC14 |
+| FR-TASK-05 | Delivery 绑定需求版本、Run、代码快照和逐条验证证据；提供只读 Diff；验收前核对需求、HEAD、未提交修改及纳入交付的未跟踪文件，需求过期或代码变化阻止接受旧交付 | FR10–FR12；AC05–AC08 |
+| FR-TASK-06 | 仅用户可接受、退回或记录验证豁免；无活动 Run、未决问题/审批且交付有效才可验收；完成后显式重开或新建关联任务，历史 Review 保留 | FR12–FR14；AC05–AC10 |
+| FR-TASK-07 | 版本化导出、备份和恢复；保留 Task/Run/Delivery/Review 关联；导入不启动执行或重放审批，停止不自动删除成果 | NFR03–NFR09；AC16、AC20 |
+
+Task 的业务状态为 `backlog / todo / in_progress / in_review / blocked / done / canceled`，Run 的执行状态独立记录；详细转移条件由专题 PRD 第 7–8 节拥有。`idle`、最终文本或退出码 0 不等于交付完成。停止 Run 默认使任务阻塞，取消 Task 表示放弃目标，退回 Delivery 则使任务回到待办。只有用户接受当前有效 Delivery 才进入 `done`。
+
+### 9.4 接入方案与实施前决策
+
+专题 PRD 的默认提案为独立本地 Web 任务台，经官方 TypeScript SDK Adapter 驱动 Harness；原生插件入口列为后续扩展。这与本 PRD 的 D-01 原生 UI 优先及主 Plan 的复用要求存在差异，须由 TBOARD-00 在 G0 对独立外壳或原生入口、部署方式和数据拥有者形成决策；本次需求合并不批准平行 Daemon、重复 Task Store 或第二份 Session 权威。Task 业务状态由一个任务服务持有，Harness Session 日志继续拥有模型与工具事实，二者以引用关联。
+
+G0 须验证并冻结 Harness/SDK/runtime/操作系统组合、Session 创建与恢复、问题和审批语义、目标 runtime 停止隔离及目录归属；SDK 驱动 Harness 的方式不等于已接入 Codex/Codely 原生执行器。Provider/Executor 独立选择和既有费用/权限规则继续适用；启动沿用受支持的 dsh profile。任务级工具只允许受服务端绑定作用域的读取、进度、评论、阻塞和交付，不授予 Agent 人工完成或豁免权限。
+
+原生插件入口、有限并行、依赖关系和受控自动领取属于 G3；团队账号、PR/CI 和跨设备能力按 G4 与主 Plan 现有任务映射。Taskboard 的成本预算扩展不降低主产品已经要求的额度透明和付费授权。界面性能及可靠性数字仍是待验证目标，完整指标以专题 PRD 第 12–14 节为准。
 
 ---
 
@@ -305,6 +387,7 @@
 | **M2：Web 平级 Provider 产品化** | 基于前置验证完善独立插件、平级 UI、状态/诊断及可靠性；生产真实访问单独准入 | M2 不用于推迟第一优先验证，也不以 PoC 替代产品验收 |
 | **M3：可靠性与多端** | ContextEpoch、Checkpoint、QuotaPolicy、Executor 切换、Worker | 状态可恢复且不乱执行 |
 | **M4：可选 Tool Bridge** | MCP Gateway、Scoped Broker、ChatGPT 反向工具能力、长任务 | Tool Bridge 与 Executor 区分 |
+| **Taskboard MVP（G0–G2）** | 接入验证、看板/详情、版本化执行与交付、人工验收、恢复及备份 | 对应主 Plan 第 16 节；G2 通过才可发布，不以 G1 演示替代可靠性验收；独立入口待 G0 决策 |
 | **后续 TODO** | Agent 动态生成 Workflow、更多 Agent/Provider、复杂跨设备调度策略 | 不回填首期强制需求 |
 
 > Web 前置验证先于剩余里程碑工作；其完成或明确不可行结论由实际证据判断。M0–M4 是产品能力里程碑，不直接替换历史 V0–V2 研发阶段编号；开发 Plan 要依据仓库实际完成情况做增量映射。
@@ -331,6 +414,8 @@
 | UAT-14 | 重启并继续任务 | 从 DSH Checkpoint/状态继续，不依赖 Web 历史完整存在 |
 | UAT-15 | 组合契约测试 | Web/Mock、SIWC × Codex、Codely 四种组合在 Provider/Executor 层互不耦合 |
 | UAT-16 | 含副作用操作超时/重连 | 提交状态不确定时不会自动重复执行同一写操作 |
+
+Taskboard 增补验收沿用[专题 PRD 第 13–14 节](DeepSeek_Harness_Taskboard_PRD_v0.1.md#13-功能验收用例)的 AC01–AC20，不重编号为 UAT；[实施 Plan 第 16 节](../workflows/DSH_IMPLEMENTATION_PLAN.md#16-taskboard-增量实施计划)逐项分配实现与验证责任。发布前必须通过 G0 接入验证、全部 20 项用例及一次真实编码任务的启动、失败重试、交付、退回和再验收。模型验收可选不等于人工验收可省略。
 
 ---
 
@@ -374,5 +459,6 @@
 | D-07 | DSH 自行管理 Session/Memory/Task/Run/Checkpoint；额度来源、切换和权限透明 |
 | D-08 | 采用模板化自适应 Workflow + 用户 Override；Agent 动态 Workflow 属未来 TODO |
 | D-09 | Web ChatGPT Provider 的真实可行性是当前第一优先验证项；以 codex-chatgpt-web 为参考，Browser-only 不依赖 Full Harness/Executor，Mock 与真实结论分开 |
+| D-10 | Taskboard MVP 采用任务/执行/交付分离与人工验收；独立本地 Web 外壳仍为 G0 待决提案，不覆盖 D-01 或现有数据归属 |
 
-**本 PRD 是产品设计基线；任何与 vNext.2/vNext.3 相反的流程图和优先级描述，应以本版 D-01～D-09 为准。**
+**本 PRD 是产品设计基线；任何与 vNext.2/vNext.3 相反的流程图和优先级描述，应以本版 D-01～D-10 为准。**

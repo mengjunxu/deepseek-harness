@@ -1,8 +1,10 @@
 # DSH v2 — Codex / Codely 通用开发执行计划
 
-> 版本：vNext.4-merged-draft | 更新：2026-11-01 | 状态：**增量计划；现有基础可复用，完整产品尚未验收**
+> 版本：vNext.4-merged-draft | 更新：2026-11-11 | 状态：**增量计划；现有基础可复用，完整产品尚未验收**
 >
 > 产品需求：[vNext.4 PRD](../myPlan/DSH_PRD_vNext_4_2026-10-27.md)；有效任务状态与证据见第 12 节。历史文档集中在 [legacy](../legacy/README.zh.md)。
+>
+> Taskboard：[专题 PRD](../myPlan/DeepSeek_Harness_Taskboard_PRD_v0.1.md) → [第 16 节任务定义与验收映射](#16-taskboard-增量实施计划) → [第 12.10 节执行进度](#1210-taskboard-增量-checklist)。主 PRD 需求以 FR-TASK 编号关联专题 FR/AC；执行任务用 TBOARD 编号，完成须附实现与测试证据。
 >
 > 适用：Codex Desktop/CLI、Codely CLI、其他具备文件/命令执行能力的 Coding Agent
 >
@@ -10,13 +12,15 @@
 
 本计划已合并用户提供的《DSH ChatGPT Integration Plan vNext（2026-10-26）》。第 10 节规定当前阶段顺序、额度分类、复用矩阵和新增任务；原 `P0-*` 至 `P4-*` 编号保留，第 4 节描述原任务验收。新方案中的 P0–P5 在本仓库记为 CG0–CG5，避免与旧编号冲突。阶段不代表任务已完成，实际状态以 Checklist 和对应 Task 证据为准。本轮增量合并 [vNext.4 PRD](../myPlan/DSH_PRD_vNext_4_2026-10-27.md) 与 [Plan](../legacy/myPlan/DSH_Implementation_Plan_vNext_4_2026-10-27.md)，并对照 [v5.1 旧计划](../legacy/Generic_Agent_Harness_v5_1_CN_Technical_Design_and_Codex_Implementation_Plan.md)。第 11 节拥有本轮 VN4 任务映射；当前验证优先级以第 15 节为准，其余任务映射按第 11 节执行。当前用户已授权进入 P1；QR-01 的 Provider 元数据、政策配置与显式意图输入已有验收证据；QR-03 的 opt-in 路由部分已实施，P2–P7 未启动。
 
-**当前第一优先（2026-10-31 用户决定）：先执行 WB-01 / VN4-06 的 Web ChatGPT Provider 可行性验证，再推进 QR-02、其余额度策略和 Executor 集成。第 15 节覆盖早先把 Web 排至 P4/M2 或可跳过研究的顺序；已有成果保留，验证启动不依赖完整 Task/Workflow、UI 或预算系统。**
+**执行顺序与当前检查点**：2026-10-31 确定 Web Provider 验证先于剩余产品化；WB-01 / VN4-06 已于 2026-11-02 按第 12.8–12.9 节证据标为 DONE，完成范围是受控 PoC，生产准入仍未放开。QR-02 配置职责验收已完成；后续按原依赖推进 QR-03 剩余路由、额度策略和 Executor 集成；无需重复领取已完成 PoC。Taskboard 本轮仅纳入规划，不改变该顺序。
+
+**进度判读**：第 12 节是唯一功能状态入口；`TODO` 未开始，`PARTIAL` 已有基础但验收未完成，`DONE` 必须有对应版本的实现和验证证据。第 12.7 节及各项链接的 `.ai/tasks/<task-id>/handoff.md` 记录命令、结果和限制，接续时与真实 Git 核对。Taskboard 本次只完成需求/计划合并，TBOARD 功能项均未实施；文档任务 DONE 不改变这些状态。
 
 ## 0. 给执行 Agent 的第一条指令（必须遵循）
 
 1. 先读取**本文件（含第 12 节 Checklist）与最新 PRD**，再审查仓库、已有架构、分支和测试现状；不得凭空认定项目是空仓库。
 2. 本文件第 12 节是里程碑与任务状态的**共同进度入口**；代码和自动化测试是事实来源。未真实实现、未验证的项不得打勾。
-3. 按第 11 节阶段和依赖实施，每次只领取一个最小可验证任务编号；保留 P0 未完成探测，不因一条真实 API 路线受阻就阻断独立的 Mock/路由契约工作。禁止跨越用户批准阶段、无关重构和覆盖其他 Agent 的工作。
+3. 按第 11 节阶段和依赖实施，Taskboard 增补按第 16 节映射，每次只领取一个最小可验证任务编号；保留 P0 未完成探测，不因一条真实 API 路线受阻就阻断独立的 Mock/路由契约工作。禁止跨越用户批准阶段、无关重构和覆盖其他 Agent 的工作。
 4. 保留仓库既有语言、框架、目录和约定。第 2 节说明当前复用路径；重大架构差异按现有 Agent Notes 流程记录。
 5. 开始前检查 `git status`、当前分支、已有变更；不得擅自清理、重置或覆盖用户/其他 Agent 的未提交修改。
 6. 每个任务结束必须：实现代码、执行对应测试、更新 Checklist 的证据列/状态、记录风险和下一任务；**禁止仅靠自然语言宣称完成**。
@@ -35,6 +39,7 @@
 - 一个 DSH Chat 会话里，用户既可普通聊天，又可从某段对话创建 Task；**不是每轮聊天都生成计划**。
 - 简单工程任务：`Chat → TaskSpec → Executor → 确定性验证 → 按风险或用户要求 Review → 用户看到结果`。
 - 复杂工程任务：`Chat → 目标/约束/验收标准 → 可选高层 Plan → Executor 内部规划 → 执行与测试 → Verification → 按需 ChatGPT Review`。
+- Taskboard 在看板/列表中管理任务和需求版本，从详情进入执行、只读变更与交付验收；只有用户接受指定有效 Delivery 才完成任务。Taskboard MVP 默认单操作者、一个活动任务，详细任务见第 16 节。
 - Task 能在 UI 关闭、聊天 Turn 结束后继续；重新打开 UI 可查询任务和完整事件状态。
 - 执行器实际改动、测试证据、检查项及失败原因保存在 DSH；可授权的高风险操作必须请求明确批准。
 - Codex 与 Codely **开发同一 DSH 仓库时**可通过 Git + Checklist 交接，无需复述整段历史。
@@ -95,7 +100,7 @@ Workspace / Execution Process / Tests / Git
 | 层 | 当前实现 | 实施约束 |
 |---|---|---|
 | Runtime | Node `^22.19.0` 或 `>=24`、TypeScript strict、pnpm 11.7.0、Cordis | 以根 package.json 为准，不新建应用启动器 |
-| API / UI | 现有 Host、Remote、事件推送、React Web 与 Electron | 复用服务和设置扩展，不引入平行 Daemon/UI |
+| API / UI | 现有 Host、Remote、事件推送、React Web 与 Electron | 当前复用服务和设置扩展；Taskboard 独立外壳是 TBOARD-00 待决提案，决策前不引入平行 Daemon/UI |
 | Persistence | Session JSONL；storage SQLite/JSON；实验 MGSD SQLite TaskFact | 不把 Session 迁移到第二套 Conversation 数据库；先核对 Task 存储复用 |
 | Validation | Schemastery 配置、已有 JSON/类型校验 | 新领域输入使用现有边界，不复制同一状态的权威来源 |
 | Tests | Vitest、记录回放、真实 API 与 Web 验收 | 定向测试不能替代 Loader、Session 快照及真实验收 |
@@ -154,10 +159,12 @@ packages/{storage,credentials,mcp}/  # 已有存储、凭据和 MCP 出站/资�
 
 ### 3.2 状态模型与转移
 
+以下为目标编排阶段；Taskboard 业务状态与 Run 状态分别按专题 PRD 第 7–8 节映射，不直接把阶段名写成产品任务状态。
+
 ```text
-Task:  DRAFT → AWAITING_APPROVAL → QUEUED → RUNNING → VERIFYING
-           → [policy: none] → ACCEPTED (模型 Review 未请求)
-           → [policy: on-risk / required-by-user] → REVIEWING → ACCEPTED
+编排:  DRAFT → AWAITING_APPROVAL → QUEUED → RUNNING → VERIFYING
+           → [policy: none] → READY_FOR_ACCEPTANCE (模型 Review 未请求)
+           → [policy: on-risk / required-by-user] → REVIEWING → READY_FOR_ACCEPTANCE
                          ├→ CHANGES_REQUESTED → QUEUED [新 WorkItem/Attempt]
                          └→ NEEDS_USER_DECISION
 分支:  QUEUED/RUNNING → CANCEL_REQUESTED → CANCELLED
@@ -165,9 +172,9 @@ Task:  DRAFT → AWAITING_APPROVAL → QUEUED → RUNNING → VERIFYING
        INTERRUPTED → RECOVERING → QUEUED 或 BLOCKED
 ```
 
-- **Task** = 用户目标；**WorkItem** = 可调度执行单元；**ExecutionRun** = 某次 Agent 执行；**AgentSessionRef** = 第三方会话引用；**ReviewDecision** = 最终验收决定。
+- **Task** = 用户目标；**WorkItem** = 可调度执行单元；**ExecutionRun** = 某次 Agent 执行；**AgentSessionRef** = 第三方会话引用；**ReviewDecision** = 模型语义审查决定；**HumanReview** = 用户针对指定 Delivery 的接受/退回记录（专题 PRD 称 Review）。
 - 不允许通过直接改 DB 字段跳过合法迁移，必须由 StateMachine + 事件事务统一改变状态。
-- `Run completed` **不等于** `Task accepted`；`Verifier passed` **不等于** `ChatGPT review passed`。
+- `Run completed` **不等于** `Task accepted`；`Verifier passed` **不等于** `ChatGPT review passed`。Taskboard 必须在有效交付、Run 结束、问题和审批已结清后进入待验收，只有人工接受才进入 done；停止 Run、取消任务和退回交付分别处理。
 - 用户撤销授权、Executor 断线、超时应进入可检查状态，不默认自动重试所有副作用操作。
 
 ### 3.3 ExecutorAdapter v1（语言无关语义）
@@ -192,7 +199,7 @@ interface ExecutorAdapter {
 
 `VerificationRecord` 必须包含：TaskSpec Revision、Git base/head、命令、工作目录、退出码、原始结果文件引用、每条 AC 的 `pass/fail/unknown` 和证据。未经运行的测试标为 `unknown`，不得标成 `pass`。
 
-`ReviewPackage` 最小包含：TaskSpec 摘要、AC Matrix、Diff 摘要、可用测试证据、风险/阻塞、Artifact 引用；大小受限，按需展开。`ReviewDecision` 为 `accept | request_changes | needs_user_decision`，并持久化理由和证据引用。`reviewerPolicy` 为 `none | on-risk | required-by-user`；未请求模型审查时记录 skipped，不创建虚假的 ReviewDecision。确定性验证始终必需，failed/unknown 不得被 skipped 转为 pass。ChatGPT 的 Review 是语义审查；最终高风险发布仍需用户批准。
+`ReviewPackage` 最小包含：TaskSpec 摘要、AC Matrix、Diff 摘要、可用测试证据、风险/阻塞、Artifact 引用；大小受限，按需展开。`ReviewDecision` 为 `accept | request_changes | needs_user_decision`，并持久化理由和证据引用。`reviewerPolicy` 为 `none | on-risk | required-by-user`；未请求模型审查时记录 skipped，不创建虚假的 ReviewDecision。确定性验证始终必需，failed/unknown 不得被 skipped 转为 pass。ChatGPT 的 Review 是语义审查；最终高风险发布仍需用户批准。Taskboard 的人工 Review 独立绑定 Delivery 版本、需求版本、代码快照、操作者和理由；模型 accept/skipped 均不写入 done。验证失败或未执行可如实提交人工审查，失败项豁免须由用户记录理由，不能改写验证结果。
 
 ### 3.5 Conversation / Event 合约
 
@@ -227,7 +234,7 @@ interface ExecutorAdapter {
 
 ### P1 — V0：单机最小闭环（Web 前置验证后推进）
 
-**目标用户演示**：在 DSH UI 输入任务 → ChatGPT/Mock 提议 TaskSpec → 用户确认 → Codely/Mock 在隔离工作区执行 → DSH 跑真实验证 → ChatGPT/Mock 评审 → UI 显示最终结论；关掉 UI 后任务继续。
+**目标用户演示**：在 DSH UI 输入任务 → ChatGPT/Mock 提议 TaskSpec → 用户确认 → Codely/Mock 在隔离工作区执行 → DSH 跑真实验证 → 按需模型评审 → UI 显示结果；Taskboard 形成 Delivery 后由用户接受或退回。关掉 UI 后任务继续。
 
 | ID | 任务与实施动作 | 依赖 | 交付物 / 验收 |
 |---|---|---|---|
@@ -242,7 +249,7 @@ interface ExecutorAdapter {
 | P1-09 | Workspace 安全：路径白名单、独立 worktree、写入锁、限制 Shell 与 Secret | P1-07/08 | 防路径逃逸、防同工作区双写、危险操作需要批准 |
 | P1-10 | Verification Engine：运行可配置测试命令、保存退出码与产物、AC Matrix | P1-08/09 | 真实测试失败不会标为通过；未知项标记 unknown |
 | P1-11 | 按 reviewerPolicy 可选 Review；需要时 ReviewPackage → ChatGPT/Mock → Decision；有限修复 | P1-05/10 | skipped 与 accept / request_changes / needs_user_decision 路径有集成测 |
-| P1-12 | UI：聊天、生成 TaskSpec、确认、任务状态/进度、验收结果、取消与错误反馈 | P1-04/06/08/11 | Playwright 完整 E2E、UI 重开恢复 |
+| P1-12 | UI：聊天、TaskSpec 确认、Task/Run 进度、取消与错误反馈；Taskboard 看板/详情/交付验收由 TBOARD-07 细化 | P1-04/06/08/11；Taskboard 子项依赖见第 16 节 | Playwright 完整 E2E、UI 重开恢复；Taskboard AC01–AC10 及异常状态回放 |
 | P1-13 | 单机可复现 Demo、README、升级/备份/回滚指南 | P1-01..12 | 干净环境按文档从零跑通 Mock 及 1 个真实路径 |
 
 **V0 Gate（全部必须过）**：真实或清楚标注的 Mock 聊天→TaskSpec→Executor→Verification→按需 Review 闭环；同一个 Task 重复请求不产生两个 Run；UI 断开继续执行；Daemon 重启状态可重建；未授权副作用被阻断；测试证据可追溯；Log 与 Token 不泄漏。
@@ -421,7 +428,7 @@ codely -p "先阅读 DSH_IMPLEMENTATION_PLAN.md（含第 12 节 Checklist），�
 | Memory：`.ai/MEMORY.md` 是开发协作索引；`apps/cli/config/examples/mcp-memory` 是外部资源示例 | 产品 User/Project/Decision/Task Memory、隔离检索与 MemorySnapshot 尚未验收；与 ChatGPT Memory 无同步关系 | NEW / MODIFY；P2-01，不能用 Markdown 记录冒充产品实现 |
 | Quota-aware Router 与 Usage Ledger：已有 LLM 路由、usage、retry/凭据服务；未发现 UsageSource / 按意图费用策略 | 补分类、能力 tri-state、共享额度保护、预算同意与回退审计 | NEW；QR-01..06，旧 P2-06 复用其计量而不再另造 Ledger |
 | MCP：`packages/mcp/mcp-client`、`mcp-resources` 是出站/资源；现有 subagent/SSH 不等于多 PC Worker 协调器 | Worker Registry/lease/fencing、入站任务 Gateway 与 Tunnel 未发现对应完整闭环 | NEW；P3-01..08；不能把 MCP Client 写成入站服务已完成 |
-| `pi2dsh`、`dsh-codex-oauth`、`dsh-codely` 这三个名称未在已跟踪源码/配置/manifest 中定位为独立插件 | 可能是旧称、外部插件或历史设计；已定位功能对应者见上表，不能据旧名称安装、删除或宣称兼容 | DEFER 名称核对到 QR-02 / P0-04/05；本轮未扫描用户凭据或全局私有配置 |
+| `pi2dsh`、`dsh-codex-oauth`、`dsh-codely` 这三个名称未在已跟踪源码/配置/manifest 中定位为独立插件 | 可能是旧称、外部插件或历史设计；已定位功能对应者见上表，不能据旧名称安装、删除或宣称兼容 | QR-02 已复核仓库范围，仍未定位为独立插件；未扫描用户凭据或全局私有配置 |
 
 ### 10.2 Provider、执行模式与额度
 
@@ -495,6 +502,8 @@ Session/Message/Turn 继续以 Session log 为权威；TaskSpec、PlanRevision�
 | Checkpoint | 关联 task/run、stateDigest、artifactRefs 与 recoverability；不能冒充原生 Agent 思维缓存 |
 | ReviewPackage | 复用检查/review 事实；包含 TaskSpec 摘要、changedFiles、版本引用、testSummary、错误、风险和 Artifact 引用 |
 | UsageRecord | 复用 request/usage；关联 task/session/provider/usageSource，分列 reported/estimated usage、可用 price 与 policyDecision |
+| Taskboard Delivery / HumanReview | 扩展现有 Artifact/验证事实的引用；绑定需求版本、Run、代码快照和人工接受/退回；不与模型 ReviewDecision 混用 |
+| Taskboard Interaction / Lease | 复用审批/问题请求身份与执行/目录所有权；补服务端 Run 绑定、终态、租约代次和重启对账 |
 
 | 差异 | 本次处理 / 待定事项 |
 |---|---|
@@ -543,12 +552,12 @@ ChatToHarness 与 codex-chatgpt-web 的静态源码审阅范围见 [参考锁定
 | vNext.4 §15 要求修改 WORKFLOW；ADAPT | 产品模板规则归本计划和 workflow 拥有者；.ai/WORKFLOW 是开发协作规范，不把运行时 Workflow 写入该文件 |
 | 已实施动态工作流 / Codex 子代理 ADR；KEEP | 仍拥有脚本执行与原生子代理循环的决策；新提案只补产品路由和任务政策，不宣称废弃现有实现 |
 
-当前先领取 WB-01 / VN4-06 的 Web Provider 验证工单，再按结果继续 VN4-01/02 和 QR-02。P1 已获用户授权；其他 P2–P7 未启动；缺失 vNext.1–3 原文、真实 Web 准入与活动 Codex Host 仍明确未验证。
+WB-01 / VN4-06 的受控 Web 验证与 QR-02 配置职责验收已按第 12 节完成，后续继续 VN4-01/02 与 QR-03 的未完成部分。P1 已获用户授权；其他 P2–P7 未启动；缺失 vNext.1–3 原文、Web 生产准入与活动 Codex Host 仍明确未验证。Taskboard 从 TBOARD-00 开始细化，不把文档更新当作新阶段已启动。
 
 
 ## 12. 有效 Checklist 与任务证据
 
-本节合并原独立 Checklist 的有效任务、验收状态和证据，是后续执行时的唯一清单入口。只有 DONE 勾选；PARTIAL 不代表产品验收完成。任务定义与依赖以第 11 节为准，原始交接日志保留在 legacy，后续交接写入 .ai/tasks 对应 Task。新增功能仍须另行授权。
+本节合并原独立 Checklist 的有效任务、验收状态和证据，是后续执行时的唯一清单入口。只有 DONE 勾选；PARTIAL 不代表产品验收完成。任务定义与依赖以第 11 节为准，Taskboard 增补定义见第 16 节，原始交接日志保留在 legacy，后续交接写入 .ai/tasks 对应 Task。新增功能仍须另行授权。
 
 状态：TODO 未开始、PARTIAL 已有基础但验收未完成、DOING 执行中、IN_REVIEW 待复核、DONE 有证据的完成、BLOCKED 阻塞、OBSOLETE 已替换需求。领取任务前检查 Git、当前 Task 和写入权；完成后同步本节状态、证据及 Task Checkpoint。
 
@@ -597,7 +606,7 @@ ChatToHarness 与 codex-chatgpt-web 的静态源码审阅范围见 [参考锁定
 - [ ] **P1-09 [PARTIAL]** sandbox/guard/workspace 与本地工作区控制已有；通用 Task 单写者、审批和 Secrets 验收待补。
 - [ ] **P1-10 [PARTIAL]** 本地 Codely 独立 checks 和 MGSD process_exit 事实已有；补 AC Matrix、Diff/Test Report Artifact。
 - [ ] **P1-11 [PARTIAL]** MGSD review 状态/修复预算已有；补 reviewerPolicy、skipped 及需要审查时的 ReviewPackage/Reviewer 三分支闭环。
-- [ ] **P1-12 [PARTIAL]** Chat、设置和本地命令已有；补统一 TaskSpec 确认、Task/Run 进度、取消及验收 UI。
+- [ ] **P1-12 [PARTIAL]** Chat、设置和本地命令已有；补统一 TaskSpec 确认、Task/Run 进度、取消及验收 UI；Taskboard 专项见 TBOARD-07，不能因本次规划合并标为完成。
 - [ ] **P1-13 [TODO]** README/启动脚本/Mock Demo/配置说明/备份与回滚指南。
 
 **V0 Gate：最低完整产品演示**
@@ -605,7 +614,7 @@ ChatToHarness 与 codex-chatgpt-web 的静态源码审阅范围见 [参考锁定
 - [ ] 从聊天生成 **TaskSpec**，明确批准后提交，记录 TaskId/Revision。
 - [ ] 调度独立选定的 Codex/Codely/Mock 在受控工作区执行；日志与输出可视且可追溯。
 - [ ] 自动 Verification 把失败/未知和通过区分；未请求模型 Review 时记录 skipped，需要审查时产生结构化 Decision。
-- [ ] ChatGPT/Mock 发现不符合验收标准能触发修复（或要求用户决定）。
+- [ ] ChatGPT/Mock 发现不符合验收标准能触发受预算和授权约束的修复（或要求用户决定）；Taskboard 用户退回后由新 Run 带入反馈，人工接受绑定指定 Delivery。
 - [ ] 关闭 UI 后执行持续；重开 UI 按 cursor 查看进度。
 - [ ] Daemon 意外退出后可准确恢复/标记 Run，不发生无意识重复副作用。
 - [ ] 同一请求重试不会产生两个任务/两次启动。
@@ -711,8 +720,8 @@ ChatToHarness 与 codex-chatgpt-web 的静态源码审阅范围见 [参考锁定
 
 - [x] **CG-00 [DONE]** 新旧计划审计合并、Gap Matrix、Decision Log、实现证据与 Memory 同步；本轮仅文档。三组命名双语配对、局部链接/换行/文件结尾、全仓引用、22 文档标准测试通过；最终 test:docs 为 18/2，doc-sync 为 33/9（引用随后单独修复通过），剩余限制见 [检查点](../../.ai/tasks/dsh-chatgpt-plan-update/handoff.md)。此为历史 CG0 记录；当前 P1/CG1 已获授权，进度以下列 QR 状态为准。
 - [x] **QR-01 [DONE]** LlmProviderInfo.policy、usageSource/能力三态/unknown 余额、实验准入、SIWC 共享来源、pi-ai 政策配置和显式意图/能力要求输入已有解析与验收证据。见[元数据任务](../../.ai/tasks/dsh-p1-provider-policy/handoff.md)、[配置任务](../../.ai/tasks/dsh-p1-provider-config/handoff.md)和[意图任务](../../.ai/tasks/dsh-p1-intent-routing/handoff.md)；不将 VN4-01/02 或 CG1 Gate 标完成。
-- [ ] **QR-02 [TODO]** Auth / Provider / Executor / 费用来源分离；核对旧插件名称和 Codex/Codely 双模式；依赖 QR-01。
-- [ ] **QR-03 [PARTIAL]** opt-in chat/plan/review/execute 显式 Provider/model 路由、逐 Turn 捕获、要求能力 unknown/unsupported 拒绝、失败不隐式跨路线已有证据；QR-02 接入、精确模型能力匹配、用户选择/显式回退与完整 Gate 待补。
+- [x] **QR-02 [DONE]** Auth / Provider / Executor / 费用声明独立配置已核对：Loader 回归覆盖凭据/政策独立更新、已存 OAuth 账户替换与删除、显式 Key 优先及缺失时不回退；Codex 实例模型/环境/权限隔离和 Codely 无模型轮次的 Loader 执行有证据。Codex 两模式有实现，Codely external-agent 为本地示例、native-model 仍 unknown；旧插件名未定位为独立包，未删除插件。见[首轮证据](../../.ai/tasks/dsh-p1-auth-route-separation/handoff.md)与[OAuth/执行配置验收](../../.ai/tasks/dsh-p1-oauth-route-composition/handoff.md)。完成范围为配置职责与模式审计；真实账户/生命周期、统一 Run/UI 仍归 P1-05/07、VN4-02。
+- [ ] **QR-03 [PARTIAL]** opt-in chat/plan/review/execute 显式 Provider/model 路由、逐 Turn 捕获、要求能力 unknown/unsupported 拒绝、失败不隐式跨路线已有证据；显式 vision 要求已按精确模型 inputModalities 校验，拒绝未知/仅文本模型且有记录回放，见[模型视觉准入](../../.ai/tasks/dsh-p1-exact-model-vision/handoff.md)；tools 要求已增加精确模型 toolSupport 三态声明与 pi-ai 配置/热更新验收，见[模型工具支持](../../.ai/tasks/dsh-p1-model-tool-support/handoff.md)；streaming 要求已按精确模型 streamingSupport 三态声明校验，见[模型流式支持](../../.ai/tasks/dsh-p1-model-streaming-support/handoff.md)；`selection: entry` 已接入现有入口选择拥有者，验证逐 Turn 固定、下一轮生效与提示一致，见[入口模型路由](../../.ai/tasks/dsh-p1-entry-model-routing/handoff.md)；结构化输出/恢复的精确语义、用户选择的 GUI 验收/显式回退与完整 Gate 待补；QR-02 配置职责验收已完成。
 - [ ] **QR-04 [TODO]** 共享额度保护、预算和付费同意、reserve/settle/cancel；依赖 QR-03。
 - [ ] **QR-05 [TODO]** UsageRecord 与政策决定持久化、报告/估算分列、去重/脱敏；依赖 QR-01/04。
 - [ ] **QR-06 [TODO]** UI 显示来源和用量、预算同意与回退证据、真实 profile/Session 快照/GIF；依赖 QR-03/04/05。
@@ -727,7 +736,7 @@ CG1 Gate（待实施）：默认路由、能力不匹配、余额 unknown、限�
 任务定义、依赖和 T01–T30 / UAT-01–16 映射见本文件第 11 节。本节的 DONE 仅表示 P0 文档交付；功能验收保持未勾选。
 
 - [x] **VN4-00 [DONE]** P0 源码审计、新旧对照、参考版本锁定、proposed ADR、主计划与本清单增量合并；验证和限制见[任务 Checkpoint](../../.ai/tasks/dsh-vnext4-audit/handoff.md)。
-- [ ] **VN4-01 [PARTIAL]** Provider 描述符、政策配置、显式意图输入与 opt-in 路由已实施；SIWC/Web 平级 UI、QR-02/03 剩余验收尚未闭环。
+- [ ] **VN4-01 [PARTIAL]** Provider 描述符、政策配置、显式意图输入与 opt-in 路由已实施；SIWC/Web 平级 UI、QR-03 剩余验收尚未闭环。
 - [ ] **VN4-02 [TODO]** Provider/Executor/Workflow 独立选择与 Run 固定绑定；UI/回放/GIF 尚未验收。
 - [ ] **VN4-03 [PARTIAL]** TaskSpec、可选 Plan 与批准/版本映射；MGSD 现有执行仍要求批准 Plan。
 - [ ] **VN4-04 [PARTIAL]** 模板/Override/reviewerPolicy；已有脚本 Workflow，产品无 Plan/无模型 Review 分支待实现。
@@ -741,6 +750,27 @@ CG1 Gate（待实施）：默认路由、能力不匹配、余额 unknown、限�
 
 **OBSOLETE 需求**：v5.1 固定 Planner/Reviewer 流水线、统一 ACP 必需前提、固定 Codex 架构/Codely 执行、旧文档新建 Core 目录。替代条目和保留内容见主计划 §11.1；不删除历史输入，不将 obsolete 勾为功能 DONE。ADR 为 proposed，尚未提升为已实施决策。
 
+
+### 12.10 Taskboard 增量 Checklist
+
+范围来自[Taskboard PRD v0.1](../myPlan/DeepSeek_Harness_Taskboard_PRD_v0.1.md)，任务定义、依赖与 FR/AC 映射归[第 16 节](#16-taskboard-增量实施计划)。以下状态仅表示产品实施；本次文档更新记录见[规划任务](../../.ai/tasks/dsh-taskboard-plan/handoff.md)。已有 P1/P2 基础和 SDK 能力不等于工作台已通过验收。
+
+| ID | 状态 | 交付重点 | 实施与验收证据 |
+|---|---|---|---|
+| TBOARD-00 | TODO | G0 入口、服务/数据归属与版本决策 | NOT_RUN；仅记录候选与冲突 |
+| TBOARD-01 | TODO | G0 SDK/runtime 接入验证 | NOT_RUN；不可复用 Web Provider PoC 作为通过证据 |
+| TBOARD-02 | TODO | 任务版本、业务状态与关联持久化 | NOT_RUN |
+| TBOARD-03 | TODO | Run 启动、重试、输入回执与排队 | NOT_RUN |
+| TBOARD-04 | TODO | 目录隔离、停止与租约保护 | NOT_RUN |
+| TBOARD-05 | TODO | 事件、问题、审批与任务级工具 | NOT_RUN |
+| TBOARD-06 | TODO | Delivery 快照与人工验收 | NOT_RUN |
+| TBOARD-07 | TODO | 看板、详情与待处理交互 | NOT_RUN；P1-12 保持 PARTIAL |
+| TBOARD-08 | TODO | 重启对账、备份和兼容性 | NOT_RUN |
+| TBOARD-09 | TODO | G2 发布与全流程验收 | NOT_RUN |
+| TBOARD-10 | TODO | G3 原生入口及受控扩展 | 后续范围，未启动 |
+| TBOARD-11 | TODO | G4 团队、PR/CI 与远程协作 | 后续范围，未启动 |
+
+每项完成时在证据列关联对应实施 Task 和固定版本证据，记录实际命令、结果与未验证范围；同步被细化的 P1/P2 状态，只在其全部验收要求满足后完成父项。
 
 ## 13. P0 执行器能力与实施基线（2026-10-30）
 
@@ -788,7 +818,7 @@ QR-01 已完成：既有 LLM 服务提供可选 LlmProviderInfo.policy，解析 
 
 可选的 @deepseek-ai/dsh-agent-default-model/intent-routing 插件通过既有提示词和 agent/request 瀑布流为四种意图选择显式 Provider/model。配置拥有该作用域的模型选择权；每个 Turn 捕获一份配置，后续变更影响下一 Turn。提示词变量与最终路线一致；限额、传输失败和中断不隐式尝试其他路线。它不自动分类文本，不启动 Executor，也不替代交互式模型选择器。证据见[意图任务](../../.ai/tasks/dsh-p1-intent-routing/handoff.md)：207 个定向单元测试与 1 个循环拒绝回归、TypeScript/Python SDK 各四条真实 profile 路线及持久化兼容验证。
 
-QR-03 与 VN4-01 保持 PARTIAL，VN4-02 仍 TODO。当前下一步按第 15 节先验证 Web ChatGPT Provider，再补 QR-02 的账户/Provider/Executor/费用来源分离和模式接入，以及精确模型能力匹配、显式用户选择/回退和独立选择 UI。额度预留/结算、预算同意、UsageRecord 和完整 CG1 Gate 尚未实现。生产 Web 路线仍默认 gated；受控验证按第 15 节执行，API Key 真实验证按用户要求免测；没有新增 Registry。
+QR-03 与 VN4-01 保持 PARTIAL，VN4-02 仍 TODO。WB-01 / VN4-06 的受控 Web PoC 和 QR-02 的配置职责/模式审计已完成，证据见第 12.8 节；后续补 QR-03 的精确模型能力匹配、显式用户选择/回退，以及 VN4-02 的独立选择 UI。额度预留/结算、预算同意、UsageRecord 和完整 CG1 Gate 尚未实现。生产 Web 路线仍默认 gated；受控验证按第 15 节执行，API Key 真实验证按用户要求免测；没有新增 Registry。
 
 
 ## 15. 当前第一优先：Web ChatGPT Provider 可行性验证
@@ -810,3 +840,61 @@ QR-03 与 VN4-01 保持 PARTIAL，VN4-02 仍 TODO。当前下一步按第 15 节
 2026-11-01 的[验证任务](../../.ai/tasks/dsh-web-provider-poc/handoff.md)已完成参考隔离 DEV 的 Browser-only 真实收发：5.6 High、唯一标记精确回复、Responses completed，以及取消后的 failed 终态和本地清理；不推定服务器停止生成/额度返还或其他模型能力。156 项参考测试与构建另有证据。DSH SDK 负向探测仍在 Adapter I/O 前拒绝 Web 请求，DSH 实际接入和生产准入未通过，WB-01 / VN4-06 保持未勾选。参考 DEV 禁止 Responses listener；用户已批准受限 PoC 准入，注册授权实现及 Mock SDK 验证已有证据；真实 DSH 浏览器 worker 仍未实现，当前因 Codex 五小时余量 14% 按用户规则停止，接续点见该 Task。
 
 2026-11-02 Codely 接续同一任务并完成 DSH 实际接入：独立 Bun worker 复用参考进程内 responseRequest 与 Browser Adapter（不启动 Responses listener），桥接 Adapter 经受限准入注册 chatgpt_web_unofficial 路线，运行时 patch 禁用全部本地工具。适配器层 18 项与运行时层 Mock 验证通过后，经用户确认发起一次真实请求：唯一标记精确回显、Responses completed、真实 usage（estimated 口径）、request/header 路由与无工具正确、thread/Turn 关联真实 message id、attribution user-agent 上 wire、worker 干净退出。三次提交前失败定位为桥接协议缺陷（参考 console 日志混入协议 stdout）并修复，未消耗模型用量；生产默认门禁不变，生产准入未放开。取消证据止步适配器层（Python/TS SDK 无 wire-level cancel）。证据：[dsh-web-real-request.json](../../.ai/tasks/dsh-web-provider-poc/evidence/dsh-web-real-request.json)、[dsh-web-bridge-mock.json](../../.ai/tasks/dsh-web-provider-poc/evidence/dsh-web-bridge-mock.json) 与[任务记录](../../.ai/tasks/dsh-web-provider-poc/handoff.md)；WB-01 / VN4-06 经用户确认打勾。
+
+## 16. Taskboard 增量实施计划
+
+本节承接[主 PRD 第 9.3–9.4 节](../myPlan/DSH_PRD_vNext_4_2026-10-27.md#93-任务工作台-mvp)及[Taskboard PRD v0.1](../myPlan/DeepSeek_Harness_Taskboard_PRD_v0.1.md)。详细产品行为由专题 PRD 拥有，本节只定义仓库实施归属、依赖、验收与未决事项；状态统一放在[第 12.10 节](#1210-taskboard-增量-checklist)。本次更新不启动产品实施，不改变第 15 节的 Provider 优先级或既有完成证据。
+
+### 16.1 入口与数据决策
+
+TBOARD-00 先处理下列差异；G0 决策、技术验证和功能完成分别记录。架构差异按既有 Agent Notes 流程提出，未确认前保持现有正式决策和已发布数据；无需新增平行 ADR 目录。
+
+| 议题 | Taskboard 提案与本仓库处理 |
+|---|---|
+| 产品入口 | Word 默认独立本地 Web，原生 Slots 入口放 G3；现有 Plan 复用 Host/Client。G0 比较独立外壳与原生入口的部署/复用代价，明确批准的方案后才实现；不能默认创建第二套 Daemon |
+| Task 与 Session | 任务服务是业务状态唯一拥有者，Harness Session log 保持模型与工具事实权威。先核对 MGSD/Job/storage 的复用和迁移，再确定 Task/Run/Delivery/HumanReview 拥有者；不得维护两份同一 Task 状态 |
+| SDK 与 Executor | TypeScript SDK Adapter 负责 Harness Session 控制；Codex/Codely 仍是独立 Executor，SDK 接入通过不等于外部 Agent 已接通。复用受支持的 dsh profile，不增加 package bin 或 argv 逃生路径 |
+| 状态与 Review | 专题 Task/Run 状态映射到第 3 节目标语义；人工 Review 与模型 ReviewDecision 分开。仅用户接受当前有效 Delivery 可完成任务；保持旧数据回放和版本迁移要求 |
+| 工具与费用 | MVP 的任务级工具桥不是 FR-TB 可选入站 MCP Gateway；只提供当前作用域的读取、进度、评论、交付和阻塞。专题后续预算范围不降低 QR 费用授权要求 |
+| 发布组合 | G0 冻结首发系统、Harness/SDK/runtime 版本、profile/模型配置、权限能力和备份目录；仅对实测组合宣称支持。工期在 G0 后估算，不承诺发布日期 |
+
+### 16.2 阶段与现有路线映射
+
+专题 P0 是 G0–G2 的完整 MVP；G1 可演示不等于可发布。G3/G4 对应扩展范围，需单独确定实施范围；跨机器能力继续归主 Plan 的 V2，不提前变为 MVP 前提。
+
+| Taskboard 阶段 | 主 Plan 复用范围 | 退出标准 |
+|---|---|---|
+| G0 接入验证 | P0-06、P1-07/09、VN4-02/09；TBOARD-00/01 | 入口及状态拥有者决策明确；专题第 10 节的全部真实接入用例通过，冻结版本/系统/配置矩阵 |
+| G1 任务闭环 | P1-01..04/07..12、P2-03 的工作台子项；TBOARD-02..07 | AC01–AC10 通过，人工接受/退回可完成一个任务；启动幂等与目录锁先于任何真实执行，不推迟到 G2 才实施 |
+| G2 恢复与发布 | P1-13、P2-04 的工作台子项；TBOARD-08/09 | AC11–AC20 及全部 P0 要求通过；完成真实编码、失败重试、交付、退回、再验收全过程 |
+| G3 能力扩展 | P2-07 与 Taskboard 扩展；TBOARD-10 | 原生入口复用同一任务服务；并行、依赖和自动领取有新增权限与并发回归 |
+| G4 团队协作 | P3-01..06、未来 PR/CI 集成；TBOARD-11 | 身份/角色、协作编辑、远程节点及跨设备恢复独立验收 |
+
+### 16.3 可领取任务与验收映射
+
+TBOARD 编号细化现有 P1/P2 任务的工作台缺口，不重复建立通用 Session、Task API 或 Executor。FR/AC/NFR 编号均指专题 PRD；T/UAT 继续使用原编号。下表依赖是工作台内部最小实施顺序，须结合第 11 节的通用能力依赖领取。
+
+| ID / 阶段 | 复用任务与拥有者候选 | 依赖 | 最小交付与验收映射 |
+|---|---|---|---|
+| TBOARD-00 / G0 | P0-06；Host/Client、storage、Session、MGSD | 本节需求与当前源码审计 | 第 16.1 节决策、兼容矩阵计划及缺口；落实 FR01、NFR09；独立外壳未获架构决策前不实施 |
+| TBOARD-01 / G0 | P1-07/09；sdk/client、server、protocol、interaction、subprocess | TBOARD-00 | 真实 Session 创建、同任务连续两次执行、关闭后恢复；审批允许/拒绝/取消、用户问题、双实例停止隔离、目录追踪和服务中断无重复执行；专题第 10 节全部通过 |
+| TBOARD-02 / G1 | P1-01..03；storage、TaskFact、Session 引用 | TBOARD-00/01 | Project/Task/Run/Delivery/HumanReview/Interaction/Lease 映射、任务版本和输入快照、状态命令期望版本/事务/幂等、历史与归档；FR02–FR04、FR14；AC01、AC03、AC05 |
+| TBOARD-03 / G1 | P1-04/07/08；jobs/workflow、SDK Adapter | TBOARD-02/04 | 手动启动与默认串行队列、先落启动意图、独占 runtime、Session/Run 关联、输入接纳回执、重试/继续新建 Run；FR05、FR08；AC02、AC04、AC11、AC17 |
+| TBOARD-04 / G1 | P1-09；workspace、sandbox、subprocess | TBOARD-02 | 规范化目录及别名/父子目录锁、基线/worktree 验证、显式原目录串行；停止请求、目标进程树退出证据、超时保留锁；FR01、FR07、FR09；AC12、AC15、AC18、AC19 |
+| TBOARD-05 / G1 | P1-04/06/09；Session events、interaction、authorization | TBOARD-03 | 原始事件/稳定身份或自有游标、历史与通知去重、真实进度；问题/审批分别路由及撤销/迟到响应拒绝；服务端绑定任务级工具权限；FR04、FR06、FR13；AC09、AC10、AC14 |
+| TBOARD-06 / G1 | P1-10/11、P2-03；deliverables、Artifact/验证、storage | TBOARD-03/05 | Delivery 必填证据、需求版本与代码指纹、只读 Diff、过期拒绝；人工接受/退回/豁免与历史 Review；Agent 无完成权限；FR10–FR12、FR14；AC05、AC06、AC07、AC08 |
+| TBOARD-07 / G1 | P1-12、VN4-02；Client/Host 扩展或 G0 批准外壳 | TBOARD-02..06 | 项目导航、看板/列表、搜索/筛选/拖拽、详情中的需求/执行/变更/验收、待我处理与设置；FR01–FR14；AC01–AC10 的 UI E2E、异常态回放和演示 |
+| TBOARD-08 / G2 | P1-02/08/13、P2-04；Session/storage、subprocess | TBOARD-03..06 | 重启对账、输入未知状态不重发、旧 runtime 确认退出后恢复；版本化导出/备份、冲突拒绝和兼容升级；NFR03–NFR09；AC11、AC13、AC14、AC16、AC17、AC18、AC20 |
+| TBOARD-09 / G2 | P1-13；发布配置、测试与文档 | TBOARD-07/08 | 全部 AC01–AC20、NFR01–NFR09、真实工程闭环、版本矩阵与恢复指南；不得以 Mock 代替 G0 或真实发布验收 |
+| TBOARD-10 / G3 | P2-07；Client Slots、任务服务、调度 | TBOARD-09 及扩展范围确认 | 原生入口、有限并行、父子任务/阻塞依赖、受控自动领取；新增并发/权限回归，入口不争抢同一 Session |
+| TBOARD-11 / G4 | P3-01..06；identity、authorization、远程协调 | TBOARD-09 及团队/远程范围确认 | 团队账号/角色、协作编辑、PR/CI 与远程节点分别拆项；权限与跨设备恢复独立验收 |
+
+依赖顺序为 TBOARD-00 → 01 → 02 → 04 → 03 → 05 → 06；07 在 02–06 就绪后验收，08 在 03–06 就绪后加固，09 汇总 07/08 的发布证据。01 的停止隔离验证使用受控双实例，不代表 MVP 已允许两个业务任务并行。TBOARD-08 只承接工作台必需的本地恢复，P2-04 的更广恢复范围仍按原计划推进。
+
+### 16.4 验证、证据与完成条件
+
+单元/集成测试覆盖业务状态、版本冲突、幂等、Delivery 过期、人工权限、事务与恢复；SDK/进程测试覆盖真实请求身份、取消/退出、工作目录及启动后写库失败。UI E2E 验证用户可见的待处理、停止中、断连、失败、过期交付和验收拒绝；产品文案使用 locale 字典，非平凡模型/用户输出补 keyless 记录回放，事件或 loop 改动同步 TypeScript/Python SDK expected outputs。具体测试由实现所属包拥有，不新建脱离真实 profile 的演示替代验收。
+
+每个 AC 保存对应版本、脱敏配置、Task/Run/Session/runtime 身份、工作目录、关键事件、进程退出证据、最终持久化记录及实际命令；审批测试同时检查真实副作用，验收测试同时检查 Delivery/HumanReview 指纹。Mock、静态源码审阅和真实路径分开记录；NOT_RUN、失败和不支持均不得写为 PASS。
+
+发布须满足专题 PRD 第 14 节门槛：非预期重复执行、验收丢失、审批扩大及误停其他任务均为 0，done 的人工 Review 完整率为 100%。NFR02 在 8 核/16 GB/SSD、本地连接、2000 任务的参考环境测量首屏 P95 ≤ 2 秒、状态到达服务后 1 秒内反映到 UI；这些是验收目标，不是当前测量值。每项 TBOARD 完成后更新第 12.10 节及对应 Task Checkpoint，G2 之前不宣称 Taskboard MVP 已发布。

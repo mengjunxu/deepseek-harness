@@ -1,0 +1,2 @@
+2e46e71f557f2c67d4c68ee32f8d1ca8a6f44fcad1458ee7dd9a495ecc8f5a4e  docs/myPlan/DSH_PRD_vNext_4_2026-10-27.md
+bcf22579c103933d0e7e1166f5f501c3864b212a90fce81594d2ffda8ad3bd56  docs/myPlan/DeepSeek_Harness_Taskboard_PRD_v0.1.md
