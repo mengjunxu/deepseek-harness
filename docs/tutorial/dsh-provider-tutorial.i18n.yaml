@@ -1,0 +1,31 @@
+# Bilingual-pair consistency record for dsh-provider-tutorial.md (docs/i18n/README.md): per heading
+# section, a hash of its English and Chinese blocks outside code blocks and generated regions.
+# After editing either side, bring the other along and re-record with:
+#   pnpm run verify-translation-pairing --write docs/tutorial/dsh-provider-tutorial.md
+/configure-dsh-model-providers-on-windows:
+  en: 6c9e34c45db1ad87
+  zh: 9aad407e683eb38e
+/configure-dsh-model-providers-on-windows/1-start-dsh-web:
+  en: 8b864b9aa3061538
+  zh: 54fe11ca8f6b446c
+/configure-dsh-model-providers-on-windows/2-choose-a-provider:
+  en: 06e07db5a12d5311
+  zh: 88063884c95f261a
+/configure-dsh-model-providers-on-windows/2-choose-a-provider/a-deepseek-api:
+  en: 3e5ac7907616b0ec
+  zh: c2fb01bb1ab9f2d1
+/configure-dsh-model-providers-on-windows/2-choose-a-provider/b-openai-api-or-another-catalog-provider:
+  en: 05e23eee461811bf
+  zh: 2b23abada8178f4b
+/configure-dsh-model-providers-on-windows/2-choose-a-provider/c-custom-api-gateway-or-local-model-server:
+  en: 4f353ee7ad3113fa
+  zh: 10ec8f3d3833f54c
+/configure-dsh-model-providers-on-windows/2-choose-a-provider/d-sign-in-with-a-chatgpt-plan-experimental-siwc-plugin:
+  en: 682b159f70df5850
+  zh: 90f32603e41fc48f
+/configure-dsh-model-providers-on-windows/3-send-a-test-message:
+  en: a16ab61ee668da04
+  zh: c3b04d2d441ea0c9
+/configure-dsh-model-providers-on-windows/troubleshooting:
+  en: 39e23da843f1ba4c
+  zh: e1c42284eb8f9fe6
