@@ -1,0 +1,33 @@
+{
+  "platform": "win32 x64",
+  "node": "26.10.0",
+  "pnpm": "11.7.0",
+  "controllerFiles": {
+    "packages/api/taskboard-controller/src/index.ts": "9f19355bf3b6de878fcc9cb268cb19765081dabc968751e21ad533a886bf5e60",
+    "packages/api/taskboard-controller/src/stop.ts": "f77a4ad1327fd1244a61940ed1a0942423cfc6b367e2d5cc6dc703171f069ada",
+    "packages/api/taskboard-controller/src/execution.ts": "701ac24155f76c734b15fd65472ce94003ebf15097b4ca876ce81d9cf01c816f",
+    "packages/api/taskboard-controller/lib/index.js": "2cc7f1f40ea9f47440b52c33b60383fe627ddcc4d0e06004cee851ea487c5e8d",
+    "packages/api/taskboard-controller/lib/typert.host.js": "2d6832d31f2368640350a05bbee8de9fd606b70022516870dabc9c4533213dca"
+  },
+  "fixtureFiles": {
+    "packages/api/taskboard-controller/tests/taskboard.host.spec.ts": "e27d440c030584739b97ac74ab846d370cb0e3a8c20bcfaf11509f2d501fa1e1",
+    ".ai/tasks/dsh-tboard-04/evidence/stop.mjs": "d5f603064a176eff60b0d272bebe4d87abcbb8011d6b0d978e05ea51194bfc65",
+    "apps/web/tests/fixtures/taskboard-smoke.mjs": "c0509a26fc97878e7144bbdcc43e6ebccc86774b3667689eb99abd1a05b3f608"
+  },
+  "noToolScopeEvidence": {
+    "command": "node .ai/tasks/dsh-tboard-04/evidence/stop.mjs",
+    "targetRuntimeExited": true,
+    "otherRuntimeAlive": true,
+    "fullScopeObserved": false,
+    "gracefulStopRetainedLease": true,
+    "explicitForceAndRecheckRetainedSameGeneration": true,
+    "replayAddedActions": 0,
+    "modelInputs": 0
+  },
+  "authenticatedWeb": {
+    "command": "node_modules/.bin/vitest.CMD run --config vitest.web.config.ts apps/web/tests/taskboard.e2e.ts",
+    "passed": 1,
+    "absentRunRejected": true
+  },
+  "macosControlledTool": "NOT_RUN: the receiving environment runs Windows"
+}

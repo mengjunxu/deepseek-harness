@@ -70,6 +70,7 @@ try {
   await server.rpc('editTask', { request: { ...request, commandId: randomUUID(), expectedVersion: 1, requirements: { ...request.requirements, description: 'New requirements' } } })
   await server.rpc('comment', { request: { commandId: randomUUID(), projectId, taskId, expectedVersion: 2, text: 'Operator comment' } })
   const before = await server.rpc('detail', { projectId, taskId })
+  await assert.rejects(server.rpc('recheckRunStop', { projectId, taskId, runId: randomUUID() }), /unknown stop target/)
   assert.equal(before.activity.length, 3)
   assert.equal(before.revisions.length, 2)
   await server.stop()

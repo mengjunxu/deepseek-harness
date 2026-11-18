@@ -27,7 +27,7 @@ Read project cards with `listTasks` and revision snapshots and activity with `de
 
 Use `inspectProject` to display a registered project's canonical path, branch, commit and local changes. For continuation, `inspectPriorWorkspace` reads the latest inactive Run's directory. Original-directory execution rechecks the operator's selection after admission. Isolated execution creates a worktree at the pinned commit under the configured `worktreeRoot`.
 
-Use `stopRun` with the selected Run ID and current task version. A graceful request targets that Run's SDK child. An explicit force request becomes available after an unconfirmed stop. The task detail includes the control state, connection state and the observation that prevented release. The Host retains the lease until it observes runtime exit and an empty owned tool-process scope.
+Use `stopRun` with the selected Run ID and current task version. A graceful request targets that Run's SDK child. After an unconfirmed stop, use `recheckRunStop` to observe the same child and tool-process scope without sending a signal, or issue an explicit force request through `stopRun`. The task detail reports the reason the lease remains held. The Host releases the lease only when it observes runtime exit and an empty owned tool-process scope. The recheck uses the launching Host's process handles. After a Host restart, incomplete evidence keeps the directory locked.
 
 Host adapters construct the exclusive client with `createTaskRuntime`. It launches the `sdk` profile in the confirmed directory and loads the Taskboard permission patch after the selected Host patches. The SDK handshake requires the native approval, permission preset, sandbox policy and sandbox provider services.
 

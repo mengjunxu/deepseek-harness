@@ -343,7 +343,7 @@ Provider/额度/用量的具体证据集中在第 12.8 节，Taskboard 集中在
 | TBOARD-01 | DONE | 专题 §10 八项 G0 用例在本分支通过；换目录时新建 Session，新旧 Run 保留引用，材料显式选择。已冻结 macOS 本地接入组合。[矩阵和实测范围](../../.ai/tasks/dsh-tboard-01/matrix.md) |
 | TBOARD-02 | DONE | [任务业务库验收](../../.ai/tasks/dsh-tboard-02/handoff.md)：现有 Web 认证、项目与任务、需求与 Run 快照、交付与人工 Review、请求与租约、版本冲突、排序、归档、重启和重放。调度、真实代码复核和 UI 由后续步骤接入 |
 | TBOARD-03 | TODO | 持久启动、输入回执、串行队列、重试与继续 |
-| TBOARD-04 | IN_PROGRESS | 已验证工作树基线、原目录二次确认、[定向停止可核实的工具进程](../../.ai/tasks/dsh-tboard-04/evidence/controlled-stop.json)、[强停未确认保留租约](../../.ai/tasks/dsh-tboard-04/evidence/stop.json)及[无效审批配置阻断输入](../../.ai/tasks/dsh-tboard-04/evidence/permission.json)。[首版强停平台及验收范围待确认](../../.ai/tasks/dsh-tboard-04/platform.md) |
+| TBOARD-04 | IN_PROGRESS | 已验证工作树基线、原目录二次确认、[定向停止可核实的工具进程](../../.ai/tasks/dsh-tboard-04/evidence/controlled-stop.json)、[强停未确认保留租约](../../.ai/tasks/dsh-tboard-04/evidence/stop.json)及[无效审批配置阻断输入](../../.ai/tasks/dsh-tboard-04/evidence/permission.json)。[首发沿用 macOS G0 组合](../../.ai/tasks/dsh-tboard-04/platform.md)。同一 Host 的停止复核已实现，最新控制器待在首发 macOS 复验。 |
 | TBOARD-05 | TODO | 事件游标、问题/审批及服务端任务工具作用域 |
 | TBOARD-06 | TODO | 交付快照、只读 Diff、人工接受/退回/豁免 |
 | TBOARD-07 | TODO | 看板、详情、待处理、设置与异常状态 |

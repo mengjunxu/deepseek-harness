@@ -21,6 +21,11 @@ function ownedRun(tx: Tx, owner: RuntimeBinding): TaskRun {
   return run
 }
 
+function matchesRun(owner: RuntimeBinding, run: TaskRun): boolean {
+  return run.generation === owner.generation && run.admission.taskId === owner.taskId
+    && run.admission.projectId === owner.projectId && run.admission.runtimeId === owner.runtimeId
+}
+
 function taskFor(tx: Tx, owner: Pick<RuntimeBinding, 'projectId' | 'taskId'>): TaskRecord {
   const task = tx.get('tasks', owner.taskId)
   if (!task || task.task.projectId !== owner.projectId) throw new Error('task outside project')
@@ -51,6 +56,21 @@ export class TaskExecutions {
    */
   active(owner: RuntimeBinding): Promise<TaskRun> {
     return this.domain.transaction(tx => ownedRun(tx, owner))
+  }
+
+  /**
+   * Require an unconfirmed stop before observing the active runtime again.
+   * @param owner - recorded runtime and lease generation.
+   * @returns false for the same settled Run and true for an unconfirmed stop.
+   */
+  canRecheckStop(owner: RuntimeBinding): Promise<boolean> {
+    return this.domain.transaction((tx) => {
+      const saved = tx.get('runs', owner.runId)
+      if (saved?.endedAt && matchesRun(owner, saved)) return false
+      const run = ownedRun(tx, owner)
+      if (run.control !== 'stop_requested' || !run.stopFailure) throw new Error('no unconfirmed stop')
+      return true
+    })
   }
 
   /**
@@ -222,8 +242,7 @@ export class TaskExecutions {
     const hash = fingerprint({ evidence, state, reason, delivery: output })
     return this.domain.transaction((tx) => {
       const saved = tx.get('runs', owner.runId)
-      if (saved?.endFingerprint === hash && saved.generation === owner.generation && saved.admission.taskId === owner.taskId
-        && saved.admission.projectId === owner.projectId && saved.admission.runtimeId === owner.runtimeId) return
+      if (saved?.endFingerprint === hash && matchesRun(owner, saved)) return
       const run = ownedRun(tx, owner)
       if (run.control === 'stop_requested' && state !== 'interrupted') throw new Error('pending stop requires an interrupted outcome')
       if (!reason.trim() || (state === 'finished' && !run.receipt)) throw new Error('missing confirmed run outcome')

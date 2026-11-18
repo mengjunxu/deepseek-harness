@@ -27,7 +27,7 @@ Web Host 通过已认证的 `taskboard` Remote 命名空间提供项目绑定、
 
 通过 `inspectProject` 查看已登记项目的实际路径、分支、commit 和本地变更。继续执行时，`inspectPriorWorkspace` 读取最近一次已结束 Run 的目录。原目录执行会在取得租约后重新核对操作者确认的状态。隔离执行从固定 commit 在配置的 `worktreeRoot` 下创建工作树。
 
-通过 `stopRun` 传入选定的 Run ID 和当前任务版本。正常停止只请求该 Run 的 SDK 子进程关闭。停止未确认时可显式请求强制结束。任务详情提供控制状态、连接状态和未能解锁的具体原因。Host 在观察到 runtime 退出且所属工具进程范围已清空后释放租约。
+通过 `stopRun` 传入选定的 Run ID 和当前任务版本。正常停止只请求该 Run 的 SDK 子进程关闭。停止未确认时，用 `recheckRunStop` 重新观察同一子进程和工具进程范围，无需发送信号，也可通过 `stopRun` 显式请求强制结束。任务详情显示租约仍占用的原因。Host 只有在观察到 runtime 退出且所属工具进程范围清空后才释放租约。重新核对使用启动该 Run 的 Host 持有的进程句柄。Host 重启后，证据不足时目录继续锁定。
 
 Host Adapter 通过 `createTaskRuntime` 创建独占客户端。它在确认的工作目录启动 `sdk` profile，并在 Host 选定的补丁之后加载工作台权限补丁。SDK 握手要求原生审批、权限预设、沙箱策略及沙箱后端服务均已激活。
 

@@ -201,9 +201,25 @@ export default class TaskboardController extends TypertRemoteService {
   @Remote
   async stopRun(request: TaskStopCommand): Promise<void> {
     const parsed = stopCommand.parse(request)
-    const run = this.domain.table('runs').get(parsed.runId)
-    if (!run || run.admission.projectId !== parsed.projectId || run.admission.taskId !== parsed.taskId) throw new Error('unknown stop target')
-    await this.stops.stop({ ...run.admission, generation: run.generation }, parsed)
+    await this.stops.stop(this.stopTarget(parsed.projectId, parsed.taskId, parsed.runId), parsed)
+  }
+
+  /**
+   * Recheck an unconfirmed stop without sending another shutdown or force request.
+   * @param projectId - project owning the Run's task.
+   * @param taskId - task owning the Run.
+   * @param runId - Run whose exit must be observed again.
+   * @returns after recording exit or keeping the lease when the Host lacks complete evidence.
+   */
+  @Remote
+  async recheckRunStop(projectId: ProjectId, taskId: TaskId, runId: TaskRunId): Promise<void> {
+    await this.stops.recheck(this.stopTarget(projectId, taskId, runId))
+  }
+
+  private stopTarget(projectId: ProjectId, taskId: TaskId, runId: TaskRunId): RuntimeBinding {
+    const run = this.domain.table('runs').get(runId)
+    if (!run || run.admission.projectId !== projectId || run.admission.taskId !== taskId) throw new Error('unknown stop target')
+    return { ...run.admission, generation: run.generation }
   }
 
   /**

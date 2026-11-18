@@ -82,12 +82,17 @@ try {
     const messageId = await target.client.prompt('stop-fixture', [{ type: 'text', text: 'Start the fixture tool' }])
     await board.executions.started(owner, messageId)
     const pid = await fixtureChild()
-    await board.stops.attach(owner, target.client, async () => ({
-      state: alive(pid) ? 'occupied' : 'empty', source: 'fixed fixture: bash execs one sleep, no other tool calls',
-    }))
+    let canObserve = false
+    await board.stops.attach(owner, target.client, async () => {
+      if (!canObserve) return { state: 'unknown', source: 'fixture delayed scope observation' }
+      return { state: alive(pid) ? 'occupied' : 'empty', source: 'fixed fixture: bash execs one sleep, no other tool calls' }
+    })
     await board.stopRun({ ...command(4), runId, force: false })
     assert.equal(await target.client.waitForExit(1000), true)
     assert.equal(alive(pid), false)
+    assert.equal((await board.executions.active(owner)).stopFailure, 'scope-unknown')
+    canObserve = true
+    await board.recheckRunStop(projectId, taskId, runId)
     assert.equal(await peer.client.waitForExit(20), false)
     assert.equal(requests, 1)
     await assert.rejects(board.executions.active(owner), /no longer owns/)
@@ -95,7 +100,7 @@ try {
     assert.equal(saved.state, 'interrupted')
     assert.equal(saved.receipt, messageId)
     console.log(JSON.stringify({ fixedTool: '/bin/sleep', realSdkReceipt: true, localModelRequests: requests,
-      targetRuntimeExited: true, fixtureChildExited: true, otherRuntimeAlive: true, releasedGeneration: owner.generation }, null, 2))
+      targetRuntimeExited: true, fixtureChildExited: true, otherRuntimeAlive: true, releasedAfterRecheck: owner.generation }, null, 2))
   } else {
     await board.stops.attach(owner, target.client, async () => ({ state: 'unknown', source: 'no persistent OS scope available' }))
     const stop = { ...command(3), runId, force: false }
@@ -107,11 +112,13 @@ try {
     await board.stopRun(stop)
     const force = { ...command(4), runId, force: true }
     await board.stopRun(force)
+    await board.recheckRunStop(projectId, taskId, runId)
+    assert.equal((await board.executions.active(owner)).stopFailure, 'scope-unknown')
     assert.equal((await board.executions.active(owner)).generation, admitted.generation)
     assert.equal(await peer.client.waitForExit(20), false)
     assert.deepEqual(board.detail(projectId, taskId).activity.slice(-2).map(r => r.action), ['stop-requested', 'force-requested'])
     console.log(JSON.stringify({ targetRuntimeExited: true, otherRuntimeAlive: true, fullScopeObserved: false,
-      gracefulStopRetainedLease: true, explicitForceRetainedSameGeneration: true, replayAddedActions: 0, modelInputs: 0 }, null, 2))
+      gracefulStopRetainedLease: true, explicitForceAndRecheckRetainedSameGeneration: true, replayAddedActions: 0, modelInputs: 0 }, null, 2))
   }
 } finally {
   try { await Promise.all(runtimes.map(h => h.close())) } finally {

@@ -1,5 +1,7 @@
 # macOS 停止证据与首发范围
 
+Taskboard 首发沿用 [macOS G0 组合](../dsh-tboard-01/matrix.md)。Host 在确认目标 SDK 和所属工具进程范围退出后释放目录租约。证据不足时保留租约。仍持有目标进程句柄的 Host 可以重新核对退出证据，跨 Host 重启的进程对账归 TBOARD-08。
+
 G0 在本机确认了正常 shutdown、目标 runtime 退出、测试 shell 子进程消失和另一 Run 存活。[双实例证据](../dsh-tboard-01/evidence/stop-tree.json)。专题 FR07、AC12 和 AC18 要求结束前确认目标进程树，确认不足时保留租约，禁止用服务重启、PID 消失或租约过期代替确认。
 
 当前 [subprocess-local 平台限制](../../../packages/subprocess/subprocess-local/README.md#known-limitations-and-deferred-work)说明，macOS 没有该后端支持的持久 OS 进程范围，普通命令使用进程组，终端使用观测到的进程身份。[SDK 关闭](../../../packages/sdk/server/src/index.ts)先答复 shutdown，再处置根运行时；根进程的退出码不包含逐个子进程的存活证据。目标不明确时强制发送信号或释放目录，均无法满足 FR07。

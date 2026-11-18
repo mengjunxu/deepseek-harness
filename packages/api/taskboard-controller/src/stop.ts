@@ -28,6 +28,8 @@ interface Target {
   scope: (signal: AbortSignal) => Promise<ScopeObservation>
 }
 
+type StopAttempt = 'shutdown' | 'force' | 'recheck'
+
 function sameOwner(a: RuntimeBinding, b: RuntimeBinding): boolean {
   return a.runId === b.runId && a.runtimeId === b.runtimeId && a.projectId === b.projectId &&
     a.taskId === b.taskId && a.generation === b.generation
@@ -69,26 +71,39 @@ export class RunStops {
     const { force, runId, ...base } = command
     if (runId !== owner.runId) throw new Error('wrong stop target')
     const request: TaskCommand = base
-    const { issued } = await this.executions.requestStop(owner, request, force)
-    const prior = this.pending.get(runId)
-    if (!issued) {
-      if (prior) await prior
+    await this.serialize(runId, async () => {
+      const { issued } = await this.executions.requestStop(owner, request, force)
+      if (issued) await this.perform(owner, force ? 'force' : 'shutdown')
       else if (!this.targets.has(runId)) await this.executions.stopUnconfirmed(owner, 'runtime-unavailable')
-      return
-    }
-    const task = prior ? prior.then(() => this.perform(owner, force)) : this.perform(owner, force)
+    })
+  }
+
+  /**
+   * Reobserve an unconfirmed stop using the same Host's SDK child and scope observer.
+   * @param owner - recorded runtime and lease generation.
+   * @returns after confirmation or retention of the lease. A terminal Run is already settled.
+   */
+  recheck(owner: RuntimeBinding): Promise<void> {
+    return this.serialize(owner.runId, async () => {
+      if (await this.executions.canRecheckStop(owner)) await this.perform(owner, 'recheck')
+    })
+  }
+
+  private async serialize(runId: TaskRunId, action: () => Promise<void>): Promise<void> {
+    const prior = this.pending.get(runId)
+    const task = prior ? prior.then(action, action) : action()
     this.pending.set(runId, task)
     try { await task } finally { if (this.pending.get(runId) === task) this.pending.delete(runId) }
   }
 
-  private async perform(owner: RuntimeBinding, force: boolean): Promise<void> {
+  private async perform(owner: RuntimeBinding, attempt: StopAttempt): Promise<void> {
     const target = this.targets.get(owner.runId)
     let result: ExitEvidence | StopFailure = 'runtime-unavailable'
     if (target && sameOwner(target.owner, owner)) {
       const timer = AbortSignal.timeout(this.timeoutMs)
       const deadline = new Promise<StopFailure>((resolve) => { timer.addEventListener('abort', () => { resolve('deadline') }, { once: true }) })
       try {
-        result = await Promise.race([deadline, this.signalAndObserve(target, timer, force)])
+        result = await Promise.race([deadline, this.observeExit(target, timer, attempt)])
       } catch (error) {
         // A broken transport or failed process observation leaves this generation occupied.
         if (!(error instanceof Error)) throw error
@@ -100,9 +115,9 @@ export class RunStops {
     this.targets.delete(owner.runId)
   }
 
-  private async signalAndObserve(target: Target, signal: AbortSignal, force: boolean): Promise<ExitEvidence | StopFailure> {
-    if (force) await target.client.close()
-    else await target.client.request('shutdown', {}, this.timeoutMs)
+  private async observeExit(target: Target, signal: AbortSignal, attempt: StopAttempt): Promise<ExitEvidence | StopFailure> {
+    if (attempt === 'force') await target.client.close()
+    if (attempt === 'shutdown') await target.client.request('shutdown', {}, this.timeoutMs)
     signal.throwIfAborted()
     if (!await target.client.waitForExit(this.timeoutMs)) return 'runtime-alive'
     signal.throwIfAborted()

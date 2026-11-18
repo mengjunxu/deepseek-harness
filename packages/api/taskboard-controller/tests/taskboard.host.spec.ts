@@ -10,8 +10,9 @@ import { randomUUID } from 'node:crypto'
 import { mkdir, mkdtemp, readFile, realpath, rm, symlink, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import { expect, it, onTestFinished } from 'vitest'
+import { expect, it, onTestFinished, vi } from 'vitest'
 import TaskboardController from '../src/index.ts'
+import type { ScopeObservation } from '../src/stop.ts'
 import type { CommandId, ProjectId, TaskId, TaskRequirements, TaskRunId } from '../src/types.ts'
 
 const commandId = () => brandString<CommandId>(randomUUID())
@@ -306,6 +307,8 @@ it('retains an unconfirmed stop through Host restart and requires an explicit, v
   const { service } = await f.open()
   await service.stopRun({ ...stop, runId, force: false })
   expect(service.detail(projectId, taskId)?.runs[0]).toMatchObject({ stopFailure: 'runtime-unavailable', control: 'stop_requested', connection: 'suspect', state: 'running' })
+  await service.recheckRunStop(projectId, taskId, runId)
+  expect((await service.executions.active(owner)).stopFailure).toBe('runtime-unavailable')
   await expect(service.executions.requestStop({ ...owner, generation: owner.generation + 1 }, command(5), true)).rejects.toThrow('no longer owns')
   await service.executions.requestStop(owner, command(5), true)
   await service.executions.stopUnconfirmed(owner, 'deadline')
@@ -364,4 +367,43 @@ it('returns at the stop deadline and ignores a late acknowledgement without free
   reply.resolve(true)
   expect((await f.service.executions.active(owner)).stopFailure).toBe('deadline')
   expect(observed).toBe(false)
+})
+
+it('rechecks the same stopped runtime without signalling again and commits confirmed exit once', async () => {
+  const f = await fixture()
+  const { projectId, taskId } = f.create
+  const cmd = (v: number) => ({ projectId, taskId, expectedVersion: v, commandId: commandId() })
+  const runId = brandString<TaskRunId>(randomUUID())
+  await f.service.createTask(f.create)
+  await f.service.planTask(cmd(1))
+  const run = await f.service.executions.admit({ ...cmd(2), runId, previousRun: null, runtimeId: randomUUID(), mode: 'fresh',
+    configurationRef: 'sdk', materials: [], feedback: [], workspace: { directory: f.root, baseline: null, branch: null },
+    session: { workspace: f.root, sessionId: 'recheck', home: f.root, provider: 'deepseek-official', compatibility: 'g0' } })
+  const owner = { ...run.admission, generation: run.generation }
+  const request = vi.fn(async () => ({}))
+  const close = vi.fn(async () => {})
+  const observing = Promise.withResolvers<undefined>()
+  const empty = Promise.withResolvers<ScopeObservation>()
+  const scope = vi.fn(async () => { observing.resolve(undefined); return empty.promise })
+    .mockResolvedValueOnce({ state: 'unknown', source: 'no complete process observation' })
+  const waitForExit = vi.fn(async () => true).mockResolvedValueOnce(false)
+  await f.service.stops.attach(owner, { request, close, waitForExit }, scope)
+  await expect(f.service.recheckRunStop(projectId, taskId, runId)).rejects.toThrow('no unconfirmed stop')
+  await f.service.stopRun({ ...cmd(3), runId, force: false })
+  expect((await f.service.executions.active(owner)).stopFailure).toBe('runtime-alive')
+  await f.service.recheckRunStop(projectId, taskId, runId)
+  expect((await f.service.executions.active(owner)).stopFailure).toBe('scope-unknown')
+  const first = f.service.recheckRunStop(projectId, taskId, runId)
+  await observing.promise
+  const second = f.service.recheckRunStop(projectId, taskId, runId)
+  empty.resolve({ state: 'empty', source: 'test supervisor' })
+  await Promise.all([first, second])
+  await f.service.recheckRunStop(projectId, taskId, runId)
+  expect(request).toHaveBeenCalledTimes(1)
+  expect(close).not.toHaveBeenCalled()
+  expect(scope).toHaveBeenCalledTimes(2)
+  const detail = f.service.detail(projectId, taskId)
+  expect(detail?.runs[0]).toMatchObject({ state: 'interrupted', stopFailure: null })
+  expect(detail?.activity.filter(entry => entry.action === 'run-ended')).toHaveLength(1)
+  await expect(f.service.executions.active(owner)).rejects.toThrow('no longer owns')
 })
