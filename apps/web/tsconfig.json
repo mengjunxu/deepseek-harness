@@ -22,6 +22,9 @@
   // this client-registered project must not also hold them (one program
   // cannot see both sides of the cordis Context merges).
   "exclude": [
+    "tests/paid-route-confirmation.e2e.ts",
+    "tests/entry-intent-routing.e2e.ts",
+    "tests/turn-usage-source.e2e.ts",
     "tests/codely-local.snapshot.ts",
     "tests/mgsd-local.snapshot.ts",
     "tests/shortcuts-desktop.e2e.ts",

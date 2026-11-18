@@ -1,0 +1,48 @@
+{
+  "created": [
+    {
+      "id": "session-tboard-a",
+      "receipt": true,
+      "finalResponse": "reply-FIRST_A"
+    },
+    {
+      "id": "session-tboard-b",
+      "receipt": true,
+      "finalResponse": "reply-FIRST_B"
+    }
+  ],
+  "closedWhileActive": "interrupted",
+  "survivingPeer": {
+    "id": "session-tboard-b",
+    "receipt": true,
+    "finalResponse": "reply-AFTER_STOP_B"
+  },
+  "peerHeader": [
+    {
+      "id": "session-tboard-b",
+      "cwdMatches": true
+    }
+  ],
+  "reopenedWithoutPrompt": {
+    "session/resume": "unknown DeepSeek Harness SDK runtime method: session/resume",
+    "session/query": "unknown DeepSeek Harness SDK runtime method: session/query",
+    "session/working-directory/get": "unknown DeepSeek Harness SDK runtime method: session/working-directory/get"
+  },
+  "api": {
+    "resumeSession": "undefined",
+    "onRequest": "undefined"
+  },
+  "firstHeader": [
+    {
+      "id": "session-tboard-a",
+      "cwdMatches": true
+    }
+  ],
+  "reopenPreservesJournal": true,
+  "loopbackRequests": [
+    "FIRST_A",
+    "FIRST_B",
+    "HOLD_A",
+    "AFTER_STOP_B"
+  ]
+}

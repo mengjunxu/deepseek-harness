@@ -446,6 +446,8 @@ describe('adapter registration, routing, and accepted-input ownership', () => {
       streamed += 1
       yield { type: 'finish', reason: { kind: 'stop' } }
     })
+    const preparationFailures: import('@deepseek-ai/dsh-llm').LlmPreparationFailure[] = []
+    ctx.on('llm/preparation-failed', (failure) => { preparationFailures.push(failure) })
     const agent = await ctx.agentLoop.create(SessionId('policy-virtual'), { provider: 'virtual', model: 'fixture' })
     const idle = waitForIdle(ctx, agent)
     send(agent, 'go')
@@ -456,6 +458,9 @@ describe('adapter registration, routing, and accepted-input ownership', () => {
     })
     expect(events.some(event => event.type === 'request/header')).toBe(false)
     expect(streamed).toBe(0)
+    expect(preparationFailures).toEqual([{ provider: 'virtual', model: 'fixture', intent: 'chat',
+      sessionId: agent.session.id, stage: 'prepare', usageSource: 'unknown', category: 'route',
+      loopAttempt: { stepStartSeq: events.find(event => event.type === 'step/start')?.seq, attempt: 1 } }])
   })
 
   it('duplicate adapter registration is rejected', async () => {

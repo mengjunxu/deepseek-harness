@@ -1,0 +1,10 @@
+version: 1
+scenario: model-request-budget-reserved
+profile: headless
+composition: model-request-budget-reserved
+recording: authored
+header:
+  class: default
+  pin: true
+  systemPromptSource: text-turn
+  toolSchemasSource: text-turn

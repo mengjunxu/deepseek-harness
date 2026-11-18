@@ -1,0 +1,37 @@
+# Bilingual-pair consistency record for README.md (docs/i18n/README.md): per heading
+# section, a hash of its English and Chinese blocks outside code blocks and generated regions.
+# After editing either side, bring the other along and re-record with:
+#   pnpm run verify-translation-pairing --write packages/guard/paid-route-policy/README.md
+/:
+  en: 512f721de113c583
+  zh: 6d9fb217e557ddfa
+/deepseek-ai-dsh-paid-route-policy:
+  en: bd023560dc9a8560
+  zh: 861b98444853ff3d
+/deepseek-ai-dsh-paid-route-policy/summary:
+  en: 689391e85624de4d
+  zh: b4b301de91512c82
+/deepseek-ai-dsh-paid-route-policy/table-of-contents:
+  en: d152484eb41ac6b4
+  zh: fee86fd013d88c08
+/deepseek-ai-dsh-paid-route-policy/use-this-package:
+  en: b3348870b55acc36
+  zh: 8700d2c6c12f7c04
+/deepseek-ai-dsh-paid-route-policy/understand-the-implementation:
+  en: 302e36c261f27d84
+  zh: 563738aa14c297a0
+/deepseek-ai-dsh-paid-route-policy/further-exploration:
+  en: c4bc73ca1652e35f
+  zh: eb839f66983b8b50
+/deepseek-ai-dsh-paid-route-policy/model-experience:
+  en: 6d2df0bc5808f24e
+  zh: f18c4b65a4f73f69
+/deepseek-ai-dsh-paid-route-policy/model-experience/kv-cache-effect:
+  en: 5fdae3660970f3b8
+  zh: a538d731f2f39611
+/deepseek-ai-dsh-paid-route-policy/known-limitations-and-deferred-work:
+  en: c7061b4c8bda1a16
+  zh: facf14ad85af31c5
+/deepseek-ai-dsh-paid-route-policy/known-limitations-and-deferred-work/dev-note:
+  en: e67f633dc6fe7773
+  zh: 3bb0c20c93f16f98

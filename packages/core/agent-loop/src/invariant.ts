@@ -4,6 +4,7 @@
  */
 
 import type { Context } from '@deepseek-ai/cordis'
+import { deepEqualJson } from '@deepseek-ai/dsh-util-values'
 import { isAgentLoopRequest, type GenerateOptions } from '@deepseek-ai/dsh-llm'
 import type { InvariantFailure, InvariantInstaller } from '@deepseek-ai/dsh-invariants'
 import { foldRequestHeader } from '@deepseek-ai/dsh-session'
@@ -30,12 +31,20 @@ const install: InvariantInstaller = Object.assign((ctx: Context, fail: Invariant
 
     // oxlint-disable-next-line typescript/no-deprecated -- Existing Session history read; migration deferred.
     const events = session.snapshotEvents()
-    if (!events.some(event => event.type === 'step/start')) {
+    const stepStart = events.findLast(event => event.type === 'step/start')
+    if (stepStart === undefined) {
       return fail('a loop-built request with no step/start in its session log')
     }
     const header = foldRequestHeader(events)
     if (header === undefined) {
       return fail('a loop-built request with no request/header event in its session log')
+    }
+    const attempt = 1 + events.filter(event => event.seq > stepStart.seq
+      && (event.type === 'assistant/message' || event.type === 'assistant/attempt')
+      && event.data.turn === stepStart.data.turn && event.data.step === stepStart.data.step).length
+    if (options.loopAttempt?.stepStartSeq !== stepStart.seq || options.loopAttempt.attempt !== attempt
+      || !Object.isFrozen(options.loopAttempt)) {
+      fail('a loop-built request must carry its frozen durable step and attempt ordinal')
     }
     const expected = session.deriveMessages()
     if (JSON.stringify(options.messages) !== JSON.stringify(expected)) {
@@ -47,6 +56,7 @@ const install: InvariantInstaller = Object.assign((ctx: Context, fail: Invariant
       && options.system === undefined
       && options.temperature === header.config.temperature
       && options.maxTokens === header.config.maxTokens
+      && deepEqualJson(options.responseFormat, header.config.responseFormat)
       && JSON.stringify(options.stop) === JSON.stringify(header.config.stop)
       && JSON.stringify(options.tools ?? []) === JSON.stringify(header.tools ?? [])
     if (!headerMatches) {

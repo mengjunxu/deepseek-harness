@@ -1,0 +1,10 @@
+version: 1
+scenario: request-preparation-failed
+profile: headless
+composition: request-preparation-failed
+recording: authored
+header:
+  class: request-preparation-failed
+  pin: true
+  systemPromptSource: model-request-budget-execute
+  toolSchemasSource: text-turn

@@ -209,6 +209,24 @@ Source: [`packages/boot/app-boot/src/profile-context.ts`](../../packages/boot/ap
 
 ### `app-boot/*` events
 
+<a id="app-bootbefore-dispose--parallel"></a>
+
+#### `app-boot/before-dispose` — parallel
+
+Stop new owned work and await active work before whole-application resource teardown. All listeners settle before Cordis fibers dispose, including when a listener rejects. Listeners must not call or await disposeApplication for the same root.
+
+```ts cordis-catalog
+/**
+ * Stop new owned work and await active work before whole-application resource teardown.
+ * All listeners settle before Cordis fibers dispose, including when a listener rejects.
+ * Listeners must not call or await disposeApplication for the same root.
+ * @mode parallel
+ */
+'app-boot/before-dispose'(): Promise<void>
+```
+
+Source: [`packages/boot/app-boot/src/dispose.ts`](../../packages/boot/app-boot/src/dispose.ts)
+
 <a id="app-bootconfig-reload--emit"></a>
 
 #### `app-boot/config-reload` — emit

@@ -1,0 +1,10 @@
+version: 1
+scenario: model-resume-required
+profile: headless
+composition: model-resume-required
+recording: authored
+header:
+  class: default
+  pin: true
+  systemPromptSource: text-turn
+  toolSchemasSource: text-turn

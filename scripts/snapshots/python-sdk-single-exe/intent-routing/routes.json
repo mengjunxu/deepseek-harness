@@ -46,5 +46,144 @@
     },
     "final_response": "INTENT_OK",
     "finish_reason": "completed"
+  },
+  "structured-output": {
+    "config": {
+      "provider": "intent-chat",
+      "model": "chat-fixture",
+      "intent": "chat",
+      "responseFormat": {
+        "type": "json_schema",
+        "name": "result",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "result": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "result"
+          ],
+          "additionalProperties": false
+        },
+        "strict": true
+      },
+      "requiredCapabilities": [
+        "tools"
+      ]
+    },
+    "final_response": "{\"result\":\"ok\"}",
+    "finish_reason": "completed"
+  },
+  "request-accounting": {
+    "config": {
+      "provider": "intent-chat",
+      "model": "chat-fixture",
+      "intent": "chat",
+      "requiredCapabilities": [
+        "tools"
+      ]
+    },
+    "final_response": "INTENT_OK",
+    "finish_reason": "completed",
+    "accounting": [
+      {
+        "provider": "intent-chat",
+        "model": "chat-fixture",
+        "usageSource": "local",
+        "intent": "chat",
+        "outcome": "completed",
+        "finishKind": "stop",
+        "usage": {
+          "kind": "adapter-reported",
+          "tokens": {
+            "inputTokens": 1,
+            "outputTokens": 1
+          }
+        },
+        "loopAttempt": {
+          "stepStartSeq": 6,
+          "attempt": 1
+        }
+      }
+    ]
+  },
+  "request-preparation-failed": {
+    "config": {
+      "provider": "intent-chat",
+      "model": "chat-fixture",
+      "intent": "chat",
+      "requiredCapabilities": [
+        "tools"
+      ]
+    },
+    "final_response": "INTENT_OK",
+    "finish_reason": "completed",
+    "accounting": [
+      {
+        "provider": "intent-chat",
+        "model": "chat-fixture",
+        "usageSource": "local",
+        "intent": "chat",
+        "outcome": "completed",
+        "finishKind": "stop",
+        "usage": {
+          "kind": "adapter-reported",
+          "tokens": {
+            "inputTokens": 1,
+            "outputTokens": 1
+          }
+        },
+        "loopAttempt": {
+          "stepStartSeq": 6,
+          "attempt": 1
+        }
+      }
+    ],
+    "preparation": [
+      {
+        "provider": "intent-chat",
+        "model": "chat-fixture",
+        "purpose": "compaction",
+        "stage": "prepare",
+        "usageSource": "local",
+        "category": "capability"
+      }
+    ]
+  },
+  "request-usage-measurement": {
+    "config": {
+      "provider": "intent-chat",
+      "model": "chat-fixture",
+      "intent": "chat",
+      "requiredCapabilities": [
+        "tools"
+      ]
+    },
+    "final_response": "INTENT_OK",
+    "finish_reason": "completed",
+    "accounting": [
+      {
+        "provider": "intent-chat",
+        "model": "chat-fixture",
+        "usageSource": "local",
+        "intent": "chat",
+        "outcome": "completed",
+        "finishKind": "stop",
+        "usage": {
+          "kind": "adapter-reported",
+          "tokens": {
+            "inputTokens": 1,
+            "outputTokens": 1,
+            "measurement": "estimated"
+          }
+        },
+        "loopAttempt": {
+          "stepStartSeq": 6,
+          "attempt": 1
+        }
+      }
+    ]
   }
 }

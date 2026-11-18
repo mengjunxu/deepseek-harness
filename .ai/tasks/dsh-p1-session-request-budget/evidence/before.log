@@ -1,0 +1,116 @@
+The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
+The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
+The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
+
+ RUN  v4.1.8 /Users/x-dt/workspace/AI/Agents/deepseek-harness
+
+ ❯ |thread-safe| packages/guard/request-budget-policy/tests/config.spec.ts (17 tests | 3 failed) 9ms
+   × rejects invalid local allowance {"budgets":[{"id":"test","usageSource":"local","maxRequests":5,"routes":[{"provider":"p","models":["m"]}],"maxRequestsPerSession":-1}]} 2ms
+   × rejects invalid local allowance {"budgets":[{"id":"test","usageSource":"local","maxRequests":5,"routes":[{"provider":"p","models":["m"]}],"maxRequestsPerSession":1.2}]} 1ms
+   × rejects invalid local allowance {"budgets":[{"id":"test","usageSource":"local","maxRequests":5,"routes":[{"provider":"p","models":["m"]}],"maxRequestsPerSession":9007199254740992}]} 0ms
+ ❯ |thread-safe| packages/guard/request-budget-policy/tests/store.spec.ts (12 tests | 6 failed) 91ms
+   × enforces Session and shared limits atomically across owners without bypassing execute reserves 11ms
+   × refunds only cancelled Session attempts and retains auxiliary and crash charges across restart 7ms
+   × refuses missing identity and a zero Session cap without consuming any allowance 5ms
+   × refuses changing an immutable Session cap to undefined after restart 7ms
+   × refuses changing an immutable Session cap to 0 after restart 6ms
+   × refuses changing an immutable Session cap to 2 after restart 6ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 9 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |thread-safe| packages/guard/request-budget-policy/tests/config.spec.ts > rejects invalid local allowance {"budgets":[{"id":"test","usageSource":"local","maxRequests":5,"routes":[{"provider":"p","models":["m"]}],"maxRequestsPerSession":-1}]}
+ FAIL  |thread-safe| packages/guard/request-budget-policy/tests/config.spec.ts > rejects invalid local allowance {"budgets":[{"id":"test","usageSource":"local","maxRequests":5,"routes":[{"provider":"p","models":["m"]}],"maxRequestsPerSession":1.2}]}
+ FAIL  |thread-safe| packages/guard/request-budget-policy/tests/config.spec.ts > rejects invalid local allowance {"budgets":[{"id":"test","usageSource":"local","maxRequests":5,"routes":[{"provider":"p","models":["m"]}],"maxRequestsPerSession":9007199254740992}]}
+AssertionError: expected [Function] to throw an error
+ ❯ packages/guard/request-budget-policy/tests/config.spec.ts:27:125
+     25|   { budgets: [{ ...rule, routes: [{ provider: 'p', models: ['m', 'm'] …
+     26|   { budgets: [null] },
+     27| ])('rejects invalid local allowance %j', (raw) => { const input: Recor…
+       |                                                                                                                             ^
+     28|
+     29| it('keeps Session limits optional and accepts a zero cap', () => {
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/9]⎯
+
+ FAIL  |thread-safe| packages/guard/request-budget-policy/tests/store.spec.ts > enforces Session and shared limits atomically across owners without bypassing execute reserves
+AssertionError: promise resolved "undefined" instead of rejecting
+
+- Expected:
+Error {
+  "message": "rejected promise",
+}
+
++ Received:
+undefined
+
+ ❯ packages/guard/request-budget-policy/tests/store.spec.ts:71:75
+     69|   await first.reserve(selected, attempt, a)
+     70|   await second.reserve(selected, attempt, a)
+     71|   await expect(second.reserve(selected, id(), { ...a, intent: 'execute…
+       |                                                                           ^
+     72|     .rejects.toMatchObject({ code: 'LOCAL_SESSION_REQUEST_BUDGET_EXHAU…
+     73|   await second.reserve(selected, id(), b)
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/9]⎯
+
+ FAIL  |thread-safe| packages/guard/request-budget-policy/tests/store.spec.ts > refunds only cancelled Session attempts and retains auxiliary and crash charges across restart
+AssertionError: promise resolved "undefined" instead of rejecting
+
+- Expected:
+Error {
+  "message": "rejected promise",
+}
+
++ Received:
+undefined
+
+ ❯ packages/guard/request-budget-policy/tests/store.spec.ts:93:83
+     91|   const restored = await open()
+     92|   await restored.initialize(selected)
+     93|   await expect(restored.reserve(selected, id(), { ...request, intent: …
+       |                                                                                   ^
+     94|     .rejects.toMatchObject({ code: 'LOCAL_SESSION_REQUEST_BUDGET_EXHAU…
+     95|   await restored.reserve(selected, id(), { ...request, sessionId: sess…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/9]⎯
+
+ FAIL  |thread-safe| packages/guard/request-budget-policy/tests/store.spec.ts > refuses missing identity and a zero Session cap without consuming any allowance
+AssertionError: promise resolved "undefined" instead of rejecting
+
+- Expected:
+Error {
+  "message": "rejected promise",
+}
+
++ Received:
+undefined
+
+ ❯ packages/guard/request-budget-policy/tests/store.spec.ts:102:52
+    100|   const { open, persisted } = await fixture(), store = await open(), s…
+    101|   await store.initialize(selected)
+    102|   await expect(store.reserve(selected, id(), facts)).rejects.toMatchOb…
+       |                                                    ^
+    103|   await expect(store.reserve(selected, id(), { ...facts, sessionId: se…
+    104|     .rejects.toMatchObject({ code: 'LOCAL_SESSION_REQUEST_BUDGET_EXHAU…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/9]⎯
+
+ FAIL  |thread-safe| packages/guard/request-budget-policy/tests/store.spec.ts > refuses changing an immutable Session cap to undefined after restart
+ FAIL  |thread-safe| packages/guard/request-budget-policy/tests/store.spec.ts > refuses changing an immutable Session cap to 0 after restart
+ FAIL  |thread-safe| packages/guard/request-budget-policy/tests/store.spec.ts > refuses changing an immutable Session cap to 2 after restart
+AssertionError: expected function to throw an error, but it didn't
+ ❯ packages/guard/request-budget-policy/tests/store.spec.ts:112:50
+    110|   await first.initialize(rule(3, 0, 1)); await first.close()
+    111|   const restored = await open(), changed = rule(3, 0, limit)
+    112|   expect(() => { restored.validate([changed]) }).toThrow(expect.object…
+       |                                                  ^
+    113|   await expect(restored.initialize(changed)).rejects.toMatchObject({ c…
+    114| })
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/9]⎯
+
+
+ Test Files  2 failed (2)
+      Tests  9 failed | 20 passed (29)
+   Start at  21:36:11
+   Duration  611ms (transform 543ms, setup 289ms, import 549ms, tests 100ms, environment 0ms)

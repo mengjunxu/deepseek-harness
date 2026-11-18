@@ -224,6 +224,8 @@ export interface ResolvedPiAiProviderProfile
   configuredToolSupport: ReadonlyMap<string, LlmCapabilitySupport>
   /** Exact model incremental response support explicitly declared by models or modelOverrides. */
   configuredStreamingSupport: ReadonlyMap<string, LlmCapabilitySupport>
+  /** Exact-model native JSON Schema declarations. */
+  configuredStructuredOutputSupport: ReadonlyMap<string, LlmCapabilitySupport>
 }
 
 /** Plugin configuration: the provider routes this instance owns. */
@@ -311,6 +313,7 @@ const reasoningEfforts = z.dict(
 const modelFields = {
   toolSupport: z.union(['supported', 'unsupported', 'unknown']),
   streamingSupport: z.union(['supported', 'unsupported', 'unknown']),
+  structuredOutputSupport: z.union(['supported', 'unsupported', 'unknown']),
   name: z.string(),
   contextWindow: z.number().step(1).min(1),
   maxTokens: z.number().step(1).min(1),
@@ -430,6 +433,12 @@ export function resolveProfiles(
   for (const [provider, source] of entries) {
     rejectRemovedFields(provider, source)
     if (provider.length === 0) throw new Error('llm-pi-ai: provider names must be non-empty')
+    const policy = source.policy === undefined ? undefined : resolveProviderPolicy(source.policy)
+    if (policy?.capabilities.resume === 'supported') {
+      throw new Error(
+        `llm-pi-ai: provider "${provider}" declares resume supported, but the adapter does not expose native provider session restore`,
+      )
+    }
     if (source.baseURL !== undefined && source.baseURL.length === 0) {
       throw new Error(`llm-pi-ai: provider "${provider}" has an empty baseURL`)
     }
@@ -498,12 +507,12 @@ export function resolveProfiles(
       if (validation === 'strict' || !(error instanceof PiAiCatalogError)) throw error
       catalogError ??= error.message
     }
-    const { apiKeyEnv, retryPolicy, policy, models: _models, displayName: _displayName, ...rest } = source
+    const { apiKeyEnv, retryPolicy, policy: _policy, models: _models, displayName: _displayName, ...rest } = source
     resolved.set(provider, {
       ...rest,
       provider,
       displayName,
-      ...policy === undefined ? {} : { policy: resolveProviderPolicy(policy) },
+      ...policy === undefined ? {} : { policy },
       ...apiKeyEnv === undefined ? {} : { apiKeyEnv: credentialRef(apiKeyEnv) },
       streamIdleTimeoutMs,
       maxRequestImageBytes,
@@ -515,6 +524,7 @@ export function resolveProfiles(
       configuredMaxTokens: catalog?.configuredMaxTokens ?? new Map(),
       configuredToolSupport: catalog?.configuredToolSupport ?? new Map(),
       configuredStreamingSupport: catalog?.configuredStreamingSupport ?? new Map(),
+      configuredStructuredOutputSupport: catalog?.configuredStructuredOutputSupport ?? new Map(),
       modelErrors: catalog?.modelErrors ?? new Map(),
       ...piProvider === undefined ? {} : { piProvider },
       ...catalogError === undefined ? {} : { catalogError },

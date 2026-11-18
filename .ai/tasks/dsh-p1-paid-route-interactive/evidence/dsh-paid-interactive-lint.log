@@ -1,0 +1,11 @@
+$ tsx scripts/run-oxlint.ts .
+packages/guard/paid-route-policy/tests/confirmation.spec.ts:118:1: error @stylistic(max-len): This line has a length of 153. Maximum allowed is 140.
+packages/guard/paid-route-policy/tests/confirmation.spec.ts:42:30: error @stylistic(arrow-parens): Expected parentheses around arrow function argument having a body with curly braces.
+packages/guard/paid-route-policy/tests/confirmation.spec.ts:120:30: error @stylistic(arrow-parens): Expected parentheses around arrow function argument having a body with curly braces.
+packages/llm/llm/src/index.ts:1225:1: error @stylistic(max-len): This line has a length of 172. Maximum allowed is 140.
+packages/llm/llm/src/index.ts:1235:1: error @stylistic(max-len): This line has a length of 180. Maximum allowed is 140.
+packages/llm/llm/src/index.ts:1240:1: error @stylistic(max-len): This line has a length of 155. Maximum allowed is 140.
+packages/guard/paid-route-policy/src/confirmation.ts:51:13: error typescript(no-unnecessary-condition): Unnecessary conditional, value is always falsy.
+apps/web/tests/paid-route-confirmation.e2e.ts:93:60: error typescript(no-unsafe-assignment): Unsafe assignment of an any value.
+packages/llm/llm/tests/dispatch.spec.ts:87:18: error typescript(no-confusing-void-expression): Returning a void expression from an arrow function shorthand is forbidden. help: Add braces to the arrow function.
+[ELIFECYCLE] Command failed with exit code 1.

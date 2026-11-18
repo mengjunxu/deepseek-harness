@@ -1,0 +1,18 @@
+{
+  "node_modules/@deepseek-ai/dsh": {
+    "version": "0.2.2-rc.3",
+    "integrity": "sha512-S+4oUYVKWuc1SCMMp1mpUa2llxVy0o9gIgp7TDg/Ea7PuvXVkAfnykqSH1/oDXVB+y5VzEm0QIJulo1LIB3qRg=="
+  },
+  "node_modules/@deepseek-ai/dsh-sdk-client": {
+    "version": "0.2.2-rc.3",
+    "integrity": "sha512-AyaEAotYJ8QKoqokbneMOlduITwtMNytCYNrF/sk8R1ru/5hVk57HfoxOEhkwxD2V0tdLncza+S09dwNJMfhhQ=="
+  },
+  "node_modules/@deepseek-ai/dsh-sdk-jsonrpc-server": {
+    "version": "0.2.2-rc.3",
+    "integrity": "sha512-NZf+TV9K92MYmGEZ+XC8KF0TyKCwg0NkXJlEu3M2IilWjLQWJKlGf7+PPH9G3A/6YiDNzJAo1otaTk6XeHFB1Q=="
+  },
+  "node_modules/@deepseek-ai/dsh-sdk-protocol": {
+    "version": "0.2.2-rc.3",
+    "integrity": "sha512-R7+WULHv9v/A1HVCBT2G1QvNAvGB1cdx5lhd4YHhmEUMMqFDM6Q9BBkTz4PvkMypb0D168YFqyIt+JxAulIUtw=="
+  }
+}

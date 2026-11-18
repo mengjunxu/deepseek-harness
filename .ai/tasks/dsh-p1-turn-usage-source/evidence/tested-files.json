@@ -1,0 +1,31 @@
+{
+  "captured_at": "2026-11-16T03:53:02.081820+00:00",
+  "tested_code_commit": null,
+  "reason": "Uncommitted exact-source evidence; prior tasks and source history preserved.",
+  "files": {
+    "apps/cli/config/examples/request-accounting.yml": "2cbdeb6868b79839635c3ccd37d19598cf455491c77558b0fe21063ebc513c66",
+    "apps/web/tests/turn-usage-source.e2e.ts": "a89f423c8088b54a03c1670d5835f15d06fa1d5881285e039889db9de68669ff",
+    "apps/web/tsconfig.json": "986a7513d6ed96e5097dc78ae1037113c318788fd20bf6bce90def754a8c7ab8",
+    "docs/user/guide/providers.md": "fd3be08f3b85c0bce00ecabf35eec0e8de4363172d0d297d785ba73b79ada297",
+    "docs/user/guide/providers.zh.md": "16e8a42ba260a13dccaa73b3ff34ec98a7ad930f22f6bd04a3f4da6f94831871",
+    "packages/client/ui-chat/README.md": "94a21625e0a1643c88f7233dfefe896fab0adbca36ec171f36462d23ca1a37cc",
+    "packages/client/ui-chat/README.zh.md": "7c8ef8f5d51204686afc7a99fe11a51ee3c16702d12226f70d653c50a0604445",
+    "packages/client/ui-chat/src/client/chat/TurnUsagePanel.tsx": "f704f369d45747436ab8a71ce667c59e31e220843101e7721ce57cbd6e8c9bf1",
+    "packages/client/ui-chat/src/client/contract/chat-nodes.ts": "1e68f8055ce5831f0326aea5ac7b9c7a1dc201c163cfeadacd7316635ea35333",
+    "packages/client/ui-chat/src/client/conversation-nodes/request-accounting.ts": "13fa283b435bd99385e219e2c2df8dcf0b43dab0886cfac67c0a1178f07e8be3",
+    "packages/client/ui-chat/src/client/conversation-nodes/turn-tail.ts": "23439539283ad70606b91dbb09eb24df874005ccbdec2803d679cea70d1cc959",
+    "packages/client/ui-chat/src/client/locale.ts": "fbc9bdf27703b0489ecbb661ecefa375cd23fa01f7c6cce6620e640a8624c214",
+    "packages/client/ui-chat/tests/conversation-node-definitions.client.spec.ts": "e80975ac5be96b3b3b976bbd90957551412e52f721450987a9bd4a63c914287b",
+    "packages/client/ui-chat/tests/turn-usage-panel.client.spec.tsx": "86125737cb69a55fcc4ebe6ff052e80dcd6cfad42a7c7413ca47ab7f67fe7d9b",
+    "packages/llm/token-meter/README.md": "b83be1ce846be8acdf17191da99b721a6314d2e6cd52a3f982a01c42ca5a5459",
+    "packages/llm/token-meter/README.zh.md": "5b6386b806e859c17696300d7ede13ad24fb35ded545097c0332960b92ba7fee",
+    "packages/llm/token-meter/src/turn-usage.ts": "17b450a5adadd7b6b3ed0c88f3d88ca64f6982d8f89c3da684d5d6117813c5f7",
+    "packages/llm/token-meter/tests/turn-usage.spec.ts": "3414f5207b3fa7db8ea5726bfa6ddc35047533bf90745e606155a28a3d127acb",
+    "snapshots/web/turn-usage-source/session.v3.jsonl": "bee35f08def45d8752d77f9400c969e809173b9b7e9c6b8d0c8cd8612411646e",
+    "snapshots/web/turn-usage-source/session.v4.jsonl": "126b738b4818ad95b59f3ba5aa1d71fb502e97ee17ee43ecbbf2960ff6ae0743",
+    "snapshots/web/turn-usage-source/snapshot.yml": "2ede93226c37716617005bb3b0aa1820e502cd5cd2264d9e7ba8990edafb43a9",
+    "snapshots/web/turn-usage-source/system-prompt.expected.md": "c843f53b22963070f554607f5adc005223c3bf44a3cb191173633c16aaa40f5a",
+    "snapshots/web/turn-usage-source/tool-schemas.expected.json": "31e323b530c58474e1a63cdc9b2c64961451954f521f213ec1cb7d3f2164fce2",
+    "tsconfig.host.json": "da817009190a8e6b0ec067609f1ba62dcb43437cdb90894ed04d8ca07264701f"
+  }
+}

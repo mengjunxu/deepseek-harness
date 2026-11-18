@@ -1,0 +1,156 @@
+{
+  "captured_at": "2026-11-16T04:20:31.806382+00:00",
+  "commit": null,
+  "files": [
+    {
+      "path": "apps/cli/config/examples/paid-route-confirmation.yml",
+      "bytes": 201,
+      "sha256": "b260fac9be9860204bcf3ffda414f83da47d5409b06f65350c3174947315e4ec"
+    },
+    {
+      "path": "apps/web/tests/paid-route-confirmation.e2e.ts",
+      "bytes": 7724,
+      "sha256": "853a7e88784e8c9020014c115af33c54bc7191b0546490b45b0b4e8897942dc4"
+    },
+    {
+      "path": "docs/subsystems/llm-streaming.md",
+      "bytes": 80769,
+      "sha256": "1c262ed8f13ee3700ee7febb991fd2ba92e222057b90e1b1be3de33eccec30fb"
+    },
+    {
+      "path": "docs/subsystems/llm-streaming.zh.md",
+      "bytes": 79720,
+      "sha256": "48bbb96ab3f2af4d94fa8d3ce5770856d02451bae67f50e1d21d21e024ea3c7e"
+    },
+    {
+      "path": "docs/user/guide/providers.md",
+      "bytes": 16341,
+      "sha256": "359e0ec503d8359ac4b5689ecb79bdc213594f1b1d4bc6223c91887b04fb7534"
+    },
+    {
+      "path": "docs/user/guide/providers.zh.md",
+      "bytes": 15822,
+      "sha256": "2c4e187bacde1d1eb85aeece39d3f80ad1fed12af723435c0bf7c4f635ebdf22"
+    },
+    {
+      "path": "packages/guard/paid-route-policy/README.md",
+      "bytes": 7090,
+      "sha256": "06b38b0514595135b63b11f4e0bdbee8013dc84d6e197289607e0c721b680d1f"
+    },
+    {
+      "path": "packages/guard/paid-route-policy/README.zh.md",
+      "bytes": 6410,
+      "sha256": "a2b2419ce2ebb2f2643507da5ce336e57ef9fbc4d8c96bbbecde30d22757bc4c"
+    },
+    {
+      "path": "packages/guard/paid-route-policy/package.json",
+      "bytes": 1302,
+      "sha256": "e9972a706fab96b81df94dc24a31e0436dad11240184621fba59dea2301a4af3"
+    },
+    {
+      "path": "packages/guard/paid-route-policy/src/config.ts",
+      "bytes": 1649,
+      "sha256": "09df0dda568926dacc1f1ba51c6432a9f064b2146d50125fa4b31bfdc99fb451"
+    },
+    {
+      "path": "packages/guard/paid-route-policy/src/confirmation.ts",
+      "bytes": 4116,
+      "sha256": "951f370a2c1dc8eb0f29804340290a3b60151d956f5683dea515c06ccb2c2d41"
+    },
+    {
+      "path": "packages/guard/paid-route-policy/src/index.ts",
+      "bytes": 1328,
+      "sha256": "c184cc5593efb3d0035bf6b4c6c1a11bba07e31e012030809c06f2993489c61c"
+    },
+    {
+      "path": "packages/guard/paid-route-policy/tests/adapter.ts",
+      "bytes": 1081,
+      "sha256": "ace3edef691b705023beda936879349e2ce119a89a66f56a21bf5e8e00fda0e7"
+    },
+    {
+      "path": "packages/guard/paid-route-policy/tests/admission.spec.ts",
+      "bytes": 6664,
+      "sha256": "95bf8909af91d1c764d7fe70797af516b6a8db4ec4d640699311e05b188c5cc3"
+    },
+    {
+      "path": "packages/guard/paid-route-policy/tests/confirmation.spec.ts",
+      "bytes": 11508,
+      "sha256": "cd399d907e3c313e8020d8d7bf2a5350190d12d09daf2e01a40a051828d16d5b"
+    },
+    {
+      "path": "packages/guard/paid-route-policy/tests/fixtures/model-paid-route-required.ts",
+      "bytes": 821,
+      "sha256": "e2390462fbdb3ecda0868a5729e6c5d6fbe31bfdd6e7261a808dc656d70af6c4"
+    },
+    {
+      "path": "packages/guard/paid-route-policy/tests/loader.spec.ts",
+      "bytes": 4279,
+      "sha256": "accf8a6952696abe5965104080e23787b7b0fa57dd762521a613c0b72556a6a4"
+    },
+    {
+      "path": "packages/guard/paid-route-policy/tsconfig.json",
+      "bytes": 537,
+      "sha256": "2f18711eebc6041dfefd30b00f8bf1cfbcbd597c9c1efe1212d66153285d1692"
+    },
+    {
+      "path": "packages/llm/llm/README.md",
+      "bytes": 26824,
+      "sha256": "e18106e9f38d161ebe6c7dcdc495b22b2c81e3576fe5ff5dd19450ee83ccd68b"
+    },
+    {
+      "path": "packages/llm/llm/README.zh.md",
+      "bytes": 24659,
+      "sha256": "d9b480a84aca903343467a871b22c2db5367085831671fabc44c6b75ee54a7d8"
+    },
+    {
+      "path": "packages/llm/llm/src/dispatch.ts",
+      "bytes": 2269,
+      "sha256": "49a64681f76edf861179dae57050db60fd9c28a3ca67f840fb9a3e8b8c5e51c8"
+    },
+    {
+      "path": "packages/llm/llm/src/index.ts",
+      "bytes": 62729,
+      "sha256": "f823e4ac469efdd439d14da8a46c83ec4d16771ea3513ba63acdaef7e37467da"
+    },
+    {
+      "path": "packages/llm/llm/src/types.ts",
+      "bytes": 28722,
+      "sha256": "9099c8d877d9677b97ba79a68e38425e2033e9911eaf468d1a8545f4f2378667"
+    },
+    {
+      "path": "packages/llm/llm/tests/dispatch.spec.ts",
+      "bytes": 13302,
+      "sha256": "41e716ba88b4b004f2346df6af42248dc80ee6020d1a5b7956fc593c8b52d1be"
+    },
+    {
+      "path": "scripts/type-equiv.manifest.json",
+      "bytes": 74917,
+      "sha256": "6fcc3f3fba63348a051dbbba7068231945e1b5d892cce78972fdbe8134a7574e"
+    },
+    {
+      "path": "snapshots/web/paid-route-confirmation/session.v3.jsonl",
+      "bytes": 3296,
+      "sha256": "86308d64df6dc62a8479510e76834ece1ffe061ddbeba3d1ae811be6b923f827"
+    },
+    {
+      "path": "snapshots/web/paid-route-confirmation/session.v4.jsonl",
+      "bytes": 4034,
+      "sha256": "759fef4205be70fe8f2a3857564434c49efd5b9623131bd8253d6e5cedc2a6be"
+    },
+    {
+      "path": "snapshots/web/paid-route-confirmation/snapshot.yml",
+      "bytes": 176,
+      "sha256": "875450d90163d36c5535f93ef5e458260a25960122e0825263c193a0321dc4fb"
+    },
+    {
+      "path": "snapshots/web/paid-route-confirmation/system-prompt.expected.md",
+      "bytes": 5711,
+      "sha256": "c843f53b22963070f554607f5adc005223c3bf44a3cb191173633c16aaa40f5a"
+    },
+    {
+      "path": "snapshots/web/paid-route-confirmation/tool-schemas.expected.json",
+      "bytes": 29010,
+      "sha256": "53ad31bf596428ad98f28bf4ba77ad26e9df40e1f7edb8e5f17df16e0eeb266e"
+    }
+  ]
+}

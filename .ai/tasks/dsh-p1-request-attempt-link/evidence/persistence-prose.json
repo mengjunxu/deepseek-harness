@@ -1,0 +1,12 @@
+{
+  "en": {
+    "summary": "Adds optional durable loop-attempt attribution to native settlement and preparation audit records.",
+    "compatibility": "Both existing event roots gain an optional loopAttempt reference. Existing records remain valid with absent/unknown attribution. New references use the enclosing Session, committed step/start sequence and step-local attempt ordinal; they do not reuse lifecycle-local live frame IDs. Both projection state versions advance to 2 and discard version-one caches for replay. Session envelope grammar and physical storage versions remain unchanged.",
+    "verification": "1096 affected owner tests in 61 files pass, with 100% focused executable coverage of preparation/recording/projection/invariant modules. Five accounting profile refreshes and nine affected replays pass. Python SDK passes seven cases using retained inputs and fixed attribution metadata. Two built headless Hosts resume the same persisted Session with distinct step references and attempt one; two independent copies also pass concurrently. Removing only the emitted settlement reference fails the real SDK fixed metadata oracle, then exact bytes are restored. No real provider account called; the SDK prompt API is not treated as a resume API."
+  },
+  "zh": {
+    "summary": "为原生结算及准备审计记录增加可选的持久循环尝试归属。",
+    "compatibility": "两个既有事件根新增可选 loopAttempt 引用。既有记录仍有效，缺失归属保持未知。新引用由所属 Session、已提交 step/start 序号及步骤内尝试序号组成，不复用生命周期内的实时 frame ID。两个投影状态均升至版本 2，丢弃版本 1 缓存后重放。Session 信封语法与物理存储版本不变。",
+    "verification": "61 个文件中的 1096 项相关拥有者测试通过，准备／记录／投影／不变量模块的聚焦可执行覆盖率达到 100%。五个记账组合刷新及九项相关回放通过。Python SDK 七项用例通过，使用保留输入及固定归属元数据。两个构建版 headless Host 恢复同一个持久 Session，使用不同步骤引用且尝试序号均为 1；两个独立测试副本并发也通过。仅移除构建产物的结算引用会使真实 SDK 固定元数据断言失败，随后恢复完全相同的文件。没有调用真实提供方账户；不把 SDK prompt 接口当作恢复接口。"
+  }
+}

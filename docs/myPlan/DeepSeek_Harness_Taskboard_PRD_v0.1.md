@@ -6,7 +6,7 @@
 **日期：** 2026年11月11日
 **状态：** 待评审
 
-**关联文档：**[Word 原稿](DeepSeek_Harness_Taskboard_PRD_v0.1.docx)、[主 PRD](DSH_PRD_vNext_4_2026-10-27.md#93-任务工作台-mvp)、[实施任务映射](../workflows/DSH_IMPLEMENTATION_PLAN.md#16-taskboard-增量实施计划)、[执行进度](../workflows/DSH_IMPLEMENTATION_PLAN.md#1210-taskboard-增量-checklist)。本文件的独立 Web 入口为拟定方案，和主产品架构的适配决策归 TBOARD-00；功能完成情况以主 Plan 的证据为准。
+**关联文档：**[Word 原稿](DeepSeek_Harness_Taskboard_PRD_v0.1.docx)、[主 PRD](DSH_PRD_vNext_4_2026-10-27.md#93-任务工作台-mvp)、[实施任务映射](../workflows/DSH_IMPLEMENTATION_PLAN.md#16-taskboard-增量实施计划)、[执行进度](../workflows/DSH_IMPLEMENTATION_PLAN.md#1210-taskboard-增量-checklist)。TBOARD-00 已确认首版复用现有 DSH Web、Host 与认证；功能完成情况以主 Plan 的证据为准。
 
 > 格式说明：本文件保留 Word v0.1 的正文与表格；两张示意图改为可编辑的 Mermaid 结构图。支持 Mermaid 的 Markdown 阅读器可直接渲染图表。
 
@@ -16,7 +16,7 @@
 
 ### 本版产品决定
 
-- MVP 采用独立的本地 Web 任务台，通过官方 TypeScript SDK 驱动 Harness。任务数据与会话数据分别管理，后续可增加 Harness 原生插件入口。
+- MVP 在现有 DSH Web 内提供工作台，复用 Host 和认证。任务服务持有业务库，每个 Run 经官方 TypeScript SDK 启动独占 runtime。
 
 - 第一版服务单一操作者，面向个人开发者的日常编码任务；任务资料支持小团队交接，在线多人协作列入后续版本。
 
@@ -100,7 +100,7 @@ cloader/dsh-taskboard 已公开 Harness 任务插件，可进一步参考任务�
 
 ### P1 与 P2 范围
 
-P1：Harness 原生插件入口、有限并行、父子任务与阻塞依赖、受控自动领取、团队账号及协作、PR 与 CI 集成。P2：跨机器执行、复杂 Agent 编排、定时自动化、成本预算、完整编辑器与浏览器预览。
+P1：有限并行、父子任务与阻塞依赖、受控自动领取、团队账号及协作、PR 与 CI 集成。P2：跨机器执行、复杂 Agent 编排、定时自动化、成本预算、完整编辑器与浏览器预览。
 
 ### 优先级规则
 
@@ -191,7 +191,7 @@ flowchart TB
 
 ### FR08 重试与会话恢复
 
-重试、退回修改或继续执行均新建 Run，记录前序 Run。用户点击继续执行后，先恢复真实 Session，再显式发送本次已确认的输入快照。仅查看历史不发送输入；恢复失败由用户选择新会话和继承内容。
+重试、退回修改或继续执行均新建 Run，记录前序 Run。在原工作目录继续执行时，先恢复真实 Session，再显式发送本次已确认的输入快照。仅查看历史不发送输入；恢复失败由用户选择新会话和继承内容。更换工作目录时新建 Run 和 Session，保留前序 Run、Session 和材料原记录。新 Run 记录新旧目录、分支及前序引用，只有用户显式选择的材料进入本次输入快照。
 
 **验收要点：**保存输入接纳回执，发送结果未知时先对账，不能盲目重发。恢复不自动重建外部进程，继续前校验目录与分支。[S02](https://github.com/deepseek-ai/deepseek-harness/blob/master/packages/sdk/client/README.md)
 
@@ -291,16 +291,15 @@ SDK 活动结束后先保存结果回执，再关闭该 Run 的独占 runtime；
 
 ```mermaid
 flowchart TB
-    web["任务台 Web UI"] -->|本地 API| service["任务服务"]
+    web["DSH Web 工作台"] -->|现有认证连接| service["Web Host 中的任务服务"]
     service -->|事务写入| storage["SQLite、任务附件与验收快照"]
     service --> adapter["Harness Adapter"]
     bridge["任务级工具桥"] --> adapter
     adapter -->|官方 SDK| runtime["独立 Harness runtime"]
     runtime --> workdir["任务工作目录与 Git worktree"]
-    native["Harness 原生 Slots 插件（P1）"] -.->|复用任务服务| service
 ```
 
-*图 2 建议架构  属于本产品设计  原生插件入口为 P1 并复用同一任务服务*
+*图 2 首版工作台的任务服务、业务库与独占 runtime*
 
 ### 数据和执行所有权
 
@@ -308,7 +307,7 @@ Task 数据库为业务状态唯一事实源。每个 Run 记录 runtime 身份�
 
 ### 插件与 MCP 的职责
 
-Harness 原生 Slots 和右侧栏可承载后续入口，避免依赖 DOM 注入。[S06](https://deepseek-harness.github.io/deepseek-harness/en/reference/subsystems/slots) MCP 可将任务服务工具暴露给 Agent；会话启动、恢复和停止仍归 Adapter。不得让原生 Web runtime 与 SDK runtime 同时接管同一 Session。[S07](https://github.com/deepseek-ai/deepseek-harness/blob/master/packages/mcp/README.md)
+Harness 原生 Slots 和右侧栏可承载工作台页面，避免依赖 DOM 注入。[S06](https://deepseek-harness.github.io/deepseek-harness/en/reference/subsystems/slots) MCP 可将任务服务工具暴露给 Agent；会话启动、恢复和停止仍归 Adapter。不得让原生 Web runtime 与 SDK runtime 同时接管同一 Session。[S07](https://github.com/deepseek-ai/deepseek-harness/blob/master/packages/mcp/README.md)
 
 ## 10 接入能力与验证门槛
 
@@ -320,7 +319,7 @@ Harness 原生 Slots 和右侧栏可承载后续入口，避免依赖 DOM 注入
 | 停止执行 | 当前无 per-session close 或 prompt-cancel wire 方法 [S03](https://github.com/deepseek-ai/deepseek-harness/blob/master/packages/sdk/server/README.md) | 按 Run 独立 runtime；shutdown 后确认退出；强制终止按中断记录 |
 | 人工审批 | 可启用 approvalRequests 并接收 approval/request [S03](https://github.com/deepseek-ai/deepseek-harness/blob/master/packages/sdk/server/README.md)[S04](https://github.com/deepseek-ai/deepseek-harness/blob/master/packages/sdk/protocol/README.md) | 展示范围与动作；允许一次、拒绝、取消；验证断线后迟到回复 |
 | 用户问题 | 协议提供 user-question/ask 与取消通知 [S04](https://github.com/deepseek-ai/deepseek-harness/blob/master/packages/sdk/protocol/README.md) | 独立问题入口；匹配请求身份；取消后禁止继续回答 |
-| 界面扩展 | 提供 React Slots 与右侧栏注册机制 [S06](https://deepseek-harness.github.io/deepseek-harness/en/reference/subsystems/slots) | P1 原生入口；同一任务服务与控制路径 |
+| 界面扩展 | 提供 React Slots 与右侧栏注册机制 [S06](https://deepseek-harness.github.io/deepseek-harness/en/reference/subsystems/slots) | 首版原生页面连接同一任务服务与控制路径 |
 | 工具连接 | MCP 作为连接外部工具和资源的客户端能力 [S07](https://github.com/deepseek-ai/deepseek-harness/blob/master/packages/mcp/README.md) | P0 任务级工具桥；MCP 开放集成放 P1 |
 | 目录隔离 | Session 可设置工作目录；沙箱模式针对文件效果 [S04](https://github.com/deepseek-ai/deepseek-harness/blob/master/packages/sdk/protocol/README.md)[S15](https://deepseek-harness.github.io/deepseek-harness/en/reference/subsystems/sandbox) | worktree 由产品管理；显示有效权限，不把目录分开等同完整安全隔离 |
 
@@ -427,7 +426,7 @@ Harness 原生 Slots 和右侧栏可承载后续入口，避免依赖 DOM 注入
 | G0<br>接入验证 | 冻结 Harness SDK runtime 与操作系统组合；验证 Session、审批、问题、停止与恢复 | 第 10 节接入用例全部通过；形成能力矩阵和缺口处置 |
 | G1<br>任务闭环 | 项目与看板、任务版本、手动执行、事件记录、交付及人工验收 | AC01 至 AC10 通过，可完整交付一个任务 |
 | G2<br>恢复加固 | 目录锁、启动幂等、进程对账、备份及兼容性控制 | AC11 至 AC20 通过，满足全部发布门槛 |
-| G3<br>能力扩展 | 原生插件入口、有限并行、依赖关系和受控自动领取 | 保持 P0 质量门槛；新增并发和权限回归通过 |
+| G3<br>能力扩展 | 有限并行、依赖关系和受控自动领取 | 保持 P0 质量门槛；新增并发和权限回归通过 |
 | G4<br>团队协作 | 账号、角色、协作编辑、远程节点、PR 与 CI | 单独完成权限模型及跨设备恢复验收 |
 
 ### 主要风险与应对
@@ -448,7 +447,7 @@ Harness 原生 Slots 和右侧栏可承载后续入口，避免依赖 DOM 注入
 
 | 决策 | 本版默认方案 | 影响与确认时点 |
 | --- | --- | --- |
-| 产品入口 | 独立本地 Web 任务台；Harness 原生嵌入列 P1 | 若原生嵌入是首要目标，在 G0 调整外壳与执行所有权设计 |
+| 产品入口 | 现有 DSH Web 内的工作台页面，复用 Host 和认证 | TBOARD-00 已确认；每个 Run 由独占 SDK runtime 执行 |
 | 目标用户 | 个人开发者优先，单操作者；兼顾资料交接 | 若需多人在线首发，需增加身份与并发编辑范围 |
 | 首发平台 | 按实际工作环境选择一个平台完成完整验收 | G0 冻结操作系统、Shell 与沙箱能力矩阵 |
 | 并发范围 | 默认一个活动任务，其他排队 | 只有独立目录与停止隔离验证通过才开放更多 |

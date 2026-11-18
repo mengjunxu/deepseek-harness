@@ -1,0 +1,27 @@
+---
+schema_version: 1
+task_id: dsh-p1-resume-semantics
+state: DONE
+previous_agent: none
+next_agent: none
+branch: codely_bridge
+base_commit: null
+tested_code_commit: null
+updated_at: "2026-11-15T12:53:09+08:00"
+---
+
+# Checkpoint
+
+Codex owns this increment after native structured-output task completed. Branch remains codely_bridge, no outgoing commit, many preserved local edits across completed tasks. Existing LLM policy has an unqualified resume tri-state; SIWC declares unsupported. The Codex subagent README explicitly promises a fresh process/thread/turn with no native resume. DSH agent-loop separately reopens its durable Session. Next: inspect pi-ai replay state and installed SDK options before choosing a correction. Weekly source get_usage_limits, 10080-minute window: 59% used / 41% remaining; reset Unix 1794907980. No new write by another agent.
+
+## Step 1 checkpoint
+
+Source audit distinguishes three mechanisms: pi-ai reconstructs complete assistant history using durable signatures/response metadata; agent-loop reopens its own durable Session with crash repair; Codex external-agent starts a fresh ephemeral thread and offers no native resume. The installed pi-ai SDK can optimize a live cached WebSocket with connection-scoped previous_response_id, but DSH exposes no API to restore a native provider conversation after process restart. This transport optimization does not establish a native cold-resume promise. Correction scope: define LLM policy resume as restoring a provider-owned conversation after a process restart, distinct from transcript replay, DSH restore and external-agent continuation; pi-ai must reject a supported declaration rather than publish a capability it cannot expose. Keep unknown/unsupported valid. Test strict/deferred resolution and actual settings transaction rejection without I/O, preserve ordinary history replay. No new service or native operation is introduced. Memory/Workflow unchanged. Next: failed-first parser/Loader tests, then the owning profile validation check.
+
+## Step 2 checkpoint
+
+Failed-first strict/deferred parser and real settings tests produced 3 FAIL / 2 PASS before correction. All 5 focused cases now PASS: unsupported/unknown remain accepted, a supported native cold-restore claim rejects before catalog dispatch in both validation modes, the settings file and live policy remain unchanged, no provider request occurs for a required resume, and ordinary explicit history still completes. pi-ai profile resolution now resolves policy once before catalog materialization and refuses the unsupported declaration. LLM policy JSDoc defines resume independently from other restore mechanisms. Target tsc and scoped lint PASS. New authored headless snapshot/fixture is prepared; refresh/build are in progress, not yet accepted. No Memory/Workflow update. Next: verify keyless Session projection, source-equivalent docs and owning READMEs/Plan.
+
+## Step 3 / completion checkpoint
+
+pi-ai rejects a supported native cold-resume claim in both validation modes and before a settings write; the file and live policy remain unchanged. Focused cases PASS 5 after 3 failed-first rejections. Config/Loader/provider-policy/Codex owner tests PASS 141 across 4 files; pi-ai history conversion PASS 28. New headless keyless Session refresh/replay PASS 1 each, and new resume plus adjacent native-format regressions PASS 3. The Session records UNSUPPORTED_PROVIDER_CAPABILITY as a tool failure, then an ordinary completed continuation; no target-provider I/O. Authored V3 and generated V4 stay separate. Target tsc/build, scoped lint, three named pairs, 481 type blocks, persistence verification (no structural changes), links/freshness and diff check pass. doc-sync remains 39 PASS/3 existing legacy FAIL; test:docs 18 PASS/2 existing pairing/wrap FAIL. README pairs and parent QR-03 explain native provider cold restore, DSH replay/restore and external-agent continuation independently; QR-03 remains PARTIAL. No new native resume or real API claim. No new Architecture/Memory/Workflow rule needed. All edits local/uncommitted; Codex releases this task before taking the next authorized P1 increment. Weekly last live check 2026-11-15T12:08:09+08:00: 10080-minute window, 59% used / 41% remaining; reset Unix 1794907980.

@@ -20,6 +20,8 @@ pnpm --filter @deepseek-ai/dsh-web-frontend exec playwright install --with-deps 
 
 显式滚动使用 `support.ts` 的 `scrollIntoView`：旧元素脱离 DOM 时重新解析 locator，并在同一个浏览器任务中检查连接状态、执行原生滚动。各场景保留滚动后的可见性与几何断言。
 
+entry-intent-routing 场景通过输入区选择模型，并验证工具步骤和后续 Turn 的实际请求路线、推理强度、持久请求头与切换提示。请求屏障会在选择器改变待用模型时暂停首轮；脚本化模型输出使该集成检查无需密钥。限流、额度和断流案例保留失败终态，不向其他路线发起请求；只有用户选择模型并提交后续 Turn 才继续。
+
 ## 这些是 Host 面的测试
 
 它们在根 `tsconfig.host.json` 中做类型检查，而不在 Client aggregate 中，因为它们直接读取 Host 服务：`ctx.connection`、Host 侧 `SessionStore` 与 `ctx.sessionProjectionCache`。运行时驱动浏览器并不使一个文件成为 Client 程序的一部分——两个 face 在相同的键上以不同服务合并 Cordis `Context`，因此单个程序无法同时看见两者。把这些文件挪进 Client aggregate 会让每一处 Host 服务访问都无法编译。

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import type { StreamChunk, TokenUsage } from '@deepseek-ai/dsh-llm'
+import type { LlmUsageSource, StreamChunk, TokenUsage } from '@deepseek-ai/dsh-llm'
 import type { SessionEvent } from '@deepseek-ai/dsh-session'
 import { deriveTurnTokenUsage } from '../src/turn-usage.ts'
 
@@ -65,8 +65,97 @@ function completeAttempt(...middle: readonly SessionEvent[]): SessionEvent[] {
   ]
 }
 
+function accounting(seq: number, usageSource: LlmUsageSource = 'local', extra: Record<string, unknown> = {}): SessionEvent {
+  return event(seq, 'llm/request-accounting', {
+    provider: 'deepseek', model: 'deepseek-chat', usageSource, outcome: 'completed', usage: { kind: 'unknown' },
+    loopAttempt: { stepStartSeq: 2, attempt: 1 }, ...extra,
+  })
+}
+
+it.each(['provider-reported', 'estimated'] as const)('discloses explicit %s measurement without changing counts', (measurement) => {
+  const events = completeAttempt(message(3, usage({ measurement })))
+  expect(deriveTurnTokenUsage(events)).toMatchObject({ measurement, totalTokens: 170, outputTokens: 20 })
+})
+
+it.each(['provider-reported', undefined] as const)('marks a Turn mixed when estimated and %s attempts differ', (second) => {
+  const result = deriveTurnTokenUsage([
+    event(1, 'turn/start', { turn: 1 }), event(2, 'step/start', { turn: 1, step: 1 }),
+    message(3, usage({ measurement: 'estimated' })), event(4, 'step/end', { turn: 1, step: 1 }),
+    event(5, 'step/start', { turn: 1, step: 2 }), message(6, usage({ measurement: second }), 'deepseek', 'deepseek-chat', 2),
+    event(7, 'step/end', { turn: 1, step: 2 }), event(8, 'turn/end', { turn: 1, reason: { kind: 'completed' } }),
+  ])
+  expect(result).toMatchObject({ measurement: 'mixed', totalTokens: 340, outputTokens: 40 })
+})
+
+it('refuses a recorded sample with an undeclared measurement', () => {
+  const raw = event(3, 'assistant/message', {
+    turn: 1, step: 1, stream: [],
+    message: { source: { provider: 'p', model: 'm' } },
+    usage: { inputTokens: 1, outputTokens: 1, totalTokens: 2, measurement: 'official-billing' },
+  })
+  expect(deriveTurnTokenUsage(completeAttempt(raw))).toBeUndefined()
+})
+
 describe('deriveTurnTokenUsage', () => {
-  it('preserves authoritative totals and explicit optional buckets', () => {
+  it('uses only the accounting source explicitly linked to this loop attempt', () => {
+    const linked = event(3, 'llm/request-accounting', {
+      provider: 'deepseek', model: 'deepseek-chat', usageSource: 'local', outcome: 'completed',
+      loopAttempt: { stepStartSeq: 2, attempt: 1 }, usage: { kind: 'unknown' },
+    })
+    const result = deriveTurnTokenUsage(completeAttempt(linked, message(4, usage())))
+    expect(result?.totalTokens).toBe(170)
+    expect(result?.routes).toEqual([{ provider: 'deepseek', model: 'deepseek-chat', usageSource: 'local' }])
+  })
+
+  it.each([
+    { loopAttempt: undefined }, { loopAttempt: { stepStartSeq: 200, attempt: 1 } },
+    { loopAttempt: { stepStartSeq: 2, attempt: 2 } }, { provider: 'another-route' }, { model: 'another-model' },
+  ])('keeps unmatched source evidence unknown (%j)', (extra) => {
+    const result = deriveTurnTokenUsage(completeAttempt(accounting(3, 'api_metered', extra), message(4, usage())))
+    expect(result?.totalTokens).toBe(170)
+    expect(result?.routes).toEqual([{ provider: 'deepseek', model: 'deepseek-chat', usageSource: 'unknown' }])
+  })
+
+  it.each(['local', 'api_metered'] as const)('treats duplicate attempt evidence as unknown (%s)', (source) => {
+    const result = deriveTurnTokenUsage(completeAttempt(accounting(3), accounting(4, source), message(5, usage())))
+    expect(result?.totalTokens).toBe(170)
+    expect(result?.routes?.[0]?.usageSource).toBe('unknown')
+  })
+
+  it('does not replace a main source with adjacent unlinked auxiliary accounting', () => {
+    const result = deriveTurnTokenUsage(completeAttempt(accounting(3),
+      accounting(4, 'api_metered', { loopAttempt: undefined, purpose: 'compaction' }), message(5, usage())))
+    expect(result?.routes?.[0]?.usageSource).toBe('local')
+  })
+
+  it('keeps two source declarations for the same model across steps', () => {
+    const result = deriveTurnTokenUsage([
+      event(1, 'turn/start', { turn: 1 }), event(2, 'step/start', { turn: 1, step: 1 }),
+      accounting(3), message(4, usage()), event(5, 'step/end', { turn: 1, step: 1 }),
+      event(6, 'step/start', { turn: 1, step: 2 }),
+      accounting(7, 'api_metered', { loopAttempt: { stepStartSeq: 6, attempt: 1 } }),
+      message(8, usage(), 'deepseek', 'deepseek-chat', 2),
+      event(9, 'step/end', { turn: 1, step: 2 }), event(10, 'turn/end', { turn: 1, reason: { kind: 'completed' } }),
+    ])
+    expect(result?.totalTokens).toBe(340)
+    expect(result?.routes?.map(route => route.usageSource)).toEqual(['local', 'api_metered'])
+  })
+
+  it('attributes failed and recovered attempts through their explicit retry references', () => {
+    const result = deriveTurnTokenUsage([
+      event(1, 'turn/start', { turn: 1 }), event(2, 'step/start', { turn: 1, step: 1 }),
+      accounting(3, 'local', { outcome: 'error' }), attempt(4, [{ type: 'usage', usage: usage() }]),
+      event(5, 'llm/retry', { turn: 1, step: 1, retryId: 'retry-source', provider: 'deepseek', mode: 'normal',
+        policyKey: 'fixture', retry: 1, maxRetries: 1, delayMs: 1, failure: { code: 'RATE_LIMIT', message: 'retry' } }),
+      event(6, 'llm/retry-started', { turn: 1, step: 1, retryId: 'retry-source', retry: 1 }),
+      accounting(7, 'api_metered', { loopAttempt: { stepStartSeq: 2, attempt: 2 } }), message(8, usage()),
+      event(9, 'step/end', { turn: 1, step: 1 }), event(10, 'turn/end', { turn: 1, reason: { kind: 'completed' } }),
+    ])
+    expect(result?.totalTokens).toBe(340)
+    expect(result?.routes?.map(route => route.usageSource)).toEqual(['local', 'api_metered'])
+  })
+
+  it('preserves reported totals and explicit optional buckets', () => {
     expect(deriveTurnTokenUsage(completeAttempt(message(3, usage({
       cacheWriteTokens: 0,
       reasoningTokens: 8,
@@ -77,7 +166,7 @@ describe('deriveTurnTokenUsage', () => {
       cacheReadTokens: 50,
       cacheWriteTokens: 0,
       reasoningTokens: 8,
-      routes: [{ provider: 'deepseek', model: 'deepseek-chat' }],
+      routes: [{ provider: 'deepseek', model: 'deepseek-chat', usageSource: 'unknown' }],
     })
   })
 
@@ -221,8 +310,8 @@ describe('deriveTurnTokenUsage', () => {
       totalTokens: 340,
       cacheReadTokens: 100,
       routes: [
-        { provider: 'deepseek', model: 'deepseek-chat' },
-        { provider: 'openai', model: 'gpt-5' },
+        { provider: 'deepseek', model: 'deepseek-chat', usageSource: 'unknown' },
+        { provider: 'openai', model: 'gpt-5', usageSource: 'unknown' },
       ],
     })
   })

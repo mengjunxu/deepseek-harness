@@ -1,0 +1,11 @@
+- insert:
+    - id: agent-intent-routing
+      name: '@deepseek-ai/dsh-agent-default-model/intent-routing'
+      config:
+        routing:
+          intent: plan
+          routes:
+            chat: { provider: unavailable-chat, model: unused }
+            plan: { selection: entry, requiredCapabilities: [] }
+            review: { provider: unavailable-review, model: unused }
+            execute: { provider: unavailable-execute, model: unused }

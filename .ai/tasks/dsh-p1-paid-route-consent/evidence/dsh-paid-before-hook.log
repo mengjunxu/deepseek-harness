@@ -1,0 +1,259 @@
+native/system/packages/darwin-x64        | [WARN] Unsupported platform: wanted: {"cpu":["x64"],"os":["darwin"],"libc":["any"]} (current: {"os":"darwin","cpu":"arm64","libc":"unknown"})
+native/system/packages/linux-arm64       | [WARN] Unsupported platform: wanted: {"cpu":["arm64"],"os":["linux"],"libc":["any"]} (current: {"os":"darwin","cpu":"arm64","libc":"unknown"})
+native/system/packages/linux-x64         | [WARN] Unsupported platform: wanted: {"cpu":["x64"],"os":["linux"],"libc":["any"]} (current: {"os":"darwin","cpu":"arm64","libc":"unknown"})
+Scope: all 341 workspace projects
+[WARN] There are cyclic workspace dependencies: /Users/x-dt/workspace/AI/Agents/deepseek-harness/apps/cli, /Users/x-dt/workspace/AI/Agents/deepseek-harness/packages/sdk/client; /Users/x-dt/workspace/AI/Agents/deepseek-harness/apps/web, /Users/x-dt/workspace/AI/Agents/deepseek-harness/packages/test-support/client-runtime, /Users/x-dt/workspace/AI/Agents/deepseek-harness/packages/bundle/web-app; /Users/x-dt/workspace/AI/Agents/deepseek-harness/packages/api/remotes, /Users/x-dt/workspace/AI/Agents/deepseek-harness/packages/client/ui-plugin-manager, /Users/x-dt/workspace/AI/Agents/deepseek-harness/packages/client/ui-sidebar, /Users/x-dt/workspace/AI/Agents/deepseek-harness/packages/client/ui-workspace, /Users/x-dt/workspace/AI/Agents/deepseek-harness/packages/client/ui-conversation; /Users/x-dt/workspace/AI/Agents/deepseek-harness/packages/api/session-controller, /Users/x-dt/workspace/AI/Agents/deepseek-harness/packages/subagent/subagent, /Users/x-dt/workspace/AI/Agents/deepseek-harness/packages/schedule/schedule; /Users/x-dt/workspace/AI/Agents/deepseek-harness/packages/compaction/compaction-basic, /Users/x-dt/workspace/AI/Agents/deepseek-harness/packages/compaction/compaction-image-offload; /Users/x-dt/workspace/AI/Agents/deepseek-harness/packages/compaction/compaction-tool-result-pruner, /Users/x-dt/workspace/AI/Agents/deepseek-harness/packages/llm/token-meter, /Users/x-dt/workspace/AI/Agents/deepseek-harness/packages/llm/llm-retry, /Users/x-dt/workspace/AI/Agents/deepseek-harness/packages/llm/llm-deepseek, /Users/x-dt/workspace/AI/Agents/deepseek-harness/packages/llm/plugin-package-inventory-deepseek, /Users/x-dt/workspace/AI/Agents/deepseek-harness/packages/preset/agent-preset-registry, /Users/x-dt/workspace/AI/Agents/deepseek-harness/packages/preset/agent-preset; /Users/x-dt/workspace/AI/Agents/deepseek-harness/packages/core/agent-default-model, /Users/x-dt/workspace/AI/Agents/deepseek-harness/packages/settings/settings; /Users/x-dt/workspace/AI/Agents/deepseek-harness/packages/sandbox/sandbox-local, /Users/x-dt/workspace/AI/Agents/deepseek-harness/packages/sandbox/sandbox-windows-acl; /Users/x-dt/workspace/AI/Agents/deepseek-harness/packages/ssh/fs-ssh, /Users/x-dt/workspace/AI/Agents/deepseek-harness/packages/ssh/ssh; /Users/x-dt/workspace/AI/Agents/deepseek-harness/packages/subagent/subagent-spawn-in-process, /Users/x-dt/workspace/AI/Agents/deepseek-harness/packages/subagent/tool-subagent; /Users/x-dt/workspace/AI/Agents/deepseek-harness/vendor/cordis, /Users/x-dt/workspace/AI/Agents/deepseek-harness/vendor/include
+✓ Lockfile passes supply-chain policies (verified 1h ago)
+Progress: resolved 1, reused 0, downloaded 0, added 0
+Progress: resolved 122, reused 122, downloaded 0, added 0
+packages/mcp/mcp-client                  | [WARN] deprecated @modelcontextprotocol/server-everything@2026.7.4
+packages/mcp/mcp-client                  | [WARN] deprecated @modelcontextprotocol/server-filesystem@2026.7.10
+Progress: resolved 181, reused 180, downloaded 0, added 0
+Progress: resolved 748, reused 595, downloaded 0, added 0
+Progress: resolved 1255, reused 1001, downloaded 0, added 0
+Progress: resolved 1607, reused 1353, downloaded 0, added 0
+Progress: resolved 1660, reused 1391, downloaded 0, added 0
+[WARN] 13 deprecated subdependencies found: @smithy/core@3.24.7, boolean@3.2.0, fstream@1.0.12, glob@10.5.0, glob@7.2.3, inflight@1.0.6, lodash.isequal@4.5.0, node-domexception@1.0.0, prebuild-install@7.1.3, rimraf@2.6.3, tsconfck@3.1.6, uuid@8.3.2, whatwg-encoding@2.0.0
+Packages: +53 -55
++++++++++++++++++++++++++++++++++++++++-----------------------------------------
+Progress: resolved 1679, reused 1392, downloaded 0, added 0, done
+packages/subprocess/subprocess-local postinstall$ node scripts/ensure-spawn-helper.mjs
+packages/subprocess/subprocess-local postinstall: Done
+. postinstall$ node scripts/install-lefthook.mjs
+. postinstall: sync hooks: ✔️(pre-push, pre-commit, pre-merge-commit)
+. postinstall: Done
+
+Done in 10.3s using pnpm v11.25.0
+The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
+The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
+The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
+
+ RUN  v4.1.8 /Users/x-dt/workspace/AI/Agents/deepseek-harness
+
+xxxxx····x·
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 6 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |thread-safe| packages/guard/paid-route-policy/tests/admission.spec.ts > refuses unapproved preparation and direct streaming before adapter work
+AssertionError: promise resolved "{ …(4) }" instead of rejecting
+
+- Expected
++ Received
+
+- Error {
+-   "message": "rejected promise",
++ {
++   "adapterDefaults": {},
++   "config": {
++     "model": "m",
++     "provider": "paid",
++   },
++   "retryPolicy": {
++     "initialDelayMs": 500,
++     "jitterRatio": 0.1,
++     "maxDelayMs": 10000,
++     "maxRetries": 5,
++     "mode": "normal",
++     "retryableCodes": [
++       "EMPTY_RESPONSE",
++       "RATE_LIMIT",
++       "SERVER",
++       "TIMEOUT",
++       "TRANSPORT",
++     ],
++   },
++   "stream": [Function stream],
+  }
+
+ ❯ packages/guard/paid-route-policy/tests/admission.spec.ts:44:41
+     42| it('refuses unapproved preparation and direct streaming before adapter…
+     43|   const { ctx, adapter } = await fixture()
+     44|   await expect(ctx.llm.prepareCall(call)).rejects.toMatchObject({ code…
+       |                                         ^
+     45|   const chunks = await Array.fromAsync(ctx.llm.stream({ ...call, messa…
+     46|   expect(chunks).toMatchObject([{ type: 'finish', reason: { kind: 'err…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/6]⎯
+
+ FAIL  |thread-safe| packages/guard/paid-route-policy/tests/admission.spec.ts > grants an exact provider/model pair and refuses sibling routes and models
+AssertionError: promise resolved "{ config: { …(2) }, …(3) }" instead of rejecting
+
+- Expected
++ Received
+
+- Error {
+-   "message": "rejected promise",
++ {
++   "adapterDefaults": {},
++   "config": {
++     "model": "m",
++     "provider": "other",
++   },
++   "retryPolicy": {
++     "initialDelayMs": 500,
++     "jitterRatio": 0.1,
++     "maxDelayMs": 10000,
++     "maxRetries": 5,
++     "mode": "normal",
++     "retryableCodes": [
++       "EMPTY_RESPONSE",
++       "RATE_LIMIT",
++       "SERVER",
++       "TIMEOUT",
++       "TRANSPORT",
++     ],
++   },
++   "stream": [Function stream],
+  }
+
+ ❯ packages/guard/paid-route-policy/tests/admission.spec.ts:54:47
+     52|   const { ctx, adapter } = await fixture(true)
+     53|   for (const rejected of [{ ...call, provider: 'other' }, { ...call, m…
+     54|     await expect(ctx.llm.prepareCall(rejected)).rejects.toMatchObject(…
+       |                                               ^
+     55|   }
+     56|   const prepared = await ctx.llm.prepareCall(call)
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/6]⎯
+
+ FAIL  |thread-safe| packages/guard/paid-route-policy/tests/admission.spec.ts > revokes a prepared request before streaming and permits a later explicit grant
+AssertionError: expected { type: 'finish', …(1) } to match object { reason: { kind: 'error', …(1) } }
+(1 matching property omitted from actual)
+
+- Expected
++ Received
+
+  {
+    "reason": {
+-     "failure": {
+-       "code": "PAID_ROUTE_CONSENT_REQUIRED",
+-     },
+-     "kind": "error",
++     "kind": "stop",
+    },
+  }
+
+ ❯ packages/guard/paid-route-policy/tests/admission.spec.ts:68:25
+     66|   await live.update({ grants: [] })
+     67|   const chunks = await Array.fromAsync(prepared.stream({ ...prepared.c…
+     68|   expect(chunks.at(-1)).toMatchObject({ reason: { kind: 'error', failu…
+       |                         ^
+     69|   expect(adapter.calls).toBe(0)
+     70|   await live.update({ grants })
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/6]⎯
+
+ FAIL  |thread-safe| packages/guard/paid-route-policy/tests/admission.spec.ts > checks the prepared metered source after discovery changes to a local replacement
+AssertionError: expected { type: 'finish', …(1) } to match object { reason: { kind: 'error', …(1) } }
+(1 matching property omitted from actual)
+
+- Expected
++ Received
+
+  {
+    "reason": {
+-     "failure": {
+-       "code": "PAID_ROUTE_CONSENT_REQUIRED",
+-     },
+-     "kind": "error",
++     "kind": "stop",
+    },
+  }
+
+ ❯ packages/guard/paid-route-policy/tests/admission.spec.ts:81:6
+     79|   await live.update({ grants: [] })
+     80|   expect((await Array.fromAsync(prepared.stream({ ...prepared.config, …
+     81|     .toMatchObject({ reason: { kind: 'error', failure: { code: 'PAID_R…
+       |      ^
+     82|   expect(adapter.calls).toBe(0)
+     83|   await expect(ctx.llm.prepareCall(call)).resolves.toMatchObject({ con…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/6]⎯
+
+ FAIL  |thread-safe| packages/guard/paid-route-policy/tests/admission.spec.ts > retains a prepared local source after discovery changes to an unapproved metered replacement
+AssertionError: promise resolved "{ …(4) }" instead of rejecting
+
+- Expected
++ Received
+
+- Error {
+-   "message": "rejected promise",
++ {
++   "adapterDefaults": {},
++   "config": {
++     "model": "m",
++     "provider": "paid",
++   },
++   "retryPolicy": {
++     "initialDelayMs": 500,
++     "jitterRatio": 0.1,
++     "maxDelayMs": 10000,
++     "maxRetries": 5,
++     "mode": "normal",
++     "retryableCodes": [
++       "EMPTY_RESPONSE",
++       "RATE_LIMIT",
++       "SERVER",
++       "TIMEOUT",
++       "TRANSPORT",
++     ],
++   },
++   "stream": [Function stream],
+  }
+
+ ❯ packages/guard/paid-route-policy/tests/admission.spec.ts:93:41
+     91|     .toEqual({ type: 'finish', reason: { kind: 'stop' } })
+     92|   expect(adapter.calls).toBe(1)
+     93|   await expect(ctx.llm.prepareCall(call)).rejects.toMatchObject({ code…
+       |                                         ^
+     94| })
+     95|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/6]⎯
+
+ FAIL  |thread-safe| packages/guard/paid-route-policy/tests/admission.spec.ts > does not override another refusal and withdraws its listener on unload
+AssertionError: promise resolved "{ …(4) }" instead of rejecting
+
+- Expected
++ Received
+
+- Error {
+-   "message": "rejected promise",
++ {
++   "adapterDefaults": {},
++   "config": {
++     "model": "m",
++     "provider": "paid",
++   },
++   "retryPolicy": {
++     "initialDelayMs": 500,
++     "jitterRatio": 0.1,
++     "maxDelayMs": 10000,
++     "maxRetries": 5,
++     "mode": "normal",
++     "retryableCodes": [
++       "EMPTY_RESPONSE",
++       "RATE_LIMIT",
++       "SERVER",
++       "TIMEOUT",
++       "TRANSPORT",
++     ],
++   },
++   "stream": [Function stream],
+  }
+
+ ❯ packages/guard/paid-route-policy/tests/admission.spec.ts:105:41
+    103|   const { ctx, live } = await fixture(true)
+    104|   const dispose = ctx.on('llm/admission', () => ({ code: 'OTHER_POLICY…
+    105|   await expect(ctx.llm.prepareCall(call)).rejects.toMatchObject({ code…
+       |                                         ^
+    106|   dispose()
+    107|   await live.update({ grants: [] })
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/6]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  6 failed | 5 passed (11)
+   Start at  12:13:51
+   Duration  529ms (transform 312ms, setup 152ms, import 251ms, tests 41ms, environment 0ms)

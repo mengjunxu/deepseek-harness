@@ -3,23 +3,23 @@
 # After editing either side, bring the other along and re-record with:
 #   pnpm run verify-translation-pairing --write packages/guard/README.md
 /:
-  en: 686a2d1a60d83d95
-  zh: a83604e78920e5f8
-/guard-loop-hygiene-guard-family:
-  en: 7ec1ea7779315a9c
-  zh: 0786cd17a5bc5980
-/guard-loop-hygiene-guard-family/summary:
-  en: 8569a7ad49a968c9
-  zh: 911e6327d70294a8
-/guard-loop-hygiene-guard-family/table-of-contents:
+  en: 41b796693e7d30e5
+  zh: 8af015e0773a1e47
+/guard-model-and-tool-policies:
+  en: 2f9fd719e2afb61d
+  zh: 327369b35655b800
+/guard-model-and-tool-policies/summary:
+  en: 90968a455a2a2c3c
+  zh: a595fadf1ae668be
+/guard-model-and-tool-policies/table-of-contents:
   en: 1eb35b015a6c423f
   zh: a8a3dceee2c9e943
-/guard-loop-hygiene-guard-family/packages:
-  en: 94709a168b24fa55
-  zh: 3eb300975fdc440c
-/guard-loop-hygiene-guard-family/related-documentation:
-  en: 9289eddb3e91bbb3
-  zh: 5b2ae5b3986fab82
-/guard-loop-hygiene-guard-family/dev-note:
+/guard-model-and-tool-policies/packages:
+  en: 130beaa01d5d4522
+  zh: b0063e4aed844bd8
+/guard-model-and-tool-policies/related-documentation:
+  en: 0ed24188932c8c32
+  zh: bfb5b00377dbe053
+/guard-model-and-tool-policies/dev-note:
   en: 5de1d6304e00c58f
   zh: 8d8225361cfa29e5

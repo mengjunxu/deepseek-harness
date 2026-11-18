@@ -1,0 +1,6 @@
+verify-translation-pairing: recorded docs/subsystems/llm-streaming.i18n.yaml
+verify-translation-pairing: recorded docs/user/guide/providers.i18n.yaml
+verify-translation-pairing: recorded packages/client/ui-chat/README.i18n.yaml
+verify-translation-pairing: recorded packages/llm/llm-deepseek/README.i18n.yaml
+verify-translation-pairing: recorded packages/llm/token-meter/README.i18n.yaml
+verify-translation-pairing: 5 record(s) written; run the check to validate the pairs.

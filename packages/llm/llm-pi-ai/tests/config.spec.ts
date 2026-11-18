@@ -109,6 +109,16 @@ describe('request image policy bounds', () => {
 })
 
 describe('provider policy configuration', () => {
+  it.each(['strict', 'deferred'] as const)('refuses native cold resume claims during %s resolution', (validation) => {
+    expect(() => resolveProfiles({ openai: { policy: { capabilities: { resume: 'supported' } } } }, validation))
+      .toThrow('does not expose native provider session restore')
+  })
+
+  it.each(['unsupported', 'unknown'] as const)('preserves native cold resume %s without disabling ordinary history', (resume) => {
+    const profiles = resolveProfiles({ openai: { policy: { capabilities: { resume } } } })
+    expect(profiles.get('openai')?.policy?.capabilities.resume).toBe(resume)
+  })
+
   it('resolves partial admission declarations without inferring balance or capabilities', () => {
     const config = Config({ providers: { openai: { policy: { usageSource: 'api_metered' } } } })
     const profiles = resolveProfiles(structuredClone(config.providers.get()) as Options['providers'])
@@ -135,7 +145,7 @@ describe('provider policy configuration', () => {
   })
 })
 
-describe.each(['toolSupport', 'streamingSupport'] as const)('exact model %s configuration', (field) => {
+describe.each(['toolSupport', 'streamingSupport', 'structuredOutputSupport'] as const)('exact model %s configuration', (field) => {
   it.each(['supported', 'unsupported', 'unknown'] as const)('preserves explicit %s support without inferring it for siblings', (toolSupport) => {
     const input: Options = { providers: { 'tool-fixture': {
       api: 'openai-completions', baseURL: 'http://127.0.0.1:9',
@@ -144,7 +154,11 @@ describe.each(['toolSupport', 'streamingSupport'] as const)('exact model %s conf
     expect(Config(input).providers.get()['tool-fixture']?.models?.[0]?.[field]).toBe(toolSupport)
     expect(Config(input).providers.get()['tool-fixture']?.models?.[1]?.[field]).toBeUndefined()
     const profile = resolveProfiles(input.providers).get('tool-fixture')
-    const supportMap = field === 'toolSupport' ? profile?.configuredToolSupport : profile?.configuredStreamingSupport
+    const supportMap = {
+      toolSupport: profile?.configuredToolSupport,
+      streamingSupport: profile?.configuredStreamingSupport,
+      structuredOutputSupport: profile?.configuredStructuredOutputSupport,
+    }[field]
     expect(supportMap?.get('explicit')).toBe(toolSupport)
     expect(supportMap?.has('unknown')).toBe(false)
   })

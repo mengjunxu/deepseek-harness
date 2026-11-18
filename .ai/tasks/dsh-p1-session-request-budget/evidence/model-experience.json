@@ -1,0 +1,20 @@
+{
+  "baselineFirstTurn": [
+    {
+      "path": "snapshots/session/text-turn/system-prompt.expected.md",
+      "bytes": 2794,
+      "sameAsCommitted": true,
+      "sha256": "940a58e80b52302c9fa89c4ca81368ea92ec63ebe22c3e75e2d507abed28c665"
+    },
+    {
+      "path": "snapshots/session/text-turn/tool-schemas.expected.json",
+      "bytes": 25205,
+      "sameAsCommitted": true,
+      "sha256": "46c67ea5d179b2153b5a0979b0f12f7d1474e3231ee4b7f0aeb4f4efb0b5e053"
+    }
+  ],
+  "addedBaselineBytes": 0,
+  "deltaTokens": 0,
+  "deferredDocumentation": "Optional request-budget-policy Config only; baseline prompt and tool declarations remain unchanged",
+  "modelInputChanges": "Session caps add no model input; a denied native request is recorded by its existing Session/tool consumer"
+}

@@ -1,0 +1,87 @@
+The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
+The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
+The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
+
+ RUN  v4.1.8 /Users/x-dt/workspace/AI/Agents/deepseek-harness
+
+ ❯ |thread-safe| packages/test-support/llm-replay/tests/llm-replay.spec.ts (152 tests | 4 failed | 148 skipped) 25ms
+     × preserves exact-model toolSupport from loaded replay configuration 16ms
+     × preserves exact-model streamingSupport from loaded replay configuration 4ms
+     × rejects invalid toolSupport in replay JSON 3ms
+     × rejects invalid streamingSupport in replay JSON 2ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |thread-safe| packages/test-support/llm-replay/tests/llm-replay.spec.ts > apply (the plugin entry) > preserves exact-model toolSupport from loaded replay configuration
+AssertionError: expected { provider: 'native', id: 'm', …(1) } to match object { toolSupport: 'supported' }
+(3 matching properties omitted from actual)
+
+- Expected
++ Received
+
+  {
+-   "toolSupport": "supported",
++   "id": "m",
++   "name": "m",
++   "provider": "native",
+  }
+
+ ❯ packages/test-support/llm-replay/tests/llm-replay.spec.ts:2166:57
+    2164|     await ctx.plugin(LlmRuntime)
+    2165|     apply(ctx, { file, providers: [{ id: 'native', models: [{ id: 'm',…
+    2166|     await expect(ctx.llm.resolveModelInfo('native', 'm')).resolves.toM…
+       |                                                         ^
+    2167|   })
+    2168|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ FAIL  |thread-safe| packages/test-support/llm-replay/tests/llm-replay.spec.ts > apply (the plugin entry) > preserves exact-model streamingSupport from loaded replay configuration
+AssertionError: expected { provider: 'native', id: 'm', …(1) } to match object { streamingSupport: 'supported' }
+(3 matching properties omitted from actual)
+
+- Expected
++ Received
+
+  {
+-   "streamingSupport": "supported",
++   "id": "m",
++   "name": "m",
++   "provider": "native",
+  }
+
+ ❯ packages/test-support/llm-replay/tests/llm-replay.spec.ts:2166:57
+    2164|     await ctx.plugin(LlmRuntime)
+    2165|     apply(ctx, { file, providers: [{ id: 'native', models: [{ id: 'm',…
+    2166|     await expect(ctx.llm.resolveModelInfo('native', 'm')).resolves.toM…
+       |                                                         ^
+    2167|   })
+    2168|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+ FAIL  |thread-safe| packages/test-support/llm-replay/tests/llm-replay.spec.ts > apply (the plugin entry) > rejects invalid toolSupport in replay JSON
+ FAIL  |thread-safe| packages/test-support/llm-replay/tests/llm-replay.spec.ts > apply (the plugin entry) > rejects invalid streamingSupport in replay JSON
+AssertionError: expected [Function] to throw an error
+
+- Expected:
+null
+
++ Received:
+undefined
+
+ ❯ packages/test-support/llm-replay/tests/llm-replay.spec.ts:2175:55
+    2173|     await ctx.plugin(LlmRuntime)
+    2174|     const providers: NonNullable<Config['providers']> = JSON.parse(JSO…
+    2175|     expect(() => { apply(ctx, { file, providers }) }).toThrow(`${field…
+       |                                                       ^
+    2176|   })
+    2177|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  4 failed | 148 skipped (152)
+   Start at  22:23:07
+   Duration  778ms (transform 522ms, setup 139ms, import 525ms, tests 25ms, environment 0ms)

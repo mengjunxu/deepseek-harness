@@ -6,8 +6,11 @@
   en: 607839c43380a8f5
   zh: b535386aa9ffcf17
 /llm-streaming/provider-admission-metadata:
-  en: f399b1aa6e6985eb
-  zh: 2fdfeeddf9cd3769
+  en: 02350026c668c8f8
+  zh: 3f8fa24617ed2278
+/llm-streaming/preset-metered-route-policy:
+  en: 8069b928b143f7be
+  zh: 3684c6536861aef5
 /llm-streaming/content-blocks-and-messages:
   en: 365ecc228f756098
   zh: 396e68661a789854
@@ -33,14 +36,14 @@
   en: 7ff4b18ef82a959d
   zh: 8a40e6c7c57258a4
 /llm-streaming/tokenusage:
-  en: 33830f78fdb845fa
-  zh: f43a4502c4c3bfff
+  en: 781ac1f6a030e282
+  zh: ba35f4ec46a46933
 /llm-streaming/blockassembler:
   en: 58dec2259b0b1c6f
   zh: fc99fe965acaabf3
 /llm-streaming/the-model-request:
-  en: ddca84b082554567
-  zh: 804ffb1cb0c94bfa
+  en: 622c0845eed0f3d9
+  zh: 5ebb9aba638e57a5
 /llm-streaming/the-model-request/the-request-envelope-llmcallconfig-and-the-logged-header:
   en: 0f83695e4a977ed9
   zh: 244e628209bf08f5

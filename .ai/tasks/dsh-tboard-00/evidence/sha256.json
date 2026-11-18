@@ -1,0 +1,15 @@
+{
+  "apps/cli/lib/bin.js": "87dd715bb2f03ba14de9d4db67877d5ff37b6c036510abd8826006eaa65b0aff",
+  "packages/sdk/client/lib/index.js": "3e936345f36c1845ad07a66084a126cd0a9b511aa192501932874d7e09b9e7b8",
+  "packages/sdk/server/lib/index.js": "f935ba0fc284441b8937c45feddd030cd85ae6e2514b3fe64104dc28202d9353",
+  "packages/sdk/protocol/lib/index.js": "371c38ca3514797d86df5f4bb78a56c40a2637294b83aababe8145bec6a20253",
+  "packages/bundle/sdk-app/package.json": "2efbc45fa72af733065e84992aaf4b69e21cb1f22c3226d0320c016826754cdd",
+  "docs/myPlan/DSH_PRD_vNext_4_2026-10-27.md": "e8c0e4b2ea8a112edadb1a059b1be945a97bb0087019321a9640594da364b269",
+  "docs/myPlan/DeepSeek_Harness_Taskboard_PRD_v0.1.md": "fe4883e278b05993f7d018c3736cbc50b2b4effd0600828db50e495f396404eb",
+  ".ai/tasks/dsh-tboard-00/evidence/sdk-probe.mjs": "bdef0cf06f151ced2b87059b687da7300444a8bb7a3460fe76f5f37d8dc24c65",
+  ".ai/tasks/dsh-tboard-00/evidence/sdk-result.json": "fcf515d317ea0c13ec05685ae104a98f7e384df258196e99b4ba451084c50304",
+  ".ai/tasks/dsh-tboard-00/evidence/official-interaction.json": "7682f74925fd6ebb4a321961b14e5b2827f5f67e98b66d049e145ccb3f237c3c",
+  ".ai/tasks/dsh-tboard-00/evidence/official-interaction.mjs": "4e1a96b87e9f80c0059de41cef59c069f03a078bb9ab966edbfeded74fa5dd8a",
+  ".ai/tasks/dsh-tboard-00/evidence/official-resume.json": "5329c84682f6a504f84ac0ccea317b81d211c8d5e1d8c9f3a17b7507d8b56d9f",
+  ".ai/tasks/dsh-tboard-00/evidence/official-resume.mjs": "0e995f12cf3676782422973fd7bc3e2d4e24647e091dcc236b4be99c54b9feee"
+}

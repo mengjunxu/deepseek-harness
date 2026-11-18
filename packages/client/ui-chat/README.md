@@ -58,7 +58,11 @@ Generic command rows retain the ordinary command glyph in every lifecycle state;
 <a id="turn-token-usage"></a>
 ## Turn token usage
 
-A completed Turn shows an expandable usage row only when the loaded window includes `turn/start` and every started model attempt reports safe, exact usage. The row omits unavailable optional buckets. Incomplete or contradictory accounting hides the complete disclosure instead of presenting a partial total.
+A completed Turn shows an expandable usage row only when the loaded window includes `turn/start` and every started model attempt reports safe, internally consistent token counts. The row omits unavailable optional buckets. Incomplete or contradictory accounting hides the complete disclosure instead of presenting a partial total.
+
+The usage dialog shows the captured cost source for each model route. Native accounting joins through the committed Step and attempt reference; current model settings do not rewrite history. Missing, duplicated or mismatched evidence shows Unknown. Source declarations describe the route; token samples do not establish official billing or account balance. Enable [native request recording](../../llm/token-meter/README.md#request-records) to retain this attribution.
+
+The counter-measurement row distinguishes explicitly provider-reported samples from estimates. Missing sample metadata stays Unknown; a Turn combining different or partly unknown measurements shows Mixed. Arithmetic totals are unchanged, and cost-source declarations do not classify counter accuracy.
 
 Settings → General → Performance & usage stores `ui-chat.performanceUsage` as `detailed` (default) or `compact`. Compact shows only available output speed and cache-hit percentage beneath the composer, without interactive statistic dialogs or per-Turn usage. Detailed exposes session statistics and per-Turn token usage. Neither mode shows elapsed time in the completed-turn footer. The preference changes presentation only; accounting and Session events remain intact.
 

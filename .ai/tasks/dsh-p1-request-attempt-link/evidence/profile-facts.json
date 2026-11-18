@@ -1,0 +1,61 @@
+{
+  "session/request-accounting": {
+    "steps": [
+      6
+    ],
+    "refs": [
+      {
+        "stepStartSeq": 6,
+        "attempt": 1
+      }
+    ]
+  },
+  "session/request-accounting-retry": {
+    "steps": [
+      6
+    ],
+    "refs": [
+      {
+        "stepStartSeq": 6,
+        "attempt": 1
+      },
+      {
+        "stepStartSeq": 6,
+        "attempt": 2
+      }
+    ]
+  },
+  "session/request-preparation-failed": {
+    "steps": [
+      6
+    ],
+    "refs": [
+      {
+        "stepStartSeq": 6,
+        "attempt": 1
+      }
+    ]
+  },
+  "sdk/request-accounting": {
+    "steps": [
+      6
+    ],
+    "refs": [
+      {
+        "stepStartSeq": 6,
+        "attempt": 1
+      }
+    ]
+  },
+  "sdk/request-preparation-failed": {
+    "steps": [
+      6
+    ],
+    "refs": [
+      {
+        "stepStartSeq": 6,
+        "attempt": 1
+      }
+    ]
+  }
+}

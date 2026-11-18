@@ -1,0 +1,180 @@
+ℹ target: es2024
+ℹ tsconfig: tsconfig.json
+ℹ entry: lib/types/preload-platform-account.js
+ℹ target: es2024
+ℹ tsconfig: tsconfig.json
+ℹ entry: lib/types/preload-mandatory.js
+ℹ target: es2024
+ℹ tsconfig: tsconfig.json
+ℹ entry: lib/types/preload-update-dialog.js
+ℹ target: es2024
+ℹ tsconfig: tsconfig.json
+ℹ Build start
+ℹ [CJS] lib/preload-welcome.cjs  17.61 kB │ gzip: 5.61 kB
+ℹ [CJS] 1 files, total: 17.61 kB
+ℹ [CJS] lib/preload-platform-account.cjs  2.08 kB │ gzip: 0.90 kB
+ℹ [CJS] 1 files, total: 2.08 kB
+ℹ [CJS] lib/preload-mandatory.cjs  1.03 kB │ gzip: 0.47 kB
+ℹ [CJS] 1 files, total: 1.03 kB
+ℹ [CJS] lib/preload-update-dialog.cjs  1.11 kB │ gzip: 0.52 kB
+ℹ [CJS] 1 files, total: 1.11 kB
+✔ Build complete in 22ms
+✔ Build complete in 22ms
+✔ Build complete in 22ms
+ℹ [CJS] lib/preload-app.cjs  37.06 kB │ gzip: 11.37 kB
+ℹ [CJS] 1 files, total: 37.06 kB
+✔ Build complete in 23ms
+✔ Build complete in 23ms
+ℹ Hint: consider adding deps.onlyBundle option to avoid unintended bundling of dependencies, or set deps.onlyBundle: false to disable this hint.
+See more at https://tsdown.dev/options/dependencies#deps-onlybundle
+Detected dependencies in bundle:
+- js-yaml
+- ajv
+- fast-deep-equal
+- json-schema-traverse
+- fast-uri
+- zod
+ℹ [ESM] lib/main.js  851.98 kB │ gzip: 200.68 kB
+ℹ [ESM] 1 files, total: 851.98 kB
+[33m[INEFFECTIVE_DYNAMIC_IMPORT] [0m../../node_modules/.pnpm/ajv@8.20.0/node_modules/ajv/dist/2020.js is dynamically imported by ../../packages/boot/app-boot/lib/index.js but also statically imported by ../../packages/llm/llm/lib/index.js, dynamic import will not move module into another chunk.
+
+✔ Build complete in 96ms
+vite v6.4.3 building for production...
+transforming...
+✓ 34 modules transformed.
+rendering chunks...
+computing gzip size...
+lib/welcome/Montserrat-OFL.txt          4.40 kB │ gzip:  1.97 kB
+lib/welcome/montserrat-light.woff2     61.55 kB
+lib/welcome/montserrat-regular.woff2   62.01 kB
+lib/welcome/montserrat-medium.woff2    62.15 kB
+lib/welcome/brand-font.css              0.55 kB │ gzip:  0.20 kB
+lib/welcome/welcome.css                35.82 kB │ gzip:  5.00 kB
+lib/welcome/welcome.js                154.65 kB │ gzip: 49.82 kB
+✓ built in 412ms
+
+> @deepseek-ai/dsh-root@0.1.7-rc.2 doc-typecheck:contracts-ready
+> tsx scripts/doc-typecheck.ts
+
+doc-typecheck: documentation code blocks failed to compile.
+
+docs/legacy/Generic_Agent_Harness_Architecture_Execute_Plan_v4.md (block at line 231, +3:9): error TS2304: Cannot find name 'AccessMode'.
+docs/legacy/Generic_Agent_Harness_Architecture_Execute_Plan_v4.md (block at line 231, +6:10): error TS2304: Cannot find name 'Role'.
+docs/legacy/Generic_Agent_Harness_Architecture_Execute_Plan_v4.md (block at line 246, +2:16): error TS2304: Cannot find name 'Task'.
+docs/legacy/Generic_Agent_Harness_Architecture_Execute_Plan_v4.md (block at line 246, +3:32): error TS2304: Cannot find name 'Task'.
+docs/legacy/Generic_Agent_Harness_Architecture_Execute_Plan_v4.md (block at line 246, +4:21): error TS2552: Cannot find name 'TaskTransition'. Did you mean 'CSSTransition'?
+docs/legacy/Generic_Agent_Harness_Architecture_Execute_Plan_v4.md (block at line 246, +4:46): error TS2304: Cannot find name 'Task'.
+docs/legacy/Generic_Agent_Harness_Architecture_Execute_Plan_v4.md (block at line 246, +17:19): error TS2304: Cannot find name 'RemoteTaskIntent'.
+docs/legacy/Generic_Agent_Harness_Architecture_Execute_Plan_v4.md (block at line 246, +17:46): error TS2304: Cannot find name 'RemoteTaskRef'.
+docs/legacy/Generic_Agent_Harness_Architecture_Execute_Plan_v4.md (block at line 246, +18:12): error TS2304: Cannot find name 'RemoteTaskRef'.
+docs/legacy/Generic_Agent_Harness_Architecture_Execute_Plan_v4.md (block at line 246, +18:36): error TS2304: Cannot find name 'RemoteTaskStatus'.
+docs/legacy/Generic_Agent_Harness_Architecture_Execute_Plan_v4.md (block at line 246, +19:17): error TS2304: Cannot find name 'RemoteTaskRef'.
+docs/legacy/Generic_Agent_Harness_Architecture_Execute_Plan_v4.md (block at line 246, +20:22): error TS2304: Cannot find name 'RemoteTaskRef'.
+docs/legacy/Generic_Agent_Harness_Architecture_Execute_Plan_v4.md (block at line 246, +23:17): error TS2304: Cannot find name 'Task'.
+docs/legacy/Generic_Agent_Harness_Architecture_Execute_Plan_v4.md (block at line 246, +23:32): error TS2304: Cannot find name 'WorkspaceLease'.
+docs/legacy/Generic_Agent_Harness_Architecture_Execute_Plan_v4.md (block at line 246, +24:41): error TS2304: Cannot find name 'WorkspaceSnapshot'.
+docs/legacy/Generic_Agent_Harness_Architecture_Execute_Plan_v4.md (block at line 246, +28:16): error TS2304: Cannot find name 'ContextRequest'.
+docs/legacy/Generic_Agent_Harness_Architecture_Execute_Plan_v4.md (block at line 246, +28:41): error TS2304: Cannot find name 'ContextBundle'.
+docs/legacy/Generic_Agent_Harness_Architecture_Execute_Plan_v4.md (block at line 246, +31:20): error TS2304: Cannot find name 'ApprovalRecord'.
+docs/legacy/Generic_Agent_Harness_Architecture_Execute_Plan_v4.md (block at line 246, +31:46): error TS2304: Cannot find name 'PlanSnapshot'.
+docs/legacy/MGSD_Distributed_Agent_Harness_Architecture_and_Execution_Plan.md (block at line 1354, +2:14): error TS2304: Cannot find name 'Task'.
+docs/legacy/MGSD_Distributed_Agent_Harness_Architecture_and_Execution_Plan.md (block at line 1354, +2:29): error TS2304: Cannot find name 'TaskContext'.
+docs/legacy/MGSD_Distributed_Agent_Harness_Architecture_and_Execution_Plan.md (block at line 1354, +2:51): error TS2304: Cannot find name 'PlanResult'.
+docs/legacy/MGSD_Distributed_Agent_Harness_Architecture_and_Execution_Plan.md (block at line 1354, +6:17): error TS2304: Cannot find name 'ReviewInput'.
+docs/legacy/MGSD_Distributed_Agent_Harness_Architecture_and_Execution_Plan.md (block at line 1354, +6:39): error TS2304: Cannot find name 'ReviewResult'.
+docs/legacy/MGSD_Distributed_Agent_Harness_Architecture_and_Execution_Plan.md (block at line 1414, +1:1): error TS2304: Cannot find name 'transition'.
+docs/legacy/MGSD_Distributed_Agent_Harness_Architecture_and_Execution_Plan.md (block at line 1414, +1:12): error TS2304: Cannot find name 'task'.
+docs/legacy/MGSD_Distributed_Agent_Harness_Architecture_and_Execution_Plan.md (block at line 1414, +1:18): error TS2304: Cannot find name 'TaskState'.
+docs/legacy/MGSD_Distributed_Agent_Harness_Architecture_and_Execution_Plan.md (block at line 1543, +1:1): error TS1375: 'await' expressions are only allowed at the top level of a file when that file is a module, but this file has no imports or exports. Consider adding an empty 'export {}' to make this file a module.
+docs/legacy/MGSD_Distributed_Agent_Harness_Architecture_and_Execution_Plan.md (block at line 1543, +1:7): error TS2304: Cannot find name 'processRunner'.
+docs/legacy/MGSD_Distributed_Agent_Harness_Architecture_and_Execution_Plan.md (block at line 1543, +4:8): error TS2304: Cannot find name 'workspacePath'.
+docs/legacy/MGSD_Distributed_Agent_Harness_Architecture_and_Execution_Plan_v2.md (block at line 601, +4:30): error TS2304: Cannot find name 'AgentCapabilities'.
+docs/legacy/MGSD_Distributed_Agent_Harness_Architecture_and_Execution_Plan_v2.md (block at line 601, +7:14): error TS2304: Cannot find name 'AgentRequest'.
+docs/legacy/MGSD_Distributed_Agent_Harness_Architecture_and_Execution_Plan_v2.md (block at line 601, +8:22): error TS2304: Cannot find name 'AgentEvent'.
+docs/legacy/MGSD_Distributed_Agent_Harness_Architecture_and_Execution_Plan_v2.md (block at line 601, +9:14): error TS2304: Cannot find name 'AgentResult'.
+docs/legacy/MGSD_Distributed_Agent_Harness_Architecture_and_Execution_Plan_v2.md (block at line 637, +4:10): error TS2304: Cannot find name 'TaskState'.
+docs/legacy/MGSD_Distributed_Agent_Harness_Architecture_and_Execution_Plan_v2.md (block at line 637, +5:9): error TS2304: Cannot find name 'TaskRisk'.
+docs/legacy/MGSD_Distributed_Agent_Harness_Architecture_and_Execution_Plan_v2.md (block at line 637, +26:10): error TS2304: Cannot find name 'TaskState'.
+docs/legacy/MGSD_Distributed_Agent_Harness_Architecture_and_Execution_Plan_v2.md (block at line 680, +6:15): error TS2304: Cannot find name 'MemoryRef'.
+docs/legacy/MGSD_Distributed_Agent_Harness_Architecture_and_Execution_Plan_v2.md (block at line 680, +7:14): error TS2304: Cannot find name 'SkillRef'.
+docs/legacy/myPlan/AGENTS.original.md (block at line 157, +1:6): error TS2300: Duplicate identifier 'ProviderClass'.
+docs/legacy/myPlan/AGENTS.original.md (block at line 157, +2:6): error TS2300: Duplicate identifier 'UsageSource'.
+docs/legacy/myPlan/AGENTS.original.md (block at line 157, +5:6): error TS2300: Duplicate identifier 'Support'.
+docs/legacy/myPlan/AGENTS.original.md (block at line 157, +6:6): error TS2300: Duplicate identifier 'ProviderAvailability'.
+docs/legacy/myPlan/AGENTS.original.md (block at line 195, +8:10): error TS2304: Cannot find name 'MessagePart'.
+docs/legacy/myPlan/AGENTS.original.md (block at line 195, +14:6): error TS2300: Duplicate identifier 'TurnEvent'.
+docs/legacy/myPlan/DSH_Implementation_Plan_vNext_4_2026-10-27.md (block at line 157, +1:6): error TS2300: Duplicate identifier 'ProviderClass'.
+docs/legacy/myPlan/DSH_Implementation_Plan_vNext_4_2026-10-27.md (block at line 157, +2:6): error TS2300: Duplicate identifier 'UsageSource'.
+docs/legacy/myPlan/DSH_Implementation_Plan_vNext_4_2026-10-27.md (block at line 157, +5:6): error TS2300: Duplicate identifier 'Support'.
+docs/legacy/myPlan/DSH_Implementation_Plan_vNext_4_2026-10-27.md (block at line 157, +6:6): error TS2300: Duplicate identifier 'ProviderAvailability'.
+docs/legacy/myPlan/DSH_Implementation_Plan_vNext_4_2026-10-27.md (block at line 195, +8:10): error TS2304: Cannot find name 'MessagePart'.
+docs/legacy/myPlan/DSH_Implementation_Plan_vNext_4_2026-10-27.md (block at line 195, +14:6): error TS2300: Duplicate identifier 'TurnEvent'.
+
+[ELIFECYCLE] Command failed with exit code 1.
+run-gates: start repository references
+run-gates: PASS public repository links (2.73s)
+run-gates: start concrete terms
+run-gates: PASS Session format references (4.86s)
+run-gates: start doc refs
+run-gates: PASS concrete terms (1.77s)
+run-gates: start subsystem pages
+run-gates: PASS doc refs (1.08s)
+run-gates: start package paths
+run-gates: PASS subsystem pages (0.65s)
+run-gates: start tsconfig paths
+run-gates: PASS tsconfig paths (0.44s)
+run-gates: start config source ownership
+run-gates: PASS config source ownership (0.41s)
+run-gates: start package README Summaries
+run-gates: PASS package paths (1.03s)
+run-gates: start package README model experience
+run-gates: PASS package README Summaries (0.41s)
+run-gates: start agent note classification
+run-gates: PASS agent note classification (0.44s)
+run-gates: start agent note format
+run-gates: PASS agent note format (0.47s)
+run-gates: start archived agent notes
+run-gates: PASS repository references (6.87s)
+run-gates: start skill invocation metadata
+run-gates: PASS archived agent notes (0.58s)
+run-gates: start translation prompt
+run-gates: PASS skill invocation metadata (0.40s)
+run-gates: start doc budgets
+run-gates: PASS translation prompt (0.39s)
+run-gates: start documentation standard tests
+run-gates: PASS doc budgets (0.40s)
+run-gates: start documentation site checks
+run-gates: PASS documentation standard tests (1.13s)
+run-gates: start package README limitations
+
+== FAILED translation pairing (34.19s) ==
+command: pnpm run verify-translation-pairing
+outcome: exit 1
+$ tsx scripts/verify-translation-pairing.ts
+verify-translation-pairing: bilingual pairing rules violated (see docs/i18n/README.md):
+  docs/legacy/Generic_Agent_Harness_Architecture_Execute_Plan_v4.md: in-scope documentation must merge bilingual (docs/i18n/README.md); add the counterpart and record the pair
+  docs/legacy/Generic_Agent_Harness_v5_1_CN_Technical_Design_and_Codex_Implementation_Plan.md: in-scope documentation must merge bilingual (docs/i18n/README.md); add the counterpart and record the pair
+  docs/legacy/Generic_Agent_Harness_v5_ACP_Architecture_Execute_Plan.md: in-scope documentation must merge bilingual (docs/i18n/README.md); add the counterpart and record the pair
+  docs/legacy/MGSD_Distributed_Agent_Harness_Architecture_and_Execution_Plan.md: in-scope documentation must merge bilingual (docs/i18n/README.md); add the counterpart and record the pair
+  docs/legacy/MGSD_Distributed_Agent_Harness_Architecture_and_Execution_Plan_v2.md: in-scope documentation must merge bilingual (docs/i18n/README.md); add the counterpart and record the pair
+  docs/legacy/myPlan/AGENTS.original.md: in-scope documentation must merge bilingual (docs/i18n/README.md); add the counterpart and record the pair
+  docs/legacy/myPlan/DSH_Implementation_Plan_vNext_4_2026-10-27.md: in-scope documentation must merge bilingual (docs/i18n/README.md); add the counterpart and record the pair
+  docs/legacy/workflows/DSH_CHECKLIST.md: in-scope documentation must merge bilingual (docs/i18n/README.md); add the counterpart and record the pair
+  docs/legacy/workflows/DSH：Codex 与 Codely 无缝切换工作流（V0–V2）.md: in-scope documentation must merge bilingual (docs/i18n/README.md); add the counterpart and record the pair
+  docs/myPlan/DSH_PRD_vNext_4_2026-10-27.md: in-scope documentation must merge bilingual (docs/i18n/README.md); add the counterpart and record the pair
+  docs/myPlan/DeepSeek_Harness_Taskboard_PRD_v0.1.md: in-scope documentation must merge bilingual (docs/i18n/README.md); add the counterpart and record the pair
+  docs/workflows/DSH_IMPLEMENTATION_PLAN.md: in-scope documentation must merge bilingual (docs/i18n/README.md); add the counterpart and record the pair
+[ELIFECYCLE] Command failed with exit code 1.
+run-gates: PASS package README model experience (4.75s)
+run-gates: PASS package README limitations (4.51s)
+run-gates: PASS documentation site checks (6.66s)
+
+run-gates: 39 passed, 3 failed, 0 skipped in 87.32s.
+run-gates: unsuccessful gates:
+  - FAILED doc-typecheck (72.97s, exit 1)
+    pnpm run doc-typecheck
+  - FAILED translation pairing (34.19s, exit 1)
+    pnpm run verify-translation-pairing
+  - FAILED markdown wrap (8.37s, exit 1)
+    pnpm run verify-md-wrap
+[ELIFECYCLE] Command failed with exit code 1.

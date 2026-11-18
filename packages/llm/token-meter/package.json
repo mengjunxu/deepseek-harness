@@ -27,6 +27,10 @@
     "./estimate": {
       "types": "./lib/types/estimate.d.ts",
       "default": "./lib/types/estimate.js"
+    },
+    "./request-records": {
+      "types": "./lib/types/request-records.d.ts",
+      "default": "./lib/types/request-records.js"
     }
   },
   "files": [
@@ -56,6 +60,7 @@
     "@deepseek-ai/dsh-llm-retry": "workspace:*",
     "@deepseek-ai/dsh-session": "workspace:*",
     "@deepseek-ai/dsh-session-projection": "workspace:*",
-    "@deepseek-ai/dsh-compaction-image-offload": "workspace:*"
+    "@deepseek-ai/dsh-compaction-image-offload": "workspace:*",
+    "@deepseek-ai/dsh-app-boot": "workspace:*"
   }
 }

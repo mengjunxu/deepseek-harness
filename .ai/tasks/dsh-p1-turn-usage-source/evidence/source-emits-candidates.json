@@ -1,0 +1,142 @@
+[
+  {
+    "path": "packages/test-support/loader-smoke/src/index.js",
+    "source": "packages/test-support/loader-smoke/src/index.ts",
+    "mtime": "2026-11-16T03:10:19.261735+00:00"
+  },
+  {
+    "path": "packages/test-support/loader-smoke/src/agent-turn.js",
+    "source": "packages/test-support/loader-smoke/src/agent-turn.ts",
+    "mtime": "2026-11-16T03:10:19.259817+00:00"
+  },
+  {
+    "path": "packages/test-support/loader-smoke/src/agent-turn.d.ts",
+    "source": "packages/test-support/loader-smoke/src/agent-turn.ts",
+    "mtime": "2026-11-16T03:10:19.260174+00:00"
+  },
+  {
+    "path": "packages/test-support/loader-smoke/src/index.d.ts",
+    "source": "packages/test-support/loader-smoke/src/index.ts",
+    "mtime": "2026-11-16T03:10:19.262592+00:00"
+  },
+  {
+    "path": "packages/test-support/session-snapshot/src/session-files.js",
+    "source": "packages/test-support/session-snapshot/src/session-files.ts",
+    "mtime": "2026-11-16T03:10:19.312892+00:00"
+  },
+  {
+    "path": "packages/test-support/session-snapshot/src/normalize.js",
+    "source": "packages/test-support/session-snapshot/src/normalize.ts",
+    "mtime": "2026-11-16T03:10:19.307129+00:00"
+  },
+  {
+    "path": "packages/test-support/session-snapshot/src/session-files.d.ts",
+    "source": "packages/test-support/session-snapshot/src/session-files.ts",
+    "mtime": "2026-11-16T03:10:19.313383+00:00"
+  },
+  {
+    "path": "packages/test-support/session-snapshot/src/workspace.d.ts",
+    "source": "packages/test-support/session-snapshot/src/workspace.ts",
+    "mtime": "2026-11-16T03:10:19.322998+00:00"
+  },
+  {
+    "path": "packages/test-support/session-snapshot/src/normalize.d.ts",
+    "source": "packages/test-support/session-snapshot/src/normalize.ts",
+    "mtime": "2026-11-16T03:10:19.307847+00:00"
+  },
+  {
+    "path": "packages/test-support/session-snapshot/src/launcher.d.ts",
+    "source": "packages/test-support/session-snapshot/src/launcher.ts",
+    "mtime": "2026-11-16T03:10:19.268163+00:00"
+  },
+  {
+    "path": "packages/test-support/session-snapshot/src/harness.js",
+    "source": "packages/test-support/session-snapshot/src/harness.ts",
+    "mtime": "2026-11-16T03:10:19.274430+00:00"
+  },
+  {
+    "path": "packages/test-support/session-snapshot/src/manifest.js",
+    "source": "packages/test-support/session-snapshot/src/manifest.ts",
+    "mtime": "2026-11-16T03:10:19.317460+00:00"
+  },
+  {
+    "path": "packages/test-support/session-snapshot/src/index.js",
+    "source": "packages/test-support/session-snapshot/src/index.ts",
+    "mtime": "2026-11-16T03:10:19.268760+00:00"
+  },
+  {
+    "path": "packages/test-support/session-snapshot/src/harness.d.ts",
+    "source": "packages/test-support/session-snapshot/src/harness.ts",
+    "mtime": "2026-11-16T03:10:19.275339+00:00"
+  },
+  {
+    "path": "packages/test-support/session-snapshot/src/suite.js",
+    "source": "packages/test-support/session-snapshot/src/suite.ts",
+    "mtime": "2026-11-16T03:10:19.289287+00:00"
+  },
+  {
+    "path": "packages/test-support/session-snapshot/src/suite.d.ts",
+    "source": "packages/test-support/session-snapshot/src/suite.ts",
+    "mtime": "2026-11-16T03:10:19.290966+00:00"
+  },
+  {
+    "path": "packages/test-support/session-snapshot/src/workspace.js",
+    "source": "packages/test-support/session-snapshot/src/workspace.ts",
+    "mtime": "2026-11-16T03:10:19.322651+00:00"
+  },
+  {
+    "path": "packages/test-support/session-snapshot/src/identity.d.ts",
+    "source": "packages/test-support/session-snapshot/src/identity.ts",
+    "mtime": "2026-11-16T03:10:19.319798+00:00"
+  },
+  {
+    "path": "packages/test-support/session-snapshot/src/manifest.d.ts",
+    "source": "packages/test-support/session-snapshot/src/manifest.ts",
+    "mtime": "2026-11-16T03:10:19.318159+00:00"
+  },
+  {
+    "path": "packages/test-support/session-snapshot/src/identity.js",
+    "source": "packages/test-support/session-snapshot/src/identity.ts",
+    "mtime": "2026-11-16T03:10:19.319604+00:00"
+  },
+  {
+    "path": "packages/test-support/session-snapshot/src/index.d.ts",
+    "source": "packages/test-support/session-snapshot/src/index.ts",
+    "mtime": "2026-11-16T03:10:19.269111+00:00"
+  },
+  {
+    "path": "packages/test-support/session-snapshot/src/launcher.js",
+    "source": "packages/test-support/session-snapshot/src/launcher.ts",
+    "mtime": "2026-11-16T03:10:19.267291+00:00"
+  },
+  {
+    "path": "packages/test-support/llm-replay/src/index.js",
+    "source": "packages/test-support/llm-replay/src/index.ts",
+    "mtime": "2026-11-16T03:10:19.300306+00:00"
+  },
+  {
+    "path": "packages/test-support/llm-replay/src/index.d.ts",
+    "source": "packages/test-support/llm-replay/src/index.ts",
+    "mtime": "2026-11-16T03:10:19.301478+00:00"
+  },
+  {
+    "path": "packages/llm/deepseek-llm-api-extensions/src/types.js",
+    "source": "packages/llm/deepseek-llm-api-extensions/src/types.ts",
+    "mtime": "2026-11-16T03:10:19.309764+00:00"
+  },
+  {
+    "path": "packages/llm/deepseek-llm-api-extensions/src/types.d.ts",
+    "source": "packages/llm/deepseek-llm-api-extensions/src/types.ts",
+    "mtime": "2026-11-16T03:10:19.310329+00:00"
+  },
+  {
+    "path": "packages/llm/deepseek-llm-api-extensions/src/index.js",
+    "source": "packages/llm/deepseek-llm-api-extensions/src/index.ts",
+    "mtime": "2026-11-16T03:10:19.309061+00:00"
+  },
+  {
+    "path": "packages/llm/deepseek-llm-api-extensions/src/index.d.ts",
+    "source": "packages/llm/deepseek-llm-api-extensions/src/index.ts",
+    "mtime": "2026-11-16T03:10:19.309509+00:00"
+  }
+]

@@ -249,6 +249,29 @@ export interface SettingsControllerInternals {
 ```
 <!-- END GENERATED config-catalog:@deepseek-ai/dsh-api-settings-controller -->
 
+<!-- BEGIN GENERATED config-catalog:@deepseek-ai/dsh-api-taskboard-controller -->
+<a id="deepseek-aidsh-api-taskboard-controller"></a>
+
+## `@deepseek-ai/dsh-api-taskboard-controller`
+
+- `inject`: `subprocess` · `storageDomain` · `storageBackendServiceKey('sqlite')`
+- `source`: [`packages/api/taskboard-controller/src/index.ts:37`](../packages/api/taskboard-controller/src/index.ts)
+
+```ts config-catalog
+/** Host worktree directory and optional Git command limits. */
+interface Config {
+  /** Absolute parent for isolated Git worktrees. */
+  worktreeRoot: string
+  /** Milliseconds for one stop attempt including process observation. */
+  stopTimeoutMs?: number
+  /** Maximum duration of each Git subprocess in milliseconds. */
+  gitTimeoutMs?: number
+  /** Maximum retained Git stdout in bytes per command. */
+  gitOutputMaxBytes?: number
+}
+```
+<!-- END GENERATED config-catalog:@deepseek-ai/dsh-api-taskboard-controller -->
+
 <!-- BEGIN GENERATED config-catalog:@deepseek-ai/dsh-api-terminal-controller -->
 <a id="deepseek-aidsh-api-terminal-controller"></a>
 
@@ -1623,7 +1646,7 @@ export interface Config extends ProtocolConfig {
 
 - `inject`: `llm`
 - `refs`: `Api` (`@earendil-works/pi-ai`) · `CacheRetention` (`@earendil-works/pi-ai`) · [`LlmCapabilitySupport`](../packages/llm/llm/src/index.ts) · [`LlmProviderPolicyInput`](../packages/llm/llm/src/index.ts) · `Model` (`@earendil-works/pi-ai`) · `ModelThinkingLevel` (`@earendil-works/pi-ai`) · `OpenAICompletionsCompat` (`@earendil-works/pi-ai`) · [`RetryPolicyConfig`](../packages/llm/llm/src/index.ts) · `ThinkingBudgets` (`@earendil-works/pi-ai`) · `Transport` (`@earendil-works/pi-ai`) · `Volatile` (`@deepseek-ai/cordis`)
-- `source`: [`packages/llm/llm-pi-ai/src/config.ts:230`](../packages/llm/llm-pi-ai/src/config.ts)
+- `source`: [`packages/llm/llm-pi-ai/src/config.ts:232`](../packages/llm/llm-pi-ai/src/config.ts)
 
 ```ts config-catalog
 /** Plugin configuration: the provider routes this instance owns. */
@@ -1734,6 +1757,8 @@ export interface PiAiProviderProfile {
 
 /** One configured model: catalog overrides and explicit tool/streaming metadata. */
 export interface PiAiModelProfile {
+  /** Explicit native JSON Schema support for this model/API; omission stays unknown. */
+  structuredOutputSupport?: LlmCapabilitySupport
   /** Incremental response support for this route/model; omission stays unknown without protocol or Provider inference. */
   streamingSupport?: LlmCapabilitySupport
   /** Exact model tool-call support; omitted means unknown and never inherits Provider policy or protocol defaults. */
@@ -1903,8 +1928,8 @@ export type PiAiThinkingTokenBudgetField = NonNullable<OpenAICompletionsCompat['
 ## `@deepseek-ai/dsh-llm-replay`
 
 - `inject`: `llm`
-- `refs`: [`ModelModality`](../packages/llm/llm/src/index.ts) · [`RetryPolicyConfig`](../packages/llm/llm/src/index.ts) · [`SystemPromptUpdate`](../packages/llm/llm/src/index.ts) · [`ToolUpdate`](../packages/llm/llm/src/index.ts)
-- `source`: [`packages/test-support/llm-replay/src/index.ts:1129`](../packages/test-support/llm-replay/src/index.ts)
+- `refs`: [`LlmCapabilitySupport`](../packages/llm/llm/src/index.ts) · [`LlmProviderPolicyInput`](../packages/llm/llm/src/index.ts) · [`ModelModality`](../packages/llm/llm/src/index.ts) · [`RetryPolicyConfig`](../packages/llm/llm/src/index.ts) · [`SystemPromptUpdate`](../packages/llm/llm/src/index.ts) · [`ToolUpdate`](../packages/llm/llm/src/index.ts)
+- `source`: [`packages/test-support/llm-replay/src/index.ts:1150`](../packages/test-support/llm-replay/src/index.ts)
 
 ```ts config-catalog
 /** Plugin config: the {@link ReplayConfig} inputs, each defaulting to its `DSH_SNAPSHOT_*` env var in `apply`. */
@@ -1931,6 +1956,8 @@ export interface ReplayProviderConfig {
   id: string
   /** Selector label; defaults to {@link id}. */
   name?: string
+  /** Optional explicit provider admission policy for keyless capability scenarios. */
+  policy?: LlmProviderPolicyInput
   /** Advisory models exposed to replay scenarios that exercise discovery. */
   models?: ReplayModelConfig[]
   /** Optional provider-owned retry policy used by assembled recovery snapshots. */
@@ -1941,6 +1968,12 @@ export interface ReplayProviderConfig {
 export interface ReplayModelConfig {
   /** Model id used for replay requests. */
   id: string
+  /** Optional exact-model native JSON Schema support; omission remains unknown. */
+  structuredOutputSupport?: LlmCapabilitySupport
+  /** Optional exact-model tool support for native registered replay routes. */
+  toolSupport?: LlmCapabilitySupport
+  /** Optional exact-model incremental response support for native registered replay routes. */
+  streamingSupport?: LlmCapabilitySupport
   /** Selector label; defaults to {@link id}. */
   name?: string
   /** Optional selector description. */
@@ -2181,6 +2214,31 @@ export interface Config {
 }
 ```
 <!-- END GENERATED config-catalog:@deepseek-ai/dsh-office-to-pdf -->
+
+<!-- BEGIN GENERATED config-catalog:@deepseek-ai/dsh-paid-route-policy -->
+<a id="deepseek-aidsh-paid-route-policy"></a>
+
+## `@deepseek-ai/dsh-paid-route-policy`
+
+- `inject`: `llm`
+- `refs`: `Volatile` (`@deepseek-ai/cordis`)
+- `source`: [`packages/guard/paid-route-policy/src/config.ts:6`](../packages/guard/paid-route-policy/src/config.ts)
+
+```ts config-catalog
+/** Live operator preauthorization; every grant names exact model ids on one provider route. */
+export interface Config {
+  /** Missing exact grants deny by default; ask requires an available live Agent and approval answerer. */
+  onMissingGrant: Volatile<'deny' | 'ask'>
+  /** Complete preset grants; an empty list permits no declared API-metered route. */
+  grants: Volatile<{
+    /** Registered Provider route approved for declared API-metered inference. */
+    provider: string
+    /** Non-empty exact model allowlist, including auxiliary calls on these pairs. */
+    models: string[]
+  }[]>
+}
+```
+<!-- END GENERATED config-catalog:@deepseek-ai/dsh-paid-route-policy -->
 
 <!-- BEGIN GENERATED config-catalog:@deepseek-ai/dsh-permission-presets -->
 <a id="deepseek-aidsh-permission-presets"></a>
@@ -2450,6 +2508,45 @@ export interface Config {
 }
 ```
 <!-- END GENERATED config-catalog:@deepseek-ai/dsh-repeat-tool-reminder -->
+
+<!-- BEGIN GENERATED config-catalog:@deepseek-ai/dsh-request-budget-policy -->
+<a id="deepseek-aidsh-request-budget-policy"></a>
+
+## `@deepseek-ai/dsh-request-budget-policy`
+
+- `inject`: `llm`
+- `refs`: [`LlmUsageSource`](../packages/llm/llm/src/index.ts) · `Volatile` (`@deepseek-ai/cordis`)
+- `source`: [`packages/guard/request-budget-policy/src/config.ts:32`](../packages/guard/request-budget-policy/src/config.ts)
+
+```ts config-catalog
+/** Live local allowances; empty means no request budgets are enforced. */
+export interface Config {
+  /** Replacing rules retains persisted counts for every reused identity. */
+  budgets: Volatile<RequestBudget[]>
+}
+
+/** One exact-route group sharing a finite allowance. */
+export interface RequestBudget {
+  /** Persisted identity; shared/Session limits, execute reserve and source cannot change for this identity. */
+  id: string
+  /** Required captured Provider declaration; unknown is explicit and grants no payment permission. */
+  usageSource: LlmUsageSource
+  /** Total local attempts, including pending attempts left by crashes. */
+  maxRequests: number
+  /** Optional cap per exact durable Session ID within this allowance; missing identity is refused. */
+  maxRequestsPerSession?: number
+  /** Slots accessible only to requests explicitly labeled execute. */
+  reserveExecuteRequests: number
+  /** Exact, case-sensitive provider/model pairs; each pair belongs to only one budget. */
+  routes: {
+    /** Captured registered Provider route id. */
+    provider: string
+    /** Nonempty exact model ids approved to share this allowance. */
+    models: string[]
+  }[]
+}
+```
+<!-- END GENERATED config-catalog:@deepseek-ai/dsh-request-budget-policy -->
 
 <!-- BEGIN GENERATED config-catalog:@deepseek-ai/dsh-sandbox-local -->
 <a id="deepseek-aidsh-sandbox-local"></a>
@@ -4307,7 +4404,7 @@ export interface Config {
 ## `@deepseek-ai/dsh-workspace-changes`
 
 - `inject`: `subprocess`
-- `source`: [`packages/deliverables/workspace-changes/src/index.ts:33`](../packages/deliverables/workspace-changes/src/index.ts)
+- `source`: [`packages/deliverables/workspace-changes/src/index.ts:34`](../packages/deliverables/workspace-changes/src/index.ts)
 
 ```ts config-catalog
 /** Snapshot, capture, and comparison bounds. Invalid values fail plugin load. */

@@ -92,6 +92,12 @@ const handle = await ctx.agents.create({
 
 `agent/request` 返回后，`ctx.llm.prepareCall()` 会在活跃轮次信号下校验适配器持有的字段，并解析推理强度和输出 token 默认值。循环会在解析、`request/header` 记录与分派期间保留同一个适配器。循环会为首次请求、变化的 envelope（配置或工具——提示词不属于 header）、显式消息序列起点、surface 替换或图片省略决定后的请求及恢复写入完整 header；同一序列内内容未变的步骤、重试与普通后续轮次继承最新 header，历史内追加提示词不是替换，因此紧随其后的请求同样继承 header。在 header 之外，循环还会记录 `request/context`——提供方、模型、`contextWindow` 以及来自 `prepareCall()` 的路由 `systemPromptUpdate` 模式——且仅在其中任何一项与最新快照不同时记录。下一次 waterfall 分发前，循环移除适配器默认字段，使当前路由重新解析它们；显式设置则保留。未处理的路由仍以 `NO_ADAPTER` 失败。
 
+循环向 `prepareCall()` 单独传入自己的 Session ID，供可选准备审计在请求头尚不存在时定位 Session。该身份不是调用控制字段。
+
+每个循环请求携带冻结的 `loopAttempt` 引用：已提交的 `step/start` 序号，加上该步骤内从 1 开始的尝试序号。准备阶段在调用控制之外接收相同引用。重试递增尝试序号；恢复后的生命周期提交新的步骤序号。这些标记对模型不可见，可标识可选审计记录，不把生命周期内的流式 frame ID 当作持久身份。请求不变量依据已提交步骤与 assistant 结算事件检查引用。
+
+请求头保留原生 `responseFormat` 控制值，包括完整 JSON Schema。请求重建和不变量检查将格式与记录的请求头比较，因此缺失或更改 schema 会像其他模型控制值一样违反一致性检查。[LLM 格式校验](../../llm/llm/README.zh.md#request-strict-json-schema-output)负责准入与完成错误。
+
 循环在每个派生消息对象首次进入请求时执行深冻结，并且仅在同一 agent 内复用该证明。恢复的消息保留对象身份；构造请求不会冻结包含消息的事件包装对象。每个请求都会冻结本地规范化 header、新消息数组和请求封装，同时保留取消信号的可变性。[请求冻结决策](../../../.agents/notes/implemented/simplification/2026-09-06-agent-request-freeze-evidence.zh.md)解释了所有权与测量依据。
 
 ### 源码地图

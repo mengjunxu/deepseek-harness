@@ -1,0 +1,12 @@
+{
+  "packages/llm/llm-pi-ai/src/config.ts": "44f52fd2881a30fd306856bfbf61f8b96717c0ba9b61dd28f0eebaa6e9856358",
+  "packages/llm/llm/src/types.ts": "dc3d424d8e8fb645f895dff768dbc1bbf2c00cec82383d1f78fa459adfbadafd",
+  "packages/llm/llm-pi-ai/tests/config.spec.ts": "3da7e834c7391797754a24e88bf1a41aa13d702ff8247f180a503ad1ea46b0eb",
+  "packages/llm/llm-pi-ai/tests/loader-composition.spec.ts": "9a66e6534c7582c7eac59e7ddd8772098f0a6c94e2c033fcfb8ab2b26867e7aa",
+  "packages/llm/llm/tests/fixtures/model-resume-required.ts": "470f4cd44b7348e92d299f03d2945d7446c563d3487e834b6dd1d7873b09cb50",
+  "snapshots/session/model-resume-required/cordis.snapshot.yml": "46c06c4d4fbc77763d900b39190e2a032c7167f6f425bfc6353990a99c61e1fe",
+  "snapshots/session/model-resume-required/session.v3.jsonl": "b1b7c0f26b88891842b0ff001c792ab29b0d86f8be19e03fecdbb65391d95b41",
+  "snapshots/session/model-resume-required/session.v4.jsonl": "527e73bb72bca0af60f8f062ede58d47a3342344721aafe21127f1bc10424afd",
+  "snapshots/session/model-resume-required/snapshot.yml": "7b1c8710520fefce86ae0ed930cca63e21198d71fc312978216e1e04be36061e",
+  "snapshots/session/model-resume-required/cordis.yml": "9f1d4e1214221d6456e3af6f92da7814fe6e70e4b10acd1157aff4abdd312f61"
+}

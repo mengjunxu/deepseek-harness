@@ -1,0 +1,17 @@
+{
+  "baseline": [
+    {
+      "path": "snapshots/session/text-turn/system-prompt.expected.md",
+      "bytes": 2794,
+      "sha256": "940a58e80b52302c9fa89c4ca81368ea92ec63ebe22c3e75e2d507abed28c665"
+    },
+    {
+      "path": "snapshots/session/text-turn/tool-schemas.expected.json",
+      "bytes": 25205,
+      "sha256": "46c67ea5d179b2153b5a0979b0f12f7d1474e3231ee4b7f0aeb4f4efb0b5e053"
+    }
+  ],
+  "addedFirstTurnBytes": 0,
+  "addedFirstTurnTokens": 0,
+  "scope": "Authorization and approval audit are not model surface events; existing prompt/tool fixtures unchanged. Optional confirmation does not switch Session approval policy."
+}

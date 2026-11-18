@@ -1,0 +1,12 @@
+# Production SIWC adapter with a Session-driven, network-isolated Responses fixture.
+- id: llm-deepseek
+  disabled: true
+- id: plugin-package-inventory-deepseek
+  disabled: true
+- id: session-title-llm
+  disabled: true
+- insert:
+    - id: chatgpt-plan
+      name: '../../../packages/experimental/chatgpt-plan/lib/index.js'
+    - id: siwc-session-responses
+      name: '../../../packages/experimental/chatgpt-plan/tests/fixtures/session-responses.ts'

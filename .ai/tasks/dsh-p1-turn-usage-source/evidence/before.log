@@ -1,0 +1,58 @@
+The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
+The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
+The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
+
+ RUN  v4.1.8 /Users/x-dt/workspace/AI/Agents/deepseek-harness
+
+ ❯ |thread-safe| packages/llm/token-meter/tests/turn-usage.spec.ts (48 tests | 1 failed | 47 skipped) 5ms
+     × uses only the accounting source explicitly linked to this loop attempt 4ms
+ ❯ |thread-safe| packages/client/ui-chat/tests/turn-usage-panel.client.spec.tsx (4 tests | 1 failed | 3 skipped) 55ms
+     × discloses the captured cost source for the recorded route 54ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |thread-safe| packages/client/ui-chat/tests/turn-usage-panel.client.spec.tsx > TurnUsagePanel > discloses the captured cost source for the recorded route
+AssertionError: expected 'Turn usage13 tokProvider / modelroute…' to contain 'Cost source'
+
+Expected: "Cost source"
+Received: "Turn usage13 tokProvider / modelroute/mUncached input10 tokOutput3 tok"
+
+ ❯ packages/client/ui-chat/tests/turn-usage-panel.client.spec.tsx:21:50
+     19|     const view = render(<TurnUsagePanel usage={usage} t={t} />)
+     20|     fireEvent.click(view.getByRole('button'))
+     21|     expect(view.getByRole('dialog').textContent).toContain('Cost sourc…
+       |                                                  ^
+     22|     expect(view.getByRole('dialog').textContent).toContain('Local')
+     23|   })
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  |thread-safe| packages/llm/token-meter/tests/turn-usage.spec.ts > deriveTurnTokenUsage > uses only the accounting source explicitly linked to this loop attempt
+AssertionError: expected [ { provider: 'deepseek', …(1) } ] to deeply equal [ { provider: 'deepseek', …(2) } ]
+
+- Expected
++ Received
+
+  [
+    {
+      "model": "deepseek-chat",
+      "provider": "deepseek",
+-     "usageSource": "local",
+    },
+  ]
+
+ ❯ packages/llm/token-meter/tests/turn-usage.spec.ts:76:28
+     74|     const result = deriveTurnTokenUsage(completeAttempt(linked, messag…
+     75|     expect(result?.totalTokens).toBe(170)
+     76|     expect(result?.routes).toEqual([{ provider: 'deepseek', model: 'de…
+       |                            ^
+     77|   })
+     78|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  2 failed (2)
+      Tests  2 failed | 50 skipped (52)
+   Start at  10:37:16
+   Duration  1.71s (transform 832ms, setup 179ms, import 1.12s, tests 60ms, environment 430ms)

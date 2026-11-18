@@ -57,6 +57,8 @@ domain.table('workspaces').update(id, (r) => ({ ...r, path: newPath }))
 
 调用方拥有句柄的生命周期，并在功能关闭时用 `domain.close()` 释放它（通常作为其自身的 `ctx.effect` 资源释放函数）；插件卸载时，设施会关闭仍处于打开状态的领域。
 
+当决策必须读取独立拥有者之间的最新持久化值时，使用 `table.modify(key, fn)`。SQLite 后端支持此操作；不支持的后端拒绝并报 `atomic-modify-unsupported`。回调接收经过 schema 校验的记录或 `undefined`，须同步且纯粹，并返回替换值，或返回 `undefined` 删除记录。缓存与事件语义见[存储参考](../../../docs/subsystems/storage.zh.md)。
+
 ### 把领域路由到后端
 
 哪个后端服务哪个领域由领域插件的配置决定——绝非枢纽。`backend` 指定默认路由；`routes` 按领域名覆盖。路由到未注册后端的领域会在打开时以 `backend-not-found` 明确报错。
@@ -77,6 +79,8 @@ domain.table('workspaces').update(id, (r) => ({ ...r, path: newPath }))
 <a id="understand-the-implementation"></a>
 ## 理解实现
 
+`domain.transaction()` 的同步回调读取最新持久化记录，可一起提交多个表的修改，例如任务历史与项目排序。所有本地缓存均更新后才发布第一条变更事件。回调抛错时整笔写入回滚。
+
 <details>
 <summary>实现细节——点击展开</summary>
 
@@ -85,13 +89,15 @@ domain.table('workspaces').update(id, (r) => ({ ...r, path: newPath }))
 ### 设计理念
 
 - **spec 对象是唯一真源。** `defineDomain` 固定 spec 的字面类型，并在所属包的模块加载时、任何介质被触碰之前校验其字段。记录 schema 使用 zod，因此 `z.infer` 可避免重复定义消费方类型；插件 `Config` 仍由 schemastery 负责。
-- **内存具有最终决定权；介质是持久投影。** 读取同步取自经过校验的内存状态。每次写入都在每个领域一条的写入链上排队：先到达后端持久状态，再变更内存，然后发出 `domain/changed`——被拒绝的后端写入不会触碰内存，因此读取永远不会与介质分叉。
-- **每个领域一条写入链。** `put`、`delete`、`update` 与 `global.set` 都在其上排队；`update` 的变换在链上自己的槽位运行，因此并发更新绝不会交错。记录是普通不可变数据——返回值就是已存对象本身，绝不能原地修改。
+- **经过校验的本地读取。** 读取使用本地记录缓存。每次写入先完成后端持久化，再更新缓存并发出 `domain/changed`；被拒绝的写入不改变本地观察。原子修改在后端事务内校验最新持久化记录。
+- **每个领域一条写入链。** `put`、`delete`、`update`、`modify` 与 `global.set` 都在其上排队；`update` 的变换在链上自己的槽位读取本地缓存。记录是普通不可变数据——返回值就是已存对象本身，绝不能原地修改。
 - **写入在提交点之后发出。** `domain/changed` 是通知，不是事务参与者：监听器抛出异常时，系统会隔离该异常并记录警告，而不会让已经持久的写入被拒绝。
 
 ### 打开顺序
 
 `DomainFacility.open(spec)` 按严格顺序执行，任一步骤失败都会让整个调用失败：拒绝已打开或仍在关闭的名称（`already-open`）；解析路由（`backend-not-found`）；要求 `kv` 分面（`facet-unsupported`）；打开单元（后端 `version-mismatch`／`malformed-medium` 透传）；加载并根据 spec 的 schema 校验每条已存记录与全局（`invalid-record`）；构造领域。调用方持有句柄；设施会在卸载时关闭任何仍打开的领域，已关闭领域的名称只在资源销毁完成后才能重新打开。
+
+服务撤回与介质清理属于同一个有序 effect。服务 disposer 在清理 disposer 之后 yield，使注入消费方先完成退出，再关闭剩余 domain；消费方最后写入并发出事件时，存储 form 仍保持挂载。整机所有者还须在根 Context 并行卸载前通过 `disposeApplication` 排空工作。
 
 ### 源码地图
 
@@ -148,7 +154,7 @@ domain.table('workspaces').update(id, (r) => ({ ...r, path: newPath }))
 
 这些限制说明领域层何时不合适，或何时需要特别的运维注意。它们是当前包约束，不是任务积压。
 
-- **变更只在单进程内可见**——`domain/changed` 是进程内事件；在跨进程修订模式落地前，第二个主机进程或重新连接的 GUI 无法观察变更（[Agent Note](../../../.agents/notes/proposed/architecture/2026-07-24-domain-kv-storage-and-workspace.zh.md)）。
+- **本地变更可见性**——`domain/changed` 不推送其他进程的变更。缓存读取保留本地值；`modify` 根据事务结果刷新当前键，重新打开则刷新整个领域。
 - **没有跨表事务、二级索引或多段键**——每次写入只触碰一条记录；这些扩展列在 Agent Note 的范围外清单中。
 - **没有数据迁移**——领域的已存版本与 spec 不同时，打开操作会被拒绝（`version-mismatch`）；修改 schema 需要手工迁移已存数据。
 

@@ -2,7 +2,7 @@
 
 [English](cordis-primer.md) | 中文
 
-Cordis 是 DeepSeek Harness 底层以 vendor 方式引入的插件框架。本文介绍 harness 插件作者在阅读[子系统页面](subsystems/core.zh.md)上生成的服务/事件参考之前需要了解的 Cordis 核心概念；[Cordis 教程](cordis-tutorial/index.zh.md)则通过实践逐一讲解这些概念。vendor 源码与同步流程见 [vendor/README.md](../vendor/README.md)。
+Cordis 是 DeepSeek Harness 内部 vendored 的插件框架。本入门介绍核心概念；[子系统页面](subsystems/core.zh.md)提供生成的 service/event 参考，[Cordis 教程](cordis-tutorial/index.zh.md)提供实践。[vendor/README.md](../vendor/README.md)负责源码与同步说明。
 
 ## 五个核心概念
 
@@ -48,4 +48,4 @@ Cordis 是 DeepSeek Harness 底层以 vendor 方式引入的插件框架。本�
 
 将行为封装为插件：工具流水线事件属于 `ctx.tools`，模型流式输出属于 `ctx.llm`，实时 agent（智能体）协调属于 `ctx.agents`。拦截和策略优先使用事件；直接能力调用优先使用服务方法。
 
-每个注册都应有对应的 disposer（资源释放函数）：要么从 `ctx.effect()` 返回一个，要么使用 Cordis 提供的辅助方法自动处理。如果 teardown 顺序有要求，请将相关工作放在同一个 effect 中，以确保资源按预期顺序释放。
+每项注册都需要由 `ctx.effect()` 返回或 yield 的 disposer，或由 Cordis helper 负责清理。独立 fiber effect 可能并行释放。需要有序卸载时，应从同一个 generator effect 中 yield 相关 disposer，包括 `ctx.provide()` 的返回值；只调用 helper 而不 yield 其 disposer，仍会保留独立的所有权。整机所有者先通过 app-boot 的 `disposeApplication` 排空工作。

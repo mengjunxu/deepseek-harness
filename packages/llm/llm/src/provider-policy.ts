@@ -2,17 +2,19 @@
 import { z } from 'zod'
 import Schema from '@deepseek-ai/schemastery'
 import { deepFreeze } from '@deepseek-ai/dsh-util-values'
+import { resolveResponseFormat } from './response-format.ts'
 import { HarnessError } from './error.ts'
 import type { LlmProviderPolicy, LlmProviderPolicyInput } from './types.ts'
 
 const SUPPORT = ['supported', 'unsupported', 'unknown'] as const
-const USAGE_SOURCES = ['work_codex_shared', 'chatgpt_web_unofficial', 'api_metered',
+/** Explicit provider usage-source declarations; none implies a balance or payment authorization. */
+export const LLM_USAGE_SOURCES = ['work_codex_shared', 'chatgpt_web_unofficial', 'api_metered',
   'third_party', 'local', 'experimental_unverified', 'unknown'] as const
 const AVAILABILITY = ['ready', 'unconfigured', 'auth_required', 'limited', 'gated', 'unavailable'] as const
 
 /** Cordis configuration fields; provider resolution enforces cross-field admission rules before activation or settings writes. */
 export const ProviderPolicySchema: Schema<LlmProviderPolicyInput | undefined> = Schema.union([Schema.object({
-  usageSource: Schema.union([...USAGE_SOURCES]),
+  usageSource: Schema.union([...LLM_USAGE_SOURCES]),
   availability: Schema.union([...AVAILABILITY]),
   gateReason: Schema.string(),
   capabilities: Schema.object({
@@ -25,7 +27,7 @@ export const ProviderPolicySchema: Schema<LlmProviderPolicyInput | undefined> = 
 
 const support = z.enum(SUPPORT).default('unknown')
 const policySchema = z.object({
-  usageSource: z.enum(USAGE_SOURCES).default('unknown'),
+  usageSource: z.enum(LLM_USAGE_SOURCES).default('unknown'),
   availability: z.enum(AVAILABILITY).default('ready'),
   gateReason: z.string().trim().min(1).optional(),
   capabilities: z.object({ streaming: support, tools: support, structuredOutput: support,
@@ -77,4 +79,5 @@ const requestPolicySchema = z.object({
 export function validateLlmRequestPolicy(input: unknown): void {
   const result = requestPolicySchema.safeParse(input)
   if (!result.success) throw new HarnessError('Invalid LLM request policy', 'INVALID_REQUEST_POLICY', { cause: result.error })
+  if (result.data.responseFormat !== undefined) resolveResponseFormat(result.data.responseFormat)
 }

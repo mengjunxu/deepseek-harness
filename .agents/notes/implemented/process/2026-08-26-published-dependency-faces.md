@@ -34,6 +34,14 @@ Some development relationships exist only in `dsh.client.inject` or TypeScript p
 
 The verifier reads source manifests and source files, so it runs on a clean tree without built `lib/`. Every selected Host face must have `src/index.ts`. An unclassified Host runtime export is a policy violation that blocks all `--fix` writes; a maintainer must review the export and classify it, change the source relationship, or change the package selection. Once source safety passes, `--fix` performs only the section and range changes implied by the classification and removes stale peer metadata.
 
+### Exact default home-path export
+
+The LLM [validation-admission check](../../../../packages/llm/llm/src/validation-admission.ts) imports `defaultDshHome` to exclude the normal Harness home from isolated validation grants. Reusing the owning helper avoids a second hardcoded default-directory calculation. The Host export classification governs npm dependency placement; the LLM check still owns grant validation.
+
+`@deepseek-ai/dsh-home-paths#defaultDshHome` is an exact duplicate-safe Host export. It returns the primitive string `join(homedir(), '.dsh')`, registers no service, retains no mutable module state, and requires no shared constructor or function identity. Two independently imported built module copies have different function identities and return the same OS-default path; the [review evidence](../../../../.ai/tasks/dsh-p1-publication-hygiene/evidence/host-export-review.md) records that check and explicit human approval. This classification permits covered Host consumers to keep this edge in ordinary `dependencies` without requiring a shared module instance.
+
+The exception covers only `defaultDshHome`, not the package's other exports. A helper that later acquires identity-sensitive state or effects requires renewed classification review. By contrast, `dsh-llm#validateLlmRequestPolicy` remains peer-required because its errors use the shared `HarnessError` constructor; equal return values alone do not establish duplicate safety for an error-producing API.
+
 ### Maintainer workflow
 
 Run the verifier without `--fix` for a read-only check of package selection, export classifications, dependency sections, workspace ranges, and peer metadata. An unclassified runtime import reports one clickable `path:line:column` diagnostic per imported export.
@@ -74,7 +82,7 @@ pnpm run benchmark:npm-resolution:next -- --runs=1 --finalist-runs=5 --finalists
 
 [`verify-npm-install-layout`](../../../../scripts/verify-npm-install-layout.ts) is a deterministic package-path and version check in the `Release (dsh)` workflow on every pull request and master push; it does not enforce resolver duration. [`benchmark-npm-resolution`](../../../../scripts/benchmark-npm-resolution.ts) and [`benchmark-next-package-dependency`](../../../../scripts/benchmark-next-package-dependency.ts) remain manual because resolver time varies with machine load and metadata completion order. Their fresh-consumer, metadata-only runs isolate npm's dependency-tree calculation from registry latency and archive downloads, so relative results identify peer relays without creating a release-time performance promise.
 
-The generated policy currently leaves 27 managed Host runtime edges in `dependencies` across 13 packages. Two edges remain in `peerDependencies`: `dsh-api-remotes → dsh-scope` for `carrierKeyOf`, and `dsh-session → dsh-scope` for `scopeOf` and `scopeTarget`.
+The generated policy currently leaves 64 managed Host runtime edges in `dependencies` across 25 packages and nine identity-sensitive edges in `peerDependencies` across seven packages. The [executed edge inventory](../../../../.ai/tasks/dsh-p1-publication-hygiene/evidence/current-host-edges.log) records each export classification.
 
 ## Alternatives considered
 

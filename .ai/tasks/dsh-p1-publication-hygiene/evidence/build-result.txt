@@ -1,0 +1,12 @@
+dist/assets/langs/javascript-DI5JR1nB.js                    174.87 kB │ gzip:  16.64 kB │ map:   236.10 kB
+dist/assets/langs/graphql-DujV8YkJ.js                       371.26 kB │ gzip:  34.69 kB │ map:   500.99 kB
+dist/assets/index-B6rlXntr.js                               629.27 kB │ gzip: 212.35 kB │ map: 7,061.19 kB
+dist/assets/langs/cpp-DIPi6g--.js                           637.59 kB │ gzip:  47.33 kB │ map:   831.50 kB
+dist/assets/vendor-CCJJTK99.js                              740.58 kB │ gzip: 178.53 kB │ map: 2,509.98 kB
+
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 2.17s
+build: recorded 347 client artifact(s) with 3 public value(s)

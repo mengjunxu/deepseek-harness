@@ -4,7 +4,8 @@
  * mapped interfaces make the content, source, and finish unions extensible.
  */
 
-import type { Branded } from '@deepseek-ai/dsh-brand'
+import type { Branded, BrandedNumber } from '@deepseek-ai/dsh-brand'
+import type { JsonValue } from '@deepseek-ai/dsh-util-values'
 import type { FileAttachmentRef, ImageAttachmentRef } from '@deepseek-ai/dsh-attachment'
 import type { MessageId, ToolCallId, ProviderRequestId, ReasoningEffortId } from './brand.ts'
 import type { Message, UserMessage } from './message.ts'
@@ -56,6 +57,40 @@ export interface LlmFailure {
    * selected occurrences in an `image/offload` event and retries the step.
    */
   readonly offloadImages?: number
+}
+
+/** Durable main-loop request identity within the enclosing Session. */
+export interface LlmLoopAttemptRef {
+  /** Committed step/start event that owns the request. */
+  readonly stepStartSeq: BrandedNumber<'SessionSeq'>
+  /** Positive one-based attempt number within that step, including retries. */
+  readonly attempt: number
+}
+
+/** Invocation identity for preparation; it is not part of the logged call controls. */
+export interface LlmPreparationContext {
+  /** Local Session receiving optional preparation audit records. */
+  readonly sessionId?: Branded<'SessionId'>
+  /** Existing auxiliary request classification, when supplied. */
+  readonly purpose?: 'compaction' | 'session-title'
+  /** Explicit main-loop identity; omission makes no loop-attempt claim. */
+  readonly loopAttempt?: LlmLoopAttemptRef
+}
+
+/** Observed preparation failure; no native dispatch or provider acceptance is asserted. */
+export interface LlmPreparationFailure extends LlmPreparationContext {
+  /** Requested route, even when no adapter is registered. */
+  readonly provider: string
+  /** Requested model before adapter-owned defaults resolve. */
+  readonly model: string
+  /** Explicit request intent, when supplied. */
+  readonly intent?: LlmRequestIntent
+  /** Entry point whose preparation failed. */
+  readonly stage: 'prepare' | 'stream'
+  /** Captured registration declaration, or unknown without a registration/policy. */
+  readonly usageSource: LlmUsageSource
+  /** Fixed classification; unknown includes unrecognized provider and plugin errors. */
+  readonly category: 'aborted' | 'admission' | 'capability' | 'route' | 'credentials' | 'unknown'
 }
 
 /** Plain text visible to the end user. */
@@ -168,17 +203,24 @@ export type FinishReason = FinishReasonMap[keyof FinishReasonMap]
  * Token accounting for one model call (cache fields are optional).
  *
  * Counts are DISJOINT: `inputTokens` is uncached input only; cached input is
- * reported separately as `cacheReadTokens`/`cacheWriteTokens` (billed input =
+ * reported separately as `cacheReadTokens`/`cacheWriteTokens` (aggregate input =
  * sum of the three). Adapters whose providers fold cache hits into a total
  * prompt count (DeepSeek's `prompt_tokens`) subtract them out.
  */
 export interface TokenUsage {
+  /**
+   * Explicit counter measurement, independent of the payment route.
+   * provider-reported counts came from provider fields, including normalized
+   * arithmetic; estimated counts use an approximation. Absence is unknown.
+   * Neither value establishes official billing accuracy or account balance.
+   */
+  measurement?: 'provider-reported' | 'estimated'
   inputTokens: number
   outputTokens: number
   /**
-   * Exact full-call total including aggregate prompt and output tokens.
+   * Full-call aggregate count including prompt and output counters.
    *
-   * Adapters preserve a provider total or derive it from authoritative
+   * Adapters preserve a provider total or derive it from complete
    * aggregate prompt/output counters; they omit it when unavailable or
    * inconsistent.
    */
@@ -237,7 +279,11 @@ export interface LlmProviderPolicy {
   readonly availability: LlmProviderAvailability
   /** Operator-facing explanation when the route cannot be used. */
   readonly gateReason?: string
-  /** Provider-wide declarations; model-specific support still requires exact-model metadata. */
+  /**
+   * Provider-wide declarations; model-specific support still requires exact-model metadata.
+   * `resume` means restoring a provider-owned conversation after process restart,
+   * distinct from message replay, DSH Session restore and external-agent continuation.
+   */
   readonly capabilities: Readonly<Record<'streaming' | 'tools' | 'structuredOutput' | 'vision' | 'resume', LlmCapabilitySupport>>
   /** No service balance is inferred from local request counts or successful login. */
   readonly balance: { readonly status: 'unknown' }
@@ -362,6 +408,18 @@ export interface LlmDiscoveredModel {
   inputModalities?: readonly ModelModality[]
 }
 
+/** Native strict JSON Schema response request, retained in the request header. */
+export interface LlmResponseFormat {
+  /** Native schema-constrained output mode. */
+  type: 'json_schema'
+  /** Protocol-safe schema name, one to 64 letters, digits, underscores or dashes. */
+  name: string
+  /** Synchronous JSON Schema compiled locally; native endpoints may support a narrower subset. */
+  schema: { [key: string]: JsonValue }
+  /** Native schema adherence is required, without best-effort downgrade. */
+  strict: true
+}
+
 /** One adapter-discovered model; catalog membership is advisory, not request validation. */
 export interface LlmModelInfo {
   /** Provider route that owns this model entry. */
@@ -444,6 +502,8 @@ export type ToolUpdate = 'in-history' | 'addition-only'
 
 /** Exact-route model metadata resolved by its owning adapter. */
 export interface LlmResolvedModelInfo extends LlmModelInfo {
+  /** Exact route support for native schema-constrained output; absence is unknown. */
+  structuredOutputSupport?: LlmCapabilitySupport
   /** Exact route support for incremental response content before the terminal result; absence is unknown. */
   streamingSupport?: LlmCapabilitySupport
   /** Exact model tool-call support; absence is unknown, independent of Provider declarations. */
@@ -549,12 +609,14 @@ export interface ToolHistory {
 
 /** A single model request, fully assembled. */
 export interface GenerateOptions {
+  /** Native structured response control, recorded by loop callers and enforced on completion. */
+  responseFormat?: LlmResponseFormat
   /** Registered provider route selecting the adapter instance. */
   provider: string
   model: string
   /** Explicit conversational intent, recorded in the request header and hidden from model content. */
   intent?: LlmRequestIntent
-  /** Required Provider declarations; vision, tools and streaming also need exact model support before streaming. */
+  /** Required Provider declarations; vision, tools, streaming and structured output also need exact model support. */
   requiredCapabilities?: LlmProviderCapability[]
   /** Adapter-owned reasoning effort selected for this exact model. */
   reasoningEffort?: ReasoningEffortId
@@ -588,10 +650,35 @@ export interface GenerateOptions {
    * to separate cursors; adapters may map it to model-hidden transport metadata.
    */
   sessionId?: Branded<'SessionId'>
+  /** Main-loop invocation identity, hidden from model input and separate from call controls. */
+  loopAttempt?: LlmLoopAttemptRef
   /**
    * Provider-neutral classification for an auxiliary model call. Adapters may
    * map the purpose to model-hidden transport metadata or purpose-specific
    * generation policy. Ordinary conversation requests leave it unset.
    */
   purpose?: 'compaction' | 'session-title'
+}
+
+/** One resolved registered request, available to dispatch policies before adapter construction. */
+export interface LlmDispatchContext {
+  /** Immutable metadata captured with the adapter registration. */
+  readonly provider: Readonly<LlmProviderInfo>
+  /** Resolved and projected request; policies must not rewrite its model-visible inputs. */
+  readonly options: Readonly<GenerateOptions>
+  /**
+   * Require a pure permission check immediately before native I/O.
+   * Authorization checks also run before resource reservation.
+   * Checks must not perform I/O or mutate request inputs; a returned failure
+   * refuses the continuation. Register before delegation.
+   * @param check - invocation-local permission check; undefined delegates.
+   */
+  checkBeforeDispatch(check: () => LlmFailure | undefined): void
+  /**
+   * Add a cancellation source before delegating. The original request signal
+   * remains active; a policy cannot replace it. Registration after delegation
+   * rejects with INVALID_DISPATCH_CONTROL.
+   * @param signal - additional lifetime that cancels this provider attempt.
+   */
+  cancelOn(signal: AbortSignal): void
 }

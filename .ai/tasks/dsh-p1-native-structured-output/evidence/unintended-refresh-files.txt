@@ -1,0 +1,10 @@
+snapshots/session/agent-instructions/session.v4.jsonl
+snapshots/session/background-confinement-failure/session.v4.jsonl
+snapshots/session/background-job-admission/session.v4.jsonl
+snapshots/session/bash-startup-timeout/session.v4.jsonl
+snapshots/session/both-mode-turn/session.v4.jsonl
+snapshots/session/browser-use-chrome-devtools-mcp/session.v4.jsonl
+snapshots/session/browser-use-playwright-mcp/session.v4.jsonl
+snapshots/session/browser-use-stagehand-native/session.v4.jsonl
+snapshots/session/compaction-recovery/session.v4.jsonl
+snapshots/session/computer-use-cua-driver-mcp/session.v4.jsonl

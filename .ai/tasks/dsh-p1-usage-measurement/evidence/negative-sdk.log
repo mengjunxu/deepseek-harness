@@ -1,0 +1,119 @@
+============================= test session starts ==============================
+platform darwin -- Python 3.12.7, pytest-7.4.4, pluggy-1.0.0 -- /opt/anaconda3/bin/python
+cachedir: .pytest_cache
+rootdir: /Users/x-dt/workspace/AI/Agents/deepseek-harness/python/sdk
+configfile: pyproject.toml
+plugins: anyio-4.2.0
+collecting ... collected 8 items / 7 deselected / 1 selected
+
+python/sdk/tests/test_intent_routing_snapshot.py::test_intent_routing_snapshot[request-usage-measurement] FAILED [100%]
+
+=================================== FAILURES ===================================
+___________ test_intent_routing_snapshot[request-usage-measurement] ____________
+
+tmp_path = PosixPath('/private/var/folders/tw/b9_d4hqs4bq2h1_qssz7x7hm0000gn/T/pytest-of-x-dt/pytest-27/test_intent_routing_snapshot_r0')
+intent = 'request-usage-measurement'
+
+    @pytest.mark.skipif(sys.platform == 'win32', reason='uses the POSIX shebang of the built dsh CLI')
+    @pytest.mark.skipif(not CLI.exists(), reason='requires the built dsh profile runtime')
+    @pytest.mark.parametrize('intent', ['chat', 'plan', 'review', 'execute', 'structured-output', 'request-accounting', 'request-preparation-failed', 'request-usage-measurement'])
+    def test_intent_routing_snapshot(tmp_path: Path, intent: str) -> None:
+        accounting_case = intent in ('request-accounting', 'request-preparation-failed', 'request-usage-measurement')
+        scenario_name = ('model-structured-output' if intent == 'structured-output' else
+                         intent if accounting_case else f'intent-routing-{intent}')
+        route_intent = 'chat' if intent == 'structured-output' or accounting_case else intent
+        scenario = ROOT / 'snapshots' / 'sdk' / scenario_name
+        recording = max(
+            scenario.glob('session.v[0-9]*.jsonl'),
+            key=lambda path: int(path.name.removeprefix('session.v').removesuffix('.jsonl')),
+        )
+        if accounting_case:
+            recording = scenario / 'session.v3.jsonl'
+        replay_patch = tmp_path / 'replay.json'
+        replay_config = {'file': str(recording)}
+        if intent == 'request-usage-measurement':
+            replay_config['overrideFile'] = str(scenario / 'replay.override.json')
+        if accounting_case:
+            replay_config['providers'] = [{
+                'id': 'intent-chat',
+                'policy': {'usageSource': 'local', 'capabilities': {'tools': 'supported'}},
+                'models': [{'id': 'chat-fixture', 'toolSupport': 'supported', 'contextWindow': 262144}],
+            }]
+        replay_patch.write_text(json.dumps([
+            {'id': 'llm-deepseek', 'disabled': True},
+            {'insert': [{
+                'id': 'llm-replay',
+                'name': str(ROOT / 'packages' / 'test-support' / 'llm-replay' / 'lib' / 'index.js'),
+                'config': replay_config,
+            }]},
+        ]))
+        patches = (str(scenario / 'cordis.yml'),)
+        if accounting_case:
+            patches += (str(scenario / 'cordis.snapshot.yml'),)
+        patches += (str(replay_patch),)
+        with DeepSeekHarness(
+            dsh_bin=str(CLI),
+            dsh_home=str(tmp_path / 'home'),
+            cwd=str(tmp_path),
+            profile='sdk',
+            patches=patches,
+            provider=f'intent-{route_intent}',
+            model=f'{route_intent}-fixture',
+            env={
+                'DSH_TELEMETRY_DISABLED': '1',
+                'DSH_SNAPSHOT': 'replay',
+                'DSH_SNAPSHOT_FILE': str(recording),
+                'DSH_AGENTS_HOME': str(tmp_path / 'agents'),
+            },
+        ) as harness:
+            result = harness.run('Reply with exactly INTENT_OK.')
+        assert result.finish_reason == 'completed', next(event['data']['reason'] for event in reversed(result.events) if event['type'] == 'turn/end')
+        header = next(event for event in result.events if event['type'] == 'request/header')
+        actual = {
+            'config': header['data']['header']['config'],
+            'final_response': result.final_response,
+            'finish_reason': result.finish_reason,
+        }
+        if accounting_case:
+            actual['accounting'] = [event['data'] for event in result.events if event['type'] == 'llm/request-accounting']
+            assert len(actual['accounting']) == 1
+        if intent == 'request-preparation-failed':
+            actual['preparation'] = [event['data'] for event in result.events if event['type'] == 'llm/preparation-failed']
+            assert len(actual['preparation']) == 1
+>       assert actual == json.loads(EXPECTED.read_text())[intent]
+E       AssertionError: assert {'config': {'provider': 'intent-chat', 'model': 'chat-fixture', 'intent': 'chat', 'requiredCapabilities': ['tools']}, 'final_response': 'INTENT_OK', 'finish_reason': 'completed', 'accounting': [{'provider': 'intent-chat', 'model': 'chat-fixture', 'usageSource': 'local', 'intent': 'chat', 'loopAttempt': {'stepStartSeq': 6, 'attempt': 1}, 'outcome': 'completed', 'finishKind': 'stop', 'usage': {'kind': 'adapter-reported', 'tokens': {'inputTokens': 1, 'outputTokens': 1}}}]} == {'config': {'provider': 'intent-chat', 'model': 'chat-fixture', 'intent': 'chat', 'requiredCapabilities': ['tools']}, 'final_response': 'INTENT_OK', 'finish_reason': 'completed', 'accounting': [{'provider': 'intent-chat', 'model': 'chat-fixture', 'usageSource': 'local', 'intent': 'chat', 'outcome': 'completed', 'finishKind': 'stop', 'usage': {'kind': 'adapter-reported', 'tokens': {'inputTokens': 1, 'outputTokens': 1, 'measurement': 'estimated'}}, 'loopAttempt': {'stepStartSeq': 6, 'attempt': 1}}]}
+E         Common items:
+E         {'config': {'intent': 'chat',
+E                     'model': 'chat-fixture',
+E                     'provider': 'intent-chat',
+E                     'requiredCapabilities': ['tools']},
+E          'final_response': 'INTENT_OK',
+E          'finish_reason': 'completed'}
+E         Differing items:
+E         {'accounting': [{'finishKind': 'stop', 'intent': 'chat', 'loopAttempt': {'attempt': 1, 'stepStartSeq': 6}, 'model': 'chat-fixture', ...}]} != {'accounting': [{'finishKind': 'stop', 'intent': 'chat', 'loopAttempt': {'attempt': 1, 'stepStartSeq': 6}, 'model': 'chat-fixture', ...}]}
+E         Full diff:
+E           {
+E            'accounting': [{'finishKind': 'stop',
+E                            'intent': 'chat',
+E                            'loopAttempt': {'attempt': 1,
+E                                            'stepStartSeq': 6},
+E                            'model': 'chat-fixture',
+E                            'outcome': 'completed',
+E                            'provider': 'intent-chat',
+E                            'usage': {'kind': 'adapter-reported',
+E                                      'tokens': {'inputTokens': 1,
+E         -                                       'measurement': 'estimated',
+E                                                 'outputTokens': 1}},
+E                            'usageSource': 'local'}],
+E            'config': {'intent': 'chat',
+E                       'model': 'chat-fixture',
+E                       'provider': 'intent-chat',
+E                       'requiredCapabilities': ['tools']},
+E            'final_response': 'INTENT_OK',
+E            'finish_reason': 'completed',
+E           }
+
+python/sdk/tests/test_intent_routing_snapshot.py:83: AssertionError
+=========================== short test summary info ============================
+FAILED python/sdk/tests/test_intent_routing_snapshot.py::test_intent_routing_snapshot[request-usage-measurement]
+======================= 1 failed, 7 deselected in 0.55s ========================

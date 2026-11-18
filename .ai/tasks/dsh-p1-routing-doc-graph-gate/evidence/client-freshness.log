@@ -1,0 +1,2 @@
+$ tsx scripts/gen-client-catalog.ts --check
+gen-client-catalog: packages/extensions/cordis-client-runner/src/client/slot-catalog.ts is up to date.

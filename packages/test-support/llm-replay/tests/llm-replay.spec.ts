@@ -1,7 +1,7 @@
 import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, onTestFinished, vi } from 'vitest'
 import { Context } from '@deepseek-ai/cordis'
 import { SESSION_FORMAT_VERSION, SessionSeq } from '@deepseek-ai/dsh-session'
 import type { SessionEvent } from '@deepseek-ai/dsh-session'
@@ -1476,6 +1476,34 @@ describe('installLlmReplay (through the real LlmRuntime)', () => {
     expect(ctx.llm.listProviders()).toEqual([])
   })
 
+  it('admits and validates replayed native JSON only with explicit provider and model support', async () => {
+    const text = '{"result":"ok"}'
+    const chunks: StreamChunk[] = [
+      { type: 'block-start', index: 0, blockType: 'text' },
+      { type: 'block-end', index: 0, block: { type: 'text', text } },
+      { type: 'finish', reason: { kind: 'stop' } },
+    ]
+    writeLog(chunks)
+    const ctx = new Context()
+    onTestFinished(() => ctx.fiber.dispose())
+    await ctx.plugin(LlmRuntime)
+    apply(ctx, {
+      file, providers: [{
+        id: 'native', policy: { capabilities: { structuredOutput: 'supported' } },
+        models: [{ id: 'schema', structuredOutputSupport: 'supported' }, { id: 'unknown' }],
+      }],
+    })
+    const request: GenerateOptions = {
+      provider: 'native', model: 'schema', messages: [],
+      responseFormat: { type: 'json_schema', name: 'result', strict: true, schema: {
+        type: 'object', properties: { result: { type: 'string' } }, required: ['result'], additionalProperties: false,
+      } },
+    }
+    await expect(ctx.llm.prepareCall({ ...request, model: 'unknown' }))
+      .rejects.toMatchObject({ code: 'UNSUPPORTED_MODEL_CAPABILITY' })
+    expect(await drain(ctx.llm.stream(request))).toEqual(chunks)
+  })
+
   it('rejects an invalid replay-provider retry policy during registration', async () => {
     writeLog(TEXT_CHUNKS)
     const ctx = new Context()
@@ -2129,6 +2157,50 @@ describe('installLlmReplay (per-session keying)', () => {
 })
 
 describe('apply (the plugin entry)', () => {
+  it.each(['toolSupport', 'streamingSupport'] as const)('preserves exact-model %s from loaded replay configuration', async (field) => {
+    writeFileSync(file, replaySessionJsonl([TEXT_CHUNKS]), 'utf8')
+    const ctx = new Context()
+    onTestFinished(() => ctx.fiber.dispose())
+    await ctx.plugin(LlmRuntime)
+    apply(ctx, { file, providers: [{ id: 'native', models: [{ id: 'm', [field]: 'supported' }] }] })
+    await expect(ctx.llm.resolveModelInfo('native', 'm')).resolves.toMatchObject({ [field]: 'supported' })
+  })
+
+  it.each(['toolSupport', 'streamingSupport'] as const)('rejects invalid %s in replay JSON', async (field) => {
+    writeFileSync(file, replaySessionJsonl([TEXT_CHUNKS]), 'utf8')
+    const ctx = new Context()
+    onTestFinished(() => ctx.fiber.dispose())
+    await ctx.plugin(LlmRuntime)
+    const providers = JSON.parse(JSON.stringify([
+      { id: 'native', models: [{ id: 'm', [field]: 'yes' }] },
+    ])) as NonNullable<Config['providers']>
+    expect(() => { apply(ctx, { file, providers }) }).toThrow(`${field} is invalid`)
+  })
+
+  it.each(['unknown', 'unsupported'] as const)('preserves explicit structured support %s', async (support) => {
+    writeFileSync(file, replaySessionJsonl([TEXT_CHUNKS]), 'utf8')
+    const ctx = new Context()
+    onTestFinished(() => ctx.fiber.dispose())
+    await ctx.plugin(LlmRuntime)
+    apply(ctx, { file, providers: [
+      { id: 'native', models: [{ id: 'schema', structuredOutputSupport: support }] },
+    ] })
+    await expect(ctx.llm.resolveModelInfo('native', 'schema')).resolves.toMatchObject({ structuredOutputSupport: support })
+  })
+
+  it('rejects invalid structured support and provider policy in loaded JSON', async () => {
+    writeFileSync(file, replaySessionJsonl([TEXT_CHUNKS]), 'utf8')
+    const ctx = new Context()
+    onTestFinished(() => ctx.fiber.dispose())
+    await ctx.plugin(LlmRuntime)
+    expect(() => {
+      apply(ctx, { file, providers: JSON.parse('[{"id":"native","models":[{"id":"schema","structuredOutputSupport":"yes"}]}]') as NonNullable<Config['providers']> })
+    }).toThrow('structuredOutputSupport is invalid')
+    expect(() => {
+      apply(ctx, { file, providers: JSON.parse('[{"id":"native","policy":{"availability":"gated"}}]') as NonNullable<Config['providers']> })
+    }).toThrow()
+  })
+
   const ORIG = {
     file: process.env.DSH_SNAPSHOT_FILE,
     override: process.env.DSH_SNAPSHOT_OVERRIDE,

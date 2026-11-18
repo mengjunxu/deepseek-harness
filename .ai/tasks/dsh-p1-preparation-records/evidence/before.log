@@ -1,0 +1,35 @@
+The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
+The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
+The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
+
+ RUN  v4.1.8 /Users/x-dt/workspace/AI/Agents/deepseek-harness
+
+ ❯ |thread-safe| packages/llm/token-meter/tests/request-records.spec.ts (19 tests | 1 failed | 18 skipped) 18ms
+   × audits a direct native preparation refusal separately from settled dispatches 17ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |thread-safe| packages/llm/token-meter/tests/request-records.spec.ts > audits a direct native preparation refusal separately from settled dispatches
+AssertionError: expected [] to have a length of 1 but got +0
+
+- Expected
++ Received
+
+- 1
++ 0
+
+ ❯ packages/llm/token-meter/tests/request-records.spec.ts:38:93
+     36|   const { ctx, events, call, session } = await fixture()
+     37|   await Array.fromAsync(ctx.llm.stream({ ...call, provider: 'unregiste…
+     38|   expect(events.map(event => event.type).filter(type => type === 'llm/…
+       |                                                                                             ^
+     39|   expect(events.filter(event => event.type === 'llm/request-accounting…
+     40|   expect(ctx.sessionProjections.snapshot(session, ['requestAccounting'…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 18 skipped (19)
+   Start at  23:11:25
+   Duration  682ms (transform 443ms, setup 147ms, import 427ms, tests 18ms, environment 0ms)

@@ -1,0 +1,36 @@
+The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
+The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
+The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
+
+ RUN  v4.1.8 /Users/x-dt/workspace/AI/Agents/deepseek-harness
+
+x···
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |thread-safe| scripts/gen-doc-graphs.spec.ts > event relation call-site indexing > finds global and scoped Context.bail queries without accepting unrelated methods
+AssertionError: expected [] to deeply equal [ 'pkgquery' ]
+
+- Expected
++ Received
+
+- [
+-   "pkgquery",
+- ]
++ []
+
+ ❯ scripts/gen-doc-graphs.spec.ts:95:66
+     93| describe('event relation call-site indexing', () => {
+     94|   it('finds global and scoped Context.bail queries without accepting u…
+     95|     expect(dispatchersOf(['pkgquery'], 'pkgquery/global-query')).toEqu…
+       |                                                                  ^
+     96|     expect(dispatchersOf(['pkgquery'], 'pkgquery/scoped-query')).toEqu…
+     97|     expect(dispatchersOf(['pkgquery'], 'pkgquery/unrelated')).toEqual(…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 3 passed (4)
+   Start at  10:49:52
+   Duration  842ms (transform 309ms, setup 149ms, import 574ms, tests 19ms, environment 0ms)

@@ -14,8 +14,11 @@ import type { ChildProcess } from 'node:child_process'
  * Race the child's exit against a timer. Neither outcome leaves anything
  * behind on the child: the exit listener is removed on timeout and the timer
  * is cleared on exit, so the ladder's tiers never accumulate listeners.
+ * @param child - SDK runtime process.
+ * @param ms - observation window in milliseconds.
+ * @returns whether the process exited within the window.
  */
-function exitsWithin(child: ChildProcess, ms: number): Promise<boolean> {
+export function exitsWithin(child: ChildProcess, ms: number): Promise<boolean> {
   if (child.exitCode !== null || child.signalCode !== null) return Promise.resolve(true)
   return new Promise<boolean>((resolve) => {
     const onExit = (): void => {

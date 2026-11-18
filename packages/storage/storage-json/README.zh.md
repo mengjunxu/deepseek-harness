@@ -87,6 +87,8 @@ kind: "package-reference"
 
 `per-record` 表文档位于 `<root>/<unit>/<table>/<key>.json`，形式为 `{ "version": 1, "record": <value> }`；可选的全局值使用 `<root>/<unit>/global.json`。格式版本来自领域规范。
 
+后端服务先撤回并等待注入的 domain 所有者排空，然后注销后端并关闭介质。两个 disposer 由同一个有序 effect yield。整机所有者仍须在根 Context 并行卸载前提供应用排空阶段。
+
 ### 源码地图
 
 | 文件 | 职责 |

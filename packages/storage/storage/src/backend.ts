@@ -73,6 +73,24 @@ export interface KvUnitDescriptor {
   readonly compatibleVersions?: readonly number[]
 }
 
+/** Synchronous record access valid only within the owning transaction callback. */
+export interface KvTransaction {
+  /**
+   * Read a record from the transaction's current view.
+   * @param table - Declared table.
+   * @param key - Record identity.
+   * @returns decoded data or undefined for a missing key.
+   */
+  get(table: string, key: string): unknown
+  /**
+   * Store one record; undefined removes the key.
+   * @param table - Declared table.
+   * @param key - Record identity.
+   * @param value - Serializable data, or undefined for removal.
+   */
+  set(table: string, key: string, value: unknown): void
+}
+
 /**
  * One opened unit. Values are opaque JSON to this layer: no schema, no
  * events, no domain meaning. The unit does NOT serialize concurrent writes —
@@ -83,6 +101,13 @@ export interface KvUnitDescriptor {
  * rejects with `closed`.
  */
 export interface KvUnit {
+  /**
+   * Commit all changes made by a synchronous callback in one write transaction.
+   * @param operation - Reads and writes through the provided handle; it cannot escape the call.
+   * @returns the callback result after commit. A thrown error rolls back all writes.
+   */
+  transaction?<T>(operation: (tx: KvTransaction) => T): Promise<T>
+
   /**
    * Read the full current snapshot.
    * @returns every table's records keyed by table name, plus the global
@@ -100,6 +125,20 @@ export interface KvUnit {
    * @returns resolution after durability.
    */
   putRecord(table: string, key: string, value: unknown): Promise<void>
+
+  /**
+   * Atomically read and modify the latest persisted record across independent
+   * owners of this medium. The callback runs exactly once after acquiring the
+   * write transaction; it must be synchronous, pure and must not reenter the
+   * backend. Callback and serialization failures roll back the modification.
+   * Backends that cannot provide this operation omit it; consumers must not
+   * substitute a cached read followed by putRecord.
+   * @param table - Declared table name.
+   * @param key - Record key.
+   * @param modify - Current persisted value, or undefined when absent; returning undefined deletes the record.
+   * @returns the committed callback result, including undefined after deletion.
+   */
+  modifyRecord?(table: string, key: string, modify: (current: unknown) => unknown): Promise<unknown>
 
   /**
    * Delete one record durably. Idempotent: a missing key is a no-op.

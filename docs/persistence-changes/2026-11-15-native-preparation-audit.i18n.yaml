@@ -1,0 +1,28 @@
+# Bilingual-pair consistency record for 2026-11-15-native-preparation-audit.md (docs/i18n/README.md): per heading
+# section, a hash of its English and Chinese blocks outside code blocks and generated regions.
+# After editing either side, bring the other along and re-record with:
+#   pnpm run verify-translation-pairing --write docs/persistence-changes/2026-11-15-native-preparation-audit.md
+/:
+  en: 3d5a424ae7d7e46b
+  zh: c22a8e4a62d8cc1a
+/2026-11-15-native-preparation-audit:
+  en: 906eed2b96c4b5fc
+  zh: e014c9e4ba444ed3
+/2026-11-15-native-preparation-audit/summary:
+  en: a2a9ebdddfc98cb6
+  zh: 292cd65d25dff481
+/2026-11-15-native-preparation-audit/table-of-contents:
+  en: 6cf314a069ceb451
+  zh: 9adff678e9ecab3b
+/2026-11-15-native-preparation-audit/declaration:
+  en: 6907136f28e48c90
+  zh: 02f8298485f3d8e7
+/2026-11-15-native-preparation-audit/compatibility:
+  en: da0c926df2954177
+  zh: f41303ee2b1473e3
+/2026-11-15-native-preparation-audit/verification:
+  en: 56d33c7eb4b33d27
+  zh: 8eebb77d1c4ac737
+/2026-11-15-native-preparation-audit/dev-note:
+  en: b75c8458928b72b9
+  zh: 003ba4e17b4b5269

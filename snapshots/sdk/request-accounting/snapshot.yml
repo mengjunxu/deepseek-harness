@@ -1,0 +1,9 @@
+version: 1
+scenario: request-accounting
+profile: sdk
+composition: sdk-request-accounting
+recording: authored
+header:
+  class: request-accounting
+  pin: true
+  toolSchemasSource: sdk/bash-tool

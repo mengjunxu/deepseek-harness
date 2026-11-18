@@ -6,7 +6,8 @@
  * @module dsh-llm/call-config
  */
 
-import type { GenerateOptions, LlmRequestIntent, LlmProviderCapability } from './types.ts'
+import type { GenerateOptions, LlmRequestIntent, LlmProviderCapability, LlmResponseFormat } from './types.ts'
+import { deepEqualJson } from '@deepseek-ai/dsh-util-values'
 import type { ReasoningEffortId } from './brand.ts'
 
 /** Process-local identities of request objects assembled by dsh-agent-loop. */
@@ -23,6 +24,8 @@ const AGENT_LOOP_REQUESTS = new WeakSet<GenerateOptions>()
 export interface LlmCallConfig {
   provider: string
   model: string
+  /** Native strict JSON Schema output, logged with the request controls. */
+  responseFormat?: LlmResponseFormat
   /** Explicit request purpose; omission preserves an unclassified request. */
   intent?: LlmRequestIntent
   /** Required provider declarations; unknown and unsupported both reject. */
@@ -58,6 +61,7 @@ export function callConfigEquals(a: LlmCallConfig, b: LlmCallConfig): boolean {
     || a.reasoningEffort !== b.reasoningEffort
     || a.temperature !== b.temperature
     || a.maxTokens !== b.maxTokens
+    || !deepEqualJson(a.responseFormat, b.responseFormat)
   ) return false
   if (a.requiredCapabilities === undefined || b.requiredCapabilities === undefined) {
     if (a.requiredCapabilities !== b.requiredCapabilities) return false

@@ -1,0 +1,19 @@
+- id: llm-pi-ai
+  name: '@deepseek-ai/dsh-llm-pi-ai'
+  config:
+    providers:
+      resume-fixture:
+        api: openai-completions
+        baseURL: http://127.0.0.1:9/v1
+        models:
+          - id: history-only
+            input:
+              - text
+        policy:
+          usageSource: local
+          capabilities:
+            resume: unsupported
+
+- insert:
+    - id: model-resume-required-snapshot
+      name: '../../../packages/llm/llm/tests/fixtures/model-resume-required.ts'

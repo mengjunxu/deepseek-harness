@@ -1,0 +1,14 @@
+[
+  {
+    "path": "snapshots/web/turn-usage-source/session.v3.jsonl",
+    "sha256": "bee35f08def45d8752d77f9400c969e809173b9b7e9c6b8d0c8cd8612411646e"
+  },
+  {
+    "path": "snapshots/session/request-usage-measurement/session.v3.jsonl",
+    "sha256": "d591b6f8880de8db93c6befddf9ae8cdf8ed894fea158da446abbe4ea4c1ad66"
+  },
+  {
+    "path": "snapshots/sdk/request-usage-measurement/session.v3.jsonl",
+    "sha256": "4a96dfaf149a0dc2df7085d4fbf8d69b941d6d58c73405bd8da9decdc857877e"
+  }
+]

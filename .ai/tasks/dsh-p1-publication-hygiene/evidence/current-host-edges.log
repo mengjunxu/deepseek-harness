@@ -1,0 +1,75 @@
+verify-package-dependencies: 64 managed Host runtime edge(s) remain in dependencies across 25 package(s):
+  @deepseek-ai/dsh-api-gateway -> @deepseek-ai/dsh-deque: @deepseek-ai/dsh-deque#Deque
+  @deepseek-ai/dsh-api-gateway -> @deepseek-ai/dsh-timeout: @deepseek-ai/dsh-timeout#MAX_TIMER_DELAY_MS
+  @deepseek-ai/dsh-api-gateway -> @deepseek-ai/dsh-typert-protocol: @deepseek-ai/dsh-typert-protocol#RemoteError, @deepseek-ai/dsh-typert-protocol#isRemoteJsonValue, @deepseek-ai/dsh-typert-protocol#remoteErrorOf, @deepseek-ai/dsh-typert-protocol#remoteMethods
+  @deepseek-ai/dsh-api-gateway -> @deepseek-ai/schemastery: @deepseek-ai/schemastery#default
+  @deepseek-ai/dsh-api-gateway -> ws: ws#WebSocketServer, ws#default
+  @deepseek-ai/dsh-api-job-controller -> @deepseek-ai/dsh-typert-protocol: @deepseek-ai/dsh-typert-protocol#Remote, @deepseek-ai/dsh-typert-protocol#RemoteError, @deepseek-ai/dsh-typert-protocol#TypertRemoteService
+  @deepseek-ai/dsh-api-job-controller -> @deepseek-ai/schemastery: @deepseek-ai/schemastery#default
+  @deepseek-ai/dsh-api-job-controller -> zod: zod#z
+  @deepseek-ai/dsh-api-remotes -> @deepseek-ai/dsh-deque: @deepseek-ai/dsh-deque#Deque
+  @deepseek-ai/dsh-api-remotes -> @deepseek-ai/dsh-util-values: @deepseek-ai/dsh-util-values#isJsonValue
+  @deepseek-ai/dsh-api-terminal-controller -> @deepseek-ai/dsh-deque: @deepseek-ai/dsh-deque#Deque
+  @deepseek-ai/dsh-api-terminal-controller -> @deepseek-ai/dsh-lazy-require: @deepseek-ai/dsh-lazy-require#createLazyRequire
+  @deepseek-ai/dsh-api-terminal-controller -> @deepseek-ai/dsh-typert-protocol: @deepseek-ai/dsh-typert-protocol#Remote, @deepseek-ai/dsh-typert-protocol#RemoteError, @deepseek-ai/dsh-typert-protocol#TypertRemoteService
+  @deepseek-ai/dsh-api-terminal-controller -> @deepseek-ai/schemastery: @deepseek-ai/schemastery#default
+  @deepseek-ai/dsh-api-terminal-controller -> @xterm/addon-serialize: @xterm/addon-serialize#*
+  @deepseek-ai/dsh-api-terminal-controller -> @xterm/headless: @xterm/headless#*
+  @deepseek-ai/dsh-api-terminal-controller -> zod: zod#z
+  @deepseek-ai/dsh-api-workspace-files -> @deepseek-ai/dsh-deque: @deepseek-ai/dsh-deque#Deque
+  @deepseek-ai/dsh-api-workspace-files -> @deepseek-ai/dsh-typert-protocol: @deepseek-ai/dsh-typert-protocol#Remote, @deepseek-ai/dsh-typert-protocol#RemoteError, @deepseek-ai/dsh-typert-protocol#TypertRemoteService
+  @deepseek-ai/dsh-api-workspace-files -> @deepseek-ai/schemastery: @deepseek-ai/schemastery#default
+  @deepseek-ai/dsh-api-workspace-files -> zod: zod#z
+  @deepseek-ai/dsh-client-connection -> @deepseek-ai/dsh-credentials: @deepseek-ai/dsh-credentials#credentialKey
+  @deepseek-ai/dsh-client-connection -> @deepseek-ai/schemastery: @deepseek-ai/schemastery#default
+  @deepseek-ai/dsh-client-connection -> zod: zod#z
+  @deepseek-ai/dsh-client-file-upload -> @deepseek-ai/dsh-brand: @deepseek-ai/dsh-brand#brandString
+  @deepseek-ai/dsh-client-file-upload -> @deepseek-ai/dsh-typert-protocol: @deepseek-ai/dsh-typert-protocol#Remote, @deepseek-ai/dsh-typert-protocol#RemoteError, @deepseek-ai/dsh-typert-protocol#TypertRemoteService, @deepseek-ai/dsh-typert-protocol#remoteErrorOf
+  @deepseek-ai/dsh-client-file-upload -> zod: zod#z
+  @deepseek-ai/dsh-client-hmr -> @deepseek-ai/schemastery: @deepseek-ai/schemastery#default
+  @deepseek-ai/dsh-client-locale -> @deepseek-ai/schemastery: @deepseek-ai/schemastery#default
+  @deepseek-ai/dsh-client-product-analytics -> @deepseek-ai/dsh-typert-protocol: @deepseek-ai/dsh-typert-protocol#Remote, @deepseek-ai/dsh-typert-protocol#TypertRemoteService
+  @deepseek-ai/dsh-client-product-analytics -> @deepseek-ai/schemastery: @deepseek-ai/schemastery#default
+  @deepseek-ai/dsh-client-product-analytics -> zod: zod#z
+  @deepseek-ai/dsh-client-shortcuts -> @deepseek-ai/dsh-util-crypto: @deepseek-ai/dsh-util-crypto#randomUUID
+  @deepseek-ai/dsh-client-shortcuts -> @deepseek-ai/dsh-util-values: @deepseek-ai/dsh-util-values#assertNever
+  @deepseek-ai/dsh-client-shortcuts -> @deepseek-ai/schemastery: @deepseek-ai/schemastery#default
+  @deepseek-ai/dsh-client-ui-chat -> @deepseek-ai/schemastery: @deepseek-ai/schemastery#default
+  @deepseek-ai/dsh-client-ui-conversation -> @deepseek-ai/schemastery: @deepseek-ai/schemastery#default
+  @deepseek-ai/dsh-client-ui-deliverables -> @deepseek-ai/dsh-typert-protocol: @deepseek-ai/dsh-typert-protocol#remoteErrorOf
+  @deepseek-ai/dsh-client-ui-plugin-manager -> @deepseek-ai/dsh-timeout: @deepseek-ai/dsh-timeout#MAX_TIMER_DELAY_MS
+  @deepseek-ai/dsh-client-ui-plugin-manager -> @deepseek-ai/dsh-typert-protocol: @deepseek-ai/dsh-typert-protocol#Remote, @deepseek-ai/dsh-typert-protocol#TypertRemoteService
+  @deepseek-ai/dsh-client-ui-plugin-manager -> @deepseek-ai/schemastery: @deepseek-ai/schemastery#default
+  @deepseek-ai/dsh-client-ui-plugin-manager -> zod: zod#z
+  @deepseek-ai/dsh-client-ui-settings -> @deepseek-ai/schemastery: @deepseek-ai/schemastery#default
+  @deepseek-ai/dsh-client-ui-settings-account -> @deepseek-ai/schemastery: @deepseek-ai/schemastery#default
+  @deepseek-ai/dsh-client-ui-settings-general -> @deepseek-ai/schemastery: @deepseek-ai/schemastery#default
+  @deepseek-ai/dsh-client-ui-settings-models -> @deepseek-ai/schemastery: @deepseek-ai/schemastery#default
+  @deepseek-ai/dsh-client-ui-sidebar-documentpreview -> @deepseek-ai/schemastery: @deepseek-ai/schemastery#default
+  @deepseek-ai/dsh-client-ui-theme -> @deepseek-ai/schemastery: @deepseek-ai/schemastery#default
+  @deepseek-ai/dsh-llm -> @deepseek-ai/dsh-brand: @deepseek-ai/dsh-brand#brandString
+  @deepseek-ai/dsh-llm -> @deepseek-ai/dsh-home-paths: @deepseek-ai/dsh-home-paths#defaultDshHome
+  @deepseek-ai/dsh-llm -> @deepseek-ai/dsh-timeout: @deepseek-ai/dsh-timeout#MAX_TIMER_DELAY_MS
+  @deepseek-ai/dsh-llm -> @deepseek-ai/dsh-typert-protocol: @deepseek-ai/dsh-typert-protocol#Remote, @deepseek-ai/dsh-typert-protocol#RemoteError, @deepseek-ai/dsh-typert-protocol#TypertRemoteService
+  @deepseek-ai/dsh-llm -> @deepseek-ai/dsh-util-crypto: @deepseek-ai/dsh-util-crypto#randomUUID
+  @deepseek-ai/dsh-llm -> @deepseek-ai/dsh-util-values: @deepseek-ai/dsh-util-values#assertNever, @deepseek-ai/dsh-util-values#deepEqualJson, @deepseek-ai/dsh-util-values#deepFreeze, @deepseek-ai/dsh-util-values#isJsonValue, @deepseek-ai/dsh-util-values#snapshotJsonValue
+  @deepseek-ai/dsh-llm -> @deepseek-ai/schemastery: @deepseek-ai/schemastery#default
+  @deepseek-ai/dsh-llm -> ajv: ajv/dist/2020.js#Ajv2020
+  @deepseek-ai/dsh-llm -> zod: zod#z
+  @deepseek-ai/dsh-session -> @deepseek-ai/dsh-brand: @deepseek-ai/dsh-brand#brandNumber, @deepseek-ai/dsh-brand#brandString
+  @deepseek-ai/dsh-session -> @deepseek-ai/dsh-util-values: @deepseek-ai/dsh-util-values#assertNever, @deepseek-ai/dsh-util-values#deepFreeze, @deepseek-ai/dsh-util-values#snapshotJsonValue
+  @deepseek-ai/dsh-session-log-export -> @deepseek-ai/dsh-brand: @deepseek-ai/dsh-brand#brandString
+  @deepseek-ai/dsh-session-log-export -> @deepseek-ai/dsh-session-format: @deepseek-ai/dsh-session-format#sessionFormatLogFilename
+  @deepseek-ai/dsh-session-log-export -> @deepseek-ai/schemastery: @deepseek-ai/schemastery#default
+  @deepseek-ai/dsh-session-log-export -> fflate: fflate#Zip, fflate#ZipDeflate
+  @deepseek-ai/dsh-typert-registry -> zod: zod#z
+verify-package-dependencies: 9 Host runtime edge(s) remain in peerDependencies because their exports require shared identity across 7 package(s):
+  @deepseek-ai/dsh-api-gateway -> @deepseek-ai/dsh-client-connection: @deepseek-ai/dsh-client-connection#OperatorPeer
+  @deepseek-ai/dsh-api-remotes -> @deepseek-ai/dsh-scope: @deepseek-ai/dsh-scope#carrierKeyOf
+  @deepseek-ai/dsh-api-terminal-controller -> @deepseek-ai/dsh-subprocess: @deepseek-ai/dsh-subprocess#SubprocessExecutableNotFoundError
+  @deepseek-ai/dsh-client-connection -> @deepseek-ai/dsh-scope: @deepseek-ai/dsh-scope#createScope
+  @deepseek-ai/dsh-client-file-upload -> @deepseek-ai/dsh-scope: @deepseek-ai/dsh-scope#scopeOf
+  @deepseek-ai/dsh-session -> @deepseek-ai/dsh-llm: @deepseek-ai/dsh-llm#callConfigEquals, @deepseek-ai/dsh-llm#validateLlmRequestPolicy
+  @deepseek-ai/dsh-session -> @deepseek-ai/dsh-scope: @deepseek-ai/dsh-scope#scopeOf, @deepseek-ai/dsh-scope#scopeTarget
+  @deepseek-ai/dsh-session-log-export -> @deepseek-ai/dsh-session: @deepseek-ai/dsh-session#SESSION_FORMAT_VERSION
+  @deepseek-ai/dsh-session-log-export -> @deepseek-ai/dsh-session-persistence: @deepseek-ai/dsh-session-persistence#SessionPersistenceNotFoundError

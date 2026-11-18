@@ -1,0 +1,10 @@
+$ vitest run --config vitest.snapshot.config.ts -t 'model-paid-route-(required|approved)'
+The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
+
+ RUN  v4.1.8 /Users/x-dt/workspace/AI/Agents/deepseek-harness
+
+
+ Test Files  1 passed | 3 skipped (4)
+      Tests  2 passed | 192 skipped (194)
+   Start at  12:28:36
+   Duration  2.31s (transform 2.09s, setup 555ms, import 2.80s, tests 1.37s, environment 0ms)

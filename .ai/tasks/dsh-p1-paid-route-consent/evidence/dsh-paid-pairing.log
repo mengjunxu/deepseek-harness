@@ -1,0 +1,2 @@
+$ tsx scripts/verify-translation-pairing.ts packages/guard/paid-route-policy/README.md packages/guard/README.md packages/llm/llm/README.md docs/subsystems/llm-streaming.md docs/capability-seams.md
+verify-translation-pairing: 5 named pair(s) consistent; the corpus-wide check still runs in doc-sync.

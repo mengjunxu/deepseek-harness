@@ -1,0 +1,2 @@
+$ tsx scripts/gen-doc-graphs.ts
+gen-doc-graphs: wrote 7 graph doc(s).

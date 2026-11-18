@@ -1,0 +1,39 @@
+The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
+The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
+The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
+
+ RUN  v4.1.8 /Users/x-dt/workspace/AI/Agents/deepseek-harness
+
+ ❯ |thread-safe| packages/llm/llm-deepseek/tests/runtime.spec.ts (158 tests | 1 failed) 960ms
+     × streams a text generation end to end through the assembler 18ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |thread-safe| packages/llm/llm-deepseek/tests/runtime.spec.ts > DeepSeekAdapter against a mock server > streams a text generation end to end through the assembler
+AssertionError: expected { inputTokens: 3, …(3) } to deeply equal { inputTokens: 3, …(2) }
+
+- Expected
++ Received
+
+  {
+    "inputTokens": 3,
++   "measurement": "provider-reported",
+    "outputTokens": 1,
+    "totalTokens": 4,
+  }
+
+ ❯ packages/llm/llm-deepseek/tests/runtime.spec.ts:367:26
+    365|     expect(result.message.content).toEqual([{ type: 'text', text: 'hel…
+    366|     expect(result.finish).toEqual({ kind: 'stop' })
+    367|     expect(result.usage).toEqual({ inputTokens: 3, outputTokens: 1, to…
+       |                          ^
+    368|
+    369|     // The wire request carried the auth header contents we configured.
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 23 passed (24)
+      Tests  1 failed | 745 passed (746)
+   Start at  12:27:36
+   Duration  3.24s (transform 6.38s, setup 2.07s, import 8.35s, tests 5.36s, environment 361ms)

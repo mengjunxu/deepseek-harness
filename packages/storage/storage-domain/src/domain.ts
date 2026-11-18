@@ -3,15 +3,16 @@
  * per-domain write chain, and change-event emission. Reads are synchronous
  * from memory; every write queues on the chain, awaits backend durability
  * FIRST, then mutates memory, then emits `domain/changed` — a rejected
- * backend write leaves memory untouched (no divergence between reads and the
- * medium), and events carry values that equal the in-memory state at
+ * backend write leaves the local cache untouched. Atomic modification reads
+ * fresh persisted records; events carry values that equal the local cache at
  * emission, in write order.
  * @module @deepseek-ai/dsh-storage-domain/src/domain
  */
 
 import type { Context } from '@deepseek-ai/cordis'
-import type { KvUnit } from '@deepseek-ai/dsh-storage'
-import { DomainError } from './error.ts'
+import type { KvTransaction, KvUnit } from '@deepseek-ai/dsh-storage'
+import type { ZodType } from 'zod'
+import { DomainError, parseRecord } from './error.ts'
 import type { DomainSpec, DomainGlobalSpec, TableKeyOf, TableValueOf } from './spec.ts'
 import type { DomainChanged } from './events.ts'
 
@@ -80,18 +81,49 @@ export interface KvTable<K extends string, V> {
   delete(key: K): Promise<boolean>
 
   /**
-   * Atomic read-modify-write on the domain's write chain: `fn` sees the
-   * value current at its queue slot, so concurrent updates never interleave.
+   * Update the cached record on this domain's process-local write chain.
+   * The callback sees the local value current at its queue slot.
    * @param key - Record key; a missing key rejects with `missing-key`.
    * @param fn - Synchronous pure transform from current to next record.
    * @returns the stored next record.
    */
   update(key: K, fn: (current: V) => V): Promise<V>
+
+  /**
+   * Atomically modify the latest persisted record across independent medium
+   * owners. The callback receives schema-validated data, not this handle's
+   * cached value, and must be synchronous, pure and must not call storage.
+   * Unsupported backends reject atomic-modify-unsupported without a fallback.
+   * Reads retain their local cached value until this call commits; the result
+   * updates that cache and emits the ordinary change event after durability.
+   * @param key - Record key.
+   * @param fn - Current record or undefined when absent; returning undefined deletes it.
+   * @returns the committed callback result, or undefined after deletion.
+   */
+  modify(key: K, fn: (current: V | undefined) => V | undefined): Promise<V | undefined>
 }
 
 /** Global handle of a spec: typed when declared, `never` (inaccessible) when not. */
 export type DomainGlobalHandleOf<S extends DomainSpec> =
   S extends { readonly global: DomainGlobalSpec<infer G> } ? DomainGlobal<G> : never
+
+/** Schema-validated access to records of one open domain during a synchronous transaction. */
+export interface DomainTransaction<S extends DomainSpec> {
+  /**
+   * Read the current persisted value, including earlier writes in this transaction.
+   * @param table - Declared table.
+   * @param key - Record identity in that table.
+   * @returns the validated record or undefined.
+   */
+  get<N extends keyof S['tables'] & string>(table: N, key: TableKeyOf<S, N>): TableValueOf<S, N> | undefined
+  /**
+   * Replace or remove a record atomically with the other writes.
+   * @param table - Declared table.
+   * @param key - Record identity.
+   * @param value - Next record or undefined for deletion.
+   */
+  set<N extends keyof S['tables'] & string>(table: N, key: TableKeyOf<S, N>, value: TableValueOf<S, N> | undefined): void
+}
 
 /** One open domain, typed by its spec. */
 export interface Domain<S extends DomainSpec> {
@@ -106,6 +138,13 @@ export interface Domain<S extends DomainSpec> {
    * @returns the typed table handle.
    */
   table<N extends keyof S['tables'] & string>(name: N): KvTable<TableKeyOf<S, N>, TableValueOf<S, N>>
+
+  /**
+   * Commit changes to multiple records and update the complete local cache before publishing events.
+   * @param operation - Synchronous operation against the latest persisted records.
+   * @returns the callback result after commit. An unsupported medium rejects before calling the operation.
+   */
+  transaction<T>(operation: (tx: DomainTransaction<S>) => T): Promise<T>
 
   /**
    * Close this domain: reject new writes immediately, drain already-queued
@@ -128,6 +167,14 @@ interface TableHost {
   assertReadable(): void
   /** Emit `domain/changed` for one durably landed write. */
   emitChanged(change: DomainChanged): void
+}
+
+/** Validated records paired with the schema used for fresh persisted reads. */
+export interface DomainTableData {
+  /** Records parsed when the domain opened. */
+  readonly records: Map<string, unknown>
+  /** Schema of every record in this table. */
+  readonly valueSchema: ZodType
 }
 
 const noop = () => {}
@@ -157,7 +204,7 @@ export class DomainImpl {
    * @param ctx - Context that carries `domain/changed` emissions.
    * @param spec - The domain declaration.
    * @param unit - The opened backend unit; this instance owns its lifecycle.
-   * @param records - Validated records from the unit's `loadAll`, one entry
+   * @param records - Validated records and their schemas, one entry
    * per declared table (empty maps included) — the facility builds it from
    * the spec, so the entry set IS the table set.
    * @param globalValue - Validated stored global, or the spec's `initial`
@@ -169,7 +216,7 @@ export class DomainImpl {
     private readonly ctx: Context,
     spec: DomainSpec,
     private readonly unit: KvUnit,
-    records: Map<string, Map<string, unknown>>,
+    private readonly records: Map<string, DomainTableData>,
     globalValue: unknown,
     private readonly onClosed: () => void,
   ) {
@@ -181,8 +228,8 @@ export class DomainImpl {
       assertReadable: () => { this.assertReadable() },
       emitChanged: (change) => { this.emitChanged(change) },
     }
-    for (const [table, tableRecords] of records) {
-      this.tables.set(table, new KvTableImpl(host, table, tableRecords))
+    for (const [table, data] of records) {
+      this.tables.set(table, new KvTableImpl(host, table, data.records, data.valueSchema))
     }
     if (spec.global !== undefined) {
       this.globalValue = globalValue
@@ -220,6 +267,52 @@ export class DomainImpl {
       throw new Error(`domain '${this.name}' declares no table '${name}'`)
     }
     return table
+  }
+
+  /**
+   * Apply one synchronous multi-record command on the domain's write chain.
+   * @param operation - Reads and writes records within the storage transaction.
+   * @returns the callback result once records and caches are committed.
+   */
+  transaction<T>(operation: (tx: KvTransaction) => T): Promise<T> {
+    return this.enqueue(async () => {
+      if (!this.unit.transaction) throw new DomainError('atomic-modify-unsupported', `domain '${this.name}' requires transactions`)
+      const changed = new Map<string, Map<string, unknown>>()
+      const parse = (table: string, key: string, value: unknown) => {
+        const schema = this.records.get(table)?.valueSchema
+        if (!schema) throw new Error(`domain '${this.name}' declares no table '${table}'`)
+        return value === undefined ? undefined : parseRecord(this.name, table, key, () => schema.parse(value))
+      }
+      const result = await this.unit.transaction(tx => operation({
+        get: (table, key) => parse(table, key, tx.get(table, key)),
+        set: (table, key, value) => {
+          const parsed = parse(table, key, value)
+          tx.set(table, key, parsed)
+          let tableChanges = changed.get(table)
+          if (!tableChanges) {
+            tableChanges = new Map()
+            changed.set(table, tableChanges)
+          }
+          tableChanges.set(key, parsed)
+        },
+      }))
+      const events: DomainChanged[] = []
+      for (const [table, writes] of changed) {
+        const data = this.records.get(table)
+        if (!data) throw new Error(`domain '${this.name}' lost table '${table}'`)
+        for (const [key, value] of writes) {
+          if (value === undefined) {
+            data.records.delete(key)
+            events.push({ domain: this.name, table, key, operation: 'deleted' })
+          } else {
+            data.records.set(key, value)
+            events.push({ domain: this.name, table, key, operation: 'put', value })
+          }
+        }
+      }
+      for (const event of events) this.emitChanged(event)
+      return result
+    })
   }
 
   /**
@@ -282,6 +375,7 @@ class KvTableImpl<K extends string, V> implements KvTable<K, V> {
     private readonly host: TableHost,
     private readonly tableName: string,
     private readonly records: Map<string, unknown>,
+    private readonly valueSchema: ZodType<V>,
   ) {}
 
   get(key: K): V | undefined {
@@ -341,6 +435,28 @@ class KvTableImpl<K extends string, V> implements KvTable<K, V> {
       await this.host.unit.putRecord(this.tableName, key, next)
       this.records.set(key, next)
       this.emitPut(key, next)
+      return next
+    })
+  }
+
+  modify(key: K, fn: (current: V | undefined) => V | undefined): Promise<V | undefined> {
+    return this.host.enqueue(async () => {
+      const unit = this.host.unit
+      if (unit.modifyRecord === undefined) {
+        throw new DomainError('atomic-modify-unsupported', `domain '${this.host.domainName}' backend cannot modify records atomically`)
+      }
+      let existed = this.records.has(key)
+      const next = await unit.modifyRecord(this.tableName, key, (raw) => {
+        if (raw !== undefined) existed = true
+        return fn(raw === undefined ? undefined : parseRecord(this.host.domainName, this.tableName, key, () => this.valueSchema.parse(raw)))
+      }) as V | undefined
+      if (next === undefined) {
+        this.records.delete(key)
+        if (existed) this.host.emitChanged({ domain: this.host.domainName, table: this.tableName, key, operation: 'deleted' })
+      } else {
+        this.records.set(key, next)
+        this.emitPut(key, next)
+      }
       return next
     })
   }

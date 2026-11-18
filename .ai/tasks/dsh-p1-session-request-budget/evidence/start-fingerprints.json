@@ -1,0 +1,22 @@
+{
+  "captured_at": "2026-11-15T13:35:26.602708+00:00",
+  "files": {
+    "packages/guard/request-budget-policy/README.zh.md": "51dddfa8167fba35db69058746883e28e170bbe2f9dac518a16ad8b8cd90325d",
+    "packages/guard/request-budget-policy/README.md": "8e56cec854e9f8484a5c1e211ac1b85b117bcbd229561eff1a9f057bad4d2283",
+    "packages/guard/request-budget-policy/package.json": "e5a008d2b35c3e26c5c3421b1a9fe7c8018b9f4c2b14e84f3700ca09be7e6be6",
+    "packages/guard/request-budget-policy/tsconfig.json": "4897e82d25fdb293dd76839665ba65b35c2b94de21b83600a43a73f875ce5cc7",
+    "packages/guard/request-budget-policy/README.i18n.yaml": "6628dd196950e7284585cf222814d6d1fa40a573d955c539a3d053bb278b9b44",
+    "packages/guard/request-budget-policy/tests/store.spec.ts": "443e65772c2d6d5e19e2f7eb0cf0e384e7906bacf72d25c75412ae353e8e2a80",
+    "packages/guard/request-budget-policy/tests/shared-hosts.two-process.e2e.ts": "e4734bc50c0e08dde71ea151d9dd489b668b83b2c28bea982af4516587735f7b",
+    "packages/guard/request-budget-policy/tests/config.spec.ts": "ca1d7b436e80ac9a449491f6c0e0c43f280c06106f78abd0de1ec9c08295838f",
+    "packages/guard/request-budget-policy/tests/runtime.spec.ts": "d37211ed5db6999b7c22aaecbf556636ebd6ea2ca87bd440719aa98304d0c382",
+    "packages/guard/request-budget-policy/tests/loader.spec.ts": "de8164f21e504ef148b05c211f9974b699fa9f11c12428b21ae8556c38fe63a4",
+    "packages/guard/request-budget-policy/src/runtime.ts": "11b1b1835d660764167826e444ac53b256356f06853f19658572506159e640ee",
+    "packages/guard/request-budget-policy/src/index.ts": "133625866fc7e2838ae43edb300984c69e0a044870ecbd8d00b76286b9990508",
+    "packages/guard/request-budget-policy/src/config.ts": "8ace3fadf27db291a68dc596fb00c065f809119c163ed59dbc5b79152411c30d",
+    "packages/guard/request-budget-policy/src/error.ts": "3b19922bc77cdb7ee1058a414154d9194b059518aea80362d2ec197c63e0cfe4",
+    "packages/guard/request-budget-policy/src/store.ts": "d70a869666bdf519009c72770b3a92760bc8f3574ce2b5e72514bba26874ae23",
+    "packages/guard/request-budget-policy/tests/fixtures/controlled-adapter.mjs": "318ccc37ceb0e532aa5aa1b7957260b59bdea83c3a10a212ab29a66159a6901d",
+    "packages/guard/request-budget-policy/tests/fixtures/model-request-budget-reserved.ts": "9389fbdfbd9e26faf22f93574ea69388b063ee61316c0284f66fe22386710ef8"
+  }
+}

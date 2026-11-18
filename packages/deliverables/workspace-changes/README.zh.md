@@ -25,6 +25,8 @@ kind: "package-reference"
 <a id="use-this-package"></a>
 ## 使用本包
 
+Host 可将已配置的 subprocess 服务、解析得到的 Git 可执行文件、命令时限和输出上限传给导出的 `GitRunner`。命令结果会标记标准输出是否被截断。
+
 正式提供的 Web bundle 挂载本插件。任何具备 `subprocess` 能力且 Host 上有 git 可执行文件的组合都可以挂载它：
 
 ```yaml

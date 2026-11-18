@@ -1,0 +1,30 @@
+{
+  "runs": [
+    {
+      "taskId": "task-dir",
+      "runId": "run-original",
+      "workspace": "project",
+      "branch": "baseline",
+      "commit": "e907295ab26ce798cf47e2fd6a4999d389347e7d",
+      "sessionId": "g0-dir-original"
+    },
+    {
+      "taskId": "task-dir",
+      "runId": "run-next",
+      "previousRun": "run-original",
+      "previousSession": "g0-dir-original",
+      "inheritedMaterials": [
+        "chosen-note"
+      ],
+      "workspace": "worktree",
+      "branch": "review-changes",
+      "commit": "e907295ab26ce798cf47e2fd6a4999d389347e7d",
+      "sessionId": "g0-dir-next"
+    }
+  ],
+  "actualToolDirectoriesAndBranchesVerified": true,
+  "onlySelectedMaterialVisible": true,
+  "originalLogUnchanged": true,
+  "offlineBackupRestoredBothSessions": true,
+  "modelCallsDuringRestore": 0
+}

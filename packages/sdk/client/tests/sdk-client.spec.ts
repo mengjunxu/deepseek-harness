@@ -63,6 +63,14 @@ async function tempDir(prefix: string): Promise<string> {
 }
 
 describe('DeepSeekHarness', () => {
+  it('returns the original session handle only after the restore acknowledgement', async () => {
+    const harness = harnessWith()
+    const restored = await harness.resumeSession('existing')
+    expect(restored.id).toBe('existing')
+    const malformed = harnessWith({ FAKE_BAD_RESUME: '1' })
+    await expect(malformed.resumeSession('existing')).rejects.toThrow(SdkProtocolError)
+  })
+
   it('ignores notifications that precede the submitted message receipt', async () => {
     const notifications = [
       { method: 'session.status', params: { sessionId: 'owned', status: 'running' } },
@@ -516,6 +524,19 @@ describe('HarnessClient', () => {
     // Close with no child ever spawned is a no-op.
     const untouched = processClient(fakeLaunch())
     await untouched.close()
+  })
+
+  it('observes shutdown timeout without terminating the runtime', async () => {
+    const client = processClient(fakeLaunch({ FAKE_IGNORE_EOF: '1' }, { disposeEofGraceMs: 50 }))
+    cleanups.push(() => client.close())
+    await expect(client.waitForExit(10)).rejects.toThrow('has not started')
+    await expect(client.waitForExit(-1)).rejects.toThrow(RangeError)
+    await client.initialize({ cwd: process.cwd(), provider: 'p', model: 'm' })
+    await client.request('shutdown', {}, 1_000)
+    expect(await client.waitForExit(50)).toBe(false)
+    await client.request('shutdown', {}, 1_000)
+    await client.close()
+    expect(await client.waitForExit(0)).toBe(true)
   })
 
   it('escalates through SIGTERM when the runtime ignores EOF', async () => {

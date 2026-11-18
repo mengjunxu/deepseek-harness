@@ -291,6 +291,32 @@ for line in sys.stdin:
             harness.run("reject malformed turn ending", session_id="main")
 
 
+def test_restore_session_sends_only_resume_before_returning_handle(tmp_path: Path) -> None:
+    script = tmp_path / "restore.py"
+    script.write_text("""
+import json, sys
+for line in sys.stdin:
+    frame = json.loads(line)
+    method = frame["method"]
+    if method == "initialize":
+        assert frame["params"]["approvalRequests"] is True
+        assert frame["params"]["capabilities"] == {"userQuestions": True}
+        result = {"serverInfo": {"name": "fixture"}}
+    elif method == "session/resume":
+        assert frame["params"] == {"sessionId": "saved"}
+        result = {}
+    elif method == "shutdown":
+        result = {}
+    else:
+        raise ValueError(method)
+    print(json.dumps({"jsonrpc": "2.0", "id": frame["id"], "result": result}), flush=True)
+    if method == "shutdown":
+        break
+""".strip())
+    with DeepSeekHarness(_launch_args=(sys.executable, str(script)), approval_requests=True, user_questions=True) as harness:
+        assert harness.resume_session("saved").id == "saved"
+
+
 def test_relative_cwd_is_absolute_in_process_environment_and_wire(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:

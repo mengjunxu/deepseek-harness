@@ -189,6 +189,20 @@ Each switch belongs to the protocols that declare it, so a switch valid on one `
 
 Every switch, its accepted values, and the protocols that take it are listed under `PiAiCompatProfile` in the [generated `dsh-llm-pi-ai` configuration reference](../../config-catalog.md#deepseek-aidsh-llm-pi-ai) — which is derived from the source, so it cannot fall behind what the adapter accepts.
 
+## Inspect cost sources
+
+With detailed performance and usage enabled, click a completed Turn's usage row to inspect its model routes and cost sources. To record source attribution for new native requests, start Web with the optional overlay:
+
+```sh
+pnpm dsh web --patch apps/cli/config/examples/request-accounting.yml
+```
+
+Unknown means the request log does not establish a cost source. Older Turns retain unknown attribution; selecting another model does not fill it in. Labels retain the Provider route declaration. Account balances remain unknown. [Recording details](../../../packages/llm/token-meter/README.md#request-records) cover supported calls and remaining gaps.
+
+The usage dialog also shows counter measurement: reported by provider, estimated, unknown or mixed. These labels do not establish official billing accuracy.
+
+To require confirmation for a declared API-metered native request, use `pnpm dsh web --patch apps/cli/config/examples/paid-route-confirmation.yml`. The existing approval panel asks for one exact route; rejecting it sends no native request or local budget reservation. Retries ask again. A Session with approval policy `never` rejects automatically. [Paid-route configuration](../../../packages/guard/paid-route-policy/README.md) explains presets and remaining limits.
+
 ## Troubleshooting
 
 - **`MISSING_CREDENTIAL`** — Store the provider key through the Models page or supply the referenced environment variable.

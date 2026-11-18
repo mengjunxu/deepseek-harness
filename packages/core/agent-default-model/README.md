@@ -79,6 +79,8 @@ An entry route can be written as `chat: { selection: entry, requiredCapabilities
 
 `routing` is one live configuration value. Each Turn captures its selected route before prompt assembly; changes affect a later Turn. The prompt's provider/model variables and the request header use that captured pair. An unavailable route fails at request preparation. Required capabilities must be declared supported by the Provider; unknown support rejects. An omitted requirement adds no capability restriction. The plugin never tries another intent's route after a limit, transport failure or interruption. The Session request header records intent, actual provider/model and requirements; no extra classification request is sent.
 
+Either route form may set `responseFormat` using the [LLM strict JSON Schema option](../../llm/llm/README.md#request-strict-json-schema-output). The Turn captures the complete format with its route; omitting it clears any inherited format. The existing request header records the format before streaming, and Provider plus exact-model structured-output support must both be declared. The [formatted SDK composition](../../../snapshots/sdk/model-structured-output/cordis.yml) supplies a complete example.
+
 -----
 
 <a id="understand-the-implementation"></a>
@@ -137,7 +139,7 @@ The default affects fresh agents; an existing session retains its selection. The
 These limits define the service's scope. They are current package constraints, not a task backlog.
 
 - **Routing policy is separate from account and quota authorization** — provider capability declarations do not grant account access, reserve budget or authorize paid fallback; exact-model capability matching is not supplied by this plugin.
-- **No independent runtime invariant** — default selection has no derived registry; the routing plugin keeps one private captured value per Turn. LLM admission and request/log reconstruction remain checked by their owning services.
+- **Runtime invariants** — No runtime invariant companion is published; default selection reads Config directly and the routing plugin keeps one private capture per Turn. LLM admission and request/log reconstruction are checked by their owning services.
 - **One process-wide default** — the service owns a single default; per-session model selection remains the entry point's responsibility.
 - **Persistence requires a profile configuration editor** — without it, saving a default does not retain the selection.
 

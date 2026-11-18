@@ -1,0 +1,19 @@
+{
+  "taskId": "task-g0",
+  "runs": [
+    {
+      "runId": "run-first",
+      "sessionId": "session-run-first",
+      "state": "input-confirmed"
+    },
+    {
+      "runId": "run-after-review",
+      "sessionId": "session-run-after-review",
+      "state": "input-confirmed"
+    }
+  ],
+  "serviceKilledBeforeReceiptCommit": true,
+  "receiptRecoveredFromSession": true,
+  "repeatedRecoveryIssuedPrompts": 0,
+  "observedModelCalls": 2
+}

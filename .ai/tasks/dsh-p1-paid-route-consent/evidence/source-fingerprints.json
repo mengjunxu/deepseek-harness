@@ -1,0 +1,23 @@
+{
+  "packages/llm/llm/src/index.ts": "3707df4d1c6c236eb5b9f2bca3854f15c8dced75f54dfff4e14e057195d46322",
+  "packages/guard/paid-route-policy/package.json": "1ee803c1318e55dc9b03503daaec59abc19efac8dd03be218ea78f4e1ee60409",
+  "packages/guard/paid-route-policy/src/index.ts": "9d2edfb8304beaffea84e48c5e6f3da820cb57a3828c9bc130896f9e38018042",
+  "packages/guard/paid-route-policy/tests/admission.spec.ts": "95bf8909af91d1c764d7fe70797af516b6a8db4ec4d640699311e05b188c5cc3",
+  "packages/guard/paid-route-policy/tests/adapter.ts": "ace3edef691b705023beda936879349e2ce119a89a66f56a21bf5e8e00fda0e7",
+  "packages/guard/paid-route-policy/tests/loader.spec.ts": "8a0fb3fdfca49caee41bdc68eb6e533d74efc2eca6c1ebb4e37c0a129c6c5357",
+  "apps/cli/package.json": "90d2fcdf16450f104da8459a6ed042c3f6ae1d3e52bfd4058bb0e4a79fb3039e",
+  "pnpm-lock.yaml": "d10e3f0f01e92b39c579affacfbe86b3c06f44d1d2c9c20d1cba2bb2b1aa5e12",
+  "tsconfig.base.json": "c14d1c84e8e252debd432379d0a7105af7c9fcc171b0a751ba5ae83b2c52b9d4",
+  "tsconfig.host.json": "f0ab4a9d599dcb42a1edd3319fea6d4f8a63e6ca385dc7e471ee6240cb66b26a",
+  "snapshots/session/model-paid-route-required/cordis.snapshot.yml": "9b50d5ea68c681cd90384c7c7b4405651379b2395b375b230ec08e455382e33f",
+  "snapshots/session/model-paid-route-required/session.v3.jsonl": "dc721091c85c5cf5a20428912e9fdabda00e255f406ef8587b62e9e10d938f3e",
+  "snapshots/session/model-paid-route-required/session.v4.jsonl": "1d5bd86a3217c2d2207595b217cad4a7a23d851b801b01f5aa17646628f6ac95",
+  "snapshots/session/model-paid-route-required/snapshot.yml": "cb4ce6341faf042091205aeaea6d26bbe3aaaa6d84289c541f4fdbb32a65e0ac",
+  "snapshots/session/model-paid-route-required/cordis.yml": "1d46072b4bda38d43d731eb3de1b63f450a9a85eba4a8588b212520648b206b4",
+  "snapshots/session/model-paid-route-approved/cordis.snapshot.yml": "059d0c4ba9d316fd949e2d19c7883ad24b9ed4037de04dd590c75bcb60bd78ab",
+  "snapshots/session/model-paid-route-approved/session.v3.jsonl": "162e2212e8646f505bd4c07b2239b01e40ae92269ea16b47ca61ce9f6b73c956",
+  "snapshots/session/model-paid-route-approved/system-prompt.expected.md": "2391d6dc3ad3e03bf9e62ff53f35530051f27e34df67044d2db9ce73f46513d0",
+  "snapshots/session/model-paid-route-approved/session.v4.jsonl": "a247769f62511128e5097b54e514204f5c6874a9fa9f83b61064aff162c17908",
+  "snapshots/session/model-paid-route-approved/snapshot.yml": "93468b39da7092e434c3e08f41c98ecc69f56fd824d1274f90e1aada6ecd0a1c",
+  "snapshots/session/model-paid-route-approved/cordis.yml": "f7f2d68ced28f67924b1a188b799b904b8e89944a40c74f176d2e515e3c51e24"
+}

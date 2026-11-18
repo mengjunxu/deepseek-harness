@@ -1,0 +1,7 @@
+{
+  "packages/sdk/client/lib/index.js": "b107d0de7a86605b61b3df77744057c301b9abdaa22154a7f7153a7d47d28e80",
+  "packages/sdk/server/lib/index.js": "d090210d58b3f4e3cca5d0480593edc8162318740925404432a048c71f1f61b2",
+  "packages/sdk/protocol/lib/index.js": "371c38ca3514797d86df5f4bb78a56c40a2637294b83aababe8145bec6a20253",
+  ".ai/tasks/dsh-tboard-01/evidence/fork-resume.mjs": "8bcee7561b03a9f9660fdbff54c9ad4e43bd869d518cfc66a82d695da92ec42c",
+  ".ai/tasks/dsh-tboard-01/evidence/fork-resume.json": "542741bf31be04680d7321630092440d2fb458683b144cf380054328f5b2ac4b"
+}

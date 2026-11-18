@@ -1495,10 +1495,10 @@ export const SERVICE_API: readonly ServiceApiEntry[] = [
         returns: 'a detached config only when a default must be materialized.',
       },
       {
-        signature: 'async prepareCall(config: LlmCallConfig, signal?: AbortSignal): Promise<PreparedLlmCall>',
+        signature: 'async prepareCall(config: LlmCallConfig, signal?: AbortSignal, context?: LlmPreparationContext): Promise<PreparedLlmCall>',
         description: 'Resolve one call under its current adapter registration. The returned one-shot handle keeps that registration across header logging and dispatch, so HMR cannot combine one adapter\'s capability result with another adapter.',
-        parameters: [{ name: 'config', description: 'provider/model route and optional request controls.' }, { name: 'signal', description: 'optional cancellation for adapter-owned capability lookup.' }],
-        returns: 'a prepared config and its registration-bound stream entry point.',
+        parameters: [{ name: 'config', description: 'provider/model route and optional request controls.' }, { name: 'signal', description: 'optional cancellation for adapter-owned capability lookup.' }, { name: 'context', description: 'optional invocation identity for preparation-failure auditing, separate from call controls.' }],
+        returns: 'a prepared config and its registration-bound stream entry point; preparation failures are observed before rejection.',
       },
       {
         signature: 'stream(options: GenerateOptions): AsyncIterable<StreamChunk>',
@@ -2875,7 +2875,7 @@ export const SERVICE_API: readonly ServiceApiEntry[] = [
   {
     key: 'storageDomain',
     summary: 'The mounted domain facility.',
-    description: 'The mounted domain facility. Opens declared domains over routed backends; one facility instance owns the open-domain table and enforces single-open per domain name.',
+    description: 'The mounted domain facility. Opens declared domains over routed backends; one facility instance owns the open-domain table and enforces single-open per domain name. Handles serve cached reads and updates. Shared-state decisions use table.modify with an atomic backend; its callbacks must be synchronous, pure and must not call storage.',
     methods: [
       {
         signature: 'async open<S extends DomainSpec>(spec: S): Promise<Domain<S>>',
@@ -3093,6 +3093,131 @@ export const SERVICE_API: readonly ServiceApiEntry[] = [
         description: 'Assemble global and scoped providers, detach tool parameters, apply canonical ordering, then run the assembly waterfall. Scoped sections and variables shadow globals. The returned waterfall value is authoritative except that an effective complete section is restored afterwards as the sole prompt section.',
         parameters: [{ name: 'context', description: 'the optional scope and plugin-defined assembly fields.' }],
         returns: 'the post-waterfall assembly with any complete prompt enforced.',
+      },
+    ],
+  },
+  {
+    key: 'taskboardController',
+    summary: 'Business state and history are committed together in one authoritative task row.',
+    description: 'Business state and history are committed together in one authoritative task row.',
+    methods: [
+      {
+        signature: 'executions!: TaskExecutions',
+        description: 'Host-only execution adapter operations scoped to the persisted Run.',
+        parameters: [],
+      },
+      {
+        signature: 'stops!: RunStops',
+        description: 'Targeted lifecycle operations on the exclusive SDK client.',
+        parameters: [],
+      },
+      {
+        signature: '@Remote inspectProject(projectId: ProjectId): Promise<WorkspaceInspection>',
+        description: 'Inspect a registered project for original-directory execution.',
+        parameters: [{ name: 'projectId', description: 'operator-selected project.' }],
+        returns: 'the canonical path, branch, baseline and change fingerprint.',
+      },
+      {
+        signature: 'planWorkspace(projectId: ProjectId, runId: TaskRunId, confirmation: WorkspaceInspection | null): Promise<TaskWorkspacePlan>',
+        description: 'Resolve a new Run directory before admission.',
+        parameters: [{ name: 'projectId', description: 'task\'s registered project.' }, { name: 'runId', description: 'new Run identity.' }, { name: 'confirmation', description: 'original directory confirmed by the operator, or null for isolation.' }],
+        returns: 'the directory and commit to bind to the lease.',
+      },
+      {
+        signature: '@Remote inspectPriorWorkspace(projectId: ProjectId, taskId: TaskId, priorRun: TaskRunId): Promise<WorkspaceInspection>',
+        description: 'Inspect the prior Run before the operator selects its directory again.',
+        parameters: [{ name: 'projectId', description: 'owning project.' }, { name: 'taskId', description: 'task whose execution is being continued.' }, { name: 'priorRun', description: 'latest inactive Run.' }],
+        returns: 'current filesystem observations for the saved directory.',
+      },
+      {
+        signature: 'planContinuation(projectId: ProjectId, taskId: TaskId, priorRun: TaskRunId, confirmation: WorkspaceInspection): Promise<TaskWorkspacePlan>',
+        description: 'Require the same actual directory and branch before resuming an existing Session.',
+        parameters: [{ name: 'projectId', description: 'owning project.' }, { name: 'taskId', description: 'task being continued.' }, { name: 'priorRun', description: 'latest inactive Run.' }, { name: 'confirmation', description: 'current state selected by the operator.' }],
+        returns: 'the validated directory plan.',
+      },
+      {
+        signature: 'async prepareWorkspace(owner: RuntimeBinding, plan: TaskWorkspacePlan): Promise<WorkspaceInspection>',
+        description: 'Prepare the exact workspace claimed by the active Run before launching its SDK.',
+        parameters: [{ name: 'owner', description: 'current runtime lease.' }, { name: 'plan', description: 'directory facts selected before admission.' }],
+        returns: 'observed working directory, branch and commit.',
+      },
+      {
+        signature: '@Remote async createProject(request: ProjectCreateCommand): Promise<TaskboardProject>',
+        description: 'Register a local project root selected by the operator.',
+        parameters: [{ name: 'request', description: 'idempotent creation with its absolute directory and optional configuration.' }],
+        returns: 'the canonical persisted project.',
+      },
+      {
+        signature: '@Remote async stopRun(request: TaskStopCommand): Promise<void>',
+        description: 'Stop one Run and retain its directory while process exit remains unconfirmed.',
+        parameters: [{ name: 'request', description: 'operator command scoped to the selected project, task and Run.' }],
+        returns: 'after the Host records the outcome.',
+      },
+      {
+        signature: '@Remote listProjects(): TaskboardProject[]',
+        description: 'List project bindings without opening their directories or Sessions.',
+        parameters: [],
+        returns: 'the projects visible to the operator.',
+      },
+      {
+        signature: '@Remote createTask(request: TaskRequirementsCommand): Promise<TaskReceipt>',
+        description: 'Create a backlog task and its first requirements revision.',
+        parameters: [{ name: 'request', description: 'project scope, command identity and editable fields.' }],
+        returns: 'the original acknowledgement on equivalent retries.',
+      },
+      {
+        signature: '@Remote editTask(request: TaskRequirementsCommand): Promise<TaskReceipt>',
+        description: 'Replace the editable fields. An active execution retains its starting revision.',
+        parameters: [{ name: 'request', description: 'expected task version and replacement fields.' }],
+        returns: 'the committed command receipt.',
+      },
+      {
+        signature: '@Remote comment(request: TaskCommentCommand): Promise<TaskReceipt>',
+        description: 'Append an operator comment.',
+        parameters: [{ name: 'request', description: 'scoped command and comment.' }],
+        returns: 'the committed command receipt.',
+      },
+      {
+        signature: '@Remote planTask(request: TaskCommand): Promise<TaskReceipt>',
+        description: 'Move a backlog or unblocked task to todo.',
+        parameters: [{ name: 'request', description: 'scoped command at the expected version.' }],
+        returns: 'the committed command receipt.',
+      },
+      {
+        signature: '@Remote cancelTask(request: TaskCommand): Promise<TaskReceipt>',
+        description: 'Cancel a task without an active execution.',
+        parameters: [{ name: 'request', description: 'scoped command at the expected version.' }],
+        returns: 'the committed command receipt.',
+      },
+      {
+        signature: '@Remote archiveTask(request: TaskCommand): Promise<TaskReceipt>',
+        description: 'Archive an accepted or canceled task while retaining its history.',
+        parameters: [{ name: 'request', description: 'scoped command at the expected version.' }],
+        returns: 'the committed command receipt.',
+      },
+      {
+        signature: '@Remote reopenTask(request: TaskCommand): Promise<TaskReceipt>',
+        description: 'Reopen a completed or canceled task and retain the previous acceptance.',
+        parameters: [{ name: 'request', description: 'scoped command at the expected version.' }],
+        returns: 'the committed command receipt.',
+      },
+      {
+        signature: '@Remote reorderTask(request: TaskOrderCommand): Promise<TaskReceipt>',
+        description: 'Move a card before a task in the same project, or to the end.',
+        parameters: [{ name: 'request', description: 'scoped move at the expected version.' }],
+        returns: 'the committed command receipt.',
+      },
+      {
+        signature: '@Remote detail(projectId: ProjectId, taskId: TaskId): TaskDetail | null',
+        description: 'Read the task, its activity and immutable revision snapshots.',
+        parameters: [{ name: 'projectId', description: 'owning project.' }, { name: 'taskId', description: 'task in the project.' }],
+        returns: 'the stored detail, or null if the task is outside the project or absent.',
+      },
+      {
+        signature: '@Remote listTasks(projectId: ProjectId, includeArchived: boolean): TaskView[]',
+        description: 'List task cards for one project, including archived records only when requested.',
+        parameters: [{ name: 'projectId', description: 'owning project.' }, { name: 'includeArchived', description: 'whether to include archived cards.' }],
+        returns: 'the project\'s task cards.',
       },
     ],
   },
@@ -3941,6 +4066,14 @@ export const EVENT_API: readonly EventApiEntry[] = [
     parameters: [{ name: 'sessionId', description: 'Agent and Session identity.' }, { name: 'running', description: 'whether the Agent is running.' }],
   },
   {
+    name: 'app-boot/before-dispose',
+    mode: 'parallel',
+    signature: '\'app-boot/before-dispose\'(): Promise<void>',
+    summary: 'Stop new owned work and await active work before whole-application resource teardown.',
+    description: 'Stop new owned work and await active work before whole-application resource teardown. All listeners settle before Cordis fibers dispose, including when a listener rejects. Listeners must not call or await disposeApplication for the same root.',
+    parameters: [],
+  },
+  {
     name: 'app-boot/config-reload',
     mode: 'emit',
     signature: '\'app-boot/config-reload\'(): void',
@@ -4155,6 +4288,38 @@ export const EVENT_API: readonly EventApiEntry[] = [
     summary: 'The provider topology changed: an adapter registered or unregistered routes, or the configurable-provider directory gained or lost entries.',
     description: 'The provider topology changed: an adapter registered or unregistered routes, or the configurable-provider directory gained or lost entries. This payload-free registry notification fires at each commit point (including registration disposal); consumers re-read `listProviders()`, `listModels()`, or `listConfigurableProviders()` for the new state. Observer failures are contained and cannot veto the registry mutation.',
     parameters: [],
+  },
+  {
+    name: 'llm/admission',
+    mode: 'bail',
+    signature: '\'llm/admission\'(this: LlmRuntime, provider: Readonly<LlmProviderInfo>, config: Readonly<LlmCallConfig>): LlmFailure | undefined',
+    summary: 'Refuse a registered route before adapter preparation and again before dispatch.',
+    description: 'Refuse a registered route before adapter preparation and again before dispatch. Listeners read the captured registration and current controls without mutating either. Return undefined to delegate; no listener can approve around another refusal. Handlers are synchronous and pure; they must not reserve resources or perform I/O.',
+    parameters: [{ name: 'provider', description: 'captured registration metadata, including its admitted usage source.' }, { name: 'config', description: 'current request controls; no credentials or message content are included.' }],
+  },
+  {
+    name: 'llm/authorize',
+    mode: 'waterfall',
+    signature: '\'llm/authorize\'(this: LlmRuntime, dispatch: LlmDispatchContext, next: () => AsyncIterable<StreamChunk>): AsyncIterable<StreamChunk>',
+    summary: 'Authorize one captured native request before resource reservation.',
+    description: 'Authorize one captured native request before resource reservation. A refusal must not delegate. Calling next() once enters dispatch policies only after admission and composed cancellation have been rechecked. Retries require a new authorization; grants must not escape this invocation.',
+    parameters: [{ name: 'dispatch', description: 'captured request and additive cancellation controls.' }, { name: 'next', description: 'single-use continuation into resource reservation.' }],
+  },
+  {
+    name: 'llm/dispatch',
+    mode: 'waterfall',
+    signature: '\'llm/dispatch\'(this: LlmRuntime, dispatch: LlmDispatchContext, next: () => AsyncIterable<StreamChunk>): AsyncIterable<StreamChunk>',
+    summary: 'Wrap one resolved registered dispatch for resource reservation and cleanup.',
+    description: 'Wrap one resolved registered dispatch for resource reservation and cleanup. Policies read the captured registration and may add cancellation sources before calling next() exactly once. Retries enter llm/stream separately. Admission is checked again when the native continuation starts. Policies emit finish chunks for owned refusals; their thrown defects remain thrown.',
+    parameters: [{ name: 'dispatch', description: 'resolved request and additional cancellation controls.' }, { name: 'next', description: 'single-use continuation into the next policy or adapter.' }],
+  },
+  {
+    name: 'llm/preparation-failed',
+    mode: 'parallel',
+    signature: '\'llm/preparation-failed\'(this: LlmRuntime, failure: Readonly<LlmPreparationFailure>): void | Promise<void>',
+    summary: 'Observe a preparation failure before the native dispatch outlet is entered.',
+    description: 'Observe a preparation failure before the native dispatch outlet is entered. Successful virtual middleware may still serve a missing-adapter route. Handlers are awaited; observer defects retain the original failure in AggregateError.',
+    parameters: [{ name: 'failure', description: 'detached metadata without messages, credentials or arbitrary error data.' }],
   },
   {
     name: 'llm/stream',
@@ -4781,10 +4946,6 @@ export const TYPE_API: readonly TypeApiEntry[] = [
     declaration: 'export type CommandFileReceiptResolver = (agent: Agent, receiptId: string) => FileAttachmentRef | undefined;',
   },
   {
-    name: 'CommandId',
-    declaration: 'export type CommandId = Branded<\'CommandId\'>;',
-  },
-  {
     name: 'CommandInputDescriptor',
     declaration: 'export interface CommandInputDescriptor {\n    readonly hint: string;\n    readonly attachments?: boolean;\n}',
   },
@@ -5061,8 +5222,16 @@ export const TYPE_API: readonly TypeApiEntry[] = [
     declaration: 'export type DeepSeekLlmApiJson = null | boolean | number | string | DeepSeekLlmApiJson[] | {\n    [key: string]: DeepSeekLlmApiJson;\n};',
   },
   {
+    name: 'DeliveryId',
+    declaration: 'export type DeliveryId = Branded<\'TaskboardDeliveryId\'>;',
+  },
+  {
     name: 'DeliveryRetentionBounds',
     declaration: 'export interface DeliveryRetentionBounds {\n    readonly days: number;\n    readonly records: number;\n}',
+  },
+  {
+    name: 'DeliverySummary',
+    declaration: 'export interface DeliverySummary {\n    id: DeliveryId;\n    runId: TaskRunId;\n    revision: number;\n    version: number;\n    snapshot: string;\n    summary: string;\n    stale: boolean;\n}',
   },
   {
     name: 'DeveloperMessage',
@@ -5106,7 +5275,7 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   },
   {
     name: 'Domain',
-    declaration: 'export interface Domain<S extends DomainSpec> {\n    readonly name: string;\n    readonly global: DomainGlobalHandleOf<S>;\n    table<N extends keyof S[\'tables\'] & string>(name: N): KvTable<TableKeyOf<S, N>, TableValueOf<S, N>>;\n    close(): Promise<void>;\n}',
+    declaration: 'export interface Domain<S extends DomainSpec> {\n    readonly name: string;\n    readonly global: DomainGlobalHandleOf<S>;\n    table<N extends keyof S[\'tables\'] & string>(name: N): KvTable<TableKeyOf<S, N>, TableValueOf<S, N>>;\n    transaction<T>(operation: (tx: DomainTransaction<S>) => T): Promise<T>;\n    close(): Promise<void>;\n}',
   },
   {
     name: 'DomainChanged',
@@ -5138,15 +5307,23 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   },
   {
     name: 'DomainImpl',
-    declaration: 'export class DomainImpl {\n    readonly name: string;\n    constructor(private readonly ctx: Context, spec: DomainSpec, private readonly unit: KvUnit, records: Map<string, Map<string, unknown>>, globalValue: unknown, private readonly onClosed: () => void);\n    get global(): DomainGlobal<unknown>;\n    table(name: string): KvTable<string, unknown>;\n    close(): Promise<void>;\n}',
+    declaration: 'export class DomainImpl {\n    readonly name: string;\n    constructor(private readonly ctx: Context, spec: DomainSpec, private readonly unit: KvUnit, private readonly records: Map<string, DomainTableData>, globalValue: unknown, private readonly onClosed: () => void);\n    get global(): DomainGlobal<unknown>;\n    table(name: string): KvTable<string, unknown>;\n    transaction<T>(operation: (tx: KvTransaction) => T): Promise<T>;\n    close(): Promise<void>;\n}',
   },
   {
     name: 'DomainSpec',
     declaration: 'export interface DomainSpec {\n    readonly name: string;\n    readonly version: number;\n    readonly layout?: \'single\' | \'per-record\';\n    readonly compatibleVersions?: readonly number[];\n    readonly invalidRecords?: \'backup-and-skip\';\n    readonly global?: DomainGlobalSpec<unknown>;\n    readonly tables: Record<string, DomainTableSpec>;\n}',
   },
   {
+    name: 'DomainTableData',
+    declaration: 'export interface DomainTableData {\n    readonly records: Map<string, unknown>;\n    readonly valueSchema: ZodType;\n}',
+  },
+  {
     name: 'DomainTableSpec',
     declaration: 'export interface DomainTableSpec<K extends string = string, V = unknown> {\n    readonly valueSchema: ZodType<V>;\n    readonly __key?: K;\n}',
+  },
+  {
+    name: 'DomainTransaction',
+    declaration: 'export interface DomainTransaction<S extends DomainSpec> {\n    get<N extends keyof S[\'tables\'] & string>(table: N, key: TableKeyOf<S, N>): TableValueOf<S, N> | undefined;\n    set<N extends keyof S[\'tables\'] & string>(table: N, key: TableKeyOf<S, N>, value: TableValueOf<S, N> | undefined): void;\n}',
   },
   {
     name: 'DshEnvironment',
@@ -5203,6 +5380,10 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   {
     name: 'EveryScheduleRecord',
     declaration: 'export interface EveryScheduleRecord {\n    readonly id: ScheduleId;\n    readonly kind: \'every\';\n    readonly title: string;\n    readonly prompt: string;\n    readonly everySeconds: number;\n    readonly scheduledAt: string;\n}',
+  },
+  {
+    name: 'ExitEvidence',
+    declaration: 'export interface ExitEvidence {\n    runtimeId: string;\n    source: string;\n}',
   },
   {
     name: 'FeedbackCategory',
@@ -5298,7 +5479,7 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   },
   {
     name: 'GenerateOptions',
-    declaration: 'export interface GenerateOptions {\n    provider: string;\n    model: string;\n    intent?: LlmRequestIntent;\n    requiredCapabilities?: LlmProviderCapability[];\n    reasoningEffort?: ReasoningEffortId;\n    messages: RequestMessage[];\n    system?: string;\n    tools?: ToolSchema[];\n    toolHistory?: ToolHistory;\n    temperature?: number;\n    maxTokens?: number;\n    stop?: string[];\n    signal?: AbortSignal;\n    sessionId?: Branded<\'SessionId\'>;\n    purpose?: \'compaction\' | \'session-title\';\n}',
+    declaration: 'export interface GenerateOptions {\n    responseFormat?: LlmResponseFormat;\n    provider: string;\n    model: string;\n    intent?: LlmRequestIntent;\n    requiredCapabilities?: LlmProviderCapability[];\n    reasoningEffort?: ReasoningEffortId;\n    messages: RequestMessage[];\n    system?: string;\n    tools?: ToolSchema[];\n    toolHistory?: ToolHistory;\n    temperature?: number;\n    maxTokens?: number;\n    stop?: string[];\n    signal?: AbortSignal;\n    sessionId?: Branded<\'SessionId\'>;\n    loopAttempt?: LlmLoopAttemptRef;\n    purpose?: \'compaction\' | \'session-title\';\n}',
   },
   {
     name: 'GenericCallView',
@@ -5598,11 +5779,15 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   },
   {
     name: 'KvTable',
-    declaration: 'export interface KvTable<K extends string, V> {\n    get(key: K): V | undefined;\n    entries(): IterableIterator<[\n        K,\n        V\n    ]>;\n    keys(): IterableIterator<K>;\n    readonly size: number;\n    put(key: K, value: V): Promise<void>;\n    delete(key: K): Promise<boolean>;\n    update(key: K, fn: (current: V) => V): Promise<V>;\n}',
+    declaration: 'export interface KvTable<K extends string, V> {\n    get(key: K): V | undefined;\n    entries(): IterableIterator<[\n        K,\n        V\n    ]>;\n    keys(): IterableIterator<K>;\n    readonly size: number;\n    put(key: K, value: V): Promise<void>;\n    delete(key: K): Promise<boolean>;\n    update(key: K, fn: (current: V) => V): Promise<V>;\n    modify(key: K, fn: (current: V | undefined) => V | undefined): Promise<V | undefined>;\n}',
+  },
+  {
+    name: 'KvTransaction',
+    declaration: 'export interface KvTransaction {\n    get(table: string, key: string): unknown;\n    set(table: string, key: string, value: unknown): void;\n}',
   },
   {
     name: 'KvUnit',
-    declaration: 'export interface KvUnit {\n    loadAll(): Promise<{\n        tables: Record<string, Record<string, unknown>>;\n        global: unknown;\n    }>;\n    putRecord(table: string, key: string, value: unknown): Promise<void>;\n    deleteRecord(table: string, key: string): Promise<void>;\n    backupRecord?(table: string, key: string): Promise<string>;\n    setGlobal(value: unknown): Promise<void>;\n    close(): Promise<void>;\n}',
+    declaration: 'export interface KvUnit {\n    transaction?<T>(operation: (tx: KvTransaction) => T): Promise<T>;\n    loadAll(): Promise<{\n        tables: Record<string, Record<string, unknown>>;\n        global: unknown;\n    }>;\n    putRecord(table: string, key: string, value: unknown): Promise<void>;\n    modifyRecord?(table: string, key: string, modify: (current: unknown) => unknown): Promise<unknown>;\n    deleteRecord(table: string, key: string): Promise<void>;\n    backupRecord?(table: string, key: string): Promise<string>;\n    setGlobal(value: unknown): Promise<void>;\n    close(): Promise<void>;\n}',
   },
   {
     name: 'KvUnitDescriptor',
@@ -5618,7 +5803,7 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   },
   {
     name: 'LlmCallConfig',
-    declaration: 'export interface LlmCallConfig {\n    provider: string;\n    model: string;\n    intent?: LlmRequestIntent;\n    requiredCapabilities?: LlmProviderCapability[];\n    reasoningEffort?: ReasoningEffortId;\n    temperature?: number;\n    maxTokens?: number;\n    stop?: string[];\n}',
+    declaration: 'export interface LlmCallConfig {\n    provider: string;\n    model: string;\n    responseFormat?: LlmResponseFormat;\n    intent?: LlmRequestIntent;\n    requiredCapabilities?: LlmProviderCapability[];\n    reasoningEffort?: ReasoningEffortId;\n    temperature?: number;\n    maxTokens?: number;\n    stop?: string[];\n}',
   },
   {
     name: 'LlmCallConfigAdapterDefaults',
@@ -5637,6 +5822,10 @@ export const TYPE_API: readonly TypeApiEntry[] = [
     declaration: 'export interface LlmDiscoveredModel {\n    id: string;\n    name?: string;\n    contextWindow?: number;\n    maxTokens?: number;\n    inputModalities?: readonly ModelModality[];\n}',
   },
   {
+    name: 'LlmDispatchContext',
+    declaration: 'export interface LlmDispatchContext {\n    readonly provider: Readonly<LlmProviderInfo>;\n    readonly options: Readonly<GenerateOptions>;\n    checkBeforeDispatch(check: () => LlmFailure | undefined): void;\n    cancelOn(signal: AbortSignal): void;\n}',
+  },
+  {
     name: 'LlmFailure',
     declaration: 'export interface LlmFailure {\n    readonly message: string;\n    readonly code: string;\n    readonly status?: number;\n    readonly providerRetryAfterMs?: number;\n    readonly requestId?: ProviderRequestId;\n    readonly offloadImages?: number;\n}',
   },
@@ -5647,6 +5836,10 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   {
     name: 'LlmImageRequestPricing',
     declaration: 'export interface LlmImageRequestPricing {\n    priceImages(images: readonly ImageBlock[]): readonly LlmImageRequestPrice[];\n}',
+  },
+  {
+    name: 'LlmLoopAttemptRef',
+    declaration: 'export interface LlmLoopAttemptRef {\n    readonly stepStartSeq: BrandedNumber<\'SessionSeq\'>;\n    readonly attempt: number;\n}',
   },
   {
     name: 'LlmModelContext',
@@ -5663,6 +5856,14 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   {
     name: 'LlmModelReasoningInfo',
     declaration: 'export interface LlmModelReasoningInfo {\n    efforts: readonly LlmReasoningEffortInfo[];\n    defaultEffort?: ReasoningEffortId;\n}',
+  },
+  {
+    name: 'LlmPreparationContext',
+    declaration: 'export interface LlmPreparationContext {\n    readonly sessionId?: Branded<\'SessionId\'>;\n    readonly purpose?: \'compaction\' | \'session-title\';\n    readonly loopAttempt?: LlmLoopAttemptRef;\n}',
+  },
+  {
+    name: 'LlmPreparationFailure',
+    declaration: 'export interface LlmPreparationFailure extends LlmPreparationContext {\n    readonly provider: string;\n    readonly model: string;\n    readonly intent?: LlmRequestIntent;\n    readonly stage: \'prepare\' | \'stream\';\n    readonly usageSource: LlmUsageSource;\n    readonly category: \'aborted\' | \'admission\' | \'capability\' | \'route\' | \'credentials\' | \'unknown\';\n}',
   },
   {
     name: 'LlmProviderAvailability',
@@ -5690,11 +5891,15 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   },
   {
     name: 'LlmResolvedModelInfo',
-    declaration: 'export interface LlmResolvedModelInfo extends LlmModelInfo {\n    streamingSupport?: LlmCapabilitySupport;\n    toolSupport?: LlmCapabilitySupport;\n    context?: LlmModelContext;\n    defaultMaxTokens?: number;\n    reasoning?: LlmModelReasoningInfo;\n    systemPromptUpdate?: SystemPromptUpdate;\n    toolUpdate?: ToolUpdate;\n}',
+    declaration: 'export interface LlmResolvedModelInfo extends LlmModelInfo {\n    structuredOutputSupport?: LlmCapabilitySupport;\n    streamingSupport?: LlmCapabilitySupport;\n    toolSupport?: LlmCapabilitySupport;\n    context?: LlmModelContext;\n    defaultMaxTokens?: number;\n    reasoning?: LlmModelReasoningInfo;\n    systemPromptUpdate?: SystemPromptUpdate;\n    toolUpdate?: ToolUpdate;\n}',
+  },
+  {
+    name: 'LlmResponseFormat',
+    declaration: 'export interface LlmResponseFormat {\n    type: \'json_schema\';\n    name: string;\n    schema: {\n        [key: string]: JsonValue;\n    };\n    strict: true;\n}',
   },
   {
     name: 'LlmRuntime',
-    declaration: 'export class LlmRuntime extends TypertRemoteService {\n    constructor(ctx: Context);\n    registerAdapter(providers: string[], adapter: LlmAdapter, validationAdmission?: LlmValidationAdmission): AdapterRegistrationHandle;\n    @Remote\n    listProviders(): LlmProviderInfo[];\n    registerConfigurableProviders(entries: readonly LlmConfigurableProvider[]): DirectoryRegistrationHandle;\n    @Remote\n    listConfigurableProviders(): LlmConfigurableProvider[];\n    registerModelDiscovery(settingsNs: string, discover: (request: LlmModelDiscoveryRequest, signal?: AbortSignal) => Promise<readonly LlmDiscoveredModel[]>): () => void;\n    async discoverModels(settingsNs: string, request: LlmModelDiscoveryRequest, signal?: AbortSignal): Promise<LlmDiscoveredModel[]>;\n    @Remote(\'discoverModels\')\n    async remoteDiscoverModels(settingsNs: string, request: LlmModelDiscoveryRequest, signal: AbortSignal): Promise<LlmDiscoveredModel[]>;\n    providerRetryPolicy(provider: string): ResolvedRetryPolicy;\n    imageRequestPricing(provider: string, model: string): LlmImageRequestPricing | undefined;\n    fileRequestText(ref: FileAttachmentRef): string;\n    async listModels(provider: string): Promise<LlmModelInfo[]>;\n    async resolveModelInfo(provider: string, model: string, signal?: AbortSignal): Promise<LlmResolvedModelInfo>;\n    async resolveCallConfig(config: LlmCallConfig, signal?: AbortSignal): Promise<LlmCallConfig>;\n    async prepareCall(config: LlmCallConfig, signal?: AbortSignal): Promise<Prepared /* …truncated — full shape in source */',
+    declaration: 'export class LlmRuntime extends TypertRemoteService {\n    constructor(ctx: Context);\n    registerAdapter(providers: string[], adapter: LlmAdapter, validationAdmission?: LlmValidationAdmission): AdapterRegistrationHandle;\n    @Remote\n    listProviders(): LlmProviderInfo[];\n    registerConfigurableProviders(entries: readonly LlmConfigurableProvider[]): DirectoryRegistrationHandle;\n    @Remote\n    listConfigurableProviders(): LlmConfigurableProvider[];\n    registerModelDiscovery(settingsNs: string, discover: (request: LlmModelDiscoveryRequest, signal?: AbortSignal) => Promise<readonly LlmDiscoveredModel[]>): () => void;\n    async discoverModels(settingsNs: string, request: LlmModelDiscoveryRequest, signal?: AbortSignal): Promise<LlmDiscoveredModel[]>;\n    @Remote(\'discoverModels\')\n    async remoteDiscoverModels(settingsNs: string, request: LlmModelDiscoveryRequest, signal: AbortSignal): Promise<LlmDiscoveredModel[]>;\n    providerRetryPolicy(provider: string): ResolvedRetryPolicy;\n    imageRequestPricing(provider: string, model: string): LlmImageRequestPricing | undefined;\n    fileRequestText(ref: FileAttachmentRef): string;\n    async listModels(provider: string): Promise<LlmModelInfo[]>;\n    async resolveModelInfo(provider: string, model: string, signal?: AbortSignal): Promise<LlmResolvedModelInfo>;\n    async resolveCallConfig(config: LlmCallConfig, signal?: AbortSignal): Promise<LlmCallConfig>;\n    async prepareCall(config: LlmCallConfig, signal?: AbortSignal, context?: LlmPrep /* …truncated — full shape in source */',
   },
   {
     name: 'LlmUsageSource',
@@ -6109,6 +6314,14 @@ export const TYPE_API: readonly TypeApiEntry[] = [
     declaration: 'export interface ProfilePnpmInvocation {\n    readonly command: string;\n    readonly args: readonly string[];\n    readonly env: Readonly<Record<string, string>>;\n}',
   },
   {
+    name: 'ProjectCreateCommand',
+    declaration: 'export interface ProjectCreateCommand {\n    commandId: CommandId;\n    expectedVersion: 0;\n    project: TaskboardProject;\n}',
+  },
+  {
+    name: 'ProjectId',
+    declaration: 'export type ProjectId = Branded<\'TaskboardProjectId\'>;',
+  },
+  {
     name: 'ProjectionChangeListener',
     declaration: 'export type ProjectionChangeListener = (session: Session, key: Extract<keyof SessionProjectionMap, string>, value: unknown, seq: SessionSeq) => void;',
   },
@@ -6329,12 +6542,32 @@ export const TYPE_API: readonly TypeApiEntry[] = [
     declaration: 'export interface ResumeAgentOptions {\n    readonly resumeSessionId: SessionId;\n    readonly parentAgent?: Agent;\n    readonly agentOptions?: AgentOptions;\n    readonly signal?: AbortSignal;\n    readonly setup?: AgentSetup;\n}',
   },
   {
+    name: 'ReviewSummary',
+    declaration: 'export interface ReviewSummary {\n    commandId: CommandId;\n    deliveryId: DeliveryId;\n    revision: number;\n    deliveryVersion: number;\n    snapshot: string;\n    verdict: \'accept\' | \'return\';\n    feedback: string;\n    waivers: {\n        criterion: string;\n        reason: string;\n    }[];\n    time: string;\n}',
+  },
+  {
     name: 'RpcId',
     declaration: 'export type RpcId = Branded<\'rpc-id\'>;',
   },
   {
+    name: 'RunAdmission',
+    declaration: 'export type RunAdmission = z.input<typeof admission> & {\n    runId: TaskRunId;\n    previousRun: TaskRunId | null;\n    projectId: ProjectId;\n    taskId: TaskId;\n    commandId: CommandId;\n};',
+  },
+  {
     name: 'RunnerFailureRule',
     declaration: 'export interface RunnerFailureRule {\n    allowedExitCodes?: readonly number[];\n    fatalSignatures: readonly string[];\n    informationalLines?: readonly string[];\n}',
+  },
+  {
+    name: 'RunStops',
+    declaration: 'export class RunStops {\n    constructor(private readonly executions: TaskExecutions, private readonly timeoutMs: number);\n    async attach(owner: RuntimeBinding, client: RuntimeStopTarget, scope: Target[\'scope\']): Promise<() => void>;\n    async stop(owner: RuntimeBinding, command: TaskStopCommand): Promise<void>;\n}',
+  },
+  {
+    name: 'RuntimeBinding',
+    declaration: 'export type RuntimeBinding = z.output<typeof binding>;',
+  },
+  {
+    name: 'RuntimeStopTarget',
+    declaration: 'export interface RuntimeStopTarget {\n    request(method: \'shutdown\', params: object, timeoutMs: number): Promise<unknown>;\n    waitForExit(timeoutMs: number): Promise<boolean>;\n    close(): Promise<void>;\n}',
   },
   {
     name: 'SandboxEnforcement',
@@ -7273,6 +7506,10 @@ export const TYPE_API: readonly TypeApiEntry[] = [
     declaration: 'export type SshStreamEndpoint = z.infer<typeof streamEndpointSchema>;',
   },
   {
+    name: 'StopFailure',
+    declaration: 'export type StopFailure = \'runtime-unavailable\' | \'deadline\' | \'runtime-alive\' | \'scope-unknown\' | \'scope-occupied\' | \'observation-failed\';',
+  },
+  {
     name: 'StorageBackend',
     declaration: 'export interface StorageBackend {\n    readonly kv?: KvFacet;\n    close(): Promise<void>;\n}',
   },
@@ -7481,6 +7718,86 @@ export const TYPE_API: readonly TypeApiEntry[] = [
     declaration: 'export type TableValueOf<S extends DomainSpec, N extends keyof S[\'tables\']> = S[\'tables\'][N] extends DomainTableSpec<string, infer V> ? V : never;',
   },
   {
+    name: 'TaskActivity',
+    declaration: 'export interface TaskActivity extends TaskReceipt {\n    actor: \'operator\' | \'runtime\';\n    time: string;\n    action: \'created\' | \'edited\' | \'commented\' | \'planned\' | \'canceled\' | \'archived\' | \'reopened\' | \'reordered\' | \'run-requested\' | \'run-started\' | \'stop-requested\' | \'force-requested\' | \'run-ended\' | \'accepted\' | \'returned\';\n    comment?: string | undefined;\n}',
+  },
+  {
+    name: 'TaskboardProject',
+    declaration: 'export interface TaskboardProject {\n    id: ProjectId;\n    title: string;\n    root: string;\n    baselineBranch?: string | undefined;\n    configurationRef?: string | undefined;\n}',
+  },
+  {
+    name: 'TaskCommand',
+    declaration: 'export interface TaskCommand {\n    commandId: CommandId;\n    projectId: ProjectId;\n    taskId: TaskId;\n    expectedVersion: number;\n}',
+  },
+  {
+    name: 'TaskCommentCommand',
+    declaration: 'export interface TaskCommentCommand extends TaskCommand {\n    text: string;\n}',
+  },
+  {
+    name: 'TaskDelivery',
+    declaration: 'export type TaskDelivery = z.output<typeof deliveryRecord>;',
+  },
+  {
+    name: 'TaskDetail',
+    declaration: 'export interface TaskDetail {\n    task: TaskView;\n    revisions: TaskRevision[];\n    activity: TaskActivity[];\n    runs: TaskRunSummary[];\n    deliveries: DeliverySummary[];\n    reviews: ReviewSummary[];\n}',
+  },
+  {
+    name: 'TaskExecutions',
+    declaration: 'export class TaskExecutions {\n    constructor(private readonly domain: Domain<typeof taskboardDomain>);\n    active(owner: RuntimeBinding): Promise<TaskRun>;\n    admit(input: RunAdmission): Promise<TaskRun>;\n    started(owner: RuntimeBinding, messageId: string): Promise<void>;\n    interaction(owner: RuntimeBinding, value: Interaction): Promise<void>;\n    requestStop(owner: RuntimeBinding, command: TaskCommand, force: boolean): Promise<{\n        receipt: TaskReceipt;\n        issued: boolean;\n    }>;\n    stopUnconfirmed(owner: RuntimeBinding, reason: StopFailure): Promise<void>;\n    exited(owner: RuntimeBinding, evidence: ExitEvidence, state: \'finished\' | \'interrupted\' | \'failed\', reason: string, output?: TaskDelivery): Promise<void>;\n    review(expectedVersion: number, decision: Omit<TaskReview, \'time\'>, observedSnapshot: string): Promise<TaskReceipt>;\n}',
+  },
+  {
+    name: 'TaskOrderCommand',
+    declaration: 'export interface TaskOrderCommand extends TaskCommand {\n    beforeTaskId: TaskId | null;\n}',
+  },
+  {
+    name: 'TaskReceipt',
+    declaration: 'export interface TaskReceipt {\n    commandId: CommandId;\n    version: number;\n    revision: number;\n}',
+  },
+  {
+    name: 'TaskRequirements',
+    declaration: 'export interface TaskRequirements {\n    title: string;\n    description: string;\n    acceptance: string[];\n    priority: \'low\' | \'normal\' | \'high\';\n    labels: string[];\n}',
+  },
+  {
+    name: 'TaskRequirementsCommand',
+    declaration: 'export interface TaskRequirementsCommand extends TaskCommand {\n    requirements: TaskRequirements;\n}',
+  },
+  {
+    name: 'TaskReview',
+    declaration: 'export type TaskReview = z.output<typeof reviewRecord>;',
+  },
+  {
+    name: 'TaskRevision',
+    declaration: 'export interface TaskRevision extends TaskRequirements {\n    revision: number;\n}',
+  },
+  {
+    name: 'TaskRun',
+    declaration: 'export type TaskRun = z.output<typeof runRecord>;',
+  },
+  {
+    name: 'TaskRunId',
+    declaration: 'export type TaskRunId = Branded<\'TaskboardRunId\'>;',
+  },
+  {
+    name: 'TaskRunSummary',
+    declaration: 'export interface TaskRunSummary {\n    runId: TaskRunId;\n    previousRun: TaskRunId | null;\n    state: \'preparing\' | \'running\' | \'finished\' | \'failed\' | \'interrupted\';\n    control: \'normal\' | \'stop_requested\' | \'finalizing\';\n    connection: \'connected\' | \'suspect\' | \'disconnected\';\n    stopFailure: StopFailure | null;\n    revision: number;\n    workspace: string;\n    branch: string | null;\n    sessionId: SessionId;\n    priorSessionId: SessionId | null;\n    mode: \'fresh\' | \'resume\';\n    materialReferences: string[];\n    receipt: string | null;\n    endReason: string | null;\n}',
+  },
+  {
+    name: 'TaskStatus',
+    declaration: 'export type TaskStatus = \'backlog\' | \'todo\' | \'in_progress\' | \'in_review\' | \'blocked\' | \'done\' | \'canceled\';',
+  },
+  {
+    name: 'TaskStopCommand',
+    declaration: 'export interface TaskStopCommand extends TaskCommand {\n    runId: TaskRunId;\n    force: boolean;\n}',
+  },
+  {
+    name: 'TaskView',
+    declaration: 'export interface TaskView extends TaskRequirements {\n    id: TaskId;\n    projectId: ProjectId;\n    version: number;\n    revision: number;\n    status: TaskStatus;\n    archived: boolean;\n}',
+  },
+  {
+    name: 'TaskWorkspacePlan',
+    declaration: 'export interface TaskWorkspacePlan {\n    mode: \'isolated\' | \'original\' | \'continue\';\n    source: string;\n    checkout: string | null;\n    directory: string;\n    branch: string | null;\n    baseline: string | null;\n    confirmation: WorkspaceInspection | null;\n}',
+  },
+  {
     name: 'TeamId',
     declaration: 'export type TeamId = Branded<\'TeamId\'>;',
   },
@@ -7638,7 +7955,7 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   },
   {
     name: 'TokenUsage',
-    declaration: 'export interface TokenUsage {\n    inputTokens: number;\n    outputTokens: number;\n    totalTokens?: number;\n    cacheReadTokens?: number;\n    cacheWriteTokens?: number;\n    reasoningTokens?: number;\n}',
+    declaration: 'export interface TokenUsage {\n    measurement?: \'provider-reported\' | \'estimated\';\n    inputTokens: number;\n    outputTokens: number;\n    totalTokens?: number;\n    cacheReadTokens?: number;\n    cacheWriteTokens?: number;\n    reasoningTokens?: number;\n}',
   },
   {
     name: 'ToolAdditionBlock',
@@ -8183,6 +8500,10 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   {
     name: 'WorkspaceInsertSessionBeforeRequest',
     declaration: 'export interface WorkspaceInsertSessionBeforeRequest {\n    readonly workspaceId: WorkspaceId;\n    readonly sessionId: SessionId;\n    readonly beforeSessionId?: SessionId;\n}',
+  },
+  {
+    name: 'WorkspaceInspection',
+    declaration: 'export interface WorkspaceInspection {\n    directory: string;\n    repository: string | null;\n    branch: string | null;\n    head: string | null;\n    dirty: boolean | null;\n    fingerprint: string | null;\n}',
   },
   {
     name: 'WorkspaceOrderValue',

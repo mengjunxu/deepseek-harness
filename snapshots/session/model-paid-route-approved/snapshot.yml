@@ -1,0 +1,9 @@
+version: 1
+scenario: model-paid-route-approved
+profile: headless
+composition: model-paid-route-approved
+recording: authored
+header:
+  class: model-paid-route-approved
+  pin: true
+  toolSchemasSource: text-turn

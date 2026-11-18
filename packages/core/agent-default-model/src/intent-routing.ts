@@ -2,13 +2,15 @@
 import type { Context, Volatile } from '@deepseek-ai/cordis'
 import Schema from '@deepseek-ai/schemastery'
 import { deepFreeze } from '@deepseek-ai/dsh-util-values'
-import { RequestIntentSchema, RequiredCapabilitiesSchema, ReasoningEffortId, LlmError } from '@deepseek-ai/dsh-llm'
-import type { LlmCallConfig, LlmProviderCapability, LlmRequestIntent } from '@deepseek-ai/dsh-llm'
+import { RequestIntentSchema, RequiredCapabilitiesSchema, ReasoningEffortId, LlmError, ResponseFormatSchema, resolveResponseFormat } from '@deepseek-ai/dsh-llm'
+import type { LlmCallConfig, LlmProviderCapability, LlmRequestIntent, LlmResponseFormat } from '@deepseek-ai/dsh-llm'
 import { agentCarrier } from '@deepseek-ai/dsh-agent'
 import type { Agent, ModelSelection, ModelSelectionCapture } from '@deepseek-ai/dsh-agent'
 
 /** One explicit route; omission of effort restores the chosen model's default. */
 export interface ConfiguredIntentRoute {
+  /** Native JSON Schema response requested for this intent, when set. */
+  responseFormat?: LlmResponseFormat
   /** Fixed-route mode; omission preserves the configured route. */
   selection?: 'configured'
   /** Registered provider route. */
@@ -23,6 +25,8 @@ export interface ConfiguredIntentRoute {
 
 /** Use the entry's current model selection while retaining this intent's requirements. */
 export interface EntryIntentRoute {
+  /** Native response schema applied to the entry-selected model. */
+  responseFormat?: LlmResponseFormat
   /** Resolve through the installed entry selection owner; absence fails before a request. */
   selection: 'entry'
   /** Capabilities required of the user-selected route. */
@@ -52,9 +56,10 @@ const configuredRoute = Schema.object({
   model: Schema.string().pattern(/\S/).required(),
   reasoningEffort: Schema.string().pattern(/\S/),
   requiredCapabilities: RequiredCapabilitiesSchema,
+  responseFormat: ResponseFormatSchema,
 }).required()
 
-const route = Schema.union([
+const route = Schema.transform(Schema.union([
   configuredRoute,
   Schema.object({
     selection: Schema.const('entry').required(),
@@ -62,8 +67,13 @@ const route = Schema.union([
     model: Schema.const(undefined),
     reasoningEffort: Schema.const(undefined),
     requiredCapabilities: RequiredCapabilitiesSchema,
+    responseFormat: ResponseFormatSchema,
   }).required(),
-]).required()
+]).required(), (value) => {
+  // Schemastery preserves null on an optional field before its own transform runs.
+  if (value.responseFormat === null) throw new LlmError('A response format must be omitted or contain a schema', 'INVALID_RESPONSE_FORMAT')
+  return value
+}).required()
 
 /** Runtime configuration for the opt-in intent-routing plugin. */
 export const Config = Schema.object({
@@ -113,10 +123,14 @@ export function apply(ctx: Context, config: Config): void {
           ...selected.reasoningEffort === undefined ? {} : { reasoningEffort: ReasoningEffortId(selected.reasoningEffort) },
         }
       }
-      const call = deepFreeze<LlmCallConfig>({
+      const responseFormat: LlmResponseFormat | undefined = selected.responseFormat === undefined
+        ? undefined : resolveResponseFormat(selected.responseFormat)
+      const call: LlmCallConfig = {
         ...choice, intent: policy.intent,
+        ...responseFormat === undefined ? {} : { responseFormat },
         ...selected.requiredCapabilities === undefined ? {} : { requiredCapabilities: [...selected.requiredCapabilities] },
-      })
+      }
+      deepFreeze(call)
       turn = { signal, call, entry: selected.selection === 'entry' }
       turns.set(agent, turn)
     }
@@ -135,7 +149,7 @@ export function apply(ctx: Context, config: Config): void {
     const turn = turns.get(agent)
     if (turn?.signal !== signal) throw new Error('Intent routing requires prompt assembly for this Turn')
     const proposed = await next()
-    const { reasoningEffort: _effort, requiredCapabilities: _requirements, ...controls } = proposed
+    const { reasoningEffort: _effort, requiredCapabilities: _requirements, responseFormat: _format, ...controls } = proposed
     return { ...controls, ...turn.call }
   }, { prepend: true })
 }

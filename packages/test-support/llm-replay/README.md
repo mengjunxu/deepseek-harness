@@ -29,6 +29,8 @@ This package gives a keyless test a real agent with a fixed model transcript: mo
 
 ### Mounting it
 
+Native dispatch/accounting tests require a nonempty `providers` catalog. Model entries may declare `structuredOutputSupport`, `toolSupport` and `streamingSupport`; unknown or unsupported declarations remain explicit. Catch-all replay bypasses registered adapter dispatch and cannot validate its accounting hooks.
+
 With `providers` configured, the plugin registers a replay-only adapter whose catalog is available to scenarios that exercise model discovery; without `providers`, it installs the catch-all `llm/stream` waterfall used by tests that do not need discovery:
 
 ```yaml
@@ -62,6 +64,8 @@ With `providers` configured, the plugin registers a replay-only adapter whose ca
 | `paceMs` | — (burst) | Optional per-chunk delay in ms for genuinely incremental delivery |
 
 The generated [configuration catalog](../../../docs/config-catalog.md#deepseek-aidsh-llm-replay) is the exhaustive source for every accepted field and its JSDoc.
+
+A replay Provider may declare `policy`, and each model may declare `structuredOutputSupport`. These declarations pass through the ordinary LLM admission checks; absent support remains unknown. They let the [formatted headless fixture](../../../snapshots/session/model-structured-output/cordis.snapshot.yml) exercise schema admission and completed-output validation without provider I/O.
 
 ### How the fixture works
 

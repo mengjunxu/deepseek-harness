@@ -57,6 +57,8 @@ domain.table('workspaces').update(id, (r) => ({ ...r, path: newPath }))
 
 The caller owns the handle's lifecycle and releases it with `domain.close()` when the feature shuts down (typically its own `ctx.effect` disposer); domains still open when the plugin unmounts are closed by the facility.
 
+Use `table.modify(key, fn)` when a decision must read the latest persisted value across independent owners. The SQLite backend supports it; unsupported backends reject `atomic-modify-unsupported`. The callback receives a schema-validated record or `undefined`, must be synchronous and pure, and returns the replacement or `undefined` to delete. See the [storage reference](../../../docs/subsystems/storage.md) for cache and event semantics.
+
 ### Routing domains to backends
 
 The domain plugin's configuration decides which backend serves which domain — never the hub. `backend` names the default route; `routes` overrides it per domain name. A route naming an unregistered backend fails loudly at open with `backend-not-found`.
@@ -77,6 +79,8 @@ Every write resolves only after the backend acknowledges durability, and each em
 <a id="understand-the-implementation"></a>
 ## Understand the implementation
 
+A domain transaction reads current persisted records and commits multiple table changes together. Use the synchronous callback passed to `domain.transaction()` for related records such as task history and project order. All local cache changes precede publication of the first change event. Callback errors roll back every write.
+
 <details>
 <summary>Implementation internals — click to expand</summary>
 
@@ -85,13 +89,15 @@ The domain layer is a single implementation, not an abstracted seam: consumers d
 ### Design concept
 
 - **The spec object is the single source of truth.** `defineDomain` pins the spec's literal types and validates its fields at the owning package's module load, before any medium is touched. Record schemas are zod, so `z.infer` avoids duplicating consumer types; plugin `Config` stays schemastery.
-- **Memory is authoritative; the medium is the durable projection.** Reads are synchronous from validated in-memory state. Every write queues on one per-domain write chain: backend durability first, then memory mutation, then `domain/changed` — a rejected backend write leaves memory untouched, so reads never diverge from the medium.
-- **One write chain per domain.** `put`, `delete`, `update`, and `global.set` all queue on it; `update`'s transform runs at its chain slot, so concurrent updates never interleave. Records are plain immutable data — returned values are the stored objects themselves and must not be mutated in place.
+- **Validated local reads.** Reads use the local record cache. Every write reaches backend durability before updating that cache and emitting `domain/changed`; a rejected write leaves local observations unchanged. Atomic modification validates the latest persisted record inside the backend transaction.
+- **One write chain per domain.** `put`, `delete`, `update`, `modify`, and `global.set` all queue on it; `update`'s transform reads the local cache at its chain slot. Records are plain immutable data — returned values are the stored objects themselves and must not be mutated in place.
 - **Writes emit after the commit point.** `domain/changed` is a notification, not a transaction participant: a throwing listener is contained with a logged warning rather than rejecting the already-durable write.
 
 ### Open sequence
 
 `DomainFacility.open(spec)` runs a strict sequence, each step failing the whole call: reject a name already open or still closing (`already-open`); resolve the route (`backend-not-found`); require the `kv` facet (`facet-unsupported`); open the unit (backend `version-mismatch`/`malformed-medium` pass through); load and validate every stored record and the global against the spec's schemas (`invalid-record`); construct the domain. The caller owns the handle; the facility closes any domain left open when it unmounts, and a closed domain's name frees for reopening only after teardown completes.
+
+Service withdrawal and medium cleanup share one ordered effect. The service disposer is yielded after the cleanup disposer so injected consumers finish before remaining domains close; the storage form stays mounted while their final writes emit events. Whole-application owners additionally drain work through `disposeApplication` before concurrent root teardown.
 
 ### Source map
 
@@ -148,7 +154,7 @@ Independent: domain reads and writes never touch request prefixes, so nothing he
 
 These limits define when the domain layer is a poor fit or needs special operational care. They are current package constraints, not a task backlog.
 
-- **Single-process change visibility** — `domain/changed` is an in-process event; a second host process or a reconnecting GUI observes no changes until the cross-process revision pattern lands ([Agent Note](../../../.agents/notes/proposed/architecture/2026-07-24-domain-kv-storage-and-workspace.md)).
+- **Local change visibility** — `domain/changed` does not push other processes’ changes. Cached reads stay local; `modify` refreshes its key from the transaction result, and reopening refreshes the complete domain.
 - **No cross-table transactions, secondary indexes, or multi-segment keys** — each write touches one record; these extensions are deferred in the Agent Note's out-of-scope list.
 - **No data migration** — a domain whose stored version differs from its spec rejects at open (`version-mismatch`); changing a schema requires migrating the stored data by hand.
 

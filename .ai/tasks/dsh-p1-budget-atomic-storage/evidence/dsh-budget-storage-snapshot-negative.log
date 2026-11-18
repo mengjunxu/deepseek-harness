@@ -1,0 +1,47 @@
+$ vitest run --config vitest.snapshot.config.ts snapshots/session/headless.snapshot.ts -t 'replays cordis-storage-atomic through dsh'
+The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
+
+ RUN  v4.1.8 /Users/x-dt/workspace/AI/Agents/deepseek-harness
+
+ ❯ snapshots/session/headless.snapshot.ts (146 tests | 1 failed | 145 skipped) 1371ms
+     × replays cordis-storage-atomic through dsh --profile headless 1370ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  snapshots/session/headless.snapshot.ts > headless recorded-session snapshots > replays cordis-storage-atomic through dsh --profile headless
+AssertionError: cordis-storage-atomic: session 0: expected [ { type: 'session', …(5) }, …(21) ] to deeply equal [ { type: 'session', …(5) }, …(21) ]
+
+- Expected
++ Received
+
+@@ -346,11 +346,11 @@
+          \"name\": \"DomainTableSpec\",
+          \"declaration\": \"export interface DomainTableSpec<K extends string = string, V = unknown> {\\n    readonly valueSchema: ZodType<V>;\\n    readonly __key?: K;\\n}\"
+        },
+        {
+          \"name\": \"KvTable\",
+-         \"declaration\": \"export interface KvTable<K extends string, V> {\\n    get(key: K): V | undefined;\\n    entries(): IterableIterator<[\\n        K,\\n        V\\n    ]>;\\n    keys(): IterableIterator<K>;\\n    readonly size: number;\\n    put(key: K, value: V): Promise<void>;\\n    delete(key: K): Promise<boolean>;\\n    update(key: K, fn: (current: V) => V): Promise<V>;\\n    modify(key: K, fn: (current: V | undefined) => V | undefined): Promise<V | undefined>;\\n}\"
++         \"declaration\": \"export interface KvTable<K extends string, V> {\\n    get(key: K): V | undefined;\\n    entries(): IterableIterator<[\\n        K,\\n        V\\n    ]>;\\n    keys(): IterableIterator<K>;\\n    readonly size: number;\\n    put(key: K, value: V): Promise<void>;\\n    delete(key: K): Promise<boolean>;\\n    update(key: K, fn: (current: V) => V): Promise<V>;\\n}\"
+        },
+        {
+          \"name\": \"KvUnit\",
+          \"declaration\": \"export interface KvUnit {\\n    loadAll(): Promise<{\\n        tables: Record<string, Record<string, unknown>>;\\n        global: unknown;\\n    }>;\\n    putRecord(table: string, key: string, value: unknown): Promise<void>;\\n    modifyRecord?(table: string, key: string, modify: (current: unknown) => unknown): Promise<unknown>;\\n    deleteRecord(table: string, key: string): Promise<void>;\\n    backupRecord?(table: string, key: string): Promise<string>;\\n    setGlobal(value: unknown): Promise<void>;\\n    close(): Promise<void>;\\n}\"
+        },
+
+ ❯ snapshots/session/headless.snapshot.ts:1266:69
+    1264|           )
+    1265|           : records(expectedSnapshots[index] as string)
+    1266|         expect(actualRecords, `${scenario.name}: session ${index}`).to…
+       |                                                                     ^
+    1267|       }
+    1268|       await verifyHeaders(scenario, actualLogs, actualContext)
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 145 skipped (146)
+   Start at  14:39:43
+   Duration  2.51s (transform 666ms, setup 140ms, import 915ms, tests 1.37s, environment 0ms)
+
+[ELIFECYCLE] Command failed with exit code 1.

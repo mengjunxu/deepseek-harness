@@ -62,6 +62,8 @@ kind: "package-reference"
 <a id="understand-the-implementation"></a>
 ## 理解实现
 
+可选 KV 事务用同步回调访问同一单元的多条记录。SQLite 将这些修改一起提交；数据域负责带类型的访问与变更事件。
+
 <details>
 <summary>实现细节——点击展开</summary>
 
@@ -76,7 +78,9 @@ kind: "package-reference"
 
 ### 后端约定
 
-[`src/backend.ts`](src/backend.ts) 是后端实现者的规范性约定，由 `tests/contract.ts` 中的共享一致性套件逐条款检查。一个后端只拥有一种介质，并暴露可选的数据形状分面；`kv` 是唯一的分面，打开单元即可获得一个带版本、全局单例的 schema 句柄，其每次调用均具备原子性，并在完成时保证持久化。单元名与表名必须匹配 `UNIT_NAME_RE`；记录键是任意字符串，绝不进入文件路径。单元不对并发写入做串行化——顺序由调用方负责——介质上记录的版本与描述符不同时拒绝 `version-mismatch`（不做迁移）。
+[`src/backend.ts`](src/backend.ts) 是后端实现者的规范性约定，由 `tests/contract.ts` 中的共享一致性套件逐条款检查。一个后端只拥有一种介质，并暴露可选的数据形状分面；`kv` 是唯一的分面，打开单元即可获得一个带版本、每个后端仅打开一次的句柄，其每次调用均具备原子性，并在完成时保证持久化。单元名与表名必须匹配 `UNIT_NAME_RE`；记录键是任意字符串，绝不进入文件路径。单元不对并发写入做串行化——顺序由调用方负责——介质上记录的版本与描述符不同时拒绝 `version-mismatch`（不做迁移）。
+
+SQLite 单元另提供可选的 `modifyRecord`，原子读取并更新最新持久化记录。消费者须明确要求此操作；先读取缓存再调用 `putRecord` 无法提供该能力。[领域 API](../storage-domain/README.zh.md)提供有类型、经过 schema 校验的访问。
 
 ### 源码地图
 

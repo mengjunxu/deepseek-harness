@@ -7,6 +7,7 @@
 export type DomainErrorCode =
   | 'already-open'
   | 'facet-unsupported'
+  | 'atomic-modify-unsupported'
   | 'invalid-record'
   | 'missing-key'
   | 'closed'
@@ -49,5 +50,26 @@ export class DomainError extends Error {
   ) {
     super(message, options)
     if (options?.detail) this.detail = options.detail
+  }
+}
+
+/**
+ * Parse persisted data and retain its domain/table/key in validation failures.
+ * @param domain - Owning domain name.
+ * @param table - Table name, or an empty string for the global slot.
+ * @param key - Record key, or an empty string for the global slot.
+ * @param parse - Schema parse of the persisted value.
+ * @returns the parsed value.
+ */
+export function parseRecord<T>(domain: string, table: string, key: string, parse: () => T): T {
+  try {
+    return parse()
+  } catch (error) {
+    const slot = table === '' ? 'global' : `record '${key}' in table '${table}'`
+    throw new DomainError(
+      'invalid-record',
+      `domain '${domain}': stored ${slot} does not match its schema`,
+      { detail: { table, key }, cause: error },
+    )
   }
 }

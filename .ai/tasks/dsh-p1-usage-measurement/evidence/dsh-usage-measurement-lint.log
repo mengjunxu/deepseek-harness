@@ -1,0 +1,4 @@
+$ tsx scripts/run-oxlint.ts .
+packages/llm/token-meter/src/turn-usage.ts:148:57: error typescript(no-non-null-assertion): Forbidden non-null assertion. help: Consider using the optional chain operator `?.` instead. `x!.y` is equivalent to `x.y` at runtime and will throw if `x` is `null` or `undefined`, but `x?.y` will return `undefined`.
+packages/llm/token-meter/src/turn-usage.ts:88:87: error typescript(no-unnecessary-condition): Unnecessary comparison between literal values.
+[ELIFECYCLE] Command failed with exit code 1.

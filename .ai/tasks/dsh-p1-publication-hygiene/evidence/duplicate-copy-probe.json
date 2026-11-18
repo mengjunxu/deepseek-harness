@@ -1,0 +1,12 @@
+{
+  "homeExport": {
+    "distinctModuleFunctions": true,
+    "samePrimitivePath": true,
+    "expectedOsDefault": true
+  },
+  "requestPolicyExport": {
+    "ownsHarnessErrorIdentity": true,
+    "foreignCopyHasDifferentClass": true,
+    "code": "INVALID_REQUEST_POLICY"
+  }
+}

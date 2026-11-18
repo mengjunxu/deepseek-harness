@@ -1,0 +1,275 @@
+## codely_bridge...origin/codely_bridge
+ M .agents/notes/implemented/architecture/2026-08-22-single-dsh-application-launcher.i18n.yaml
+ M .agents/notes/implemented/architecture/2026-08-22-single-dsh-application-launcher.md
+ M .agents/notes/implemented/architecture/2026-08-22-single-dsh-application-launcher.zh.md
+ M .agents/notes/implemented/process/2026-08-26-published-dependency-faces.i18n.yaml
+ M .agents/notes/implemented/process/2026-08-26-published-dependency-faces.md
+ M .agents/notes/implemented/process/2026-08-26-published-dependency-faces.zh.md
+ M .ai/ARCHITECTURE.md
+ M .ai/MEMORY.md
+ M .ai/WORKFLOW.md
+ M apps/cli/package.json
+ M apps/cli/reference/README.i18n.yaml
+ M apps/cli/reference/README.md
+ M apps/cli/reference/README.zh.md
+ M apps/cli/src/profile-boot.ts
+ M apps/web/tests/README.i18n.yaml
+ M apps/web/tests/README.md
+ M apps/web/tests/README.zh.md
+ M apps/web/tsconfig.json
+ M docs/architecture.i18n.yaml
+ M docs/architecture.md
+ M docs/architecture.zh.md
+ M docs/capability-seams.i18n.yaml
+ M docs/capability-seams.md
+ M docs/capability-seams.zh.md
+ M docs/config-catalog.md
+ M docs/config-catalog.zh.md
+ M docs/cordis-primer.i18n.yaml
+ M docs/cordis-primer.md
+ M docs/cordis-primer.zh.md
+ M docs/event-producer-consumer.md
+ M docs/event-producer-consumer.zh.md
+ M docs/module-graph.md
+ M docs/module-graph.zh.md
+ M docs/persistence-catalog.i18n.yaml
+ M docs/persistence-catalog.md
+ M docs/persistence-catalog.zh.md
+ M docs/persistence-changes/historical-formats/README.i18n.yaml
+ M docs/persistence-changes/historical-formats/README.md
+ M docs/persistence-changes/historical-formats/README.zh.md
+ M docs/persistence-schema.json
+ M docs/subsystems/boot.md
+ M docs/subsystems/boot.zh.md
+ M docs/subsystems/core.md
+ M docs/subsystems/core.zh.md
+ M docs/subsystems/llm-streaming.i18n.yaml
+ M docs/subsystems/llm-streaming.md
+ M docs/subsystems/llm-streaming.zh.md
+ M docs/subsystems/storage.i18n.yaml
+ M docs/subsystems/storage.md
+ M docs/subsystems/storage.zh.md
+ M docs/user/guide/providers.i18n.yaml
+ M docs/user/guide/providers.md
+ M docs/user/guide/providers.zh.md
+ M docs/workflows/DSH_IMPLEMENTATION_PLAN.md
+ M packages/boot/app-boot/README.i18n.yaml
+ M packages/boot/app-boot/README.md
+ M packages/boot/app-boot/README.zh.md
+ M packages/boot/app-boot/package.json
+ M packages/boot/app-boot/src/index.ts
+ M packages/boot/app-boot/tsconfig.json
+ M packages/client/ui-chat/README.i18n.yaml
+ M packages/client/ui-chat/README.md
+ M packages/client/ui-chat/README.zh.md
+ M packages/client/ui-chat/src/client/chat/TurnUsagePanel.tsx
+ M packages/client/ui-chat/src/client/contract/chat-nodes.ts
+ M packages/client/ui-chat/src/client/conversation-nodes/turn-tail.ts
+ M packages/client/ui-chat/src/client/locale.ts
+ M packages/client/ui-chat/tests/conversation-node-definitions.client.spec.ts
+ M packages/client/ui-chat/tests/turn-usage-panel.client.spec.tsx
+ M packages/core/agent-default-model/README.i18n.yaml
+ M packages/core/agent-default-model/README.md
+ M packages/core/agent-default-model/README.zh.md
+ M packages/core/agent-default-model/package.json
+ M packages/core/agent-default-model/src/intent-routing.ts
+ M packages/core/agent-default-model/tests/intent-routing.spec.ts
+ M packages/core/agent-loop/README.i18n.yaml
+ M packages/core/agent-loop/README.md
+ M packages/core/agent-loop/README.zh.md
+ M packages/core/agent-loop/src/agent.ts
+ M packages/core/agent-loop/src/invariant.ts
+ M packages/core/agent-loop/tests/contract-regressions.spec.ts
+ M packages/core/agent-loop/tests/invariant.spec.ts
+ M packages/core/agent-loop/tests/request-error.spec.ts
+ M packages/core/agent-loop/tests/resume.spec.ts
+ M packages/core/session/package.json
+ M packages/core/session/src/known-event-types.ts
+ M packages/experimental/chatgpt-plan/README.i18n.yaml
+ M packages/experimental/chatgpt-plan/README.md
+ M packages/experimental/chatgpt-plan/README.zh.md
+ M packages/experimental/chatgpt-plan/package.json
+ M packages/extensions/cordis-client-runner/src/client/slot-catalog.ts
+ M packages/extensions/tool-cordis/src/api-catalog.ts
+ M packages/guard/README.i18n.yaml
+ M packages/guard/README.md
+ M packages/guard/README.zh.md
+ M packages/llm/llm-pi-ai/README.i18n.yaml
+ M packages/llm/llm-pi-ai/README.md
+ M packages/llm/llm-pi-ai/README.zh.md
+ M packages/llm/llm-pi-ai/src/adapter.ts
+ M packages/llm/llm-pi-ai/src/catalog.ts
+ M packages/llm/llm-pi-ai/src/config.ts
+ M packages/llm/llm-pi-ai/tests/config.spec.ts
+ M packages/llm/llm-pi-ai/tests/loader-composition.spec.ts
+ M packages/llm/llm/README.i18n.yaml
+ M packages/llm/llm/README.md
+ M packages/llm/llm/README.zh.md
+ M packages/llm/llm/package.json
+ M packages/llm/llm/src/call-config.ts
+ M packages/llm/llm/src/error.ts
+ M packages/llm/llm/src/index.ts
+ M packages/llm/llm/src/provider-policy.ts
+ M packages/llm/llm/src/types.ts
+ M packages/llm/llm/tests/service.spec.ts
+ M packages/llm/token-meter/README.i18n.yaml
+ M packages/llm/token-meter/README.md
+ M packages/llm/token-meter/README.zh.md
+ M packages/llm/token-meter/package.json
+ M packages/llm/token-meter/src/client.ts
+ M packages/llm/token-meter/src/turn-usage.ts
+ M packages/llm/token-meter/tests/turn-usage.spec.ts
+ M packages/llm/token-meter/tsconfig.json
+ M packages/preset/agent-preset/skills/cordis-composition-reference/references/packages.md
+ M packages/storage/storage-domain/README.i18n.yaml
+ M packages/storage/storage-domain/README.md
+ M packages/storage/storage-domain/README.zh.md
+ M packages/storage/storage-domain/package.json
+ M packages/storage/storage-domain/src/domain.ts
+ M packages/storage/storage-domain/src/error.ts
+ M packages/storage/storage-domain/src/index.ts
+ M packages/storage/storage-domain/tests/domain.spec.ts
+ M packages/storage/storage-json/README.i18n.yaml
+ M packages/storage/storage-json/README.md
+ M packages/storage/storage-json/README.zh.md
+ M packages/storage/storage-json/src/index.ts
+ M packages/storage/storage-sqlite/README.i18n.yaml
+ M packages/storage/storage-sqlite/README.md
+ M packages/storage/storage-sqlite/README.zh.md
+ M packages/storage/storage-sqlite/src/index.ts
+ M packages/storage/storage-sqlite/src/unit.ts
+ M packages/storage/storage/README.i18n.yaml
+ M packages/storage/storage/README.md
+ M packages/storage/storage/README.zh.md
+ M packages/storage/storage/src/backend.ts
+ M packages/test-support/llm-replay/README.i18n.yaml
+ M packages/test-support/llm-replay/README.md
+ M packages/test-support/llm-replay/README.zh.md
+ M packages/test-support/llm-replay/src/index.ts
+ M packages/test-support/llm-replay/tests/llm-replay.spec.ts
+ M packages/workflow/workflow-ptc/src/guest-source.ts
+ M pnpm-lock.yaml
+ M python/sdk/tests/test_intent_routing_snapshot.py
+ M scripts/check-workspace-constraints.spec.ts
+ M scripts/check-workspace-constraints.ts
+ M scripts/gen-cordis-catalog.ts
+ M scripts/gen-doc-graphs.spec.ts
+ M scripts/gen-doc-graphs.ts
+ M scripts/package-dependency-policy.ts
+ M scripts/snapshots/python-sdk-single-exe/intent-routing/routes.json
+ M scripts/type-equiv.manifest.json
+ M scripts/verify-package-readme-model-experience.ts
+ M snapshots/sdk/sdk.snapshot.ts
+ M tsconfig.base.json
+ M tsconfig.host.json
+?? .ai/tasks/dsh-p1-budget-atomic-storage/
+?? .ai/tasks/dsh-p1-entry-routing-web-acceptance/
+?? .ai/tasks/dsh-p1-local-request-budget/
+?? .ai/tasks/dsh-p1-native-structured-output/
+?? .ai/tasks/dsh-p1-paid-route-consent/
+?? .ai/tasks/dsh-p1-paid-route-interactive/
+?? .ai/tasks/dsh-p1-preparation-records/
+?? .ai/tasks/dsh-p1-publication-hygiene/
+?? .ai/tasks/dsh-p1-request-attempt-link/
+?? .ai/tasks/dsh-p1-resume-semantics/
+?? .ai/tasks/dsh-p1-routing-doc-graph-gate/
+?? .ai/tasks/dsh-p1-session-request-budget/
+?? .ai/tasks/dsh-p1-siwc-loader-session/
+?? .ai/tasks/dsh-p1-turn-usage-source/
+?? .ai/tasks/dsh-p1-usage-records/
+?? apps/cli/config/examples/request-accounting.yml
+?? apps/web/tests/entry-intent-routing.e2e.ts
+?? apps/web/tests/entry-intent-routing.overlay.yml
+?? apps/web/tests/turn-usage-source.e2e.ts
+?? docs/persistence-changes/2026-11-15-durable-loop-request-attribution.i18n.yaml
+?? docs/persistence-changes/2026-11-15-durable-loop-request-attribution.md
+?? docs/persistence-changes/2026-11-15-durable-loop-request-attribution.schema.json
+?? docs/persistence-changes/2026-11-15-durable-loop-request-attribution.zh.md
+?? docs/persistence-changes/2026-11-15-native-preparation-audit.i18n.yaml
+?? docs/persistence-changes/2026-11-15-native-preparation-audit.md
+?? docs/persistence-changes/2026-11-15-native-preparation-audit.schema.json
+?? docs/persistence-changes/2026-11-15-native-preparation-audit.zh.md
+?? docs/persistence-changes/2026-11-15-native-request-accounting.i18n.yaml
+?? docs/persistence-changes/2026-11-15-native-request-accounting.md
+?? docs/persistence-changes/2026-11-15-native-request-accounting.schema.json
+?? docs/persistence-changes/2026-11-15-native-request-accounting.zh.md
+?? docs/persistence-changes/2026-11-15-native-structured-output.i18n.yaml
+?? docs/persistence-changes/2026-11-15-native-structured-output.md
+?? docs/persistence-changes/2026-11-15-native-structured-output.schema.json
+?? docs/persistence-changes/2026-11-15-native-structured-output.zh.md
+?? packages/boot/app-boot/src/admission-policies.ts
+?? packages/boot/app-boot/src/dispose.ts
+?? packages/boot/app-boot/tests/admission-policies.spec.ts
+?? packages/boot/app-boot/tests/dispose.spec.ts
+?? packages/client/ui-chat/src/client/conversation-nodes/request-accounting.ts
+?? packages/core/agent-loop/tests/fixtures/model-preparation-audit.ts
+?? packages/experimental/chatgpt-plan/tests/fixtures/
+?? packages/experimental/chatgpt-plan/tests/loader.spec.ts
+?? packages/guard/paid-route-policy/
+?? packages/guard/request-budget-policy/
+?? packages/llm/deepseek-llm-api-extensions/src/index.d.ts.map
+?? packages/llm/deepseek-llm-api-extensions/src/index.js.map
+?? packages/llm/deepseek-llm-api-extensions/src/types.d.ts.map
+?? packages/llm/deepseek-llm-api-extensions/src/types.js.map
+?? packages/llm/llm-pi-ai/src/response-format.ts
+?? packages/llm/llm-pi-ai/tests/response-format.spec.ts
+?? packages/llm/llm-pi-ai/tests/structured-output.spec.ts
+?? packages/llm/llm/src/dispatch.ts
+?? packages/llm/llm/src/preparation-failure.ts
+?? packages/llm/llm/src/response-format.ts
+?? packages/llm/llm/tests/dispatch.spec.ts
+?? packages/llm/llm/tests/fixtures/model-resume-required.ts
+?? packages/llm/llm/tests/structured-output.spec.ts
+?? packages/llm/token-meter/src/request-record-projection.ts
+?? packages/llm/token-meter/src/request-record-types.ts
+?? packages/llm/token-meter/src/request-records.ts
+?? packages/llm/token-meter/tests/fixtures/
+?? packages/llm/token-meter/tests/request-attribution.two-process.e2e.ts
+?? packages/llm/token-meter/tests/request-records.spec.ts
+?? packages/storage/storage-domain/tests/atomic-record.spec.ts
+?? packages/storage/storage-domain/tests/provider-lifecycle.spec.ts
+?? packages/storage/storage-sqlite/tests/atomic-record.spec.ts
+?? packages/storage/storage-sqlite/tests/atomic-record.two-process.e2e.ts
+?? packages/storage/storage-sqlite/tests/fixtures/
+?? packages/test-support/llm-replay/src/index.d.ts.map
+?? packages/test-support/llm-replay/src/index.js.map
+?? packages/test-support/loader-smoke/src/agent-turn.d.ts.map
+?? packages/test-support/loader-smoke/src/agent-turn.js.map
+?? packages/test-support/loader-smoke/src/index.d.ts.map
+?? packages/test-support/loader-smoke/src/index.js.map
+?? packages/test-support/session-snapshot/src/harness.d.ts.map
+?? packages/test-support/session-snapshot/src/harness.js.map
+?? packages/test-support/session-snapshot/src/identity.d.ts.map
+?? packages/test-support/session-snapshot/src/identity.js.map
+?? packages/test-support/session-snapshot/src/index.d.ts.map
+?? packages/test-support/session-snapshot/src/index.js.map
+?? packages/test-support/session-snapshot/src/launcher.d.ts.map
+?? packages/test-support/session-snapshot/src/launcher.js.map
+?? packages/test-support/session-snapshot/src/manifest.d.ts.map
+?? packages/test-support/session-snapshot/src/manifest.js.map
+?? packages/test-support/session-snapshot/src/normalize.d.ts.map
+?? packages/test-support/session-snapshot/src/normalize.js.map
+?? packages/test-support/session-snapshot/src/session-files.d.ts.map
+?? packages/test-support/session-snapshot/src/session-files.js.map
+?? packages/test-support/session-snapshot/src/suite.d.ts.map
+?? packages/test-support/session-snapshot/src/suite.js.map
+?? packages/test-support/session-snapshot/src/workspace.d.ts.map
+?? packages/test-support/session-snapshot/src/workspace.js.map
+?? snapshots/sdk/model-structured-output/
+?? snapshots/sdk/request-accounting/
+?? snapshots/sdk/request-preparation-failed/
+?? snapshots/session/cordis-storage-atomic/
+?? snapshots/session/model-paid-route-approved/
+?? snapshots/session/model-paid-route-required/
+?? snapshots/session/model-request-budget-execute/
+?? snapshots/session/model-request-budget-reserved/
+?? snapshots/session/model-resume-required/
+?? snapshots/session/model-session-budget-exhausted/
+?? snapshots/session/model-structured-output/
+?? snapshots/session/request-accounting-retry/
+?? snapshots/session/request-accounting/
+?? snapshots/session/request-preparation-failed/
+?? snapshots/session/siwc-text-turn/
+?? snapshots/web/turn-usage-source/
+
+HEAD inspected at Task start; all Task changes remain uncommitted. Exact tested source is recorded by SHA-256 in tested-files.json.

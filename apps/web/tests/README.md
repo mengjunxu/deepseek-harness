@@ -20,6 +20,8 @@ State-sensitive cases use Workspace, admission, attachment, and model-stream bar
 
 Explicit scrolling uses `scrollIntoView` from `support.ts`: it resolves the locator again when its old element detaches and checks connection in the same browser task as native scrolling. Scenarios retain their visibility and geometry assertions after scrolling.
 
+The entry-intent-routing scenario selects models through the composer and verifies actual request routes, reasoning effort, durable headers and switch notices across a tool step and a later Turn. A request barrier holds the first Turn while the picker changes its pending selection; scripted model output keeps this integration check keyless. Rate-limit, quota and interrupted-stream cases retain the failed outcome, send no request to another route, and continue only after the user selects a model and submits another Turn.
+
 ## These are Host-face tests
 
 They type-check in the root `tsconfig.host.json`, not in the Client aggregate, because they read Host services directly: `ctx.connection`, the Host `SessionStore`, and `ctx.sessionProjectionCache`. Driving a browser at runtime does not make a file part of the Client program — the two faces merge Cordis `Context` under the same keys with different services, so one program cannot see both. Moving these files into the Client aggregate makes every Host-service access fail to compile.

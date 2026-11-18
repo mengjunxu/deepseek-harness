@@ -255,6 +255,32 @@ describe('dsh family version coherence', () => {
 })
 
 describe('package payload constraints', () => {
+  it('keeps the explicit SIWC overlay with declarations and rejects missing or unrelated payloads', () => {
+    const dir = 'packages/experimental/chatgpt-plan'
+    const manifest = JSON.parse(readFileSync(new URL(`../${dir}/package.json`, import.meta.url), 'utf8')) as WorkspaceManifest['manifest']
+    expect(manifest.exports?.['./types']).toEqual({ types: './lib/types/types.d.ts' })
+    expect(checkWorkspaceManifest({ dir, manifest })).toEqual([])
+    expect(manifest.files).not.toContain('lib/types/**/*.js')
+    for (const files of [
+      manifest.files!.filter(file => file !== 'cordis.patch.yml'),
+      [...manifest.files!, 'lib/unrelated.css'],
+      [...manifest.files!, 'lib/types/**/*.js'],
+    ]) {
+      expect(checkWorkspaceManifest({ dir, manifest: { ...manifest, files } }))
+        .toEqual([expect.stringContaining('package.json files must be')])
+    }
+  })
+
+  it('publishes the Taskboard permission patch and rejects an omitted or unrelated asset', () => {
+    const dir = 'packages/api/taskboard-controller'
+    const manifest = JSON.parse(readFileSync(new URL(`../${dir}/package.json`, import.meta.url), 'utf8')) as WorkspaceManifest['manifest']
+    expect(checkWorkspaceManifest({ dir, manifest })).toEqual([])
+    for (const files of [manifest.files!.filter(file => file !== 'sdk-permissions.patch.yml'), [...manifest.files!, 'unrelated.yml']]) {
+      expect(checkWorkspaceManifest({ dir, manifest: { ...manifest, files } }))
+        .toEqual([expect.stringContaining('package.json files must be')])
+    }
+  })
+
   it.each(['./art/icon.svg', 'art/icon.svg'])('includes declared icon %s in the canonical payload', (icon) => {
     expect(expectedDshPackageFiles({ icon, exports: { './locale/*.json': './locale/*.json' } })).toEqual([
       'art/icon.svg', 'locale/*.json', 'lib/index.js', 'lib/types/**/*.d.ts',

@@ -1,0 +1,2 @@
+$ tsx scripts/verify-repository-references.ts
+verify-repository-references: maintained files contain no repository commit identifiers or disallowed organization URLs.

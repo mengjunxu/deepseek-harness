@@ -1,0 +1,40 @@
+- id: llm-pi-ai
+  name: '@deepseek-ai/dsh-llm-pi-ai'
+  config:
+    providers:
+      budget-fixture:
+        api: openai-completions
+        baseURL: http://127.0.0.1:9/v1
+        models:
+          - id: m
+            input:
+              - text
+        policy:
+          usageSource: local
+
+- insert:
+    - id: model-request-budget-reserved-snapshot
+      name: '../../../packages/guard/request-budget-policy/tests/fixtures/model-request-budget-reserved.ts'
+
+- id: storage-domain
+  config:
+    backend: json
+    routes:
+      request_budget: sqlite
+
+- insert:
+    - id: storage-sqlite
+      name: '@deepseek-ai/dsh-storage-sqlite'
+      config:
+        path: !!js dshHomePath('request-budgets.db')
+    - id: request-budget-policy
+      name: '@deepseek-ai/dsh-request-budget-policy'
+      config:
+        budgets:
+          - id: reserved-fixture
+            usageSource: local
+            maxRequests: 1
+            reserveExecuteRequests: 1
+            routes:
+              - provider: budget-fixture
+                models: [m]

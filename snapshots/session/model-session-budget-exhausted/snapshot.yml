@@ -1,0 +1,10 @@
+version: 1
+scenario: model-session-budget-exhausted
+profile: headless
+composition: model-session-budget-exhausted
+recording: authored
+header:
+  class: default
+  pin: true
+  systemPromptSource: text-turn
+  toolSchemasSource: text-turn

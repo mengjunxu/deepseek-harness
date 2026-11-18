@@ -1,0 +1,5 @@
+{
+  "packages/storage/storage-sqlite/lib/index.js": "9ce86ced5b24e14b6c1a62b3dd1bb5aa1ae3a3fb5af2a713e0a8e0e905e1904e",
+  "packages/storage/storage-domain/lib/index.js": "996369b223465ca95670d32bbf2319ba22165d605cca458f21ea24e0f858f0a3",
+  "packages/extensions/tool-cordis/lib/types/api-catalog.js": "2d22c3d96ededf4aab91e02e24ca63bed4d875b89d46d664d0bf5dba51ba513d"
+}

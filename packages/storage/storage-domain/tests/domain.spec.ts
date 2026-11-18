@@ -408,3 +408,33 @@ describe('close and lifecycle', () => {
     await expect(table.delete('a')).resolves.toBe(true)
   })
 })
+
+it('backs up an invalid stored record when the backend supports the declared recovery policy', async () => {
+  const { ctx, backend, facility } = await harness()
+  const backup = new Map<string, unknown>()
+  backend.pool.media.set(spec.name, {
+    tables: new Map([['items', new Map<string, unknown>([
+      ['good', { label: 'retained', count: 1 }], ['bad', { label: 'invalid', count: 'wrong' }],
+    ])]]), global: null,
+  })
+  const open = backend.kv.open.bind(backend.kv)
+  const move = vi.fn(async (table: string, key: string) => {
+    const medium = backend.pool.media.get(spec.name)!
+    backup.set(key, medium.tables.get(table)?.get(key))
+    medium.tables.get(table)?.delete(key)
+    return `memory-backup/${key}`
+  })
+  backend.kv.open = async (descriptor) => {
+    const unit = await open(descriptor)
+    unit.backupRecord = move
+    return unit
+  }
+  try {
+    const domain = await facility.open({ ...spec, invalidRecords: 'backup-and-skip' })
+    expect([...domain.table('items').keys()]).toEqual(['good'])
+    expect(domain.table('items').get('good')).toEqual({ label: 'retained', count: 1 })
+    expect(move).toHaveBeenCalledExactlyOnceWith('items', 'bad')
+    expect(backup.get('bad')).toEqual({ label: 'invalid', count: 'wrong' })
+    expect(backend.pool.media.get(spec.name)?.tables.get('items')?.has('bad')).toBe(false)
+  } finally { await facility.closeAll(); await ctx.fiber.dispose() }
+})

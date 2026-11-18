@@ -44,7 +44,7 @@ interface StorageBackend {
 }
 ```
 
-A backend owns one medium (a file-tree root, a database file) and exposes optional operation groups; `kv` is the only shipped group. `KvFacet.open(descriptor)` opens one named unit — `KvUnitDescriptor` carries the name, current format version, optional compatible record versions, table names, and whether a global singleton slot exists — and returns a `KvUnit` with `loadAll`, `putRecord`, `deleteRecord`, `setGlobal`, and `close`. Unit and table names must match `UNIT_NAME_RE` (safe as a file name and as a SQL identifier segment); record keys are arbitrary strings that never reach file paths. A unit does not serialize concurrent writes — ordering belongs to the caller — but each single call is atomic on the medium and durable once resolved. A `single` medium stamped with a different version rejects `version-mismatch`; a `per-record` document stamped outside the accepted set reads as absent. A medium that cannot be parsed as the unit rejects `malformed-medium`. [`backend.ts`](../../packages/storage/storage/src/backend.ts) is the normative clause-by-clause contract, and the shared conformance suite in [`tests/contract.ts`](../../packages/storage/storage/tests/contract.ts) checks every clause against each backend. The [json backend](../../packages/storage/storage-json/README.md) republishes one whole human-readable file per unit atomically; the [sqlite backend](../../packages/storage/storage-sqlite/README.md) stores one document per row in one database for frequently updated data.
+A backend owns one medium (a file-tree root, a database file) and exposes optional operation groups; `kv` is the only shipped group. `KvFacet.open(descriptor)` opens one named unit — `KvUnitDescriptor` carries the name, current format version, optional compatible record versions, table names, and whether a global singleton slot exists — and returns a `KvUnit` with `loadAll`, `putRecord`, `deleteRecord`, `setGlobal`, and `close`, plus optional `modifyRecord` for atomic updates of fresh persisted values across owners. Unit and table names must match `UNIT_NAME_RE` (safe as a file name and as a SQL identifier segment); record keys are arbitrary strings that never reach file paths. A unit does not serialize concurrent writes — ordering belongs to the caller — but each single call is atomic on the medium and durable once resolved. A `single` medium stamped with a different version rejects `version-mismatch`; a `per-record` document stamped outside the accepted set reads as absent. A medium that cannot be parsed as the unit rejects `malformed-medium`. [`backend.ts`](../../packages/storage/storage/src/backend.ts) is the normative clause-by-clause contract, and the shared conformance suite in [`tests/contract.ts`](../../packages/storage/storage/tests/contract.ts) checks every clause against each backend. The [json backend](../../packages/storage/storage-json/README.md) republishes one whole human-readable file per unit atomically; the [sqlite backend](../../packages/storage/storage-sqlite/README.md) stores one document per row in one database for frequently updated data.
 
 ## Declaring a domain
 
@@ -112,6 +112,13 @@ interface Domain<S extends DomainSpec> {
   table<N extends keyof S['tables'] & string>(name: N): KvTable<TableKeyOf<S, N>, TableValueOf<S, N>>
 
   /**
+   * Commit changes to multiple records and update the complete local cache before publishing events.
+   * @param operation - Synchronous operation against the latest persisted records.
+   * @returns the callback result after commit. An unsupported medium rejects before calling the operation.
+   */
+  transaction<T>(operation: (tx: DomainTransaction<S>) => T): Promise<T>
+
+  /**
    * Close this domain: reject new writes immediately, drain already-queued
    * writes (their events still emit), release the backend unit, then free
    * the domain name for a later open. Idempotent — repeated calls share one
@@ -123,7 +130,7 @@ interface Domain<S extends DomainSpec> {
 }
 ```
 
-Reads are synchronous from authoritative in-memory state: `KvTable` exposes `get`/`entries`/`keys`/`size` (snapshot iterators that stay stable while queued writes land), and the global handle's `get()` serves the spec's `initial` until the first `set` materializes the slot on the medium. Every write — `put`, `delete`, `update`, `global.set` — queues on one per-domain chain and reaches backend durability first, then mutates memory, then emits `domain/changed`; a rejected backend write leaves memory untouched, so reads never diverge from the medium. `update(key, fn)` is an atomic read-modify-write at its chain slot (a missing key rejects `missing-key`); `delete` of an absent key resolves `false` with no write and no event. Returned records are the stored objects themselves, not copies — replace via `put`/`update`, never mutate in place.
+Reads use validated local state: `KvTable` exposes synchronous `get`/`entries`/`keys`/`size`, and the global handle serves its initial value until the first write. `put`, `delete`, `update`, `modify` and `global.set` share one process-local write chain. Durability precedes cache updates and `domain/changed`; failed writes leave local observations unchanged. `update(key, fn)` transforms the cached value and rejects `missing-key` when absent. `modify(key, fn)` instead uses the backend’s atomic operation on the latest persisted record, validates that record with its declared schema, and commits a synchronous pure callback result; `undefined` means absent input or deletion. Unsupported backends reject `atomic-modify-unsupported`, without falling back to `update`. The callback must not reenter storage or perform I/O. SQLite supplies this operation through an immediate transaction; lock errors propagate without retries. A successful result refreshes only the modified key’s local cache; other keys and other owners receive no automatic refresh. Deleting an absent record emits no event unless this handle retained a stale local entry. Returned records remain borrowed immutable values.
 
 ## The domain facility: `ctx.storageDomain`
 
@@ -190,7 +197,7 @@ Source: [`packages/storage/storage/src/index.ts`](../../packages/storage/storage
 
 ### `ctx.storageDomain` — `DomainFacility`
 
-The mounted domain facility. Opens declared domains over routed backends; one facility instance owns the open-domain table and enforces single-open per domain name.
+The mounted domain facility. Opens declared domains over routed backends; one facility instance owns the open-domain table and enforces single-open per domain name. Handles serve cached reads and updates. Shared-state decisions use table.modify with an atomic backend; its callbacks must be synchronous, pure and must not call storage.
 
 ```ts cordis-catalog
 /**

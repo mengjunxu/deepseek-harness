@@ -68,7 +68,24 @@ for await (const chunk of ctx.llm.stream({
 
 隔离验证 profile 可以将 `LlmValidationAdmission` 作为 `registerAdapter` 的第三个参数。授权只允许其单一 gated `chatgpt_web_unofficial` 路线及精确模型白名单，并绑定启动器提供的 Harness home；默认 home 和不匹配的 home 均被拒绝。每次准备消耗一个有界额度，包括失败或未使用的准备。替换共享剩余额度并撤销旧的已准备调用；释放注册会撤销尚未开始的分派。分派前再次检查过期时间。元数据仍为 gated，所有出厂 profile 都不提供授权，普通注册保持默认拒绝。授权仅在当前进程有效，不含浏览器凭证；它不表示生产准入或已报告余额。
 
-`LlmCallConfig` 和 `GenerateOptions` 可选地携带显式请求政策：`intent` 记录 chat/plan/review/execute，`requiredCapabilities` 列出必须由 Provider 声明支持的能力。准备调用和直接分派都会在适配器准备前以 `UNSUPPORTED_PROVIDER_CAPABILITY` 拒绝未知或不支持的要求。已准备调用同时绑定这些字段和模型控制值；调用者不能在分派前更改它们。循环在既有请求头中记录这两个字段；它们不向模型内容添加文字。持久化读取方通过 `validateLlmRequestPolicy` 校验其值。 携带政策的调用必须使用已注册 Provider；缺失路线以 `POLICY_ROUTE_UNAVAILABLE` 失败，不委托给旧版中间件。 显式 `vision` 要求还须由精确模型的 `inputModalities` 包含 `image`；缺失元数据为未知，列表未包含 `image` 为不支持。两者均在适配器流式调用前以 `UNSUPPORTED_MODEL_CAPABILITY` 拒绝，覆盖直接调用和独立 `resolveCallConfig` 查询。显式 `tools` 要求还须具备精确模型的 `toolSupport: supported`；缺省为未知，不支持或未知均以相同的模型能力错误拒绝。准备与分派仍须通过 Provider 准入；显式 `streaming` 还须具备精确模型的 `streamingSupport: supported`，表示终止结果之前的增量响应内容；未知或不支持均以相同错误拒绝。structuredOutput 和 resume 要求当前使用 Provider 声明。
+`LlmCallConfig` 和 `GenerateOptions` 可选地携带显式请求政策：`intent` 记录 chat/plan/review/execute，`requiredCapabilities` 列出必须由 Provider 声明支持的能力。准备调用和直接分派都会在适配器准备前以 `UNSUPPORTED_PROVIDER_CAPABILITY` 拒绝未知或不支持的要求。已准备调用同时绑定这些字段和模型控制值；调用者不能在分派前更改它们。循环在既有请求头中记录这两个字段；它们不向模型内容添加文字。持久化读取方通过 `validateLlmRequestPolicy` 校验其值。 携带政策的调用必须使用已注册 Provider；缺失路线以 `POLICY_ROUTE_UNAVAILABLE` 失败，不委托给旧版中间件。 显式 `vision` 要求还须由精确模型的 `inputModalities` 包含 `image`；缺失元数据为未知，列表未包含 `image` 为不支持。两者均在适配器流式调用前以 `UNSUPPORTED_MODEL_CAPABILITY` 拒绝，覆盖直接调用和独立 `resolveCallConfig` 查询。显式 `tools` 要求还须具备精确模型的 `toolSupport: supported`；缺省为未知，不支持或未知均以相同的模型能力错误拒绝。准备与分派仍须通过 Provider 准入；显式 `streaming` 还须具备精确模型的 `streamingSupport: supported`，表示终止结果之前的增量响应内容；未知或不支持均以相同错误拒绝。显式 `structuredOutput` 要求还须具备精确模型的 `structuredOutputSupport: supported`；`resume` 当前使用 Provider 声明。
+
+Provider 能力 `resume` 表示进程重启后恢复提供方拥有的会话。从 DSH Session 日志重建消息不需要它。该声明既不重开 DSH Session，也不续接外部 Agent；对应操作属于 [agent-loop](../../core/agent-loop/README.zh.md#understand-the-implementation)和所选[子智能体提供方](../../subagent/subagent/README.zh.md)。`requiredCapabilities` 只检查准入，不执行恢复操作。[pi-ai](../llm-pi-ai/README.zh.md#resume-and-recorded-history) 的适配器未暴露原生恢复请求，因此拒绝 supported 声明。
+
+### 额外的已注册路线准入
+
+`llm/admission` 在适配器准备前和分发适配器流之前（包括异步查询结束后）接收实际提供调用的 Provider 捕获元数据与请求控制值。同步监听器返回 `LlmFailure` 拒绝或返回 `undefined` 委托，不能更改输入、执行 I/O 或预留资源。首个拒绝与内建可用状态和能力检查共同生效。当前发现元数据不会替代已准备调用捕获的额度来源。实时策略可以在尚未启动的分发前撤销许可；已分发的调用遵循自身取消生命周期。可选[付费路线策略](../../guard/paid-route-policy/README.zh.md)为声明的 API 按量计费路线提供精确预设检查。
+
+`llm/authorize` 在分发政策预留资源之前包裹已捕获的原生请求。政策可以等待当次同意、添加取消信号，再委托一次或返回自己的拒绝。进入 `llm/dispatch` 前会重新检查准入与组合取消，不依赖监听器注册顺序。授权不跨越重试或其他请求。`checkBeforeDispatch(check)` 在委托前注册纯粹的当次许可检查；授权检查在预留之前及原生构造之前执行，避免撤销预设后在 ask 模式变成隐式同意。分发政策也可添加最终检查；检查缺陷继续抛出。可选[付费路线政策](../../guard/paid-route-policy/README.zh.md)在 opt-in ask 模式复用既有审批服务与成对审计。
+
+`llm/dispatch` 在模型校验与投影后包装已解析的注册请求。策略可以预留资源、通过 `dispatch.cancelOn(signal)` 添加取消源，再使用 `next()` 委托一次。原始请求信号仍然有效。原生分发在异步策略工作结束后再次检查准入。策略用终止 finish 分片表达自身拒绝；策略缺陷与清理失败仍以异常抛出。重试重新进入 `llm/stream`，各自形成独立分发。
+
+<a id="request-strict-json-schema-output"></a>
+### 请求严格 JSON Schema 输出
+
+在调用配置中设置 `responseFormat: { type: 'json_schema', name, schema, strict: true }`。名称由 1–64 个字母、数字、下划线或连字符组成；schema 必须是无损 JSON，并能通过 Ajv2020 严格校验编译为同步 JSON Schema。非法、异步或无法解析外部引用的 schema 会在分派前以 `INVALID_RESPONSE_FORMAT` 失败。即使未显式列出能力要求，格式请求也要求 Provider 的 `structuredOutput: supported` 和精确模型的 `structuredOutputSupport: supported`。未知或不支持的声明在流式调用前拒绝。已准备调用保留独立格式副本；分派前不能更改。
+
+适配器发送原生 schema；普通请求不带格式。文本成功结束时，运行时独立于推理内容解析完整文本并按 schema 校验。非法 JSON 或不符合 schema 产生 `INVALID_STRUCTURED_OUTPUT`；token 上限、缺失终止结果或未知扩展结束原因产生 `STRUCTURED_OUTPUT_INCOMPLETE`。提供方错误、取消及工具调用延续保留各自结果。最终校验之前文本可以流式输出，因此消费方必须等待成功结束，才能将其作为已校验 JSON 使用。这些规则不实现执行器续接。参见 [pi-ai 原生协议](../llm-pi-ai/README.zh.md#resolve-the-model-catalog)与[已记录的 headless 组合](../../../snapshots/session/model-structured-output/cordis.snapshot.yml)。
 
 ### 你可以做什么
 
@@ -107,6 +124,7 @@ for await (const chunk of ctx.llm.stream({
 | [`src/assembler.ts`](src/assembler.ts) | `BlockAssembler`：分片到块的增量组装 |
 | [`src/assistant-stream.ts`](src/assistant-stream.ts) | 带时间信息的紧凑 Assistant 流累积、严格校验、精确展开与记录级读取器 |
 | [`src/call-config.ts`](src/call-config.ts) | 调用配置校验、适配器默认值填入与请求冻结 |
+| [`src/dispatch.ts`](src/dispatch.ts) | 注册策略上下文、单次继续调用与传输取消组合 |
 | [`src/retry-policy.ts`](src/retry-policy.ts) | 提供方自有重试策略解析（normal 与 always 模式） |
 | [`src/error.ts`](src/error.ts) | `HarnessError`/`LlmError` 分类体系与提供方无关失败 code |
 | [`src/content.ts`](src/content.ts) | 共享文件与图片辅助函数：内容遍历、文件投影、图片卸载计数与已卸载图片投影 |
@@ -116,6 +134,8 @@ for await (const chunk of ctx.llm.stream({
 ### 主流程
 
 请求会对照其精确模型的能力校验，包括上下文窗口、输出默认值、推理强度、输入模态与 `systemPromptUpdate` 模式，并填入任何适配器配置的默认值。运行时保留已冻结输入的冻结状态；手动构建请求的调用方负责保证输入不可变。`prepareCall()` 把这些事实、分离的上下文与重试策略绑定到执行最终分发的精确适配器代次，因此 HMR（热模块替换）或动态设置无法把一个代次的图片能力与另一代次的端点混用。支持图片的适配器把持久引用投影为路由专用请求版本；`resolveImageAttachmentAccess()` 会单独把附件提供方的可选宿主对象映射进当前工具执行世界，而不改变请求图片或其 `variantId`。纯文本路由接收确定性的逐图片占位符，包括 tool-role 结果图片，而不会改写仅追加会话历史。持久 `FileBlock` 引用永远不会到达任何适配器：请求组装把每个引用（包括 tool-role 结果中的出现）替换为确定性句柄文本，指出文件与其只读保存路径，路径经由挂载的附件与文件系统提供方解析。`ctx.llm.fileRequestText(ref)` 向请求计量公开相同的同步投影。派生后带有 `offloaded: true` 的图片出现位置，经 `projectOffloadedImages()` 以占位文本到达每条路由。支持图片的路由在保留的出现位置按精确字节超过其 `LlmImageRequestBudget` 时，以 `IMAGE_OFFLOAD_REQUIRED` 失败并说明还需省略多少最老的出现位置（`requiredImageOffload()`），绝不发送未记录的投影；`dsh-compaction-image-offload` 用一条 `image/offload` 事件记录所选位置并重试。对视觉 token 收费的适配器声明按路由的 `imageRequestPricing`，`ctx.llm.imageRequestPricing(provider, model)` 为 token meter 同步解析它。分发经过 `llm/stream` waterfall（瀑布式事件），随后分片以 token 级增量返回，每个适配器结果都以唯一一个终止 `finish` 分片到达消费方。
+
+显式准备或直接流准备在 `llm/dispatch` 前失败时，可选的 `llm/preparation-failed` 观察者会收到独立的路线／来源元数据。`prepareCall(config, signal, context?)` 单独接收审计所需的 Session／purpose 身份及可选 `loopAttempt` 归属，不向调用控制加入身份字段。观察者会被等待；观察者故障通过 `AggregateError` 保留原始错误。缺少原生适配器时，外层中间件仍可能完成请求。可选的[请求记录器](../token-meter/README.zh.md#request-records)持久化这些事实，不把它们当作原生提交。
 
 文件检测在每次请求时读取当前内容，包括 tool-role 结果内容，不缓存消息身份或冻结状态。[文件扫描决策](../../../.agents/notes/implemented/simplification/2026-09-07-file-content-scan.zh.md)记录了实测遍历成本。
 

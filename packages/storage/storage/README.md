@@ -62,6 +62,8 @@ With these rows, the `json` backend registers itself and the `domain` data form 
 <a id="understand-the-implementation"></a>
 ## Understand the implementation
 
+The optional KV transaction runs a synchronous callback against multiple records of one unit. SQLite commits all of its changes together. The domain form owns the typed access and change events.
+
 <details>
 <summary>Implementation internals — click to expand</summary>
 
@@ -76,7 +78,9 @@ The hub is a pure registration table with two faces, designed so backends and da
 
 ### The backend contract
 
-[`src/backend.ts`](src/backend.ts) is the normative contract for backend implementers, checked clause by clause by the shared conformance suite in `tests/contract.ts`. A backend owns exactly one medium and exposes optional data-shape facets; `kv` is the only facet, and opening a unit yields a versioned, globally-singleton schema handle whose single calls are atomic and durable once resolved. Unit and table names must match `UNIT_NAME_RE`; record keys are arbitrary strings that never reach file paths. The unit does not serialize concurrent writes — ordering belongs to the caller — and a stored version differing from the descriptor rejects `version-mismatch` (no migration).
+[`src/backend.ts`](src/backend.ts) is the normative contract for backend implementers, checked clause by clause by the shared conformance suite in `tests/contract.ts`. A backend owns exactly one medium and exposes optional data-shape facets; `kv` is the only facet, and opening a unit yields a versioned handle with one open instance per backend whose single calls are atomic and durable once resolved. Unit and table names must match `UNIT_NAME_RE`; record keys are arbitrary strings that never reach file paths. The unit does not serialize concurrent writes — ordering belongs to the caller — and a stored version differing from the descriptor rejects `version-mismatch` (no migration).
+
+SQLite units additionally expose optional `modifyRecord` for an atomic read and update of the latest persisted record. Consumers require this operation explicitly; an ordinary cached read followed by `putRecord` does not provide it. The [domain API](../storage-domain/README.md) supplies typed, schema-validated access.
 
 ### Source map
 

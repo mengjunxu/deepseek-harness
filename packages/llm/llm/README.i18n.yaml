@@ -21,8 +21,14 @@
   en: c3ecb5a1421f27db
   zh: 4bbd3c0e513845e1
 /deepseek-ai-dsh-llm/use-this-package/minimal-composition:
-  en: 04b9969958a670fb
-  zh: ed5eb8ba4743ba5d
+  en: 5efa9bc37d6fe8a5
+  zh: b789599908a4db4d
+/deepseek-ai-dsh-llm/use-this-package/additional-registered-route-admission:
+  en: 392c4837c23e2969
+  zh: 3479de4e94e9fab2
+/deepseek-ai-dsh-llm/use-this-package/request-strict-json-schema-output:
+  en: 7d00ff83e7141915
+  zh: 8ce2830cc94b5db2
 /deepseek-ai-dsh-llm/use-this-package/what-you-can-do:
   en: b45d7a414141734e
   zh: a641c8ea3827cee6
@@ -36,11 +42,11 @@
   en: 12d0444c18a397c7
   zh: 9d4a5468b4bb7fcd
 /deepseek-ai-dsh-llm/understand-the-implementation/source-map:
-  en: ae1618577f4e8364
-  zh: a6e8ab1563c08dfb
+  en: 55cf8d718a8e11d6
+  zh: 0acc5e34617f24ec
 /deepseek-ai-dsh-llm/understand-the-implementation/main-flow:
-  en: 6dc955a0d80f6ca0
-  zh: f81dbcaeacd8b269
+  en: 9c3a5bb36788a2f5
+  zh: 2246c314123997d1
 /deepseek-ai-dsh-llm/understand-the-implementation/invariants:
   en: 0163a050239248e5
   zh: 885c95bedcbe2ff4

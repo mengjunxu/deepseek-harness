@@ -2,7 +2,7 @@
  * Tests for the event-relation collector's demand-driven call-site indexing:
  * the single-file fast path and the global fallback must recover the same
  * helper-parameter event names, including shapes that defeat the locality
- * proof (alias escapes and global script files).
+ * proof (alias escapes and global script files), and synchronous Context queries.
  */
 
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
@@ -25,11 +25,20 @@ const FIXTURE: Record<string, string> = {
     },
     include: ['vendor/**/*.ts', 'packages/**/*.ts'],
   }),
-  'vendor/cordis/src/context.ts': 'export class Context { private brand!: void }\n',
+  'vendor/cordis/src/context.ts': 'export class Context { private brand!: void; bail(...args: unknown[]): unknown { return args } }\n',
   'vendor/cordis/src/events.ts': [
     'export class EventsService {',
     '  dispatch(type: string, args: unknown[]): unknown[] { return [type, args] }',
     '}',
+    '',
+  ].join('\n'),
+  'packages/fix/pkgquery/src/index.ts': [
+    "import { Context } from '../../../../vendor/cordis/src/context.ts'",
+    'declare const ctx: Context',
+    "ctx.bail('pkgquery/global-query', {})",
+    "ctx.bail({}, 'pkgquery/scoped-query', {})",
+    'const unrelated = { bail(_name: string): void {} }',
+    "unrelated.bail('pkgquery/unrelated')",
     '',
   ].join('\n'),
   'packages/core/agent/src/dispatch.ts':
@@ -82,6 +91,12 @@ function dispatchersOf(pkgs: readonly string[], event: string): string[] {
 }
 
 describe('event relation call-site indexing', () => {
+  it('finds global and scoped Context.bail queries without accepting unrelated methods', () => {
+    expect(dispatchersOf(['pkgquery'], 'pkgquery/global-query')).toEqual(['pkgquery'])
+    expect(dispatchersOf(['pkgquery'], 'pkgquery/scoped-query')).toEqual(['pkgquery'])
+    expect(dispatchersOf(['pkgquery'], 'pkgquery/unrelated')).toEqual([])
+  })
+
   it('recovers a proven-local helper through the single-file fast path', () => {
     expect(dispatchersOf(['pkga', 'pkgb'], 'pkga/local-event')).toEqual(['pkga'])
   })

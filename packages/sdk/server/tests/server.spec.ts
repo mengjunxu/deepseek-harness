@@ -1092,6 +1092,48 @@ describe('HarnessSdkJsonRpcServer', () => {
     }
   })
 
+  it('restores only persisted root Sessions and refuses competing opens', async () => {
+    const storageDir = await mkdtemp(join(tmpdir(), 'dsh-sdk-restore-'))
+    const ctx = await makeHarness(storageDir)
+    const server = new HarnessSdkJsonRpcServer(ctx, new FakeTransport())
+    const resume = (sessionId: string) => server.handleRequest('session/resume', { sessionId })
+    try {
+      await expect(resume('saved')).rejects.toThrow('not initialized')
+      const endpoint = await mockCompletionServer()
+      vi.stubEnv('DEEPSEEK_BASE_URL', endpoint.url)
+      vi.stubEnv('DEEPSEEK_API_KEY', 'test-key')
+      await server.initialize({ cwd: storageDir, provider: 'deepseek-official', model: 'deepseek-v4-pro' })
+      await expect(server.handleRequest('session/resume', {})).rejects.toThrow('non-empty sessionId')
+      await expect(resume('missing')).rejects.toThrow()
+      for (const name of ['saved', 'child']) {
+        const owned = await ctx.agents.create({
+          sessionId: SessionId(name),
+          agentOptions: { provider: 'deepseek-official', model: 'deepseek-v4-pro' },
+          meta: name === 'child' ? { origin: 'subagent', parentSession: SessionId('saved'), cwd: storageDir } : { cwd: storageDir },
+        })
+        owned.agent.followup(createUserMessage({ content: [{ type: 'text', text: 'seed' }], source: { kind: 'user' } }))
+        await owned.agent.whenIdle()
+        await owned.dispose()
+      }
+      const resumeAgent = vi.spyOn(ctx.agents, 'resume')
+      await expect(resume('child')).rejects.toThrow('root session')
+      expect(resumeAgent).not.toHaveBeenCalled()
+      expect(ctx.agents.get(SessionId('child'))).toBeUndefined()
+      const opening = resume('saved')
+      await expect(resume('saved')).rejects.toThrow('already open or opening')
+      await expect(opening).resolves.toEqual({})
+      expect(ctx.agents.get(SessionId('saved'))?.session.header.cwd).toBe(storageDir)
+      await expect(resume('saved')).rejects.toThrow('already open or opening')
+      expect(endpoint.requests).toHaveLength(2)
+      await server.shutdown()
+      await expect(resume('saved')).rejects.toThrow('shutting down')
+    } finally {
+      await server.shutdown()
+      await ctx.fiber.dispose()
+      await rm(storageDir, { recursive: true, force: true })
+    }
+  })
+
   it('coalesces concurrent session creation and retries a failed creation', async () => {
     let resolveShared: ((handle: AgentHandle) => void) | undefined
     const sharedCreation = new Promise<AgentHandle>((resolve) => { resolveShared = resolve })
@@ -1199,6 +1241,6 @@ describe('HarnessSdkJsonRpcServer', () => {
     const server = new HarnessSdkJsonRpcServer(ctx, new FakeTransport())
 
     await expect(server.shutdown()).rejects.toBe(listenerFailure)
-    expect(on).toHaveBeenCalledTimes(4)
+    expect(on).toHaveBeenCalledTimes(6)
   })
 })

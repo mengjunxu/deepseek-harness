@@ -1,0 +1,12 @@
+version: 1
+scenario: request-usage-measurement
+profile: headless
+composition: request-usage-measurement
+recording: authored
+header:
+  class: request-usage-measurement
+  pin: true
+  systemPromptSource: model-request-budget-execute
+  toolSchemasSource: text-turn
+replay:
+  override: true

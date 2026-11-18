@@ -173,3 +173,27 @@ it('rejects entry routes without selection and rejects ambiguous entry configura
     expect(() => Routing.Config(input)).toThrow()
   }
 })
+
+it('captures a native schema for one Turn and clears inherited formats when omitted', async () => {
+  const { ctx, live, request, assemble } = await fixture('chat')
+  const responseFormat = { type: 'json_schema' as const, name: 'result', strict: true as const,
+    schema: { type: 'object', properties: { result: { type: 'string' } }, required: ['result'], additionalProperties: false } }
+  ctx.on('agent/request', async (_payload, next) => ({ ...await next(), responseFormat }))
+  await live.update({ routing: { intent: 'chat', routes: { ...routes, chat: { ...routes.chat, responseFormat } } } })
+  const first = new AbortController().signal
+  await assemble(first)
+  expect(await request(first)).toMatchObject({ responseFormat })
+  await live.update({ routing: { intent: 'plan' } })
+  await assemble(first)
+  expect(await request(first)).toMatchObject({ intent: 'chat', responseFormat })
+  const next = new AbortController().signal
+  await assemble(next)
+  expect(await request(next)).not.toHaveProperty('responseFormat')
+})
+
+it.each([null, { type: 'json_schema', name: 'bad name', strict: true, schema: {} }, {
+  type: 'json_schema', name: 'result', strict: true, schema: { type: 42 },
+}])('rejects malformed native format configuration %j', (responseFormat) => {
+  const input: Record<string, unknown> = { routing: { intent: 'chat', routes: { ...routes, chat: { ...routes.chat, responseFormat } } } }
+  expect(() => Routing.Config(input)).toThrow()
+})

@@ -1,0 +1,286 @@
+{
+  "formatVersion": 2,
+  "roots": [
+    {
+      "key": "event:llm/request-accounting",
+      "kind": "event",
+      "event": "llm/request-accounting",
+      "surface": false,
+      "digest": "66e05c8d8ca10f720bbe1f2169f053a79d13c33d6333d4123b7e876286638069",
+      "schema": {
+        "root": 0,
+        "nodes": [
+          {
+            "kind": "object",
+            "properties": [
+              {
+                "name": "data",
+                "type": 1,
+                "optional": false
+              },
+              {
+                "name": "ignorable",
+                "type": 29,
+                "optional": true
+              },
+              {
+                "name": "seq",
+                "type": 20,
+                "optional": false
+              },
+              {
+                "name": "time",
+                "type": 20,
+                "optional": false
+              },
+              {
+                "name": "type",
+                "type": 30,
+                "optional": false
+              }
+            ],
+            "indices": []
+          },
+          {
+            "kind": "object",
+            "properties": [
+              {
+                "name": "finishKind",
+                "type": 2,
+                "optional": true
+              },
+              {
+                "name": "intent",
+                "type": 3,
+                "optional": true
+              },
+              {
+                "name": "model",
+                "type": 2,
+                "optional": false
+              },
+              {
+                "name": "outcome",
+                "type": 8,
+                "optional": false
+              },
+              {
+                "name": "provider",
+                "type": 2,
+                "optional": false
+              },
+              {
+                "name": "purpose",
+                "type": 13,
+                "optional": true
+              },
+              {
+                "name": "usage",
+                "type": 16,
+                "optional": false
+              },
+              {
+                "name": "usageSource",
+                "type": 22,
+                "optional": false
+              }
+            ],
+            "indices": []
+          },
+          {
+            "kind": "primitive",
+            "type": "string"
+          },
+          {
+            "kind": "union",
+            "types": [
+              4,
+              5,
+              6,
+              7
+            ]
+          },
+          {
+            "kind": "literal",
+            "value": "chat"
+          },
+          {
+            "kind": "literal",
+            "value": "execute"
+          },
+          {
+            "kind": "literal",
+            "value": "plan"
+          },
+          {
+            "kind": "literal",
+            "value": "review"
+          },
+          {
+            "kind": "union",
+            "types": [
+              9,
+              10,
+              11,
+              12
+            ]
+          },
+          {
+            "kind": "literal",
+            "value": "aborted"
+          },
+          {
+            "kind": "literal",
+            "value": "completed"
+          },
+          {
+            "kind": "literal",
+            "value": "error"
+          },
+          {
+            "kind": "literal",
+            "value": "unknown"
+          },
+          {
+            "kind": "union",
+            "types": [
+              14,
+              15
+            ]
+          },
+          {
+            "kind": "literal",
+            "value": "compaction"
+          },
+          {
+            "kind": "literal",
+            "value": "session-title"
+          },
+          {
+            "kind": "union",
+            "types": [
+              17,
+              21
+            ]
+          },
+          {
+            "kind": "object",
+            "properties": [
+              {
+                "name": "kind",
+                "type": 18,
+                "optional": false
+              },
+              {
+                "name": "tokens",
+                "type": 19,
+                "optional": false
+              }
+            ],
+            "indices": []
+          },
+          {
+            "kind": "literal",
+            "value": "adapter-reported"
+          },
+          {
+            "kind": "object",
+            "properties": [
+              {
+                "name": "cacheReadTokens",
+                "type": 20,
+                "optional": true
+              },
+              {
+                "name": "cacheWriteTokens",
+                "type": 20,
+                "optional": true
+              },
+              {
+                "name": "inputTokens",
+                "type": 20,
+                "optional": false
+              },
+              {
+                "name": "outputTokens",
+                "type": 20,
+                "optional": false
+              },
+              {
+                "name": "reasoningTokens",
+                "type": 20,
+                "optional": true
+              },
+              {
+                "name": "totalTokens",
+                "type": 20,
+                "optional": true
+              }
+            ],
+            "indices": []
+          },
+          {
+            "kind": "primitive",
+            "type": "number"
+          },
+          {
+            "kind": "object",
+            "properties": [
+              {
+                "name": "kind",
+                "type": 12,
+                "optional": false
+              }
+            ],
+            "indices": []
+          },
+          {
+            "kind": "union",
+            "types": [
+              12,
+              23,
+              24,
+              25,
+              26,
+              27,
+              28
+            ]
+          },
+          {
+            "kind": "literal",
+            "value": "api_metered"
+          },
+          {
+            "kind": "literal",
+            "value": "chatgpt_web_unofficial"
+          },
+          {
+            "kind": "literal",
+            "value": "local"
+          },
+          {
+            "kind": "literal",
+            "value": "experimental_unverified"
+          },
+          {
+            "kind": "literal",
+            "value": "third_party"
+          },
+          {
+            "kind": "literal",
+            "value": "work_codex_shared"
+          },
+          {
+            "kind": "literal",
+            "value": true
+          },
+          {
+            "kind": "literal",
+            "value": "llm/request-accounting"
+          }
+        ]
+      }
+    }
+  ],
+  "types": []
+}

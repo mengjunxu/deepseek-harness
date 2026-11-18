@@ -1,0 +1,11 @@
+version: 1
+scenario: request-usage-measurement
+profile: sdk
+composition: sdk-request-usage-measurement
+recording: authored
+header:
+  class: request-usage-measurement
+  pin: true
+  toolSchemasSource: sdk/bash-tool
+replay:
+  override: true

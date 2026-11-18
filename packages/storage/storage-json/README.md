@@ -87,6 +87,8 @@ A `single` document carries the unit identity, global singleton, and all tables:
 
 A `per-record` table document at `<root>/<unit>/<table>/<key>.json` has the form `{ "version": 1, "record": <value> }`; the optional global value uses `<root>/<unit>/global.json`. The format version comes from the domain specification.
 
+The backend service is withdrawn and its injected domain owners drain before the backend registration and medium close. Both disposers are yielded by one ordered effect. Whole-application owners still need an application drain phase before concurrent root teardown.
+
 ### Source map
 
 | File | Role |

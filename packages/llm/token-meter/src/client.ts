@@ -7,3 +7,5 @@
 export type * from './projection.ts'
 export { deriveTurnTokenUsage } from './turn-usage.ts'
 export type { TurnTokenUsage, TurnTokenUsageRoute } from './turn-usage.ts'
+export type { RequestAccountingRecord, RequestAccountingProjection,
+  RequestPreparationFailureRecord, RequestPreparationFailureProjection } from './request-record-types.ts'

@@ -1,0 +1,42 @@
+The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
+The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
+The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
+
+ RUN  v4.1.8 /Users/x-dt/workspace/AI/Agents/deepseek-harness
+
+-----------x
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |thread-safe| packages/guard/paid-route-policy/tests/admission.spec.ts > rechecks consent after asynchronous model lookup before constructing the adapter stream
+AssertionError: expected { type: 'finish', …(1) } to match object { reason: { kind: 'error', …(1) } }
+(1 matching property omitted from actual)
+
+- Expected
++ Received
+
+  {
+    "reason": {
+-     "failure": {
+-       "code": "PAID_ROUTE_CONSENT_REQUIRED",
+-     },
+-     "kind": "error",
++     "kind": "stop",
+    },
+  }
+
+ ❯ packages/guard/paid-route-policy/tests/admission.spec.ts:123:25
+    121|     chunks = await pending
+    122|   }
+    123|   expect(chunks.at(-1)).toMatchObject({ reason: { kind: 'error', failu…
+       |                         ^
+    124|   expect(adapter.calls).toBe(0)
+    125| })
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 11 skipped (12)
+   Start at  12:28:08
+   Duration  480ms (transform 293ms, setup 140ms, import 235ms, tests 20ms, environment 0ms)

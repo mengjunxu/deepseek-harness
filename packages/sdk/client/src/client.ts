@@ -19,9 +19,10 @@ import {
   type InitializeParams,
   type InitializeResult,
   type SessionPromptParams,
+  type SessionResumeParams,
   type SdkPromptContentBlock,
 } from '@deepseek-ai/dsh-sdk-protocol'
-import { disposeRuntimeProcess } from './dispose.ts'
+import { disposeRuntimeProcess, exitsWithin } from './dispose.ts'
 import { resolveDshLaunch, type RuntimeProcessOptions } from './launch.ts'
 import type { HarnessClientOptions, HarnessNotification, NotificationFilter } from './types.ts'
 
@@ -269,6 +270,15 @@ export class HarnessClient {
   }
 
   /**
+   * Handle runtime requests on the started client, including one-shot approvals.
+   * @param handler - returns a wire result or throws to refuse the request.
+   */
+  onRequest(handler: (method: string, params: Record<string, unknown>) => Promise<unknown>): void {
+    if (this.transport === undefined || this.closeTask !== undefined) throw this.closedError('SDK transport is not running')
+    this.transport.onRequest(handler)
+  }
+
+  /**
    * Perform the process-wide handshake.
    * @param params - workspace cwd plus the provider/model route.
    * @returns the runtime's wire identity.
@@ -280,6 +290,16 @@ export class HarnessClient {
       throw new SdkProtocolError(`initialize returned no server identity: ${JSON.stringify(result)}`)
     }
     return { serverInfo: { name: result.serverInfo.name, version: result.serverInfo.version } }
+  }
+
+  /**
+   * Open a persisted root Session without enqueueing input.
+   * @param sessionId - existing identity in the initialized runtime's home.
+   */
+  async resumeSession(sessionId: string): Promise<void> {
+    const params: SessionResumeParams = { sessionId }
+    const result = await this.request('session/resume', { ...params })
+    if (!isRecord(result) || Object.keys(result).length !== 0) throw new SdkProtocolError('session/resume returned an invalid acknowledgement')
   }
 
   /**
@@ -378,6 +398,20 @@ export class HarnessClient {
       const relatedId = params.sessionId
       return typeof relatedId === 'string' && this.isDescendantOf(relatedId, sessionId)
     })
+  }
+
+  /**
+   * Observe the started runtime process without signalling it or closing stdin.
+   * @param timeoutMs - observation window in milliseconds.
+   * @returns true when the runtime process has exited, false on timeout.
+   */
+  async waitForExit(timeoutMs: number): Promise<boolean> {
+    if (!Number.isSafeInteger(timeoutMs) || timeoutMs < 0 || timeoutMs > 2_147_483_647) {
+      throw new RangeError('timeoutMs must be an integer between 0 and 2147483647')
+    }
+    if (this.child === undefined) throw new Error('runtime has not started')
+    if (this.spawnError !== undefined) throw this.spawnError
+    return exitsWithin(this.child, timeoutMs)
   }
 
   /**

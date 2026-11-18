@@ -101,17 +101,25 @@ profile 可在 `cordis.yml` 或既有设置分区声明 `policy`。解析会在�
 
 pi-ai 提供登录的提供方可以通过 harness 授权 seam 登录：流程提供 OAuth 或交互式密钥提示（密钥键入 pi-ai 自己的登录提示，而非设置表单），得到的凭据存储在 harness 凭据存储的 `llm-pi-ai/<provider id>` 记录中。存储的登录在其路由的 `apiKeyEnv` 覆盖之下完成认证，并在存储的跨进程锁下自行刷新；退出登录即删除存储记录。落在记录文法之外——小写连字符标识符——的手工声明路由键无法登录，因为对它的记录写入会以 `LlmError('UNSTORABLE_PROVIDER_ID')` 拒绝；这类路由改用 `apiKeyEnv` 或提供方 ambient 设置认证。
 
+<a id="resolve-the-model-catalog"></a>
 ### 解析模型目录
 
 profile 的 `models` 列表会替换而非扩展路由的已安装目录；每个条目从同 id 已安装模型取未设置字段的默认值，因此把路由收窄到两个模型、修正一个容量或添加比已安装目录更新的模型都是一行编辑。`modelOverrides` 无需该代价即可重塑个别已安装目录模型——修正一个模型，保留其余三十七个——当它与 `models` 列表并存、位于手工声明路由上、或点名目录未描述的模型时会被拒绝，因为静默不变的模型会成为别人日后寻找的拼写错误。
 
 通过 `models[].toolSupport`／`models[].streamingSupport` 或对应的 `modelOverrides.<id>` 字段声明精确模型的工具调用／增量响应支持：`supported`、`unsupported` 或 `unknown`。缺省保持未知；适配器不根据 Provider 政策、协议、目录名称或异步迭代器推断这两项能力。显式 `tools` 和 `streaming` 要求须同时具备 Provider 支持及对应模型字段的 `supported` 声明，否则在分派前以 `UNSUPPORTED_MODEL_CAPABILITY` 失败。流式支持表示终止结果之前的增量响应内容，不保证具体到达时间。声明不探测端点，也不改变请求协议选项。配置更新影响下一次准备，已准备调用保留捕获的模型设置。
 
+原生 JSON Schema 输出要求显式设置 `models[].structuredOutputSupport: supported` 或精确模型的 `modelOverrides.<id>` 字段，以及 Provider 的 `policy.capabilities.structuredOutput: supported`。缺省保持未知。仅 `openai-completions` 和 `openai-responses` 实现原生格式映射；为其他 API 声明支持会导致模型配置失败。目录或模型名称不能建立支持事实。带 `responseFormat` 的请求在 completions 中发送 `response_format: { type: 'json_schema', json_schema: { name, schema, strict: true } }`，在 Responses 中发送 `text.format: { type: 'json_schema', name, schema, strict: true }`，并保留其他文本选项。省略格式不添加这些字段。[LLM 输出校验](../llm/README.zh.md#request-strict-json-schema-output)决定是否成功完成；这不代表执行器续接。
+
 ### 带推理（reasoning）与协议兼容运行
 
 `reasoningEfforts` 声明模型可选择的 thinking 等级：每个键都是选择器提供的等级，其值是分派时在协议中发送的拼写，因此 `max: ultra` 可以为拥有自有词汇的网关重命名等级。省略该字段时保留已安装目录条目的能力；`false` 声明非推理模型。对于 pi-ai 无法识别的端点，`compat` 开关重塑请求——哪个角色携带系统提示词、哪个字段限制输出、thinking 等级如何传递——可逐路由、逐模型配置。条目与已安装目录都没有尺寸的模型，会采用路由的 `defaultContextWindow` 与 `defaultMaxTokens` 回退值。
 
 对于自托管 Chat Completions 端点，`thinkingTokenBudgetField` 选择推理预算参数，`vllmPriority` 在服务端启用优先级调度时设置整数调度优先级。模板参数接受 `$var: thinking.budget`。`openai-responses` 网关可设置 `supportsMaxOutputTokens: false` 来省略 `max_output_tokens`；Azure 与 Codex 传输会忽略这个共享兼容字段。这些控制均需显式启用；目录拥有的 Anthropic effort 和回退能力不是可配置开关。
+
+<a id="resume-and-recorded-history"></a>
+### 恢复与记录的历史
+
+适配器从 DSH 消息和持久化回放元数据重建完整请求历史。`policy.capabilities.resume` 描述进程重启后重开提供方拥有的会话；`supported` 会在 profile 加载和设置校验时以明确诊断失败，`unsupported`、`unknown` 与缺省仍有效。resume 不受支持时，普通多轮历史仍可使用。SDK 的活连接缓存属于传输优化，不提供持久化原生恢复操作。[DSH Session 恢复](../../core/agent-loop/README.zh.md#understand-the-implementation)与 [Codex 外部 Agent 执行](../../subagent/subagent-codex/README.zh.md#understand-the-implementation)各有自己的生命周期规则。
 
 ### 运行时更改配置
 

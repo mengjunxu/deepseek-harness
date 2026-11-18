@@ -125,6 +125,8 @@ interface SdkAssertions {
 }
 
 const SDK_ASSERTIONS: Readonly<Record<string, SdkAssertions>> = {
+  'request-usage-measurement': { expectedFinalResponse: 'INTENT_OK' },
+  'request-preparation-failed': { expectedFinalResponse: 'INTENT_OK' },
   'dynamic-tool-updates': {
     expectedFinalResponse: 'DONE',
   },

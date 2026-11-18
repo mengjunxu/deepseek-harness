@@ -58,6 +58,7 @@ import type {
 import type { AttachmentStore, ImageAttachmentRef } from '@deepseek-ai/dsh-attachment'
 import { idleWatchdog, timeoutOf } from '@deepseek-ai/dsh-timeout'
 import type { ResolvedPiAiProviderProfile } from './config.ts'
+import { nativeResponseFormat } from './response-format.ts'
 import { toPiContext } from './context.ts'
 import { createModels, getSupportedThinkingLevels } from './models.ts'
 import { toStreamChunks } from './stream.ts'
@@ -308,6 +309,7 @@ export class PiAiAdapter extends LlmAdapter {
     const configuredMaxTokens = profile.configuredMaxTokens.get(model)
     const toolSupport = profile.configuredToolSupport.get(model)
     const streamingSupport = profile.configuredStreamingSupport.get(model)
+    const structuredOutputSupport = profile.configuredStructuredOutputSupport.get(model)
     return {
       provider,
       id: model,
@@ -317,6 +319,7 @@ export class PiAiAdapter extends LlmAdapter {
       ...configuredMaxTokens === undefined ? {} : { defaultMaxTokens: configuredMaxTokens },
       ...toolSupport === undefined ? {} : { toolSupport },
       ...streamingSupport === undefined ? {} : { streamingSupport },
+      ...structuredOutputSupport === undefined ? {} : { structuredOutputSupport },
       ...reasoningInfo(resolvedModel, defaultLevel),
     }
   }
@@ -351,6 +354,7 @@ export class PiAiAdapter extends LlmAdapter {
       model,
       options.reasoningEffort ?? profile.reasoning,
     )
+    const onPayload = nativeResponseFormat(model.api, options.responseFormat)
     const apiKey = await this.config.resolveApiKey(options.provider, profile)
 
     const consumer = new AbortController()
@@ -385,6 +389,7 @@ export class PiAiAdapter extends LlmAdapter {
         }, onReplayDegrade)
       const events = snapshot.models.streamSimple(model, context, {
         ...profileOptions(profile, reasoning, apiKey),
+        ...onPayload === undefined ? {} : { onPayload },
         ...options.temperature === undefined ? {} : { temperature: options.temperature },
         ...options.maxTokens === undefined ? {} : { maxTokens: options.maxTokens },
         ...options.sessionId === undefined ? {} : { sessionId: String(options.sessionId) },

@@ -1,0 +1,211 @@
+{
+  "captured_at": "2026-11-16T05:07:00.734442+00:00",
+  "commit": null,
+  "files": [
+    {
+      "path": "apps/web/tests/turn-usage-source.e2e.ts",
+      "bytes": 6618,
+      "sha256": "cfdc238e6acfc81568eb67a8db1adb7cdf697d91558f022044f38922ba540f48"
+    },
+    {
+      "path": "docs/persistence-changes/2026-11-16-token-usage-measurement.i18n.yaml",
+      "bytes": 1094,
+      "sha256": "1444106d740e3f4392e9cf452f53457954659888020c2809b28c7452e5a5fa4c"
+    },
+    {
+      "path": "docs/persistence-changes/2026-11-16-token-usage-measurement.md",
+      "bytes": 2627,
+      "sha256": "ac6acfd3378f912e03e53d5cf838025d0f4a6697fcf4db4fa6813373240e14a4"
+    },
+    {
+      "path": "docs/persistence-changes/2026-11-16-token-usage-measurement.schema.json",
+      "bytes": 67450,
+      "sha256": "f81e08d6c234db6b63b100c7d540a3a64ba1e2fcfb2d3b58c94d6623b0dcd698"
+    },
+    {
+      "path": "docs/persistence-changes/2026-11-16-token-usage-measurement.zh.md",
+      "bytes": 2407,
+      "sha256": "f35a0dd7b094124afa92615e141b22a36da0a30061722b1212129bf1000292a6"
+    },
+    {
+      "path": "packages/client/ui-chat/src/client/chat/TurnUsagePanel.tsx",
+      "bytes": 5875,
+      "sha256": "dfd3febfafc72b82b18157514dd6b56749e847d2cb47bff17e7de4dcca5c8926"
+    },
+    {
+      "path": "packages/client/ui-chat/src/client/locale.ts",
+      "bytes": 21795,
+      "sha256": "f90d8f56d5cc3e475f86fcc3668418fc92b60aa1e147b00f7c7f2907312ae617"
+    },
+    {
+      "path": "packages/client/ui-chat/tests/turn-usage-panel.client.spec.tsx",
+      "bytes": 5463,
+      "sha256": "08aab357e5f62892458cdce87f5bec19e2fb3ce2b2e73c6f817e7e5be996d502"
+    },
+    {
+      "path": "packages/llm/llm/src/types.ts",
+      "bytes": 29078,
+      "sha256": "68b0bb2d7ad64853fd863dfeb3e010e71be0d1a84becc531702ca4b5947652a1"
+    },
+    {
+      "path": "packages/llm/llm/tests/fixtures/web-bridge.ts",
+      "bytes": 14342,
+      "sha256": "c9e88a0e3343bb14cc58deb47b80571ff48b9f37d97308b3fca859c8daf365bb"
+    },
+    {
+      "path": "packages/llm/llm-deepseek/src/translate.ts",
+      "bytes": 8310,
+      "sha256": "6560f5d4ec489760fa7a7795894cc9f4ded43f3db2e4b041ce39c465b9708c1e"
+    },
+    {
+      "path": "packages/llm/llm-deepseek/tests/runtime.spec.ts",
+      "bytes": 100935,
+      "sha256": "5064d0ae4544a7e03ffdb7985ea29dddbe92ed14c10b454f74b0c917d537b480"
+    },
+    {
+      "path": "packages/llm/llm-deepseek/tests/stream.spec.ts",
+      "bytes": 10691,
+      "sha256": "e1bafa3ecbdc6702a85d4db35bba5ea45994c7640b071da32671e99027985c1d"
+    },
+    {
+      "path": "packages/llm/token-meter/src/request-record-projection.ts",
+      "bytes": 4769,
+      "sha256": "a2d15ae99acac7eca653e1076ce2a19512db23cc62912017091f0543c02a4125"
+    },
+    {
+      "path": "packages/llm/token-meter/src/request-records.ts",
+      "bytes": 4907,
+      "sha256": "b5587de63ae1c0ec4e97711c5fd4dd1aaa4ab74c24d924bf28a30da14fd57b68"
+    },
+    {
+      "path": "packages/llm/token-meter/src/turn-usage.ts",
+      "bytes": 12336,
+      "sha256": "48d72164d506f98d5eb4e316e97781df56a6a956de22585a6c4b4262519479f7"
+    },
+    {
+      "path": "packages/llm/token-meter/tests/request-records.spec.ts",
+      "bytes": 30224,
+      "sha256": "4ce23b526b69b90982ed3563552f3df8902c09444da79985a953bf78b1c4c652"
+    },
+    {
+      "path": "packages/llm/token-meter/tests/turn-usage.spec.ts",
+      "bytes": 20926,
+      "sha256": "737bf0850e526733a1c0a125336f6a0387d8072e48526169624906e9ab865848"
+    },
+    {
+      "path": "python/sdk/tests/test_intent_routing_snapshot.py",
+      "bytes": 3919,
+      "sha256": "24404a86866506a09b0c313ef75fbae111d412ceeca758dd8e9da28f5a7d58d6"
+    },
+    {
+      "path": "scripts/snapshots/python-sdk-single-exe/intent-routing/routes.json",
+      "bytes": 4217,
+      "sha256": "6bdacb0dcd611a79aaaac86482ea0051d66babe972761913f9d733c1a9137545"
+    },
+    {
+      "path": "snapshots/sdk/request-usage-measurement/cordis.snapshot.yml",
+      "bytes": 523,
+      "sha256": "d92deaf2f04f8cb9fd3516ea2524c027d4801a7246bf62bd2afe9a4a0d2340a8"
+    },
+    {
+      "path": "snapshots/sdk/request-usage-measurement/cordis.yml",
+      "bytes": 2823,
+      "sha256": "bc3248bb4a22e527fc2c709952a688b52a92ec934b1d2454269f46f5303be787"
+    },
+    {
+      "path": "snapshots/sdk/request-usage-measurement/notifications.expected.jsonl",
+      "bytes": 4902,
+      "sha256": "42eecc377fe9b29872f1295a46d7fb6050560498e52e3af8247ba1c15e2e7df2"
+    },
+    {
+      "path": "snapshots/sdk/request-usage-measurement/replay.override.json",
+      "bytes": 565,
+      "sha256": "f511172f71f257e255128c2539525ac8b871451a3afb2a7319ee09f241012e9a"
+    },
+    {
+      "path": "snapshots/sdk/request-usage-measurement/result.expected.json",
+      "bytes": 58,
+      "sha256": "67645acb1c853c16c393f965e2fc6be520b5b01736f8fc6be4397bfbfb6255f9"
+    },
+    {
+      "path": "snapshots/sdk/request-usage-measurement/session.v3.jsonl",
+      "bytes": 3010,
+      "sha256": "4a96dfaf149a0dc2df7085d4fbf8d69b941d6d58c73405bd8da9decdc857877e"
+    },
+    {
+      "path": "snapshots/sdk/request-usage-measurement/session.v4.jsonl",
+      "bytes": 3805,
+      "sha256": "6b3d756b9dfd28d65bc3ca53f6c38198763e4589e743469b3ff0a945d095b181"
+    },
+    {
+      "path": "snapshots/sdk/request-usage-measurement/snapshot.yml",
+      "bytes": 238,
+      "sha256": "76ce569ee7652792c0585b8b30d4a5fd889ac67ff54faaa236a7ecf9dfe5c6fd"
+    },
+    {
+      "path": "snapshots/sdk/request-usage-measurement/system-prompt.expected.md",
+      "bytes": 2470,
+      "sha256": "8e9982593960324dfe431cfe3dc11746116857c32afd107876c90f4c7b8affb8"
+    },
+    {
+      "path": "snapshots/sdk/sdk.snapshot.ts",
+      "bytes": 50298,
+      "sha256": "029dd1ce2b856ef6e753e7b89d8cdd1dd831433d9dcc2b701dc64e6645fe4753"
+    },
+    {
+      "path": "snapshots/session/request-usage-measurement/cordis.snapshot.yml",
+      "bytes": 2308,
+      "sha256": "e0ddb8b786b41816f0245b0aee3a693c80c84e9f66da6bed10c120944042171a"
+    },
+    {
+      "path": "snapshots/session/request-usage-measurement/cordis.yml",
+      "bytes": 1420,
+      "sha256": "d1f5a96f8e49fb6fdda3e6e8ff93192077a57982c47c2dd4203f54cce6363bdf"
+    },
+    {
+      "path": "snapshots/session/request-usage-measurement/replay.override.json",
+      "bytes": 571,
+      "sha256": "95b6c43c11a99177aae12eca186c8f7b19ce45067ec94cc12a8748462e9e9f64"
+    },
+    {
+      "path": "snapshots/session/request-usage-measurement/session.v3.jsonl",
+      "bytes": 3322,
+      "sha256": "d591b6f8880de8db93c6befddf9ae8cdf8ed894fea158da446abbe4ea4c1ad66"
+    },
+    {
+      "path": "snapshots/session/request-usage-measurement/session.v4.jsonl",
+      "bytes": 3671,
+      "sha256": "474ec30eb0d9db0b0cb2e18845eac7ed17022059b20c485e9ec13d9f847eb87a"
+    },
+    {
+      "path": "snapshots/session/request-usage-measurement/snapshot.yml",
+      "bytes": 286,
+      "sha256": "5cd55aef9dba691a201717a91726481cb990a9c9571b9bb5b88a2750f2a91b30"
+    },
+    {
+      "path": "snapshots/web/turn-usage-source/session.v3.jsonl",
+      "bytes": 4367,
+      "sha256": "bee35f08def45d8752d77f9400c969e809173b9b7e9c6b8d0c8cd8612411646e"
+    },
+    {
+      "path": "snapshots/web/turn-usage-source/session.v4.jsonl",
+      "bytes": 6736,
+      "sha256": "f971c29da49690f23d1745fac9086184ff9ca36514adbd793b4307958b25bb84"
+    },
+    {
+      "path": "snapshots/web/turn-usage-source/snapshot.yml",
+      "bytes": 158,
+      "sha256": "2ede93226c37716617005bb3b0aa1820e502cd5cd2264d9e7ba8990edafb43a9"
+    },
+    {
+      "path": "snapshots/web/turn-usage-source/system-prompt.expected.md",
+      "bytes": 5711,
+      "sha256": "c843f53b22963070f554607f5adc005223c3bf44a3cb191173633c16aaa40f5a"
+    },
+    {
+      "path": "snapshots/web/turn-usage-source/tool-schemas.expected.json",
+      "bytes": 59421,
+      "sha256": "31e323b530c58474e1a63cdc9b2c64961451954f521f213ec1cb7d3f2164fce2"
+    }
+  ]
+}

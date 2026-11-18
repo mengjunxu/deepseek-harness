@@ -1,0 +1,52 @@
+{
+  "requirements": [
+    "docs/myPlan/DSH_PRD_vNext_4_2026-10-27.md",
+    "docs/myPlan/DeepSeek_Harness_Taskboard_PRD_v0.1.md"
+  ],
+  "before_sha256": "3d51f5fd309c3a066f81e4b48ed84cf184fe37bf9a16550b85f62042a0f18fec",
+  "after_sha256": "39aefb04da62d6a255b45fdaa9c633836b46b009a178a6f3fa752065398144cb",
+  "preserved_numbered_headings": [
+    "## 0. 给执行 Agent 的第一条指令（必须遵循）",
+    "## 1. 不可妥协的产品目标与范围",
+    "## 2. 推荐架构：Local-First Modular Monolith",
+    "## 3. 目标语义（实施前映射现有类型，不作为第二套已发布 Schema）",
+    "## 4. 里程碑、依赖与具体开发任务",
+    "## 5. 开发协作：Codex 与 Codely 一致执行规范",
+    "## 6. 测试计划 / 故障注入矩阵",
+    "## 7. 安全、可靠性和回滚要求",
+    "## 8. 各阶段提交与验收模板",
+    "## 9. 变更规则",
+    "## 10. ChatGPT 接入增量阶段与现状审计",
+    "## 11. vNext.4 增量实施路线（P0 合并结果）",
+    "## 12. 有效 Checklist 与任务证据",
+    "## 13. P0 执行器能力与实施基线（2026-10-30）",
+    "## 14. P1 当前实现范围",
+    "## 15. 当前第一优先：Web ChatGPT Provider 可行性验证",
+    "## 16. Taskboard 增量实施计划"
+  ],
+  "status_resets": [
+    "P1-01",
+    "P1-02",
+    "P1-03",
+    "P1-04",
+    "P1-08",
+    "P1-10",
+    "P1-11",
+    "P2-04",
+    "P2-06",
+    "P2-07",
+    "VN4-03",
+    "VN4-04"
+  ],
+  "MGSD_product_code_changed": false,
+  "source_sha256": {
+    "docs/myPlan/DSH_PRD_vNext_4_2026-10-27.md": "e8c0e4b2ea8a112edadb1a059b1be945a97bb0087019321a9640594da364b269",
+    "docs/myPlan/DeepSeek_Harness_Taskboard_PRD_v0.1.md": "fe4883e278b05993f7d018c3736cbc50b2b4effd0600828db50e495f396404eb"
+  },
+  "index_sha256": {
+    ".ai/ARCHITECTURE.md": "dcacdf910eec3ecb0ba2889645a96be4888b2c633ce991000755f8567bc6fe56",
+    ".ai/MEMORY.md": "0aac420292c1b0d26fe0481ad094d20fb9569a709ee3d61b8977e8efe21dafea",
+    ".ai/tasks/dsh-p1-usage-measurement/handoff.md": "0934173ffb8ded42dd6fccf293489aab8bd454a869c38eb7665ec149f30b6eeb",
+    ".ai/tasks/dsh-p1-usage-measurement/log.md": "e64931d6bde6087430c69c48e33201eed844999bd41655b14e8670b4ba54484e"
+  }
+}

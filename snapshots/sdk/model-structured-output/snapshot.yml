@@ -1,0 +1,9 @@
+version: 1
+scenario: model-structured-output
+profile: sdk
+composition: sdk-model-structured-output
+recording: authored
+header:
+  class: model-structured-output
+  pin: true
+  toolSchemasSource: sdk/bash-tool

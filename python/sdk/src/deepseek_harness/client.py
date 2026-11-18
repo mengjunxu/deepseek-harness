@@ -138,12 +138,18 @@ class HarnessClient:
         model: str,
         reasoning_effort: str | None = None,
         max_tokens: int | None = None,
+        approval_requests: bool = False,
+        user_questions: bool = False,
     ) -> InitializeResponse:
         payload: JsonObject = {
             "cwd": str(Path(cwd).resolve()),
             "provider": provider,
             "model": model,
         }
+        if user_questions:
+            payload["capabilities"] = {"userQuestions": True}
+        if approval_requests:
+            payload["approvalRequests"] = True
         if reasoning_effort is not None:
             payload["reasoningEffort"] = reasoning_effort
         if max_tokens is not None:
@@ -168,6 +174,10 @@ class HarnessClient:
                     error.data,
                 ) from error
             raise
+
+    def resume_session(self, session_id: str) -> None:
+        """Restore a persisted root session without submitting any input."""
+        self.request("session/resume", {"sessionId": session_id}, response_model=_ResumeResponse)
 
     def session_prompt(
         self,
@@ -579,6 +589,10 @@ class NotificationSubscription:
 
 class _SessionPromptResponse(BaseModel):
     messageId: str
+
+
+class _ResumeResponse(BaseModel, extra="forbid"):
+    pass
 
 
 class _ShutdownResponse(BaseModel):

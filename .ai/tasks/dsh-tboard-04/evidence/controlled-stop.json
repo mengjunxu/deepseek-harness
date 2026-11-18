@@ -1,0 +1,9 @@
+{
+  "fixedTool": "/bin/sleep",
+  "realSdkReceipt": true,
+  "localModelRequests": 1,
+  "targetRuntimeExited": true,
+  "fixtureChildExited": true,
+  "otherRuntimeAlive": true,
+  "releasedGeneration": 1
+}

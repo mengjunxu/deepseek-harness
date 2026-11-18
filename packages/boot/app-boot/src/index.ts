@@ -31,6 +31,9 @@ export { generateConfigSchema, type ConfigSchemaDump, type NativeConfigSchema } 
 export { createConfigProjector, LOADER_EXPRESSION_SCHEMA, type ConfigProjection } from './config-schema/projector.ts'
 export { isNativeConfigSchema } from './config-schema/native.ts'
 import type {} from '@deepseek-ai/dsh-system-prompt'
+import { disposeApplication } from './dispose.ts'
+import { installAdmissionPolicyActivation, isRequiredAdmissionPolicy } from './admission-policies.ts'
+export { disposeApplication } from './dispose.ts'
 
 export {
   readProfilePlugins, reconcileProfilePlugins, writeProfileBundles,
@@ -909,7 +912,7 @@ function startupDiagnostic(binName: string, failures: readonly InactiveEntry[], 
 /**
  * Apply DSH startup policy to a settled Loader tree.
  *
- * Inactive entries from the global required list reject startup. Other
+ * Inactive entries from the global required list and configured model admission policies reject startup. Other
  * inactive entries join that failure diagnostic, or produce one warning when
  * no required entry failed and leave successful siblings running.
  * Required ids absent from the tree, and disabled required entries, are ignored.
@@ -929,7 +932,7 @@ export async function auditStartupEntries(
 ): Promise<void> {
   const failures = await inactiveEntries(ctx)
   const required = new Set(failures.filter(({ entry }) => entry === bootstrapIncludes.get(ctx)
-    || requiredStartupEntryIds.has(entry.options.id)).map(({ entry }) => entry))
+    || requiredStartupEntryIds.has(entry.options.id) || isRequiredAdmissionPolicy(entry)).map(({ entry }) => entry))
   if (required.size > 0) {
     throw new StartupError(startupDiagnostic(binName, failures, required), failures.map(({ entry, outcome }) => ({
       id: entry.options.id, module: entry.options.name, required: required.has(entry), fiberState: entry.fiber?.state, outcome,
@@ -999,6 +1002,7 @@ export async function boot(
       void Promise.resolve(next()).catch((error: unknown) => { ctx.logger.error(error) })
     }, { global: true, prepend: true })
     await ctx.plugin(Loader)
+    installAdmissionPolicyActivation(ctx)
     await prepare?.(ctx)
     stage = 'plugin tree failed to load'
     await mountRootInclude(ctx, absoluteConfigPath, patches, bareModuleBaseUrl, binName)
@@ -1012,10 +1016,9 @@ export async function boot(
     await auditStartupEntries(ctx, binName)
     return ctx
   } catch (cause) {
-    // Root-fiber disposal contains cleanup failures per observer (Cordis
-    // fiber.ts hardening) and a repeated call returns the settled single-shot
-    // result, so this await cannot reject and replace `cause`.
-    await ctx.fiber.dispose()
+    const cleanupFailures: unknown[] = []
+    try { await disposeApplication(ctx) }
+    catch (error) { cleanupFailures.push(error); diagnostics.logger.error(error) }
     if (cause instanceof StartupError) {
       cause.startup = { configurationPath: absoluteConfigPath, messages: startupLogs }
       throw cause
@@ -1031,7 +1034,9 @@ export async function boot(
     const stack = deepest instanceof AggregateError
       ? `\n${deepest.stack ?? deepest.message}\n${deepest.errors.map(formatActivationError).join('\n')}`
       : deepest instanceof Error && deepest !== cause ? `\n${deepest.stack ?? deepest.message}` : ''
-    throw new Error(`${binName}: ${stage}: ${detail}${stack}`, { cause })
+    const cleanup = cleanupFailures.length === 0 ? ''
+      : `\nApplication cleanup failed: ${cleanupFailures.map(formatActivationError).join('\n')}`
+    throw new Error(`${binName}: ${stage}: ${detail}${stack}${cleanup}`, { cause })
   } finally {
     await diagnostics.fiber.dispose()
   }

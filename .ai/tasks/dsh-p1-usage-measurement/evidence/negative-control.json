@@ -1,0 +1,7 @@
+{
+  "artifact": "packages/llm/token-meter/lib/types/request-records.js",
+  "original_sha256": "d248b28543a36b733ae3f84bbb6715fe29ec96f3ce31e8e9f994595547ebe342",
+  "negative_exit": 1,
+  "restored_sha256": "d248b28543a36b733ae3f84bbb6715fe29ec96f3ce31e8e9f994595547ebe342",
+  "restored_exit": 0
+}

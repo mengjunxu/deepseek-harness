@@ -1,0 +1,6 @@
+# Ask for one declared API-metered request when no exact preset exists.
+- insert:
+    - id: paid-route-policy
+      name: '@deepseek-ai/dsh-paid-route-policy'
+      config:
+        onMissingGrant: ask

@@ -1,0 +1,35 @@
+$ vitest run --config vitest.snapshot.config.ts snapshots/session/headless.snapshot.ts -t 'replays siwc-text-turn through dsh'
+The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
+
+ RUN  v4.1.8 /Users/x-dt/workspace/AI/Agents/deepseek-harness
+
+ ❯ snapshots/session/headless.snapshot.ts (145 tests | 1 failed | 144 skipped) 17257ms
+     × replays siwc-text-turn through dsh --profile headless 17256ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  snapshots/session/headless.snapshot.ts > headless recorded-session snapshots > replays siwc-text-turn through dsh --profile headless
+Error: siwc-text-turn headless snapshot exited 1 (expected 0). stdout:
+
+
+stderr:
+dsh: TRANSPORT: Connection error.
+
+ ❯ runLoaderSmoke packages/test-support/loader-smoke/src/index.ts:252:13
+    250|     const expectedExitCode = options.expectedExitCode ?? 0
+    251|     if (result.exitCode !== expectedExitCode) {
+    252|       throw new Error(`${options.label} exited ${String(result.exitCod…
+       |             ^
+    253|     }
+    254|     await options.inspect?.(cwd)
+ ❯ snapshots/session/headless.snapshot.ts:1119:18
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 144 skipped (145)
+   Start at  13:51:16
+   Duration  18.50s (transform 726ms, setup 141ms, import 1.02s, tests 17.26s, environment 0ms)
+
+[ELIFECYCLE] Command failed with exit code 1.

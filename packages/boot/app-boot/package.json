@@ -61,6 +61,7 @@
     "@deepseek-ai/dsh-system-prompt": "workspace:*",
     "@types/js-yaml": "^4.0.9",
     "@types/semver": "^7.8.0",
-    "@deepseek-ai/cordis": "workspace:~"
+    "@deepseek-ai/cordis": "workspace:~",
+    "@deepseek-ai/dsh-llm": "workspace:*"
   }
 }

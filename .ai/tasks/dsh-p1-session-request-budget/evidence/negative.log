@@ -1,0 +1,27 @@
+The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
+
+ RUN  v4.1.8 /Users/x-dt/workspace/AI/Agents/deepseek-harness
+
+ ❯ packages/guard/request-budget-policy/tests/shared-hosts.two-process.e2e.ts (5 tests | 1 failed | 4 skipped) 1407ms
+   × shares a resumed Session cap across overlapping Hosts while global capacity remains available 1406ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  packages/guard/request-budget-policy/tests/shared-hosts.two-process.e2e.ts > shares a resumed Session cap across overlapping Hosts while global capacity remains available
+Error: A second Host exceeded the shared Session cap before exhausting its global budget
+ ❯ packages/guard/request-budget-policy/tests/shared-hosts.two-process.e2e.ts:98:11
+     96|   const abort = new AbortController()
+     97|   const entered = once(second.child, 'message', { signal: abort.signal…
+     98|     throw new Error('A second Host exceeded the shared Session cap bef…
+       |           ^
+     99|   })
+    100|   second.child.send('resolve')
+ ❯ packages/guard/request-budget-policy/tests/shared-hosts.two-process.e2e.ts:102:21
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 4 skipped (5)
+   Start at  21:45:48
+   Duration  1.63s (transform 110ms, setup 123ms, import 13ms, tests 1.41s, environment 0ms)

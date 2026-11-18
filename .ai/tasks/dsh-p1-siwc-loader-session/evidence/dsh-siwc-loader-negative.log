@@ -1,0 +1,58 @@
+The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
+The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
+The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
+
+ RUN  v4.1.8 /Users/x-dt/workspace/AI/Agents/deepseek-harness
+
+-xx
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |thread-safe| packages/experimental/chatgpt-plan/tests/loader.spec.ts > reuses the persisted account and acknowledgement after Loader restart without rediscovery
+AssertionError: expected { connected: true, …(3) } to match object { connected: true, …(2) }
+(1 matching property omitted from actual)
+
+- Expected
++ Received
+
+  {
+    "connected": true,
+    "email": "loader@example.test",
+-   "needsWelcome": false,
++   "needsWelcome": true,
+  }
+
+ ❯ packages/experimental/chatgpt-plan/tests/loader.spec.ts:109:51
+    107|   await first.ctx.fiber.dispose()
+    108|   const second = await load(root, true)
+    109|   expect(await second.ctx.chatgptPlan.getState()).toMatchObject({ conn…
+       |                                                   ^
+    110|   const wire = vi.fn(async (input: RequestInfo | URL, init?: RequestIn…
+    111|     const request = new Request(input, init)
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  |thread-safe| packages/experimental/chatgpt-plan/tests/loader.spec.ts > removes the route and settles an active response when the Loader disables SIWC
+AssertionError: expected false to be true // Object.is equality
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ packages/experimental/chatgpt-plan/tests/loader.spec.ts:159:35
+    157|     await writeFile(patch, '- id: chatgpt-plan\n  disabled: true\n')
+    158|     await vi.waitFor(() => expect(ctx.llm.listProviders()).toEqual([])…
+    159|     expect(activeSignal?.aborted).toBe(true)
+       |                                   ^
+    160|     await done
+    161|     expect(result.finish).toMatchObject({ kind: 'aborted', failure: { …
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 1 skipped (3)
+   Start at  13:46:13
+   Duration  3.08s (transform 564ms, setup 140ms, import 660ms, tests 2.20s, environment 0ms)

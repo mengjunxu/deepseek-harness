@@ -31,7 +31,7 @@ function indexOf(event: Record<string, unknown>): number {
   return event.index as number
 }
 
-function updateUsage(usage: TokenUsage, raw: unknown): void {
+function updateUsage(usage: TokenUsage, raw: unknown, observed: Set<'inputTokens' | 'outputTokens'>): void {
   const fields = object(raw)
   const keys = { input_tokens: 'inputTokens', output_tokens: 'outputTokens', cache_read_input_tokens: 'cacheReadTokens', cache_creation_input_tokens: 'cacheWriteTokens' } as const
   for (const [wire, local] of Object.entries(keys)) {
@@ -39,6 +39,7 @@ function updateUsage(usage: TokenUsage, raw: unknown): void {
     if (value === undefined) continue
     if (!Number.isSafeInteger(value) || (value as number) < 0) return malformed(`invalid ${wire}`)
     usage[local] = value as number
+    if (local === 'inputTokens' || local === 'outputTokens') observed.add(local)
   }
 }
 
@@ -104,12 +105,13 @@ function stopReason(raw: unknown): FinishReason {
 export async function* translate(events: AsyncIterable<Record<string, unknown>>, model: string): AsyncGenerator<StreamChunk> {
   const blocks = new Map<number, Block>()
   const usage: TokenUsage = { inputTokens: 0, outputTokens: 0 }
+  const observed = new Set<'inputTokens' | 'outputTokens'>()
   let started = false
   let reason: FinishReason | undefined
   for await (const event of events) {
     if (event.type === 'message_start') {
       if (started) return malformed('duplicate message_start')
-      updateUsage(usage, object(event.message).usage)
+      updateUsage(usage, object(event.message).usage, observed)
       started = true
       continue
     }
@@ -143,7 +145,7 @@ export async function* translate(events: AsyncIterable<Record<string, unknown>>,
     } else if (event.type === 'message_delta') {
       const delta = object(event.delta)
       if (delta.stop_reason != null) reason = stopReason(delta.stop_reason)
-      if (event.usage !== undefined) updateUsage(usage, event.usage)
+      if (event.usage !== undefined) updateUsage(usage, event.usage, observed)
     } else {
       if (reason === undefined || [...blocks.values()].some(block => !block.closed)) return malformed('message_stop without settled blocks and stop reason')
       if (blocks.size === 0 && reason.kind === 'stop') throw new LlmError('DeepSeek Messages returned no content', 'EMPTY_RESPONSE')
@@ -157,6 +159,7 @@ export async function* translate(events: AsyncIterable<Record<string, unknown>>,
         }
       }
       usage.totalTokens = usage.inputTokens + usage.outputTokens + (usage.cacheReadTokens ?? 0) + (usage.cacheWriteTokens ?? 0)
+      if (observed.size === 2) usage.measurement = 'provider-reported'
       yield { type: 'usage', usage }
       yield { type: 'finish', reason, replayState: replayState(model, [...blocks.values()].map(block => block.replay)) }
       return

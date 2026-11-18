@@ -1,0 +1,267 @@
+The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
+The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
+The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
+
+ RUN  v4.1.8 /Users/x-dt/workspace/AI/Agents/deepseek-harness
+
+xxxxxxxxxxx
+
+⎯⎯⎯⎯⎯⎯ Failed Tests 11 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |thread-safe| packages/llm/llm/tests/structured-output.spec.ts > rejects an invalid schema before the adapter streams
+AssertionError: promise resolved "{ config: { …(4) }, …(3) }" instead of rejecting
+
+- Expected
++ Received
+
+- Error {
+-   "message": "rejected promise",
++ {
++   "adapterDefaults": {},
++   "config": {
++     "model": "json",
++     "provider": "fixture",
++     "requiredCapabilities": [
++       "structuredOutput",
++     ],
++     "responseFormat": {
++       "name": "result",
++       "schema": {
++         "type": 42,
++       },
++       "strict": true,
++       "type": "json_schema",
++     },
++   },
++   "retryPolicy": {
++     "initialDelayMs": 500,
++     "jitterRatio": 0.1,
++     "maxDelayMs": 10000,
++     "maxRetries": 5,
++     "mode": "normal",
++     "retryableCodes": [
++       "EMPTY_RESPONSE",
++       "RATE_LIMIT",
++       "SERVER",
++       "TIMEOUT",
++       "TRANSPORT",
++     ],
++   },
++   "stream": [Function stream],
+  }
+
+ ❯ packages/llm/llm/tests/structured-output.spec.ts:58:40
+     56|   const { llm, calls } = await fixture()
+     57|   const invalid = { ...config, responseFormat: { ...format, schema: { …
+     58|   await expect(llm.prepareCall(invalid)).rejects.toMatchObject({ code:…
+       |                                        ^
+     59|   expect(calls()).toBe(0)
+     60| })
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/11]⎯
+
+ FAIL  |thread-safe| packages/llm/llm/tests/structured-output.spec.ts > rejects exact-model structured output declared unknown
+ FAIL  |thread-safe| packages/llm/llm/tests/structured-output.spec.ts > rejects exact-model structured output declared unsupported
+AssertionError: promise resolved "{ config: { …(4) }, …(3) }" instead of rejecting
+
+- Expected
++ Received
+
+- Error {
+-   "message": "rejected promise",
++ {
++   "adapterDefaults": {},
++   "config": {
++     "model": "json",
++     "provider": "fixture",
++     "requiredCapabilities": [
++       "structuredOutput",
++     ],
++     "responseFormat": {
++       "name": "result",
++       "schema": {
++         "additionalProperties": false,
++         "properties": {
++           "result": {
++             "type": "string",
++           },
++         },
++         "required": [
++           "result",
++         ],
++         "type": "object",
++       },
++       "strict": true,
++       "type": "json_schema",
++     },
++   },
++   "retryPolicy": {
++     "initialDelayMs": 500,
++     "jitterRatio": 0.1,
++     "maxDelayMs": 10000,
++     "maxRetries": 5,
++     "mode": "normal",
++     "retryableCodes": [
++       "EMPTY_RESPONSE",
++       "RATE_LIMIT",
++       "SERVER",
++       "TIMEOUT",
++       "TRANSPORT",
++     ],
++   },
++   "stream": [Function stream],
+  }
+
+ ❯ packages/llm/llm/tests/structured-output.spec.ts:64:39
+     62| it.each(['unknown', 'unsupported'] as const)('rejects exact-model stru…
+     63|   const { llm, calls } = await fixture(undefined, support)
+     64|   await expect(llm.prepareCall(config)).rejects.toMatchObject({ code: …
+       |                                       ^
+     65|   expect(calls()).toBe(0)
+     66| })
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/11]⎯
+
+ FAIL  |thread-safe| packages/llm/llm/tests/structured-output.spec.ts > requires Provider admission even when a format omits explicit requirements
+AssertionError: promise resolved "{ config: { …(3) }, …(3) }" instead of rejecting
+
+- Expected
++ Received
+
+- Error {
+-   "message": "rejected promise",
++ {
++   "adapterDefaults": {},
++   "config": {
++     "model": "json",
++     "provider": "fixture",
++     "responseFormat": {
++       "name": "result",
++       "schema": {
++         "additionalProperties": false,
++         "properties": {
++           "result": {
++             "type": "string",
++           },
++         },
++         "required": [
++           "result",
++         ],
++         "type": "object",
++       },
++       "strict": true,
++       "type": "json_schema",
++     },
++   },
++   "retryPolicy": {
++     "initialDelayMs": 500,
++     "jitterRatio": 0.1,
++     "maxDelayMs": 10000,
++     "maxRetries": 5,
++     "mode": "normal",
++     "retryableCodes": [
++       "EMPTY_RESPONSE",
++       "RATE_LIMIT",
++       "SERVER",
++       "TIMEOUT",
++       "TRANSPORT",
++     ],
++   },
++   "stream": [Function stream],
+  }
+
+ ❯ packages/llm/llm/tests/structured-output.spec.ts:71:38
+     69|   const { llm, calls } = await fixture(undefined, 'supported', 'unknow…
+     70|   const input = { provider: 'fixture', model: 'json', responseFormat: …
+     71|   await expect(llm.prepareCall(input)).rejects.toMatchObject({ code: '…
+       |                                      ^
+     72|   expect(calls()).toBe(0)
+     73| })
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/11]⎯
+
+ FAIL  |thread-safe| packages/llm/llm/tests/structured-output.spec.ts > keeps valid schema-conforming text and binds the complete prepared format
+AssertionError: expected [Function] to throw an error
+
+- Expected:
+null
+
++ Received:
+undefined
+
+ ❯ packages/llm/llm/tests/structured-output.spec.ts:79:38
+     77|   const call = await llm.prepareCall(config)
+     78|   const changed = { ...call.config, messages: [], responseFormat: { ..…
+     79|   expect(() => call.stream(changed)).toThrow('config changed')
+       |                                      ^
+     80|   expect(await collect(call.stream({ ...call.config, messages: [] })))…
+     81| })
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/11]⎯
+
+ FAIL  |thread-safe| packages/llm/llm/tests/structured-output.spec.ts > reports invalid structured completion: not-json
+ FAIL  |thread-safe| packages/llm/llm/tests/structured-output.spec.ts > reports invalid structured completion: {}
+ FAIL  |thread-safe| packages/llm/llm/tests/structured-output.spec.ts > reports invalid structured completion: {"result":1}
+ FAIL  |thread-safe| packages/llm/llm/tests/structured-output.spec.ts > reports invalid structured completion: {"result":"ok","extra":true}
+AssertionError: expected { type: 'finish', …(1) } to match object { type: 'finish', reason: { …(2) } }
+
+- Expected
++ Received
+
+  {
+    "reason": {
+-     "failure": {
+-       "code": "INVALID_STRUCTURED_OUTPUT",
+-     },
+-     "kind": "error",
++     "kind": "stop",
+    },
+    "type": "finish",
+  }
+
+ ❯ packages/llm/llm/tests/structured-output.spec.ts:87:55
+     85|     const { llm } = await fixture(textChunks(text))
+     86|     const input = { ...config, messages: [] }
+     87|     expect((await collect(llm.stream(input))).at(-1)).toMatchObject({
+       |                                                       ^
+     88|       type: 'finish', reason: { kind: 'error', failure: { code: 'INVAL…
+     89|     })
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/11]⎯
+
+ FAIL  |thread-safe| packages/llm/llm/tests/structured-output.spec.ts > rejects an incomplete structured completion without changing a provider failure
+InvariantError: invariant violated by "@deepseek-ai/dsh-llm": text delta at index 0 requires an open text block, got undefined
+ ❯ packages/runtime-diagnostics/invariants/src/index.ts:162:19
+    160|         const installInvariant = (childCtx: Context) => (
+    161|           installer(childCtx, (message): never => {
+    162|             throw new InvariantError(packageName, message)
+       |                   ^
+    163|           })
+    164|         )
+ ❯ validateDelta packages/llm/llm/src/invariant.ts:31:5
+ ❯ validateStream packages/llm/llm/src/invariant.ts:52:9
+ ❯ collect packages/llm/llm/tests/structured-output.spec.ts:51:20
+ ❯ packages/llm/llm/tests/structured-output.spec.ts:98:11
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/11]⎯
+
+ FAIL  |thread-safe| packages/llm/llm/tests/structured-output.spec.ts > allows a tool continuation and rejects a stream missing its terminal outcome
+InvariantError: invariant violated by "@deepseek-ai/dsh-llm": LLM stream ended without a terminal finish chunk
+ ❯ packages/runtime-diagnostics/invariants/src/index.ts:162:19
+    160|         const installInvariant = (childCtx: Context) => (
+    161|           installer(childCtx, (message): never => {
+    162|             throw new InvariantError(packageName, message)
+       |                   ^
+    163|           })
+    164|         )
+ ❯ validateStream packages/llm/llm/src/invariant.ts:83:18
+ ❯ collect packages/llm/llm/tests/structured-output.spec.ts:51:20
+ ❯ packages/llm/llm/tests/structured-output.spec.ts:112:11
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/11]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  11 failed (11)
+   Start at  11:05:53
+   Duration  459ms (transform 267ms, setup 141ms, import 190ms, tests 39ms, environment 0ms)

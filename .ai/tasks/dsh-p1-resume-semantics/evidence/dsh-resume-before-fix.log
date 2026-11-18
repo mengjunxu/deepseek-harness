@@ -1,0 +1,56 @@
+The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
+The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
+The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
+
+ RUN  v4.1.8 /Users/x-dt/workspace/AI/Agents/deepseek-harness
+
+------------xx··----------------------------------x----
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |thread-safe| packages/llm/llm-pi-ai/tests/config.spec.ts > provider policy configuration > refuses native cold resume claims during strict resolution
+ FAIL  |thread-safe| packages/llm/llm-pi-ai/tests/config.spec.ts > provider policy configuration > refuses native cold resume claims during deferred resolution
+AssertionError: expected [Function] to throw an error
+
+- Expected:
+null
+
++ Received:
+undefined
+
+ ❯ packages/llm/llm-pi-ai/tests/config.spec.ts:114:8
+    112|   it.each(['strict', 'deferred'] as const)('refuses native cold resume…
+    113|     expect(() => resolveProfiles({ openai: { policy: { capabilities: {…
+    114|       .toThrow('does not expose native provider session restore')
+       |        ^
+    115|   })
+    116|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  |thread-safe| packages/llm/llm-pi-ai/tests/loader-composition.spec.ts > llm-pi-ai real dormant composition > refuses a native cold resume claim without changing settings or issuing a provider request
+AssertionError: promise resolved "undefined" instead of rejecting
+
+- Expected:
+Error {
+  "message": "rejected promise",
+}
+
++ Received:
+undefined
+
+ ❯ packages/llm/llm-pi-ai/tests/loader-composition.spec.ts:260:11
+    258|     await expect(ctx.settings.update('llm-pi-ai', { providers: { 'resu…
+    259|       policy: { capabilities: { resume: 'supported' } },
+    260|     } } })).rejects.toThrow('does not expose native provider session r…
+       |           ^
+    261|     expect(await readFile(settingsPath, 'utf8')).toBe(before)
+    262|     expect(ctx.llm.listProviders()).toMatchObject([{ policy: { capabil…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+
+ Test Files  2 failed (2)
+      Tests  3 failed | 2 passed | 50 skipped (55)
+   Start at  12:00:24
+   Duration  883ms (transform 810ms, setup 284ms, import 879ms, tests 106ms, environment 0ms)

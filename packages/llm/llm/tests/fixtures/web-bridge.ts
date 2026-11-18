@@ -106,7 +106,7 @@ function usageOf(record: BridgeRecord): TokenUsage | undefined {
   const outputTokens = usage.outputTokens
   if (typeof inputTokens !== 'number' || typeof outputTokens !== 'number') return undefined
   const tokens: TokenUsage = { inputTokens, outputTokens }
-  const optional = (wireName: string, ours: keyof TokenUsage): void => {
+  const optional = (wireName: string, ours: Exclude<keyof TokenUsage, 'measurement'>): void => {
     const entry = usage[wireName]
     if (typeof entry === 'number') tokens[ours] = entry
   }

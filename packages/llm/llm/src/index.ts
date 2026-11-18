@@ -8,6 +8,7 @@
 
 import { Context } from '@deepseek-ai/cordis'
 import { Remote, RemoteError, TypertRemoteService } from '@deepseek-ai/dsh-typert-protocol'
+import { resolveResponseFormat, StructuredOutputValidator } from './response-format.ts'
 import { deepFreeze } from '@deepseek-ai/dsh-util-values'
 import type {
   GenerateOptions,
@@ -15,6 +16,9 @@ import type {
   LlmConfigurableProvider,
   LlmDiscoveredModel,
   LlmFailure,
+  LlmPreparationContext,
+  LlmPreparationFailure,
+  LlmDispatchContext,
   LlmImageRequestPricing,
   LlmModelContext,
   LlmModelDiscoveryRequest,
@@ -30,20 +34,22 @@ import type {
 import { freezeMessage } from './message.ts'
 import { resolveRetryPolicy } from './retry-policy.ts'
 import type { ResolvedRetryPolicy } from './retry-policy.ts'
-import type { ProviderRequestId } from './brand.ts'
 import { callConfigEquals } from './call-config.ts'
 import { ValidationAdmissionBudget } from './validation-admission.ts'
 import type { LlmValidationAdmission, ValidationGeneration, ValidationReservation } from './validation-admission.ts'
 import type { LlmCallConfig, LlmCallConfigAdapterDefaults } from './call-config.ts'
-import { HarnessError, INVALID_CREDENTIAL_CODE } from './error.ts'
+import { HarnessError, LlmError, INVALID_CREDENTIAL_CODE } from './error.ts'
 import { normalizeLlmFailure } from './adapter-failure.ts'
 import { normalizeApiKey } from './api-key.ts'
+import { createDispatch } from './dispatch.ts'
+import { preparationLabels, preparationFailureCategory } from './preparation-failure.ts'
 import {
   contentHasFile, contentHasImage, fileHandleText, projectFilesToText, projectImagesForTextModel, projectToolUpdates,
 } from './content.ts'
 import type { FileAttachmentRef } from '@deepseek-ai/dsh-attachment'
 
 export * from './provider-policy.ts'
+export { resolveResponseFormat, ResponseFormatSchema } from './response-format.ts'
 export type { LlmValidationAdmission } from './validation-admission.ts'
 export * from './attribution.ts'
 export * from './brand.ts'
@@ -65,6 +71,53 @@ declare module '@deepseek-ai/cordis' {
 
   interface Events {
     /**
+     * Refuse a registered route before adapter preparation and again before dispatch.
+     * Listeners read the captured registration and current controls without mutating either.
+     * Return undefined to delegate; no listener can approve around another refusal.
+     * Handlers are synchronous and pure; they must not reserve resources or perform I/O.
+     * @mode bail
+     * @param provider - captured registration metadata, including its admitted usage source.
+     * @param config - current request controls; no credentials or message content are included.
+     * @returns the first policy refusal, or undefined when every listener delegates.
+     */
+    'llm/admission'(this: LlmRuntime, provider: Readonly<LlmProviderInfo>, config: Readonly<LlmCallConfig>): LlmFailure | undefined
+
+    /**
+     * Authorize one captured native request before resource reservation.
+     * A refusal must not delegate. Calling next() once enters dispatch policies
+     * only after admission and composed cancellation have been rechecked.
+     * Retries require a new authorization; grants must not escape this invocation.
+     * @mode waterfall
+     * @param dispatch - captured request and additive cancellation controls.
+     * @param next - single-use continuation into resource reservation.
+     * @returns authorized stream or the policy's terminal refusal.
+     */
+    'llm/authorize'(this: LlmRuntime, dispatch: LlmDispatchContext, next: () => AsyncIterable<StreamChunk>): AsyncIterable<StreamChunk>
+
+    /**
+     * Wrap one resolved registered dispatch for resource reservation and cleanup.
+     * Policies read the captured registration and may add cancellation sources
+     * before calling next() exactly once. Retries enter llm/stream separately.
+     * Admission is checked again when the native continuation starts. Policies
+     * emit finish chunks for owned refusals; their thrown defects remain thrown.
+     * @mode waterfall
+     * @param dispatch - resolved request and additional cancellation controls.
+     * @param next - single-use continuation into the next policy or adapter.
+     * @returns the policy-wrapped stream.
+     */
+    'llm/dispatch'(this: LlmRuntime, dispatch: LlmDispatchContext, next: () => AsyncIterable<StreamChunk>): AsyncIterable<StreamChunk>
+
+    /**
+     * Observe a preparation failure before the native dispatch outlet is entered.
+     * Successful virtual middleware may still serve a missing-adapter route.
+     * Handlers are awaited; observer defects retain the original failure in AggregateError.
+     * @mode parallel
+     * @param failure - detached metadata without messages, credentials or arbitrary error data.
+     */
+    'llm/preparation-failed'(this: LlmRuntime, failure: Readonly<LlmPreparationFailure>): void | Promise<void>
+
+
+    /**
      * Waterfall around every streaming model call (retry, replay, routing).
      * Bound to the {@link LlmRuntime}; call `next()` to reach the resolved
      * adapter's stream, or yield your own chunks to short-circuit.
@@ -81,58 +134,6 @@ declare module '@deepseek-ai/cordis' {
   }
 }
 
-/** Structured provider facts and cause accepted by {@link LlmError}. */
-export interface LlmErrorOptions extends ErrorOptions {
-  /** Valid HTTP status observed at the provider boundary. */
-  status?: number
-  /** Positive finite provider-requested delay in milliseconds. */
-  providerRetryAfterMs?: number
-  /** Non-empty opaque provider request id. */
-  requestId?: ProviderRequestId
-  /** Positive count of additional oldest retained image occurrences to offload; only with `IMAGE_OFFLOAD_REQUIRED`. */
-  offloadImages?: number
-}
-
-/**
- * Typed error for LLM-related failures. Extends {@link HarnessError}, so the
- * `code` string (e.g. `AUTH`, `RATE_LIMIT`, `NO_ADAPTER`) is shared taxonomy.
- */
-export class LlmError extends HarnessError {
-  /** Serializable facts retained beside this live Error. */
-  readonly failure: LlmFailure
-
-  /**
-   * @param message - non-empty human-readable failure summary.
-   * @param code - non-empty stable provider-neutral machine code.
-   * @param options - optional cause and validated serializable provider facts.
-   */
-  constructor(message: string, code: string, options?: LlmErrorOptions) {
-    if (typeof message !== 'string' || message.length === 0) throw new Error('LlmError message must be a non-empty string')
-    if (typeof code !== 'string' || code.length === 0) throw new Error('LlmError code must be a non-empty string')
-    if (options?.status !== undefined
-      && (!Number.isInteger(options.status) || options.status < 100 || options.status > 599)) {
-      throw new Error('LlmError status must be an integer from 100 through 599')
-    }
-    if (options?.providerRetryAfterMs !== undefined
-      && (!Number.isFinite(options.providerRetryAfterMs) || options.providerRetryAfterMs <= 0)) {
-      throw new Error('LlmError providerRetryAfterMs must be a positive finite number')
-    }
-    if (options?.requestId !== undefined
-      && (typeof options.requestId !== 'string' || options.requestId.length === 0)) {
-      throw new Error('LlmError requestId must be a non-empty string')
-    }
-    super(message, code, options)
-    this.name = 'LlmError'
-    this.failure = Object.freeze({
-      message,
-      code,
-      ...options?.status === undefined ? {} : { status: options.status },
-      ...options?.providerRetryAfterMs === undefined ? {} : { providerRetryAfterMs: options.providerRetryAfterMs },
-      ...options?.requestId === undefined ? {} : { requestId: options.requestId },
-      ...options?.offloadImages === undefined ? {} : { offloadImages: options.offloadImages },
-    })
-  }
-}
 
 /**
  * Accept one supplied credential, or refuse it as unusable.
@@ -842,6 +843,7 @@ export class LlmRuntime extends TypertRemoteService {
       ...inputModalities === undefined ? {} : { inputModalities },
       ...resolved.toolSupport === undefined ? {} : { toolSupport: resolved.toolSupport },
       ...resolved.streamingSupport === undefined ? {} : { streamingSupport: resolved.streamingSupport },
+      ...resolved.structuredOutputSupport === undefined ? {} : { structuredOutputSupport: resolved.structuredOutputSupport },
       ...context === undefined ? {} : { context: { contextWindow: context.contextWindow } },
       ...defaultMaxTokens === undefined ? {} : { defaultMaxTokens },
       ...resolved.systemPromptUpdate === undefined ? {} : { systemPromptUpdate: resolved.systemPromptUpdate },
@@ -927,15 +929,18 @@ export class LlmRuntime extends TypertRemoteService {
       ['vision', vision],
       ['tools', info.toolSupport ?? 'unknown'],
       ['streaming', info.streamingSupport ?? 'unknown'],
+      ['structuredOutput', info.structuredOutputSupport ?? 'unknown'],
     ] as const
     for (const [capability, support] of modelSupport) {
-      if (config.requiredCapabilities?.includes(capability) && support !== 'supported') {
+      if ((config.requiredCapabilities?.includes(capability)
+        || (capability === 'structuredOutput' && config.responseFormat !== undefined)) && support !== 'supported') {
         throw new LlmError(
           `Provider "${config.provider}" model "${config.model}" requires declared support for "${capability}"; observed ${support}`,
           'UNSUPPORTED_MODEL_CAPABILITY',
         )
       }
     }
+    if (config.responseFormat !== undefined) config = { ...config, responseFormat: resolveResponseFormat(config.responseFormat) }
     const defaulted = config.maxTokens === undefined && info.defaultMaxTokens !== undefined
       ? { ...config, maxTokens: info.defaultMaxTokens }
       : config
@@ -974,10 +979,36 @@ export class LlmRuntime extends TypertRemoteService {
    * so HMR cannot combine one adapter's capability result with another adapter.
    * @param config - provider/model route and optional request controls.
    * @param signal - optional cancellation for adapter-owned capability lookup.
-   * @returns a prepared config and its registration-bound stream entry point.
+   * @param context - optional invocation identity for preparation-failure auditing, separate from call controls.
+   * @returns a prepared config and its registration-bound stream entry point; preparation failures are observed before rejection.
    */
-  async prepareCall(config: LlmCallConfig, signal?: AbortSignal): Promise<PreparedLlmCall> {
-    const registration = this.requestRegistration(config)
+  async prepareCall(config: LlmCallConfig, signal?: AbortSignal, context?: LlmPreparationContext): Promise<PreparedLlmCall> {
+    const labels = preparationLabels(config, context, 'prepare')
+    let registration: AdapterRegistration | undefined
+    try {
+      registration = this.requestRegistration(config)
+      return await this.prepareRegisteredCall(config, signal, registration)
+    } catch (error) {
+      await this.reportPreparationFailure(labels, registration?.provider, error, signal)
+      throw error
+    }
+  }
+
+  private async reportPreparationFailure(
+    labels: Omit<LlmPreparationFailure, 'category' | 'usageSource'>,
+    provider: Readonly<LlmProviderInfo> | undefined,
+    error: unknown,
+    signal?: AbortSignal,
+  ): Promise<void> {
+    const failure = Object.freeze({ ...labels, usageSource: provider?.policy?.usageSource ?? 'unknown',
+      category: preparationFailureCategory(error, signal) })
+    try { await this.ctx.parallel(this, 'llm/preparation-failed', failure) }
+    catch (observerError) { throw new AggregateError([error, observerError], 'LLM preparation and failure observation both failed') }
+  }
+
+  private async prepareRegisteredCall(
+    config: LlmCallConfig, signal: AbortSignal | undefined, registration: AdapterRegistration,
+  ): Promise<PreparedLlmCall> {
     let validation: ValidationReservation | undefined
     try {
       this.assertProviderAdmission(registration, config)
@@ -1044,8 +1075,10 @@ export class LlmRuntime extends TypertRemoteService {
 
   /** Policy-bearing calls require a registered Provider; the loop cannot delegate their admission to virtual-route middleware. */
   private requestRegistration(config: LlmCallConfig): AdapterRegistration {
-    return this.registration(config.provider, config.intent === undefined && config.requiredCapabilities === undefined
-      ? 'NO_ADAPTER' : 'POLICY_ROUTE_UNAVAILABLE')
+    if (config.responseFormat !== undefined) resolveResponseFormat(config.responseFormat)
+    const unclassified = config.responseFormat === undefined
+      && config.intent === undefined && config.requiredCapabilities === undefined
+    return this.registration(config.provider, unclassified ? 'NO_ADAPTER' : 'POLICY_ROUTE_UNAVAILABLE')
   }
 
   private assertProviderAdmission(registration: AdapterRegistration, config: LlmCallConfig, reservation?: ValidationReservation): void {
@@ -1060,12 +1093,16 @@ export class LlmRuntime extends TypertRemoteService {
         throw new LlmError(`Provider "${provider}" is unavailable: ${policy.gateReason ?? policy.availability}`, 'PROVIDER_UNAVAILABLE')
       }
     }
-    for (const capability of config.requiredCapabilities ?? []) {
+    const capabilities = new Set(config.requiredCapabilities)
+    if (config.responseFormat !== undefined) capabilities.add('structuredOutput')
+    for (const capability of capabilities) {
       const support = policy?.capabilities[capability] ?? 'unknown'
       if (support !== 'supported') {
         throw new LlmError(`Provider "${provider}" requires declared support for "${capability}"; observed ${support}`, 'UNSUPPORTED_PROVIDER_CAPABILITY')
       }
     }
+    const refusal = this.ctx.bail(this, 'llm/admission', registration.provider, config)
+    if (refusal !== undefined) throw new LlmError(refusal.message, refusal.code, refusal)
   }
 
   /** Remove replay state whose historical route is owned by another adapter. */
@@ -1114,9 +1151,12 @@ export class LlmRuntime extends TypertRemoteService {
     options: GenerateOptions,
     prepared?: PreparedDispatch,
   ): AsyncGenerator<StreamChunk> {
-    let iterator: AsyncIterator<StreamChunk>
+    let call: PreparedDispatch
+    let projectedOptions: GenerateOptions
+    const labels = preparationLabels(options, options, 'stream')
+    let registration: AdapterRegistration | undefined
     try {
-      const registration = prepared?.registration ?? this.requestRegistration(options)
+      registration = prepared?.registration ?? this.requestRegistration(options)
       this.assertProviderAdmission(registration, options, prepared?.validation)
       const validation = prepared?.validation ?? registration.validation?.reserve(options)
       const adapter = registration.adapter
@@ -1157,7 +1197,7 @@ export class LlmRuntime extends TypertRemoteService {
       // Tool changes are logged on every route; the route's declared mode selects what it receives.
       const projectedTools = projectToolUpdates(projectedMessages, resolvedOptions.tools, modelInfo.toolUpdate, resolvedOptions.toolHistory)
       projectedMessages = projectedTools.messages
-      let projectedOptions = resolvedOptions
+      projectedOptions = resolvedOptions
       if (projectedMessages !== resolvedOptions.messages || projectedTools.tools !== resolvedOptions.tools) {
         projectedOptions = {
           ...resolvedOptions,
@@ -1166,8 +1206,54 @@ export class LlmRuntime extends TypertRemoteService {
         }
         if (Object.isFrozen(resolvedOptions)) deepFreeze(projectedOptions)
       }
-      validation?.assert()
-      const stream = dispatch(this.forAdapter(projectedOptions, adapter))
+      this.assertProviderAdmission(registration, resolvedConfig, validation)
+      call = { registration, config: resolvedConfig, modelInfo, dispatch, ...validation === undefined ? {} : { validation } }
+    } catch (error: unknown) {
+      await this.reportPreparationFailure(labels, registration?.provider, error, options.signal)
+      yield adapterFailureChunk(error, options.signal)
+      return
+    }
+
+    const authorization = createDispatch(
+      call.registration.provider, projectedOptions,
+      nextOptions => this.authorizedAdapterStream(nextOptions, call, authorization.check),
+    )
+    yield* this.ctx.waterfall(this, 'llm/authorize', authorization.context, authorization.next)
+  }
+
+  /** Authorization never reserves a resource; revalidate before dispatch policies can do so. */
+  private async * authorizedAdapterStream(
+    options: GenerateOptions, call: PreparedDispatch, authorizationCheck: () => LlmFailure | undefined,
+  ): AsyncGenerator<StreamChunk> {
+    const failure = authorizationCheck()
+    if (failure !== undefined) { yield { type: 'finish', reason: { kind: 'error', failure } }; return }
+    try {
+      this.assertProviderAdmission(call.registration, call.config, call.validation)
+      if (options.signal?.aborted) throw new LlmError('LLM authorization was cancelled', 'ABORTED', { cause: options.signal.reason })
+    } catch (error: unknown) {
+      yield adapterFailureChunk(error, options.signal)
+      return
+    }
+    const dispatch = createDispatch(call.registration.provider, options,
+      nextOptions => this.nativeAdapterStream(nextOptions, call, () => authorizationCheck() ?? dispatch.check()))
+    yield* this.ctx.waterfall(this, 'llm/dispatch', dispatch.context, dispatch.next)
+  }
+
+  /** Normalize native adapter failures while keeping outer policy and consumer defects thrown. */
+  private async * nativeAdapterStream(
+    options: GenerateOptions, call: PreparedDispatch, check: () => LlmFailure | undefined,
+  ): AsyncGenerator<StreamChunk> {
+    const failure = check()
+    if (failure !== undefined) { yield { type: 'finish', reason: { kind: 'error', failure } }; return }
+    let iterator: AsyncIterator<StreamChunk>
+    let output: StructuredOutputValidator | undefined
+    try {
+      this.assertProviderAdmission(call.registration, call.config, call.validation)
+      if (options.signal?.aborted) {
+        throw new LlmError('LLM request was cancelled before adapter dispatch', 'ABORTED', { cause: options.signal.reason })
+      }
+      if (call.config.responseFormat !== undefined) output = new StructuredOutputValidator(call.config.responseFormat)
+      const stream = call.dispatch(this.forAdapter(options, call.registration.adapter))
       iterator = stream[Symbol.asyncIterator]()
     } catch (error: unknown) {
       yield adapterFailureChunk(error, options.signal)
@@ -1185,6 +1271,14 @@ export class LlmRuntime extends TypertRemoteService {
             : { done: false, value: next.value }
         } catch (error: unknown) {
           completed = true
+          yield adapterFailureChunk(error, options.signal)
+          return
+        }
+        try {
+          if (item.done) output?.end()
+          else output?.push(item.value)
+        } catch (error: unknown) {
+          if (item.done) completed = true
           yield adapterFailureChunk(error, options.signal)
           return
         }

@@ -1,0 +1,6 @@
+$ tsx scripts/gen-cordis-catalog.ts
+gen-cordis-catalog: 119 artifact(s) computed, 3 written.
+$ tsx scripts/gen-cordis-api.ts
+gen-cordis-catalog: 119 artifact(s) computed, 0 written.
+$ tsx scripts/gen-cordis-inspect-catalog.ts
+gen-cordis-inspect-catalog: wrote packages/extensions/cordis-client-runner/src/client/api-catalog.ts

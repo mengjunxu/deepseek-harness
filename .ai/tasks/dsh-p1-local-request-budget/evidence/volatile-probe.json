@@ -1,0 +1,13 @@
+{
+  "fixedPathVolatileTransform": true,
+  "normal": [
+    {
+      "id": "week",
+      "limit": 3,
+      "reserve": 1
+    }
+  ],
+  "empty": [],
+  "nullReset": [],
+  "invalidRulesRejected": 2
+}

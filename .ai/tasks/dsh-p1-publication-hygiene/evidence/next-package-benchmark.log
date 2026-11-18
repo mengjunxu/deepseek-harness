@@ -1,0 +1,20 @@
+{"type":"baseline","seconds":[24.89],"medianSeconds":24.89}
+{"type":"coarse","package":"@deepseek-ai/dsh-request-budget-policy","seconds":[24.54],"medianSeconds":24.54}
+{
+  "type": "result",
+  "baselineSeconds": [
+    24.89
+  ],
+  "baselineMedianSeconds": 24.89,
+  "candidateCount": 1,
+  "ranking": [
+    {
+      "package": "@deepseek-ai/dsh-request-budget-policy",
+      "seconds": [
+        24.62
+      ],
+      "medianSeconds": 24.62,
+      "gainSeconds": 0.27
+    }
+  ]
+}

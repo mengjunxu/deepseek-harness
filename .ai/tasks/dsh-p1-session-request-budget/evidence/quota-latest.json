@@ -1,0 +1,10 @@
+{
+  "checked_at": "2026-11-15T13:50:53.768Z",
+  "source": "get_usage_limits",
+  "weekly": {
+    "usedPercent": 63,
+    "windowDurationMins": 10080,
+    "resetsAt": 1794907980
+  },
+  "remaining": 37
+}

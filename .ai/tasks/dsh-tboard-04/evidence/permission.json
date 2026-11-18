@@ -1,0 +1,8 @@
+{
+  "policy": "invalid-test-policy",
+  "sdkRejected": true,
+  "approvalDiagnostic": true,
+  "targetRuntimeExited": true,
+  "modelRequests": 0,
+  "workDirectoryWrites": 0
+}

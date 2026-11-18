@@ -1,0 +1,10 @@
+$ DSH_SNAPSHOT=refresh vitest run --config vitest.snapshot.config.ts snapshots/session/headless.snapshot.ts -t 'refreshs model-request-budget-(reserved|execute) through dsh'
+The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
+
+ RUN  v4.1.8 /Users/x-dt/workspace/AI/Agents/deepseek-harness
+
+
+ Test Files  1 passed (1)
+      Tests  2 passed | 145 skipped (147)
+   Start at  16:30:40
+   Duration  4.18s (transform 757ms, setup 154ms, import 1.05s, tests 2.88s, environment 0ms)

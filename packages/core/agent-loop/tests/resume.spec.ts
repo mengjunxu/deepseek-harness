@@ -159,6 +159,34 @@ describe('the session-persistence Agent Note: AgentLoop factory create/resume', 
     await ctx.fiber.dispose()
   })
 
+  it('uses a new committed step identity when an Agent lifecycle resumes from storage', async () => {
+    const firstAdapter = new MockAdapter([textResponse('first')])
+    const { ctx, root } = await persistentHarness(firstAdapter)
+    let resumedCtx: Context | undefined
+    const sessionId = SessionId('durable-attempt-resume')
+    try {
+      const first = await ctx.agents.create({ sessionId, agentOptions: { provider: 'mock', model: 'mock' } })
+      first.agent.followup(createUserMessage({ content: [{ type: 'text', text: 'first' }], source: { kind: 'user' } }))
+      await first.agent.whenIdle()
+      const firstRef = firstAdapter.requests[0]?.loopAttempt
+      if (!firstRef) throw new Error('Expected first durable request identity')
+      await first.dispose(); await ctx.fiber.dispose()
+      const secondAdapter = new MockAdapter([textResponse('second')])
+      resumedCtx = await mountPersistentHarness(root, secondAdapter)
+      const second = await resumedCtx.agents.resume({ resumeSessionId: sessionId, agentOptions: { provider: 'mock', model: 'mock' } })
+      second.agent.followup(createUserMessage({ content: [{ type: 'text', text: 'second' }], source: { kind: 'user' } }))
+      await second.agent.whenIdle()
+      const secondRef = secondAdapter.requests[0]?.loopAttempt
+      if (!secondRef) throw new Error('Expected resumed durable request identity')
+      expect(firstRef.attempt).toBe(1); expect(secondRef.attempt).toBe(1)
+      expect(secondRef.stepStartSeq).toBeGreaterThan(firstRef.stepStartSeq)
+      await second.dispose()
+      const stored = await readStoredEvents(resumedCtx, sessionId)
+      expect(stored.filter(event => event.type === 'step/start').map(event => event.seq))
+        .toEqual([firstRef.stepStartSeq, secondRef.stepStartSeq])
+    } finally { await resumedCtx?.fiber.dispose(); await ctx.fiber.dispose() }
+  })
+
   it('a created agent stores its seed and live turn durably through its handle', async () => {
     const seed: SessionEvent[] = [
       { type: 'turn/start', seq: SessionSeq(0), time: 1, data: { turn: 1 } },

@@ -18,6 +18,14 @@ Python SDK 通过四个平台 wheel 包分发原生可执行文件。其打包�
 
 Vendor CLI、仅用于构建和测试的可执行文件、进程内直接挂载插件以及私有浏览器 WebWorker 预览都不属于应用启动清单。包应用 bin 或直接启动包入口的根 demo 都不是可接受的扩展点。
 
+已配置的模型准入策略必须完成激活，不受操作员选择的配置项 ID 影响。App-boot 根据声明的包或导入后的策略命名空间识别 `paid-route-policy` 与 `request-budget-policy`；启用但未激活的策略在加载后审计之前也会通过 `llm/admission` 拒绝推理，其启动失败属于致命错误。明确禁用或未配置的策略不产生激活要求。这可防止可选插件加载失败时静默移除已配置的付费或请求计数保护。
+
+### 关闭所有权
+
+启动器在整机 Context 释放前调用 app-boot 的 `disposeApplication`。它等待 `app-boot/before-dispose` 阶段完成，使监听器在存储可用时停止新的自有工作并排空活动尝试。全部监听器均会结束，包括失败的监听器，然后才执行 Cordis 并行卸载；重复 helper 调用共享一个结果。监听器不得递归关闭同一应用。进程关闭时限及重复信号升级仍会限制停滞的排空。
+
+单靠服务依赖无法排列根 Context 退出：同级 fiber 可同时开始释放，并在其异步清理完成前离开注册表发现范围。因此本地请求预算所有者在应用阶段结算回执，存储 provider 则在同一个有序 effect 中 yield 服务撤回与介质清理，保证普通依赖撤回的顺序。直接嵌入方必须使用应用 helper；直接释放根 fiber 不运行这一排空阶段。
+
 ### Profile 应用
 
 `@deepseek-ai/dsh-sdk-app` 与 `@deepseek-ai/dsh-acp-app` 在 `@deepseek-ai/dsh-base` 之上组合完整协议应用。SDK 组合包增加 JSON-RPC 服务器、应用自有帮助和 stdio 生命周期；ACP 组合包增加仅用于自动化的 ACP 服务器与相同的应用职责。两者都采用 base 层的模型、工具、持久化、settings、credentials、策略和环境行为。[独立 sdk-minimal profile](../../archived/architecture/2026-08-24-standalone-sdk-minimal-profile.md)复用 SDK 启动与 JSON-RPC 服务，但刻意拥有不含 `dsh-base` 的完整显式配置树。

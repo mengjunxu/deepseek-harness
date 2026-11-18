@@ -1,0 +1,10 @@
+$ vitest run --config vitest.web.config.ts apps/web/tests/turn-usage-source.e2e.ts
+The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
+
+ RUN  v4.1.8 /Users/x-dt/workspace/AI/Agents/deepseek-harness
+
+
+ Test Files  1 passed (1)
+      Tests  2 passed (2)
+   Start at  11:27:05
+   Duration  4.91s (transform 414ms, setup 0ms, import 678ms, tests 4.17s, environment 0ms)

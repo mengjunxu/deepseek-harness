@@ -1,0 +1,10 @@
+version: 1
+scenario: request-accounting-retry
+profile: headless
+composition: request-accounting-retry
+recording: authored
+header:
+  class: retry
+  pin: true
+  systemPromptSource: text-turn
+  toolSchemasSource: text-turn

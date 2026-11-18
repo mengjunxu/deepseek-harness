@@ -1,0 +1,9 @@
+version: 1
+scenario: model-request-budget-execute
+profile: headless
+composition: model-request-budget-execute
+recording: authored
+header:
+  class: model-request-budget-execute
+  pin: true
+  toolSchemasSource: text-turn

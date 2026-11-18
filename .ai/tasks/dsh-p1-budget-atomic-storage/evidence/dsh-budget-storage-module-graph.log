@@ -1,0 +1,2 @@
+$ tsx scripts/gen-module-graph.ts
+gen-module-graph: 3 artifact(s) computed, 0 written.

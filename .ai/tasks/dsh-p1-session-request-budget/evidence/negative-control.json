@@ -1,0 +1,5 @@
+{
+  "disabledSessionCheck": "FAIL_AS_EXPECTED",
+  "oracle": "second Host native adapter entry while only the Session limit was exhausted",
+  "restoredSha256": "bb50a34ff197966ac60b5b83a6c71e20c03cddf48f6d77c397e6a2960dae75ce"
+}

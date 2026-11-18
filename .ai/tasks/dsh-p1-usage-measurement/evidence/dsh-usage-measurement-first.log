@@ -1,0 +1,65 @@
+The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
+The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
+The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
+
+ RUN  v4.1.8 /Users/x-dt/workspace/AI/Agents/deepseek-harness
+
+ ❯ |thread-safe| packages/llm/llm-deepseek/tests/stream.spec.ts (47 tests | 1 failed) 19ms
+     × emits first-seen blocks, raw tool JSON and cumulative disjoint usage before finish 4ms
+ ❯ |thread-safe| packages/llm/token-meter/tests/request-records.spec.ts (54 tests | 1 failed) 100ms
+   × discards version-one accounting caches and rebuilds old events without inventing attribution 5ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |thread-safe| packages/llm/llm-deepseek/tests/stream.spec.ts > Messages stream > emits first-seen blocks, raw tool JSON and cumulative disjoint usage before finish
+AssertionError: expected { type: 'usage', usage: { …(6) } } to deeply equal { type: 'usage', usage: { …(5) } }
+
+- Expected
++ Received
+
+@@ -2,9 +2,10 @@
+    "type": "usage",
+    "usage": {
+      "cacheReadTokens": 30,
+      "cacheWriteTokens": 7,
+      "inputTokens": 12,
++     "measurement": "provider-reported",
+      "outputTokens": 5,
+      "totalTokens": 54,
+    },
+  }
+
+ ❯ packages/llm/llm-deepseek/tests/stream.spec.ts:32:34
+     30|     const result = await assemble(translate(events(values), MODEL))
+     31|     expect(result.message.content).toEqual([{ type: 'reasoning', text:…
+     32|     expect(result.output.at(-2)).toEqual({ type: 'usage', usage: { inp…
+       |                                  ^
+     33|     expect(result.output.at(-1)).toMatchObject({ type: 'finish', reaso…
+     34|     expect(result.output.filter(chunk => chunk.type === 'block-start')…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  |thread-safe| packages/llm/token-meter/tests/request-records.spec.ts > discards version-one accounting caches and rebuilds old events without inventing attribution
+AssertionError: expected 3 to be 2 // Object.is equality
+
+- Expected
++ Received
+
+- 2
++ 3
+
+ ❯ packages/llm/token-meter/tests/request-records.spec.ts:426:54
+    424|   expect(restored.snapshot.values.requestAccounting?.last?.record).not…
+    425|   expect(restored.snapshot.values.preparationFailures?.last?.record).n…
+    426|   expect(restored.checkpoint.requestAccounting?.ver).toBe(2)
+       |                                                      ^
+    427|   expect(restored.checkpoint.preparationFailures?.ver).toBe(2)
+    428| })
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  2 failed | 1 passed (3)
+      Tests  2 failed | 159 passed (161)
+   Start at  12:25:52
+   Duration  569ms (transform 746ms, setup 294ms, import 666ms, tests 125ms, environment 0ms)

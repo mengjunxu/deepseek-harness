@@ -103,6 +103,9 @@
       "path": "../../document/office-to-pdf"
     },
     {
+      "path": "../taskboard-controller"
+    },
+    {
       "path": "../account-controller"
     },
     {

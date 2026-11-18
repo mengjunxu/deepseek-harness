@@ -1,0 +1,67 @@
+The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
+The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
+The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
+
+ RUN  v4.1.8 /Users/x-dt/workspace/AI/Agents/deepseek-harness
+
+xxxx
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |thread-safe| packages/storage/storage-sqlite/tests/atomic-record.spec.ts > reads the latest committed value through independently opened owners and survives reopening
+Error: SQLite must implement atomic record modification
+ ❯ modifier packages/storage/storage-sqlite/tests/atomic-record.spec.ts:29:46
+     27|
+     28| function modifier(unit: KvUnit) {
+     29|   if (unit.modifyRecord === undefined) throw new Error('SQLite must im…
+       |                                              ^
+     30|   return unit.modifyRecord.bind(unit)
+     31| }
+ ❯ packages/storage/storage-sqlite/tests/atomic-record.spec.ts:42:13
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ FAIL  |thread-safe| packages/storage/storage-sqlite/tests/atomic-record.spec.ts > deletes existing or absent records and rolls back callback or serialization failures
+Error: SQLite must implement atomic record modification
+ ❯ modifier packages/storage/storage-sqlite/tests/atomic-record.spec.ts:29:46
+     27|
+     28| function modifier(unit: KvUnit) {
+     29|   if (unit.modifyRecord === undefined) throw new Error('SQLite must im…
+       |                                              ^
+     30|   return unit.modifyRecord.bind(unit)
+     31| }
+ ❯ packages/storage/storage-sqlite/tests/atomic-record.spec.ts:55:39
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+ FAIL  |thread-safe| packages/storage/storage-sqlite/tests/atomic-record.spec.ts > refuses lock contention before the callback and can modify after the other writer releases
+Error: SQLite must implement atomic record modification
+ ❯ modifier packages/storage/storage-sqlite/tests/atomic-record.spec.ts:29:46
+     27|
+     28| function modifier(unit: KvUnit) {
+     29|   if (unit.modifyRecord === undefined) throw new Error('SQLite must im…
+       |                                              ^
+     30|   return unit.modifyRecord.bind(unit)
+     31| }
+ ❯ packages/storage/storage-sqlite/tests/atomic-record.spec.ts:69:39
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
+
+ FAIL  |thread-safe| packages/storage/storage-sqlite/tests/atomic-record.spec.ts > rejects invalid tables, corrupt persisted JSON and closed units without invoking the callback
+Error: SQLite must implement atomic record modification
+ ❯ modifier packages/storage/storage-sqlite/tests/atomic-record.spec.ts:29:46
+     27|
+     28| function modifier(unit: KvUnit) {
+     29|   if (unit.modifyRecord === undefined) throw new Error('SQLite must im…
+       |                                              ^
+     30|   return unit.modifyRecord.bind(unit)
+     31| }
+ ❯ packages/storage/storage-sqlite/tests/atomic-record.spec.ts:85:39
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/4]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  4 failed (4)
+   Start at  14:07:14
+   Duration  259ms (transform 134ms, setup 136ms, import 27ms, tests 15ms, environment 0ms)

@@ -10,11 +10,11 @@
 import type { Context } from '@deepseek-ai/cordis'
 import z from '@deepseek-ai/schemastery'
 import { storageBackendServiceKey } from '@deepseek-ai/dsh-storage'
-import { DomainError } from './error.ts'
+import { DomainError, parseRecord } from './error.ts'
 import { descriptorOf } from './spec.ts'
 import type { DomainSpec } from './spec.ts'
 import { DomainImpl } from './domain.ts'
-import type { Domain } from './domain.ts'
+import type { Domain, DomainTableData } from './domain.ts'
 
 export { DomainError } from './error.ts'
 export type { DomainErrorCode, DomainErrorOptions, InvalidRecordDetail } from './error.ts'
@@ -24,7 +24,7 @@ export type {
   TableKeyOf, TableValueOf, GlobalValueOf,
 } from './spec.ts'
 export type { DomainChanged } from './events.ts'
-export type { Domain, DomainGlobal, DomainGlobalHandleOf, KvTable } from './domain.ts'
+export type { Domain, DomainGlobal, DomainGlobalHandleOf, DomainTransaction, KvTable } from './domain.ts'
 
 declare module '@deepseek-ai/dsh-storage' {
   interface StorageForms {
@@ -65,6 +65,8 @@ export const Config: z<Config> = z.object({
  * The mounted domain facility. Opens declared domains over routed backends;
  * one facility instance owns the open-domain table and enforces single-open
  * per domain name.
+ * Handles serve cached reads and updates. Shared-state decisions use table.modify
+ * with an atomic backend; its callbacks must be synchronous, pure and must not call storage.
  */
 export class DomainFacility {
   private readonly domains = new Map<string, DomainImpl>()
@@ -117,7 +119,7 @@ export class DomainFacility {
       const unit = await backend.kv.open(descriptorOf(spec))
       try {
         const snapshot = await unit.loadAll()
-        const tables = new Map<string, Map<string, unknown>>()
+        const tables = new Map<string, DomainTableData>()
         for (const [table, tableSpec] of Object.entries(spec.tables)) {
           const records = new Map<string, unknown>()
           for (const [key, raw] of Object.entries(snapshot.tables[table] ?? {})) {
@@ -139,7 +141,7 @@ export class DomainFacility {
             }
             records.set(key, parsed)
           }
-          tables.set(table, records)
+          tables.set(table, { records, valueSchema: tableSpec.valueSchema })
         }
         // A null stored global means "never written": serve `initial` without
         // materializing it — the first `set` writes.
@@ -196,20 +198,6 @@ export class DomainFacility {
   }
 }
 
-/** Run one zod parse, translating failure to `invalid-record` with its location. */
-function parseRecord<T>(domain: string, table: string, key: string, parse: () => T): T {
-  try {
-    return parse()
-  } catch (error) {
-    const slot = table === '' ? 'global' : `record '${key}' in table '${table}'`
-    throw new DomainError(
-      'invalid-record',
-      `domain '${domain}': stored ${slot} does not match its schema`,
-      { detail: { table, key }, cause: error },
-    )
-  }
-}
-
 /**
  * Mount the domain data form on the storage hub.
  * @param ctx - Plugin context.
@@ -224,16 +212,17 @@ export function apply(ctx: Context, config: Config): Promise<void> {
 
   const fiber = ctx.inject(backendServices, (domainCtx) => {
     const facility = new DomainFacility(domainCtx, config)
-    domainCtx.effect(() => {
+    domainCtx.effect(function* () {
       const unmount = domainCtx.storage.mount('domain', facility)
-      return async () => {
+      yield async () => {
         // Close leftovers before unmounting: draining writes still emit
         // domain/changed, whose invariant resolves the facility through the hub.
         await facility.closeAll()
         unmount()
       }
+      // Service withdrawal drains injected consumers before this owner's medium cleanup.
+      yield domainCtx.provide('storageDomain', facility)
     })
-    domainCtx.provide('storageDomain', facility)
   })
   return Promise.resolve(fiber).then(() => {})
 }

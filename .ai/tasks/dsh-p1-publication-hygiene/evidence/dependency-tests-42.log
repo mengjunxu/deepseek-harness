@@ -1,0 +1,34 @@
+The dependency verifier suite passed 42 tests. The co-selected Loader test initially failed because its custom profile omitted the JSON backend; its separately corrected PASS is in the local-request-budget Task.
+ RUN  v4.1.8 /Users/x-dt/workspace/AI/Agents/deepseek-harness
+
+ ❯ |thread-safe| packages/guard/request-budget-policy/tests/loader.spec.ts (1 test | 1 failed) 1048ms
+   × persists valid rules, rejects unsafe writes and keeps consumed slots across profile restart 1047ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |thread-safe| packages/guard/request-budget-policy/tests/loader.spec.ts > persists valid rules, rejects unsafe writes and keeps consumed slots across profile restart
+AssertionError: promise rejected "LlmError: Local request budget storage is… { …(2) }" instead of resolving
+ ❯ packages/guard/request-budget-policy/tests/loader.spec.ts:66:74
+     64|     const settingsPath = await profileComposition(ctx, root, path)
+     65|     const call = { provider: 'local-model', model: 'model', messages: …
+     66|     await vi.waitFor(async () => { await expect(ctx.llm.prepareCall(ca…
+       |                                                                          ^
+     67|     return { ctx, adapter, settingsPath, call }
+     68|   }
+
+Caused by: LlmError: Local request budget storage is not ready; no additional request is approved
+ ❯ Proxy.assertProviderAdmission packages/llm/llm/src/index.ts:1054:38
+ ❯ Object.apply vendor/cordis/src/utils.ts:160:40
+ ❯ Proxy.prepareCall packages/llm/llm/src/index.ts:963:12
+ ❯ Object.apply vendor/cordis/src/utils.ts:160:40
+ ❯ packages/guard/request-budget-policy/tests/loader.spec.ts:66:57
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Serialized Error: { code: 'LOCAL_REQUEST_BUDGET_UNAVAILABLE', failure: { message: 'Local request budget storage is not ready; no additional request is approved', code: 'LOCAL_REQUEST_BUDGET_UNAVAILABLE' } }
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  1 failed | 42 passed (43)
+   Start at  16:30:40
+   Duration  1.93s (transform 938ms, setup 284ms, import 1.09s, tests 1.70s, environment 0ms)

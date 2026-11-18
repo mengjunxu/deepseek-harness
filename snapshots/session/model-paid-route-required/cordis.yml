@@ -1,0 +1,23 @@
+- id: llm-pi-ai
+  name: '@deepseek-ai/dsh-llm-pi-ai'
+  config:
+    providers:
+      metered-fixture:
+        api: openai-completions
+        baseURL: http://127.0.0.1:9/v1
+        models:
+          - id: metered-model
+            input:
+              - text
+        policy:
+          usageSource: api_metered
+
+- insert:
+    - id: model-paid-route-required-snapshot
+      name: '../../../packages/guard/paid-route-policy/tests/fixtures/model-paid-route-required.ts'
+
+- insert:
+    - id: paid-route-policy
+      name: '@deepseek-ai/dsh-paid-route-policy'
+      config:
+        grants: []

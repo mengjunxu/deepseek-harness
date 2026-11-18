@@ -11,6 +11,11 @@
 export { JsonRpcLineTransport, JsonRpcResponseError } from './transport.ts'
 export type { JsonRpcTransportPeer } from './transport.ts'
 export type {
+  ApprovalRequestParams,
+  ApprovalRequestResult,
+  HarnessSdkHostRequestMap,
+  SdkUserQuestionRequest,
+  SdkUserQuestionResult,
   HarnessSdkNotificationMap,
   HarnessSdkRequestMap,
   InitializeParams,
@@ -22,6 +27,7 @@ export type {
   SessionStatusNotification,
   SessionPromptParams,
   SessionPromptResult,
+  SessionResumeParams,
   SubagentFinishedNotification,
   SubagentStartedNotification,
 } from './types.ts'

@@ -5,6 +5,9 @@
  * @module @deepseek-ai/dsh-sdk-jsonrpc-server/server
  */
 
+import type {} from '@deepseek-ai/dsh-session-persistence'
+import type {} from '@deepseek-ai/dsh-user-approval/types'
+import { askClient } from './user-question.ts'
 import type { Context } from '@deepseek-ai/cordis'
 import { resolve } from 'node:path'
 import { brandString } from '@deepseek-ai/dsh-brand'
@@ -17,6 +20,7 @@ import type SubagentRuntime from '@deepseek-ai/dsh-subagent'
 import type { SubagentRunEndInfo } from '@deepseek-ai/dsh-subagent'
 import * as LlmDeepSeek from '@deepseek-ai/dsh-llm-deepseek-api-key'
 import type {
+  ApprovalRequestParams,
   InitializeParams,
   InitializeResult,
   JsonRpcTransportPeer,
@@ -85,12 +89,37 @@ export class HarnessSdkJsonRpcServer {
   private shutdownTask: Promise<Record<string, never>> | undefined
   private shuttingDown = false
   private initialized = false
+  private approvalRequests = false
+  private userQuestions = false
+  private readonly interactionLifetime = new AbortController()
 
   constructor(
     private readonly ctx: Context,
     private readonly transport: JsonRpcTransportPeer,
     private readonly options: HarnessSdkJsonRpcServerOptions = {},
   ) {
+    this.disposers.push(ctx.on('approval/request', async (request, next) => {
+      const agent = request.agent
+      if (!this.approvalRequests || !this.ownsRoot(agent)) return next()
+      const params: ApprovalRequestParams = {
+        sessionId: agent.session.id,
+        toolName: request.toolName,
+        ...request.callId === undefined ? {} : { callId: request.callId },
+        ...request.reason === undefined ? {} : { reason: request.reason },
+      }
+      const signal = request.signal === undefined ? this.interactionLifetime.signal
+        : AbortSignal.any([request.signal, this.interactionLifetime.signal])
+      const reply = await transport.request('approval/request', params, signal)
+      if (reply === null || typeof reply !== 'object' || !('outcome' in reply)
+        || (reply.outcome !== 'allowed-once' && reply.outcome !== 'rejected' && reply.outcome !== 'cancelled')) {
+        throw new TypeError('invalid approval/request outcome')
+      }
+      return reply.outcome
+    }))
+    this.disposers.push(ctx.on('user-questions/request', (request, next) => {
+      if (!this.userQuestions || request.agent === undefined || !this.ownsRoot(request.agent)) return next()
+      return askClient(transport, request.agent.session.id, request, this.interactionLifetime.signal)
+    }))
     const serverOptions = this.options
     this.disposers.push(ctx.on('session/event', (session, event) => {
       const payload: SessionEventNotification = { sessionId: String(session.id), event }
@@ -135,6 +164,9 @@ export class HarnessSdkJsonRpcServer {
    * @returns server identity for the handshake.
    */
   async initialize(params: InitializeParams): Promise<InitializeResult> {
+    if (params.approvalRequests !== undefined && typeof params.approvalRequests !== 'boolean') {
+      throw new TypeError('initialize approvalRequests must be boolean')
+    }
     if (params.reasoningEffort !== undefined
       && (typeof params.reasoningEffort !== 'string' || params.reasoningEffort.length === 0)) {
       throw new TypeError('initialize reasoningEffort must be a non-empty string')
@@ -166,6 +198,8 @@ export class HarnessSdkJsonRpcServer {
     this.model = model
     this.reasoningEffort = reasoningEffort
     this.maxTokens = params.maxTokens
+    this.userQuestions = params.capabilities?.userQuestions === true
+    this.approvalRequests = params.approvalRequests === true
     this.initialized = true
     return { serverInfo: { name: 'deepseek-harness-sdk-runtime', version: '0.0.1' } }
   }
@@ -194,6 +228,10 @@ export class HarnessSdkJsonRpcServer {
     return { messageId: message.id }
   }
 
+  private ownsRoot(agent: Agent): boolean {
+    return this.sessions.get(agent.session.id)?.handle.agent === agent && this.ctx.agents.get(agent.id) === agent
+  }
+
   private assertLiveAgent(rec: SessionRecord, sessionId: string): void {
     if (this.ctx.agents.get(rec.handle.agent.id) !== rec.handle.agent) {
       throw new Error(`session agent was disposed outside the server: ${sessionId}`)
@@ -212,6 +250,7 @@ export class HarnessSdkJsonRpcServer {
 
   private async performShutdown(): Promise<Record<string, never>> {
     this.shuttingDown = true
+    this.interactionLifetime.abort()
     const pendingCreations = [...this.sessionCreations.values()]
     await Promise.allSettled(pendingCreations)
     this.sessionCreations.clear()
@@ -248,7 +287,23 @@ export class HarnessSdkJsonRpcServer {
   async handleRequest(method: string, params: Record<string, unknown> | undefined): Promise<unknown> {
     switch (method) {
       case 'initialize':
+        if (params?.capabilities !== undefined) {
+          const capabilities = params.capabilities
+          if (capabilities === null || typeof capabilities !== 'object' || Array.isArray(capabilities)
+            || ('userQuestions' in capabilities && typeof capabilities.userQuestions !== 'boolean')) {
+            throw new TypeError('invalid initialize capabilities')
+          }
+        }
         return this.initialize(params as unknown as InitializeParams)
+      case 'session/resume': {
+        if (!this.initialized) throw new Error('SDK server is not initialized')
+        if (this.shuttingDown) throw new Error('SDK server is shutting down')
+        const id = params?.sessionId
+        if (typeof id !== 'string' || id.length === 0) throw new TypeError('session/resume requires a non-empty sessionId')
+        if (this.sessions.has(id) || this.sessionCreations.has(id)) throw new Error(`SDK session is already open or opening: ${id}`)
+        await this.openSession(id, 'resume')
+        return {}
+      }
       case 'session/prompt':
         return this.prompt(params as unknown as SessionPromptParams)
       case 'shutdown':
@@ -264,7 +319,11 @@ export class HarnessSdkJsonRpcServer {
     if (existing) return existing
     const pending = this.sessionCreations.get(sessionId)
     if (pending) return pending
-    const creation = this.createSession(sessionId)
+    return this.openSession(sessionId, 'create')
+  }
+
+  private openSession(sessionId: string, mode: 'resume' | 'create'): Promise<SessionRecord> {
+    const creation = this.createSession(sessionId, mode)
     this.sessionCreations.set(sessionId, creation)
     void creation.then(
       () => { this.sessionCreations.delete(sessionId) },
@@ -273,21 +332,31 @@ export class HarnessSdkJsonRpcServer {
     return creation
   }
 
-  private async createSession(sessionId: string): Promise<SessionRecord> {
+  private async createSession(sessionId: string, mode: 'create' | 'resume'): Promise<SessionRecord> {
     // No preset composition: this server's compositions keep the model-facing
     // rows in the host plane, so this agent reads them from the global layer. A
     // deployment that configures a roster has to join one here first
     // (@deepseek-ai/dsh-agent-preset-registry README, "Composing a child agent").
-    const handle = await this.ctx.agents.create({
-      sessionId: brandString<SessionId>(sessionId),
-      meta: { cwd: this.cwd },
-      agentOptions: {
-        provider: this.provider,
-        model: this.model,
-        ...this.reasoningEffort === undefined ? {} : { reasoningEffort: this.reasoningEffort },
-        ...this.maxTokens === undefined ? {} : { maxTokens: this.maxTokens },
-      },
-    })
+    const id = brandString<SessionId>(sessionId)
+    const agentOptions = {
+      provider: this.provider,
+      model: this.model,
+      ...this.reasoningEffort === undefined ? {} : { reasoningEffort: this.reasoningEffort },
+      ...this.maxTokens === undefined ? {} : { maxTokens: this.maxTokens },
+    }
+    // Agent resume may append recovery events before setup. Reject stored subagents before acquiring a writer.
+    if (mode === 'resume' && (await this.ctx.get('sessionPersistence')?.stat(id))?.header.origin === 'subagent') {
+      throw new Error('resume the root session instead of its subagent')
+    }
+    const handle = mode === 'create'
+      ? await this.ctx.agents.create({ sessionId: id, meta: { cwd: this.cwd }, agentOptions })
+      : await this.ctx.agents.resume({
+        resumeSessionId: id,
+        agentOptions,
+        setup: (_agentCtx, agent) => {
+          if (agent.session.header.origin === 'subagent') throw new Error('resume the root session instead of its subagent')
+        },
+      })
     const rec: SessionRecord = { handle }
     this.sessions.set(sessionId, rec)
     return rec

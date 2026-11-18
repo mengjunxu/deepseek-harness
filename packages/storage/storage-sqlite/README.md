@@ -61,6 +61,8 @@ Missing directories and database files are created owner-only (`0o700`/`0o600`);
 <a id="understand-the-implementation"></a>
 ## Understand the implementation
 
+Multi-record commands use one immediate transaction. The callback reads its own writes. Callback or commit failure rolls back the unit of work, and the transaction handle expires when the callback returns.
+
 <details>
 <summary>Implementation internals — click to expand</summary>
 
@@ -69,13 +71,15 @@ The backend is a document-per-row layout over one `node:sqlite` connection, desi
 ### Design concept
 
 - **Document per row.** Each unit table becomes a physical STRICT table `u_<unit>_<table> (key TEXT PRIMARY KEY, value TEXT)` whose `value` column holds the record's JSON text; the global singleton lives in a shared `unit_globals` table. One key update touches exactly one row — the reason to route a high-churn domain here.
-- **Single-statement atomicity.** Every write primitive is one prepared statement, so SQLite's per-statement atomicity satisfies the KV contract without explicit transactions; write ordering stays the caller's responsibility (the domain layer's write chain).
+- **Atomic record modification.** `modifyRecord` uses `BEGIN IMMEDIATE` to read the latest record and commit its synchronous transform in one write transaction. Callback and serialization failures roll back; lock contention rejects before the callback runs, with no implicit retry. Other writes remain individual prepared statements, ordered by the caller.
 - **Names validated before DDL.** Unit and table names must match `UNIT_NAME_RE` before they reach DDL, so no external input is ever interpolated into SQL identifiers.
 - **Versions fail loud.** The physical layout version lives in `PRAGMA user_version` (fresh databases stamp it last); unit format versions live in the `units` table. Any other stamped value rejects — no migrations.
 
 ### Open sequence
 
 Opening the database creates the parent as `0o700`, exclusively creates a missing file as `0o600`, applies `PRAGMA foreign_keys = ON` and the journal mode, checks `user_version`, creates the `units` and `unit_globals` metadata tables, and stamps fresh databases last so a failure leaves the medium unstamped.
+
+The backend service is withdrawn and its injected domain owners drain before the backend registration and medium close. Both disposers are yielded by one ordered effect. Whole-application owners still need an application drain phase before concurrent root teardown.
 
 ### Source map
 

@@ -1,0 +1,9 @@
+{
+  "before": [
+    0,
+    0
+  ],
+  "independentUpdates": 2,
+  "durableUsed": 1,
+  "conclusion": "cached update is not an atomic shared reservation"
+}

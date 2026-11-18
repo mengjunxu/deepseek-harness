@@ -29,7 +29,7 @@ kind: "package-reference"
 
 仓库验证以绝对路径 overlay 指向本包已构建的 `lib/index.js`，使用新数据目录和页内目录选择器 overlay 启动正常 `web` profile。命令及自动测试与真实证据的区分见[任务记录](../../../.ai/tasks/dsh-siwc-ui/plan.md)。
 
-在设置 → 模型中选择使用 ChatGPT 登录，再打开登录页面，在浏览器中完成授权。设置卡片显示已校验的账户及订阅使用情况；模型选择器读取该账户当前的模型列表。管理用量打开 ChatGPT 设置。断开连接需先确认远端撤销，再清除本地 Token；网络失败会保留账户以便重试。
+在设置 → 模型中选择使用 ChatGPT 登录，再打开登录页面，在浏览器中完成授权。设置卡片显示已校验的账户及订阅使用情况；模型选择器读取该账户当前的模型列表。管理用量打开 ChatGPT 设置。断开连接需先确认远端撤销，再清除本地 Token；网络失败会保留账户以便重试。配置的凭据存储使账户与使用说明确认在 Host 重启后保留。
 
 | 字段 | 默认值 | 含义 |
 |---|---|---|
@@ -50,11 +50,13 @@ kind: "package-reference"
 <details>
 <summary>实现内部机制 — 点击展开</summary>
 
+`./types` 子路径仅提供账户状态类型声明。发布的浏览器实现为 `lib/client.js`，样式由 Client 构建嵌入。导出的 `cordis.patch.yml` 是显式挂载补丁；发布文件本身不激活插件。
+
 授权流程负责 PKCE、state、nonce 和临时回环监听器。OpenID Connect 校验签发者、签名、受众、有效期与账户身份后，通过现有授权服务提交授权记录。已签发的客户端 ID 和主机标识在退出后保留；access、refresh 和 ID token 不跨 Remote，也不进入 Session 事件。刷新使用凭据提供方的跨进程修改锁。
 
 适配器复用 pi-ai 的请求历史与流转换。SIWC 请求保留对话历史和系统指令，使用 `store: false` 与 `stream: true`，并把函数定义放入带有必填描述的命名空间。明确的订阅限额失败映射为 QUOTA；额度查询暂不可用映射为 SERVER，账户请求的其他 HTTP 429 响应映射为 RATE_LIMIT。账户请求失败保留端点路径、HTTP 状态、可用的请求 ID 和响应正文。账户仍有剩余额度时，本应用也可能触发单独限额；可在 ChatGPT 设置 → Usage 管理应用限额。携带凭据的 HTTP 请求拒绝重定向。
 
-本包不发布 `./invariant` 安装器：凭据记录是唯一账户权威，状态视图直接读取记录，框架负责注册，本包没有独立维护的索引可供比较。
+本包不发布运行时不变量伴生插件；凭据记录是唯一账户权威，状态视图直接读取记录，框架负责注册，本包没有独立维护的索引可供比较。
 
 </details>
 
@@ -102,4 +104,4 @@ kind: "package-reference"
 <a id="dev-note"></a>
 ### 开发备注
 
-真实 UI 验收与录制状态见上述任务的 Checkpoint。
+无密钥 [Loader 测试](tests/loader.spec.ts)覆盖显式启用、配置拒绝、重启后的账户复用与移除插件时的流取消。[记录 Session](../../../snapshots/session/siwc-text-turn/snapshot.yml)通过隔离的 Responses 传输与仓库内置的 headless profile 驱动生产 SIWC 适配器。真实账户长回复与 UI/GIF 验收仍待完成，见[验证任务](../../../.ai/tasks/dsh-p1-siwc-loader-session/handoff.md)。

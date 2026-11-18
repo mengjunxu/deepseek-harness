@@ -1,0 +1,4 @@
+# Record native request attribution for Session history and Turn usage details.
+- insert:
+    - id: request-accounting
+      name: '@deepseek-ai/dsh-token-meter/request-records'

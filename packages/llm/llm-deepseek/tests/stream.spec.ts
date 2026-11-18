@@ -29,9 +29,23 @@ describe('Messages stream', () => {
     ]
     const result = await assemble(translate(events(values), MODEL))
     expect(result.message.content).toEqual([{ type: 'reasoning', text: 'first thought' }, { type: 'tool-call', id: 'call_1', name: 'read', arguments: '{"path": "a"}' }])
-    expect(result.output.at(-2)).toEqual({ type: 'usage', usage: { inputTokens: 12, outputTokens: 5, cacheReadTokens: 30, cacheWriteTokens: 7, totalTokens: 54 } })
+    expect(result.output.at(-2)).toEqual({ type: 'usage', usage: { measurement: 'provider-reported', inputTokens: 12, outputTokens: 5, cacheReadTokens: 30, cacheWriteTokens: 7, totalTokens: 54 } })
     expect(result.output.at(-1)).toMatchObject({ type: 'finish', reason: { kind: 'tool-calls' }, replayState: { blocks: [{ type: 'reasoning', signature: 'signature' }, { type: 'tool-call' }] } })
     expect(result.output.filter(chunk => chunk.type === 'block-start').map(chunk => chunk.index)).toEqual([0, 1])
+  })
+
+  it.each([true, false])('distinguishes reported zero counters from missing input counters (%s)', async (reported) => {
+    const result = await chunks(translate(events([
+      { ...start, message: { usage: reported ? { input_tokens: 0, output_tokens: 0 } : { output_tokens: 0 } } },
+      { type: 'content_block_start', index: 0, content_block: { type: 'text', text: 'ok' } },
+      { type: 'content_block_stop', index: 0 },
+      { type: 'message_delta', delta: { stop_reason: 'end_turn' }, usage: { output_tokens: 0 } },
+      { type: 'message_stop' },
+    ]), MODEL))
+    const usage = result.find(chunk => chunk.type === 'usage')?.usage
+    expect(usage).toMatchObject({ inputTokens: 0, outputTokens: 0, totalTokens: 0 })
+    if (reported) expect(usage?.measurement).toBe('provider-reported')
+    else expect(usage).not.toHaveProperty('measurement')
   })
 
   it.each(['end_turn', 'stop_sequence'])('maps %s and ignores forward-compatible envelope events', async (reason) => {

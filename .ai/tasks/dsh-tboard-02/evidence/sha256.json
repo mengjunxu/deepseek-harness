@@ -1,0 +1,15 @@
+{
+  "packages/api/taskboard-controller/src/execution-domain.ts": "5d7e9f5fd0ea710eab3c7813d4281003231452f59098d4df2803966b16d8f6ca",
+  "packages/api/taskboard-controller/src/types.ts": "79c1e3c28dc5d2f2a2c0126e932bf7b6f6b9adef84fa39c598ab2d84545423bd",
+  "packages/api/taskboard-controller/src/index.ts": "69c20e6eb98a4650caed30953734322878c6ab767623a275cdec17f7c313669e",
+  "packages/api/taskboard-controller/src/domain.ts": "c74085e9a4abb589d6b7fc9234c167e3906c02a90261c9e9555efaab30125f5c",
+  "packages/api/taskboard-controller/src/execution.ts": "63b722f81822fbd6dadd3c624c2d83bf87963094d6a897b80c93cfbb4498d6f7",
+  "packages/api/taskboard-controller/tests/taskboard.host.spec.ts": "e91ce981b8467e2432f19bd0f12d12a4265096a401922ce2e254fd66dae47022",
+  "apps/web/tests/fixtures/taskboard-smoke.mjs": "140b9deb18eef3810b2f51f4d0e48cdd262afa5729e0aad8e8a2aeb4da698093",
+  "apps/web/tests/taskboard.e2e.ts": "cfadc7b78d7ac3d4410348839adbb9868181f3c0fcb55d838d21f11c9e651277",
+  "packages/api/taskboard-controller/lib/index.js": "d69652d66b38e2a61a47d41524c969ae786a7baf3e9fb0378233cebce21f3b1f",
+  "packages/api/taskboard-controller/lib/typert.host.js": "05a42c0c39d2cc8533b6217d7f2fe8d8a7d63639f374316f31ad751a1bec18ee",
+  "packages/storage/storage-domain/lib/index.js": "aaae4cfa2ab58a3e3e523425b796cd9c95e2669ac69d96786aed644c5b8822b5",
+  "packages/storage/storage-sqlite/lib/index.js": "d071f675a7f879183f763210b302080e87314f0fdc6b1bc85fb36bef97c8c0bc",
+  "packages/bundle/web-app/cordis.patch.yml": "78d014e1c09d3248ab8991aed88be0eb2e5fa80f5018246af81ca63d291a64a2"
+}

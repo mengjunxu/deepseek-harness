@@ -1,0 +1,2 @@
+$ tsx scripts/gen-dependency-catalog.ts
+dependency-catalog: generated docs/dependency-catalog.json

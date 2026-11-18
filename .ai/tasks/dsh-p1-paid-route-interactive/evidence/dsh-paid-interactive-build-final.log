@@ -1,0 +1,22 @@
+$ tsx scripts/build.ts
+$ tsx native/system/scripts/build.ts --host-addon-only
+build: built darwin-arm64/bin/system.node
+$ pnpm run build:lib:host && pnpm run build:lib:client
+$ node --max-old-space-size=4096 ./node_modules/typescript/bin/tsc -b tsconfig.host.json && tsdown --env.DSH_BUILD_FACE host && pnpm --filter @deepseek-ai/dsh-desktop run bundle
+packages/llm/llm/src/dispatch.ts(24,25): error TS7006: Parameter 'check' implicitly has an 'any' type.
+[ELIFECYCLE] Command failed with exit code 2.
+[ELIFECYCLE] Command failed with exit code 2.
+/Users/x-dt/workspace/AI/Agents/deepseek-harness/scripts/build.ts:27
+    throw new Error(`build: ${script} exited with ${String(result.status ?? result.signal)}`)
+          ^
+
+Error: build: build:lib exited with 2
+    at runScript (/Users/x-dt/workspace/AI/Agents/deepseek-harness/scripts/build.ts:27:11)
+    at main (/Users/x-dt/workspace/AI/Agents/deepseek-harness/scripts/build.ts:45:3)
+    at <anonymous> (/Users/x-dt/workspace/AI/Agents/deepseek-harness/scripts/build.ts:53:23)
+    at ModuleJob.run (node:internal/modules/esm/module_job:569:25)
+    at async node:internal/modules/esm/loader:650:26
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5)
+
+Node.js v26.5.0
+[ELIFECYCLE] Command failed with exit code 1.

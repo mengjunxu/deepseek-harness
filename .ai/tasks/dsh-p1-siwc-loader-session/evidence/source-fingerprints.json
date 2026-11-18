@@ -1,0 +1,17 @@
+{
+  "packages/experimental/chatgpt-plan/tests/loader.spec.ts": "a6afb853c7a32e0d5b56ad0bb075f9630a5fd2a90d486a5e4a7b68149a2b256c",
+  "packages/experimental/chatgpt-plan/tests/fixtures/session-responses.ts": "0cdb1f0db59492dd7cbbf2eb595445b8e00587d1171b04214702e00ade9d0b04",
+  "packages/experimental/chatgpt-plan/src/index.ts": "abd7092cd505336a31e243f532ee3fea657f081c53e57635a4101e2329587073",
+  "packages/experimental/chatgpt-plan/src/protocol.ts": "8e7b662e9934c3e3de10483842c7561a5227adfc2d0b1fc90e6df614040da122",
+  "packages/experimental/chatgpt-plan/package.json": "66d862061439f6530fe39a6e8d014458e09c24d119cb9f0196f531e17a2341c5",
+  "packages/experimental/chatgpt-plan/README.md": "f69ca71ecc95c62295e5b1ee712c9d4e6b50941385af54b06c7323b4dccf0ba1",
+  "packages/experimental/chatgpt-plan/README.zh.md": "85ce44abf5396d327a1e71fa3752138fca4b6c15f81ae2b5ee095b3f00816516",
+  "docs/workflows/DSH_IMPLEMENTATION_PLAN.md": "cbd38a3de9863d0c6cc4353c3e05d1edec687f1d007939a59cf43d4630a4e58d",
+  "pnpm-lock.yaml": "b3aa46fc039453f45fecaccebb0986efffeeec0d274508881d41bbe7accd7adc",
+  "snapshots/session/siwc-text-turn/cordis.snapshot.yml": "a80d8b562d74185201e1d7f574cb9123dcbbe9d9fee677352701421bfa6c2428",
+  "snapshots/session/siwc-text-turn/cordis.yml": "a80d8b562d74185201e1d7f574cb9123dcbbe9d9fee677352701421bfa6c2428",
+  "snapshots/session/siwc-text-turn/session.v3.jsonl": "cb40bc2ef378fec0cc027e978baf9a27a4140fe225d8bec76595a0d4de10bc97",
+  "snapshots/session/siwc-text-turn/session.v4.jsonl": "ef8d75d94eb1d859caf6d7bd7a7a6a2d9f35b1abd85f4d5cb78848be10d49a23",
+  "snapshots/session/siwc-text-turn/snapshot.yml": "c6428a50c774fa8f34cf9df416fef905a96ad32e4ece2be8917efd589ca78c1b",
+  "snapshots/session/siwc-text-turn/system-prompt.expected.md": "6895cfd5c162874c4db512a01bef5f3f44f85baffdbabe661e39b88f68cafa12"
+}

@@ -1,0 +1,9 @@
+version: 1
+scenario: siwc-text-turn
+profile: headless
+composition: siwc-text-turn
+recording: authored
+header:
+  class: siwc-text-turn
+  pin: true
+  toolSchemasSource: text-turn

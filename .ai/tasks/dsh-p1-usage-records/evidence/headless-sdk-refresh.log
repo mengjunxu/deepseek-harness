@@ -1,0 +1,31 @@
+$ DSH_SNAPSHOT=refresh vitest run --config vitest.snapshot.config.ts snapshots/session/headless.snapshot.ts snapshots/sdk/sdk.snapshot.ts -t 'refreshs request-accounting through dsh'
+The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
+
+ RUN  v4.1.8 /Users/x-dt/workspace/AI/Agents/deepseek-harness
+
+ ❯ snapshots/sdk/sdk.snapshot.ts (32 tests | 1 failed | 31 skipped) 604ms
+     × refreshs request-accounting through dsh --profile sdk 603ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  snapshots/sdk/sdk.snapshot.ts > TypeScript SDK snapshots over the jsonrpc runtime > refreshs request-accounting through dsh --profile sdk
+TypeError: Cannot read properties of undefined (reading 'endsWith')
+ ❯ formatSystemPromptSnapshot packages/test-support/session-snapshot/src/suite.ts:564:25
+    562|   changes: readonly string[] = [],
+    563| ): string {
+    564|   let snapshot = prompt.endsWith('\n') ? prompt : `${prompt}\n`
+       |                         ^
+    565|   for (const [index, change] of changes.entries()) {
+    566|     snapshot += `${SYSTEM_PROMPT_CHANGE_MARKER}${index + 1} -->\n\n`
+ ❯ writeHeaderSidecars snapshots/sdk/sdk.snapshot.ts:712:9
+ ❯ snapshots/sdk/sdk.snapshot.ts:971:15
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  1 failed | 1 passed | 179 skipped (181)
+   Start at  22:22:01
+   Duration  3.31s (transform 680ms, setup 160ms, import 1.11s, tests 1.87s, environment 0ms)
+
+[ELIFECYCLE] Command failed with exit code 1.

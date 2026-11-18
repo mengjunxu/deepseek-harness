@@ -166,6 +166,10 @@ interface SessionActivity {
 
 [`dsh-workspace-controller`](../../packages/api/workspace-controller) serves workspace CRUD to GUI clients over `ctx.workspaceRegistry`, and [`dsh-session-controller`](../../packages/api/session-controller) performs the create-session-then-attach flow above. [dsh-agent-instructions](../../packages/context/agent-instructions) is **not** a consumer despite the name: it discovers AGENTS.md-style instruction files under an agent's own cwd and never touches `ctx.workspaceRegistry` — the shared word refers to the user's working directory, not to this registry's entities.
 
+## Taskboard projects and tasks
+
+The Web Host registers Taskboard projects separately from chat Workspaces. Each task retains its requirements versions, activity, Run references and human decisions. [Taskboard operator commands](../../packages/api/taskboard-controller/README.md)
+
 <!-- BEGIN GENERATED cordis-surface (gen-cordis-catalog.ts) — do not edit between markers -->
 
 <a id="cordis-surface"></a>
@@ -223,6 +227,151 @@ Host service backing the generated `ctx.remote.directoryPicker` namespace. The s
 ```
 
 Source: [`packages/api/workspace-controller/src/directory-picker.ts`](../../packages/api/workspace-controller/src/directory-picker.ts)
+
+<a id="ctxtaskboardcontroller--taskboardcontroller"></a>
+
+### `ctx.taskboardController` — `TaskboardController`
+
+Business state and history are committed together in one authoritative task row.
+
+```ts cordis-catalog
+/**
+ * Inspect a registered project for original-directory execution.
+ * @param projectId - operator-selected project.
+ * @returns the canonical path, branch, baseline and change fingerprint.
+ */
+@Remote inspectProject(projectId: ProjectId): Promise<WorkspaceInspection>
+
+/**
+ * Resolve a new Run directory before admission.
+ * @param projectId - task's registered project.
+ * @param runId - new Run identity.
+ * @param confirmation - original directory confirmed by the operator, or null for isolation.
+ * @returns the directory and commit to bind to the lease.
+ */
+planWorkspace(projectId: ProjectId, runId: TaskRunId, confirmation: WorkspaceInspection | null): Promise<TaskWorkspacePlan>
+
+/**
+ * Inspect the prior Run before the operator selects its directory again.
+ * @param projectId - owning project.
+ * @param taskId - task whose execution is being continued.
+ * @param priorRun - latest inactive Run.
+ * @returns current filesystem observations for the saved directory.
+ */
+@Remote inspectPriorWorkspace(projectId: ProjectId, taskId: TaskId, priorRun: TaskRunId): Promise<WorkspaceInspection>
+
+/**
+ * Require the same actual directory and branch before resuming an existing Session.
+ * @param projectId - owning project.
+ * @param taskId - task being continued.
+ * @param priorRun - latest inactive Run.
+ * @param confirmation - current state selected by the operator.
+ * @returns the validated directory plan.
+ */
+planContinuation(projectId: ProjectId, taskId: TaskId, priorRun: TaskRunId, confirmation: WorkspaceInspection): Promise<TaskWorkspacePlan>
+
+/**
+ * Prepare the exact workspace claimed by the active Run before launching its SDK.
+ * @param owner - current runtime lease.
+ * @param plan - directory facts selected before admission.
+ * @returns observed working directory, branch and commit.
+ */
+async prepareWorkspace(owner: RuntimeBinding, plan: TaskWorkspacePlan): Promise<WorkspaceInspection>
+
+/**
+ * Register a local project root selected by the operator.
+ * @param request - idempotent creation with its absolute directory and optional configuration.
+ * @returns the canonical persisted project.
+ */
+@Remote async createProject(request: ProjectCreateCommand): Promise<TaskboardProject>
+
+/**
+ * Stop one Run and retain its directory while process exit remains unconfirmed.
+ * @param request - operator command scoped to the selected project, task and Run.
+ * @returns after the Host records the outcome.
+ */
+@Remote async stopRun(request: TaskStopCommand): Promise<void>
+
+/**
+ * List project bindings without opening their directories or Sessions.
+ * @returns the projects visible to the operator.
+ */
+@Remote listProjects(): TaskboardProject[]
+
+/**
+ * Create a backlog task and its first requirements revision.
+ * @param request - project scope, command identity and editable fields.
+ * @returns the original acknowledgement on equivalent retries.
+ */
+@Remote createTask(request: TaskRequirementsCommand): Promise<TaskReceipt>
+
+/**
+ * Replace the editable fields. An active execution retains its starting revision.
+ * @param request - expected task version and replacement fields.
+ * @returns the committed command receipt.
+ */
+@Remote editTask(request: TaskRequirementsCommand): Promise<TaskReceipt>
+
+/**
+ * Append an operator comment.
+ * @param request - scoped command and comment.
+ * @returns the committed command receipt.
+ */
+@Remote comment(request: TaskCommentCommand): Promise<TaskReceipt>
+
+/**
+ * Move a backlog or unblocked task to todo.
+ * @param request - scoped command at the expected version.
+ * @returns the committed command receipt.
+ */
+@Remote planTask(request: TaskCommand): Promise<TaskReceipt>
+
+/**
+ * Cancel a task without an active execution.
+ * @param request - scoped command at the expected version.
+ * @returns the committed command receipt.
+ */
+@Remote cancelTask(request: TaskCommand): Promise<TaskReceipt>
+
+/**
+ * Archive an accepted or canceled task while retaining its history.
+ * @param request - scoped command at the expected version.
+ * @returns the committed command receipt.
+ */
+@Remote archiveTask(request: TaskCommand): Promise<TaskReceipt>
+
+/**
+ * Reopen a completed or canceled task and retain the previous acceptance.
+ * @param request - scoped command at the expected version.
+ * @returns the committed command receipt.
+ */
+@Remote reopenTask(request: TaskCommand): Promise<TaskReceipt>
+
+/**
+ * Move a card before a task in the same project, or to the end.
+ * @param request - scoped move at the expected version.
+ * @returns the committed command receipt.
+ */
+@Remote reorderTask(request: TaskOrderCommand): Promise<TaskReceipt>
+
+/**
+ * Read the task, its activity and immutable revision snapshots.
+ * @param projectId - owning project.
+ * @param taskId - task in the project.
+ * @returns the stored detail, or null if the task is outside the project or absent.
+ */
+@Remote detail(projectId: ProjectId, taskId: TaskId): TaskDetail | null
+
+/**
+ * List task cards for one project, including archived records only when requested.
+ * @param projectId - owning project.
+ * @param includeArchived - whether to include archived cards.
+ * @returns the project's task cards.
+ */
+@Remote listTasks(projectId: ProjectId, includeArchived: boolean): TaskView[]
+```
+
+Source: [`packages/api/taskboard-controller/src/index.ts`](../../packages/api/taskboard-controller/src/index.ts)
 
 <a id="ctxterminalcontroller--terminalcontroller"></a>
 

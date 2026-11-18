@@ -25,6 +25,8 @@ This plugin summarizes which files each top-level turn changed, with per-file li
 <a id="use-this-package"></a>
 ## Use this package
 
+Host code can use the exported `GitRunner` with the configured subprocess provider, a resolved Git executable, a command timeout and an output cap. Truncated stdout is reported in the result.
+
 The shipped Web bundle mounts this plugin. Mount it in any composition with the `subprocess` capability and a git executable on the Host:
 
 ```yaml

@@ -1,0 +1,8 @@
+{
+  "cases": 2,
+  "retainedGeneration": 3,
+  "restoredV4": {
+    "snapshots/session/model-request-budget-reserved/session.v4.jsonl": "7834fa2b36e3066e63816e5ed7152e00bc6a864f14ed5260b452176f889a0432",
+    "snapshots/session/model-request-budget-execute/session.v4.jsonl": "fd07a58f868c92602828dafcd52211c66cf214e4a439a2c8efb14f16d9ea4f84"
+  }
+}

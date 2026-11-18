@@ -227,6 +227,9 @@ reader.on('line', (line) => {
   if (frame.method === undefined || frame.id === undefined) return
   const respond = (result: object): void => { write({ jsonrpc: '2.0', id: frame.id, result }) }
   switch (frame.method) {
+    case 'session/resume':
+      respond(env.FAKE_BAD_RESUME ? { unexpected: true } : {})
+      return
     case 'initialize':
       if (env.FAKE_RECORD_INIT !== undefined) appendFileSync(env.FAKE_RECORD_INIT, `${JSON.stringify(frame.params)}\n`)
       if (env.FAKE_HANG_INIT !== undefined) return

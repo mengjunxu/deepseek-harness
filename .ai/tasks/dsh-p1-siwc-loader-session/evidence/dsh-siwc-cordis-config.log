@@ -1,0 +1,2 @@
+$ tsx scripts/verify-cordis-config.ts
+verify-cordis-config: 246 config files passed.

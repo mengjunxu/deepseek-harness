@@ -31,6 +31,7 @@ kind: "package-reference"
 
 当多个插件应该就同一种基于回放的测量达成一致时选择它——压缩规划、占用 UI 与压力检查都读取同一个 fold。测量回放持久会话日志，因此确定、无需模型调用，并精确反映已记录内容。文本和未声明图片定价的路由使用固定启发式规则；当部署需要精确到计费级别的计数时，使用提供方分词器。
 
+<a id="measuring-pressure"></a>
 ### 测量压力
 
 `ctx.tokenMeter` 暴露两个操作。`measure(session, requestHeader?)` 在同一个已消费日志 revision 上返回独立、深度不可变的快照：`totalTokens` 是请求与响应压力，`surfaceTokens` 是仅表面的路由定价总量，等于 `nodes[].tokens` 之和。可选 `requestHeader` 覆盖会选择计价路由与压力字段；节点集合仍描述当前会话。`estimateMessage(message)` 用固定启发式规则为一条消息计价。每次调用都会克隆带位置的表面节点，因此测量是 O(surface)。
@@ -54,6 +55,8 @@ const price = ctx.tokenMeter.estimateMessage(message)
 
 `deriveTurnTokenUsage(events)` 为浏览器消费方把一个完整轮次折叠为精确的逐次尝试与整轮用量。生命周期证据缺失、计数不安全或精确总量矛盾时不返回结果；只有每次参与的尝试都报告可选缓存、推理或路由值时，相应汇总才会出现。
 
+轮次路线的 `usageSource` 仅取自明确关联到该循环尝试的唯一记账；证据缺失、重复或不匹配时为 `unknown`。匹配的失败尝试也可保留捕获路线。同一模型使用不同来源时分别保留条目；既有适配器样本的算术汇总不变。
+
 ### 组合
 
 ```yaml
@@ -62,6 +65,23 @@ const price = ctx.tokenMeter.estimateMessage(message)
 ```
 
 两个插件都有可用默认值。meter 只消费可选的 `llm` 服务，且仅用于解析路由声明的请求图片定价；压缩保持可选。部署会在 LLM（大语言模型）适配器上配置容量与图片定价，并在 `dsh-compaction-basic` 上配置压缩策略。
+
+<a id="request-records"></a>
+### 原生请求记账
+
+需要持久化原生分发结算的路线/来源归属时，将可选的 `@deepseek-ai/dsh-token-meter/request-records` 入口与 `llm`、`sessions` 和 `sessionProjections` 一同挂载。默认计量器不启用它。
+
+```yaml
+- insert:
+    - id: request-accounting
+      name: '@deepseek-ai/dsh-token-meter/request-records'
+```
+
+读取 `ctx.sessionProjections.snapshot(session, ['requestAccounting'])` 获取 `recordCount`、按来源划分的 `bySource` 计数，以及带已提交 `seq` 的最后记录。既有异步 [Session 查询](../../session-query/session-query/README.zh.md)读取历史记录；Session ID 与已提交序号标识每条记录。适配器返回的计数本身可能是估算，不证明官方计费或余额。
+
+同一入口还提供 `preparationFailures`，单独展示原生准备失败的次数与最后记录。通过 `ctx.sessionProjections.snapshot(session, ['preparationFailures'])` 读取。这类审计不增加分发次数或 token 总量。缺少原生适配器时，虚拟中间件仍可能完成请求。
+
+记录的 token 样本保留可选 `measurement: provider-reported | estimated`。缺失口径保持未知，不从 `usageSource` 推断。已完成 Turn 的详情独立显示计数口径与费用来源；尝试口径不一致或部分未知时显示混合。记账缓存版本 3 从事件重建版本 1/2 缓存。两种口径均不证明实际账单金额或官方余额。
 
 ### 解读数字
 
@@ -104,6 +124,24 @@ const price = ctx.tokenMeter.estimateMessage(message)
 
 `./estimate` 导出无服务状态的文字与内容估算函数，供工具结果保留复用。图片的实际请求成本由模型适配器的 `imageRequestPricing` 提供。
 
+### 原生记录语义
+
+每条 `llm/request-accounting` 事件包含捕获的服务 `provider`、解析后的 `model`、声明的 `usageSource`、可选 `intent`/`purpose`、观察到的 `outcome`、可选终态 `finishKind` 和 `usage`。注册替换不会改变已捕获的服务注册；model、intent 和 purpose 在委托前捕获。未声明来源时仍为 `unknown`。
+
+循环提供的 `loopAttempt` 将记录关联到已提交 `step/start` 序号及该步骤内从 1 开始的尝试序号；所属 Session 补齐身份。重试递增尝试序号，恢复后的生命周期提交新的步骤序号。实时 `LlmAttemptId` 仍只在当前生命周期内有效。辅助与历史记录不带该引用；消费方不能根据到达顺序或当前 Provider 目录推断关联。
+
+`usage.kind: adapter-reported` 只携带最后一次返回的 token 样本。这些计数本身也可能是估算；该标记只说明由谁返回，不声明官方计费精度或余额。缺少计数时记录 `usage.kind: unknown`。启发式测量仍由 [TokenMeter.measure](README.zh.md#measuring-pressure) 单独负责，不会替代缺失的返回计数。同一尝试的重复样本相互替换；每次重试分发各有一条记录。
+
+`completed` 表示观察到 `stop`、`tool-calls` 或 `max-tokens` 终态。错误和取消保留其结果，不复制错误消息或响应正文。消费方在终态前关闭，以及未知的可扩展终态原因，均记录为 `unknown`。记录不证明提供方已接受请求、已授权付费或已退款。
+
+`llm/preparation-failed` 记录请求路线、捕获的来源、入口阶段和固定失败类别，不包含任意错误代码／消息或请求内容。显式准备通过 `prepareCall(config, signal, { sessionId, purpose? })` 提供 Session 身份；标准循环传入自己的 Session ID。直接流使用既有调用身份。未知失败仍记为 `unknown`；成功准备不产生失败审计。准备观察者会被等待。观察者故障会通过 `AggregateError` 保留原始错误，并阻止在缺少必需审计时继续。
+
+插件只复制列出的元数据和 token 计数，不记录提示词、响应文本、凭据或不透明的提供方重放数据。同一个有序 effect 拥有监听器、有界投影和活动尝试。应用排空或插件卸载先取消自有传输，等待结算写入，再撤销贡献。嵌入方使用 app-boot 的 `disposeApplication`；直接关闭根节点不提供应用排空阶段。
+
+投影通过注册表游标折叠既有 Session 日志，并恢复其 JSON 检查点。它不保存第二份 transcript 或逐请求索引。请求记账使用缓存版本 3，准备失败使用版本 2；过期缓存通过既有日志重建；新增必读 Session 事件不改变 Session 信封语法。不认识该事件的旧构建会拒绝日志。
+
+此入口不需要独立的 invariant companion：一条原子元数据事件供给有界投影，游标和检查点验证由既有注册表负责。它不单独持久化提交状态或 token 总数。
+
 </details>
 
 -----
@@ -142,6 +180,11 @@ const price = ctx.tokenMeter.estimateMessage(message)
 - **提供方用量只在规范 envelope 完全相同时可复用**——工具、提供方、模型或调用配置变化会刻意回退到完整启发式估算；系统提示词变更在下一次成功调用之前按带符号的表面增量计量。
 - **系统提示词改写不带影子价**——循环替换 system 节点时没有紧邻的计量事件，因此 `contextPressure.projectedTokens` 以零增量折叠该替换，直到下一个用量样本；`contextBreakdown.systemTokens` 与 `measure()` 会立即按新提示词重新计价。
 - **构成检查点保留当前 surface**——精确的 system/message 分类需要位置条目；检查点大小和 surface 事件折叠成本为 O(当前保留 surface)。
+
+- 没有本地活动 Session 的调用与虚拟路线分发不属于结算覆盖范围。原生准备拥有者观察到的准备失败有单独审计；其他外层中间件拒绝仍不在覆盖范围。
+- 进程在结算前退出可能不留下记录。既有预算回执独立保留可能已提交请求的占用；记账不会回收它们。
+- Task/Run 关联、完整政策决定历史、官方余额、外部执行器及独立账单核验仍待实现。适配器原始计数不会与本地估算合并。
+- 记录次数表示观察到的分发结算，包括下游拒绝；它不是提供方确认的提交数或计费请求总数。
 
 <a id="dev-note"></a>
 ### 开发备注

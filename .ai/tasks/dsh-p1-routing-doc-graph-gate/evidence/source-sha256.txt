@@ -1,0 +1,7 @@
+3acc1d0904edb643e44b48b6dcb6a152dacd101cde9f4d8d9ade6e8c28c77c4c  scripts/gen-doc-graphs.ts
+d59b4d01b1a4cc246674be6356530fa4ae96f5f2826f2be7543e6b80f89ce0cf  scripts/gen-doc-graphs.spec.ts
+b6497bc564e83267712469be40d438b1148d89d8485550eb5e87d9c4f9365de5  docs/capability-seams.md
+301f1428e9b25e64e34415f45534888bb8123d5fca4b742113591e49ca308905  docs/event-producer-consumer.md
+9bd42b9269a6746a3453522d81e78bf6648e4f3700c89a8ed9d3caef1a60e400  docs/event-producer-consumer.zh.md
+c597a98f0ebfe18ee701b63ad1e1f4d7de897bf799dba7be2d87a0722a908a43  packages/extensions/cordis-client-runner/src/client/slot-catalog.ts
+5fd5c83ed4a4d739f1ad2333609afc6cc27abe7f5303050fb15be99fb799c72e  packages/preset/agent-preset/skills/cordis-composition-reference/references/packages.md

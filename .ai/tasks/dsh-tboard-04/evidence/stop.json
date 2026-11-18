@@ -1,0 +1,9 @@
+{
+  "targetRuntimeExited": true,
+  "otherRuntimeAlive": true,
+  "fullScopeObserved": false,
+  "gracefulStopRetainedLease": true,
+  "explicitForceRetainedSameGeneration": true,
+  "replayAddedActions": 0,
+  "modelInputs": 0
+}

@@ -1,0 +1,24 @@
+[
+  {
+    "case": "allowed-once",
+    "tool": "write"
+  },
+  {
+    "case": "rejected",
+    "tool": "write"
+  },
+  {
+    "case": "cancelled",
+    "tool": "write"
+  },
+  {
+    "case": "question",
+    "questionId": "color"
+  },
+  {
+    "case": "question-stop",
+    "withdrawalMatched": true,
+    "modelRequests": 1,
+    "activity": "interrupted"
+  }
+]

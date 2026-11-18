@@ -1,0 +1,2 @@
+$ tsx scripts/gen-cordis-inspect-catalog.ts
+gen-cordis-inspect-catalog: wrote packages/extensions/cordis-client-runner/src/client/api-catalog.ts

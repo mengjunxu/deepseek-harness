@@ -1,0 +1,5 @@
+{
+  "omittedPreparationAppend": "FAIL_AS_EXPECTED",
+  "oracle": "Real Python SDK consumes retained V3 and completes, but the fixed one-preparation-record assertion fails.",
+  "restoredSha256": "f0a824d1532e752d45a3af2502dd9ba035501319e1c2fff1d94505b28a7513af"
+}

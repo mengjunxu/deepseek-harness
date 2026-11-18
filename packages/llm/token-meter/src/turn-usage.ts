@@ -1,16 +1,21 @@
 import { lastAssistantStreamChunk } from '@deepseek-ai/dsh-llm/assistant-stream'
-import type { AssistantMessage, TokenUsage } from '@deepseek-ai/dsh-llm/types'
+import type { AssistantMessage, LlmUsageSource, TokenUsage } from '@deepseek-ai/dsh-llm/types'
 import type {} from '@deepseek-ai/dsh-llm-retry/types'
-import type { SessionEvent } from '@deepseek-ai/dsh-session/types'
+import type { SessionEvent, SessionSeq } from '@deepseek-ai/dsh-session/types'
+import type { RequestAccountingRecord } from './request-record-types.ts'
 
-/** One provider/model route that contributed a billed request attempt. */
+/** One counted model route and its captured usage-source declaration. */
 export interface TurnTokenUsageRoute {
   readonly provider: string
   readonly model: string
+  /** Unknown without unique accounting explicitly linked to this loop attempt. */
+  readonly usageSource: LlmUsageSource
 }
 
-/** Exact provider-reported token accounting for every attempt in one completed Turn. */
+/** Arithmetic totals from recorded adapter token samples for one completed Turn. */
 export interface TurnTokenUsage {
+  /** Absent when all samples are unknown; mixed includes different or partially unknown measurements. */
+  readonly measurement?: NonNullable<TokenUsage['measurement']> | 'mixed'
   /** Sum of uncached prompt input across all attempts. */
   readonly uncachedInputTokens: number
   readonly outputTokens: number
@@ -22,11 +27,12 @@ export interface TurnTokenUsage {
   readonly cacheWriteTokens?: number
   /** Output subset, present only when every attempt reported it. */
   readonly reasoningTokens?: number
-  /** Present only when every billed attempt has provider/model attribution. */
+  /** Present only when every counted attempt has provider/model attribution. */
   readonly routes?: readonly TurnTokenUsageRoute[]
 }
 
 interface NormalizedAttempt {
+  readonly measurement?: TokenUsage['measurement']
   readonly inputTokens: number
   readonly outputTokens: number
   readonly totalTokens: number
@@ -60,6 +66,10 @@ function isCount(value: unknown): value is number {
   return typeof value === 'number' && Number.isSafeInteger(value) && value >= 0
 }
 
+function isMeasurement(value: unknown): value is NonNullable<TokenUsage['measurement']> {
+  return value === 'provider-reported' || value === 'estimated'
+}
+
 function safeSum(values: readonly number[]): number | undefined {
   let total = 0
   for (const value of values) {
@@ -71,7 +81,7 @@ function safeSum(values: readonly number[]): number | undefined {
 
 function messageRoute(message: AssistantMessage): TurnTokenUsageRoute | undefined {
   const { provider, model } = message.source
-  return provider.length > 0 && model.length > 0 ? { provider, model } : undefined
+  return provider.length > 0 && model.length > 0 ? { provider, model, usageSource: 'unknown' } : undefined
 }
 
 function streamUsage(stream: SessionEvent<'assistant/message'>['data']['stream']): TokenUsage | undefined {
@@ -79,6 +89,7 @@ function streamUsage(stream: SessionEvent<'assistant/message'>['data']['stream']
 }
 
 function normalizeUsage(usage: TokenUsage, route?: TurnTokenUsageRoute): NormalizedAttempt | undefined {
+  if (usage.measurement !== undefined && !isMeasurement(usage.measurement)) return undefined
   const {
     inputTokens, outputTokens, cacheReadTokens, cacheWriteTokens, reasoningTokens, totalTokens,
   } = usage
@@ -113,6 +124,7 @@ function normalizeUsage(usage: TokenUsage, route?: TurnTokenUsageRoute): Normali
   }
 
   return {
+    ...usage.measurement === undefined ? {} : { measurement: usage.measurement },
     inputTokens,
     outputTokens,
     totalTokens: exactTotal,
@@ -124,7 +136,8 @@ function normalizeUsage(usage: TokenUsage, route?: TurnTokenUsageRoute): Normali
 }
 
 function aggregateAttempts(attempts: readonly NormalizedAttempt[]): TurnTokenUsage | undefined {
-  if (attempts.length === 0) return undefined
+  const [first] = attempts
+  if (first === undefined) return undefined
   const inputTokens = safeSum(attempts.map(attempt => attempt.inputTokens))
   const outputTokens = safeSum(attempts.map(attempt => attempt.outputTokens))
   const totalTokens = safeSum(attempts.map(attempt => attempt.totalTokens))
@@ -136,6 +149,8 @@ function aggregateAttempts(attempts: readonly NormalizedAttempt[]): TurnTokenUsa
   const cacheReadTokens = cacheRead.every(isCount) ? safeSum(cacheRead) : undefined
   const cacheWriteTokens = cacheWrite.every(isCount) ? safeSum(cacheWrite) : undefined
   const reasoningTokens = reasoning.every(isCount) ? safeSum(reasoning) : undefined
+  const measurements = new Set(attempts.map(attempt => attempt.measurement))
+  const measurement = measurements.size > 1 ? 'mixed' : first.measurement
   // A present cache bucket is bounded by exact prompt, and reasoning is bounded
   // by output. Safe required aggregates therefore imply safe optional sums.
 
@@ -143,11 +158,12 @@ function aggregateAttempts(attempts: readonly NormalizedAttempt[]): TurnTokenUsa
   const attributed = attempts.map(attempt => attempt.route)
   if (attributed.every((route): route is TurnTokenUsageRoute => route !== undefined)) {
     const unique = new Map<string, TurnTokenUsageRoute>()
-    for (const route of attributed) unique.set(`${route.provider}\0${route.model}`, route)
+    for (const route of attributed) unique.set(`${route.provider}\0${route.model}\0${route.usageSource}`, route)
     routes = [...unique.values()]
   }
 
   return {
+    ...measurement === undefined ? {} : { measurement },
     uncachedInputTokens: inputTokens,
     outputTokens,
     totalTokens,
@@ -167,13 +183,13 @@ function sameAttempt(
 }
 
 /**
- * Fold one complete Turn's durable attempt lifecycle into exact token accounting.
+ * Fold one complete Turn's durable attempts into recorded token totals and source declarations.
  *
  * No attempt is inferred from a usage sample. Any missing lifecycle boundary,
  * incomplete attempt usage, unsafe count, or contradictory exact total makes
  * the whole disclosure unavailable.
  * @param events - Turn-local durable events from `turn/start` through `turn/end`.
- * @returns exact aggregate usage, or undefined when it cannot be proven.
+ * @returns recorded aggregate usage, or undefined when lifecycle/count evidence is incomplete.
  */
 export function deriveTurnTokenUsage(events: readonly SessionEvent[]): TurnTokenUsage | undefined {
   let state: AttemptState = { kind: 'idle' }
@@ -181,10 +197,21 @@ export function deriveTurnTokenUsage(events: readonly SessionEvent[]): TurnToken
   let turn: number | undefined
   let sawEnd = false
   let invalid = false
+  let stepStartSeq: SessionSeq | undefined, attempt = 0
+  const accounting = new Map<string, RequestAccountingRecord | null>()
+  for (const event of events) {
+    if (event.type !== 'llm/request-accounting' || event.data.loopAttempt === undefined) continue
+    const ref = event.data.loopAttempt, key = `${ref.stepStartSeq}:${ref.attempt}`
+    accounting.set(key, accounting.has(key) ? null : event.data)
+  }
 
   const closeOpen = (route?: TurnTokenUsageRoute): boolean => {
     if (state.kind !== 'open' || state.sample === undefined) return false
-    const normalized = normalizeUsage(state.sample, route)
+    const captured = accounting.get(`${stepStartSeq}:${attempt}`)
+    const attributed = captured && (route === undefined
+      || (route.provider === captured.provider && route.model === captured.model))
+      ? { provider: captured.provider, model: captured.model, usageSource: captured.usageSource } : route
+    const normalized = normalizeUsage(state.sample, attributed)
     if (normalized === undefined) return false
     attempts.push(normalized)
     return true
@@ -212,7 +239,10 @@ export function deriveTurnTokenUsage(events: readonly SessionEvent[]): TurnToken
     }
     if (event.type === 'step/start') {
       if (event.data.turn !== turn || state.kind !== 'idle') invalid = true
-      else state = { kind: 'open', turn, step: event.data.step }
+      else {
+        state = { kind: 'open', turn, step: event.data.step }
+        stepStartSeq = event.seq; attempt = 1
+      }
       continue
     }
     if (event.type === 'llm/retry-started') {
@@ -220,7 +250,7 @@ export function deriveTurnTokenUsage(events: readonly SessionEvent[]): TurnToken
         || state.kind !== 'settled'
         || state.by !== 'retry'
         || !sameAttempt(state, event.data.turn, event.data.step)) invalid = true
-      else state = { kind: 'open', turn, step: event.data.step }
+      else { state = { kind: 'open', turn, step: event.data.step }; attempt += 1 }
       continue
     }
     if (event.type === 'assistant/attempt') {

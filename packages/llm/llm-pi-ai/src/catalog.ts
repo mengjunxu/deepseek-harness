@@ -12,6 +12,7 @@
  * @module dsh-llm-pi-ai/catalog
  */
 
+import { supportsStructuredOutputApi } from './response-format.ts'
 import type { LlmCapabilitySupport } from '@deepseek-ai/dsh-llm'
 import { builtinProviders, getBuiltinModels, getBuiltinProviders } from '@earendil-works/pi-ai/providers/all'
 import type { BuiltinProvider } from '@earendil-works/pi-ai/providers/all'
@@ -573,6 +574,8 @@ function assertOfferedCompatFields(
 
 /** One configured model: catalog overrides and explicit tool/streaming metadata. */
 export interface PiAiModelProfile {
+  /** Explicit native JSON Schema support for this model/API; omission stays unknown. */
+  structuredOutputSupport?: LlmCapabilitySupport
   /** Incremental response support for this route/model; omission stays unknown without protocol or Provider inference. */
   streamingSupport?: LlmCapabilitySupport
   /** Exact model tool-call support; omitted means unknown and never inherits Provider policy or protocol defaults. */
@@ -823,6 +826,8 @@ export interface RouteCatalog {
   configuredToolSupport: ReadonlyMap<string, LlmCapabilitySupport>
   /** Explicit per-model incremental response support; absence stays unknown. */
   configuredStreamingSupport: ReadonlyMap<string, LlmCapabilitySupport>
+  /** Explicit native schema output support, independent of model-name or Provider inference. */
+  configuredStructuredOutputSupport: ReadonlyMap<string, LlmCapabilitySupport>
 }
 
 /**
@@ -890,6 +895,7 @@ export function resolveRouteModels(
   const configuredMaxTokens = new Map<string, number>()
   const configuredToolSupport = new Map<string, LlmCapabilitySupport>()
   const configuredStreamingSupport = new Map<string, LlmCapabilitySupport>()
+  const configuredStructuredOutputSupport = new Map<string, LlmCapabilitySupport>()
   const resolveEntry = (entry: PiAiModelProfile): Model<Api> => {
     assertOfferedCompatFields(provider, `model "${entry.id}"`, entry.compat)
     if (entry.id.length === 0) invalid(provider, 'has a model with an empty id')
@@ -922,6 +928,10 @@ export function resolveRouteModels(
     if (entry.maxTokens !== undefined) configuredMaxTokens.set(entry.id, entry.maxTokens)
     if (entry.toolSupport !== undefined) configuredToolSupport.set(entry.id, entry.toolSupport)
     if (entry.streamingSupport !== undefined) configuredStreamingSupport.set(entry.id, entry.streamingSupport)
+    if (entry.structuredOutputSupport === 'supported' && !supportsStructuredOutputApi(api)) {
+      invalid(provider, `model "${entry.id}" declares native structured output but api "${api}" has no schema output mapping`)
+    }
+    if (entry.structuredOutputSupport !== undefined) configuredStructuredOutputSupport.set(entry.id, entry.structuredOutputSupport)
     return {
       // The installed entry lays the floor, and the fields below override it.
       // Enumerating instead would silently drop every `Model` field this
@@ -966,5 +976,8 @@ export function resolveRouteModels(
     invalid(provider, `sets compat "${field}", but no model on the route speaks a protocol that takes it;`
       + ` it exists on ${takers.join(', ')}`)
   }
-  return { models: serviceableModels, configuredMaxTokens, configuredToolSupport, configuredStreamingSupport, modelErrors }
+  return {
+    models: serviceableModels, configuredMaxTokens, configuredToolSupport,
+    configuredStreamingSupport, configuredStructuredOutputSupport, modelErrors,
+  }
 }

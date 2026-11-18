@@ -189,6 +189,20 @@ DeepSeek 将省略的 `inputModalities` 视为纯文本，并拒绝空列表。�
 
 全部开关、各自接受的取值，以及接受它们的协议，都列在[生成的 `dsh-llm-pi-ai` 配置参考](../../config-catalog.zh.md#deepseek-aidsh-llm-pi-ai)的 `PiAiCompatProfile` 之下——该参考派生自源码，因此不会落后于适配器实际接受的内容。
 
+## 查看费用来源
+
+启用详细性能与用量显示后，点击已完成轮次的用量行，查看模型路线和费用来源。要为新的原生请求记录来源归属，使用可选 overlay 启动 Web：
+
+```sh
+pnpm dsh web --patch apps/cli/config/examples/request-accounting.yml
+```
+
+“未知”表示请求日志无法确认费用来源。历史轮次保留未知归属；切换模型不会补填。标签保留提供方的路线声明；账户余额仍为未知。[记录说明](../../../packages/llm/token-meter/README.zh.md#request-records)介绍覆盖的调用和剩余限制。
+
+用量弹窗还显示计数口径：提供方报告、估算、未知或混合。这些标签不证明官方账单准确性。
+
+如需为声明为 API 按量付费的原生请求要求确认，使用 `pnpm dsh web --patch apps/cli/config/examples/paid-route-confirmation.yml`。既有审批面板按精确路线询问一次；拒绝后不发送原生请求，也不预留本地预算。重试重新询问。审批政策为 `never` 的 Session 自动拒绝。[付费路线配置](../../../packages/guard/paid-route-policy/README.zh.md)说明预设与剩余限制。
+
 ## 排错
 
 - **`MISSING_CREDENTIAL`**：通过模型页存储提供商密钥，或提供被引用的环境变量。

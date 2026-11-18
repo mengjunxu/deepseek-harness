@@ -18,6 +18,14 @@ Every supported Node application starts through the `dsh` CLI and one named prof
 
 Vendor CLIs, build-only and test-only executables, direct in-process plugin mounting, and the private browser WebWorker preview are outside the application-launch inventory. A package app bin or root demo that launches a package entry is not an accepted extension point.
 
+Configured model admission policies must activate regardless of operator-selected entry ids. App-boot checks the declared package or imported policy namespace for `paid-route-policy` and `request-budget-policy`; enabled inactive policies refuse inference through `llm/admission` even before the post-load audit, and their startup failure is fatal. Explicitly disabled or absent policies impose no activation requirement. This prevents a failed optional plugin from silently removing configured payment or request-count protection.
+
+### Shutdown ownership
+
+The launcher calls app-boot's `disposeApplication` before whole-Context disposal. Its awaited `app-boot/before-dispose` phase stops new owned work and drains active attempts while storage is available. All listeners settle, including failures, before concurrent Cordis teardown; repeated helper calls share one result. Listener code must not recursively dispose the same application. The process shutdown deadline and repeated-signal escalation still bound a stuck drain.
+
+A service dependency alone cannot order root shutdown: sibling fibers can begin disposal concurrently and leave registry discovery before their asynchronous cleanup finishes. The local request-budget owner therefore settles receipts in the application phase, while storage providers yield service withdrawal and medium cleanup through one ordered effect for ordinary dependency withdrawal. Direct embedders must use the application helper; raw root-fiber disposal does not run the drain phase.
+
 ### Profile applications
 
 `@deepseek-ai/dsh-sdk-app` and `@deepseek-ai/dsh-acp-app` compose the full protocol applications over `@deepseek-ai/dsh-base`. The SDK bundle adds the JSON-RPC server plus app-owned help and stdio lifetime; the ACP bundle adds the automation-only ACP server plus the same application responsibilities. Both adopt the base model, tools, persistence, settings, credentials, policy, and environment behavior. The [standalone sdk-minimal profile](../../archived/architecture/2026-08-24-standalone-sdk-minimal-profile.md) reuses SDK startup and JSON-RPC serving but deliberately owns a complete explicit tree without `dsh-base`.

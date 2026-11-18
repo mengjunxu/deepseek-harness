@@ -1,0 +1,28 @@
+# Bilingual-pair consistency record for 2026-11-16-token-usage-measurement.md (docs/i18n/README.md): per heading
+# section, a hash of its English and Chinese blocks outside code blocks and generated regions.
+# After editing either side, bring the other along and re-record with:
+#   pnpm run verify-translation-pairing --write docs/persistence-changes/2026-11-16-token-usage-measurement.md
+/:
+  en: 3d5a424ae7d7e46b
+  zh: c22a8e4a62d8cc1a
+/2026-11-16-token-usage-measurement:
+  en: efb625513ef1a011
+  zh: 96faa1563b5f0bf7
+/2026-11-16-token-usage-measurement/summary:
+  en: bc6205b6e8764cd1
+  zh: 54b5bab1a11d5754
+/2026-11-16-token-usage-measurement/table-of-contents:
+  en: 6cf314a069ceb451
+  zh: 9adff678e9ecab3b
+/2026-11-16-token-usage-measurement/declaration:
+  en: 6907136f28e48c90
+  zh: 02f8298485f3d8e7
+/2026-11-16-token-usage-measurement/compatibility:
+  en: 80e0affaabaa7189
+  zh: 65260a6732be30fb
+/2026-11-16-token-usage-measurement/verification:
+  en: 6910e5ecddbc0bc2
+  zh: 0c8bf6e8838c1b4f
+/2026-11-16-token-usage-measurement/dev-note:
+  en: b75c8458928b72b9
+  zh: 003ba4e17b4b5269

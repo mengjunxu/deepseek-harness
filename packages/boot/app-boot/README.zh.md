@@ -40,7 +40,9 @@ installFailLoud('dsh')
 const ctx = await boot('dsh', resolveConfigPath(argv[2], process.env.DSH_SNAPSHOT))
 ```
 
-`installFailLoud` 会为未处理 rejection 或未捕获异常向 stderr 写一条带标签的 `util.inspect` 诊断，在固定超时内等待界面的 release 钩子，然后以 1 退出；控制流不会回到失败的操作，因为只有抛出点知道哪些状态仍然完整，事件循环只运行到 release 结束或超时。有了这个入口，启动会保留所有能够激活的插件。启用但失败的插件会产生带标签的警告。required entry 失败时，启动会拆卸整个应用并以非零码退出；profile 中不存在的 required id 和已禁用的 required entry 不影响启动。全局 required list 覆盖共享 Agent 执行、应用 endpoint，以及 Web 启动与传输：`agent-loop`、`webserver`、`modules`、`connection`、`headless-runner`、`acp` 和 `sdk-jsonrpc-server`。
+`installFailLoud` 会为未处理 rejection 或未捕获异常向 stderr 写一条带标签的 `util.inspect` 诊断，在固定超时内等待界面的 release 钩子，然后以 1 退出；控制流不会回到失败的操作，因为只有抛出点知道哪些状态仍然完整，事件循环只运行到 release 结束或超时。有了这个入口，启动会保留所有能够激活的插件。启用但失败的插件会产生带标签的警告。required entry 失败时，启动会拆卸整个应用并以非零码退出；profile 中不存在的 required id 和已禁用的 required entry 不影响启动。全局 required list 覆盖共享 Agent 执行、应用 endpoint，以及 Web 启动与传输：`agent-loop`、`webserver`、`modules`、`connection`、`headless-runner`、`acp` 和 `sdk-jsonrpc-server`。已配置的 `paid-route-policy` 与 `request-budget-policy` 包也属于必需项，不受配置项 ID 影响。任一启用策略尚未激活时，`llm/admission` 返回 `ADMISSION_POLICY_INACTIVE` 拒绝推理，包括启动审计之前；应先修复操作员配置，再重试。
+
+整机所有者调用 `disposeApplication(ctx)`，先等待全部 `app-boot/before-dispose` 监听器完成，再由 Cordis 并行卸载资源。监听器停止新工作并排空拥有的尝试，不得递归关闭同一根 Context。helper 合并重复调用、保留监听器错误，并继续释放资源；`dsh` 启动器在正常与致命退出时都使用它。直接关闭根 fiber 不提供这一应用排空阶段。
 
 <a id="profiles"></a>
 ### Profile

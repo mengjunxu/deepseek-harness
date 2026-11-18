@@ -1,0 +1,62 @@
+native/system/packages/darwin-x64        | [WARN] Unsupported platform: wanted: {"cpu":["x64"],"os":["darwin"],"libc":["any"]} (current: {"os":"darwin","cpu":"arm64","libc":"unknown"})
+native/system/packages/linux-arm64       | [WARN] Unsupported platform: wanted: {"cpu":["arm64"],"os":["linux"],"libc":["any"]} (current: {"os":"darwin","cpu":"arm64","libc":"unknown"})
+native/system/packages/linux-x64         | [WARN] Unsupported platform: wanted: {"cpu":["x64"],"os":["linux"],"libc":["any"]} (current: {"os":"darwin","cpu":"arm64","libc":"unknown"})
+Scope: all 340 workspace projects
+[WARN] There are cyclic workspace dependencies: /Users/x-dt/workspace/AI/Agents/deepseek-harness/apps/cli, /Users/x-dt/workspace/AI/Agents/deepseek-harness/packages/sdk/client; /Users/x-dt/workspace/AI/Agents/deepseek-harness/apps/web, /Users/x-dt/workspace/AI/Agents/deepseek-harness/packages/test-support/client-runtime, /Users/x-dt/workspace/AI/Agents/deepseek-harness/packages/bundle/web-app; /Users/x-dt/workspace/AI/Agents/deepseek-harness/packages/api/remotes, /Users/x-dt/workspace/AI/Agents/deepseek-harness/packages/client/ui-plugin-manager, /Users/x-dt/workspace/AI/Agents/deepseek-harness/packages/client/ui-sidebar, /Users/x-dt/workspace/AI/Agents/deepseek-harness/packages/client/ui-workspace, /Users/x-dt/workspace/AI/Agents/deepseek-harness/packages/client/ui-conversation; /Users/x-dt/workspace/AI/Agents/deepseek-harness/packages/api/session-controller, /Users/x-dt/workspace/AI/Agents/deepseek-harness/packages/subagent/subagent, /Users/x-dt/workspace/AI/Agents/deepseek-harness/packages/schedule/schedule; /Users/x-dt/workspace/AI/Agents/deepseek-harness/packages/compaction/compaction-basic, /Users/x-dt/workspace/AI/Agents/deepseek-harness/packages/compaction/compaction-image-offload; /Users/x-dt/workspace/AI/Agents/deepseek-harness/packages/compaction/compaction-tool-result-pruner, /Users/x-dt/workspace/AI/Agents/deepseek-harness/packages/llm/token-meter, /Users/x-dt/workspace/AI/Agents/deepseek-harness/packages/llm/llm-retry, /Users/x-dt/workspace/AI/Agents/deepseek-harness/packages/llm/llm-deepseek, /Users/x-dt/workspace/AI/Agents/deepseek-harness/packages/llm/plugin-package-inventory-deepseek, /Users/x-dt/workspace/AI/Agents/deepseek-harness/packages/preset/agent-preset-registry, /Users/x-dt/workspace/AI/Agents/deepseek-harness/packages/preset/agent-preset; /Users/x-dt/workspace/AI/Agents/deepseek-harness/packages/core/agent-default-model, /Users/x-dt/workspace/AI/Agents/deepseek-harness/packages/settings/settings; /Users/x-dt/workspace/AI/Agents/deepseek-harness/packages/sandbox/sandbox-local, /Users/x-dt/workspace/AI/Agents/deepseek-harness/packages/sandbox/sandbox-windows-acl; /Users/x-dt/workspace/AI/Agents/deepseek-harness/packages/ssh/fs-ssh, /Users/x-dt/workspace/AI/Agents/deepseek-harness/packages/ssh/ssh; /Users/x-dt/workspace/AI/Agents/deepseek-harness/packages/subagent/subagent-spawn-in-process, /Users/x-dt/workspace/AI/Agents/deepseek-harness/packages/subagent/tool-subagent; /Users/x-dt/workspace/AI/Agents/deepseek-harness/vendor/cordis, /Users/x-dt/workspace/AI/Agents/deepseek-harness/vendor/include
+? Verifying lockfile against supply-chain policies (1679 entries)...
+
+   ╭──────────────────────────────────────────────────────────────────────╮
+   │                                                                      │
+   │                 Update available! 11.25.0 → 12.21.0.                 │
+   │                 Changelog: https://pnpm.io/v/12.21.0                 │
+   │   To update, run: curl -fsSL https://get.pnpm.io/install.sh | sh -   │
+   │                                                                      │
+   ╰──────────────────────────────────────────────────────────────────────╯
+
+✓ Lockfile passes supply-chain policies (1679 entries in 7s)
+Lockfile is up to date, resolution step is skipped
+Progress: resolved 1, reused 0, downloaded 0, added 0
+Packages: +57 -53
++++++++++++++++++++++++++++++++++++++++++---------------------------------------
+Progress: resolved 57, reused 57, downloaded 0, added 55, done
+
+packages/subprocess/subprocess-local postinstall$ node scripts/ensure-spawn-helper.mjs
+packages/subprocess/subprocess-local postinstall: Done
+. postinstall$ node scripts/install-lefthook.mjs
+. postinstall: sync hooks: ✔️(pre-commit, pre-push, pre-merge-commit)
+. postinstall: Done
+Done in 11.2s using pnpm v11.25.0
+The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
+The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
+The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
+
+ RUN  v4.1.8 /Users/x-dt/workspace/AI/Agents/deepseek-harness
+
+···········x
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |thread-safe| packages/llm/llm/tests/structured-output.spec.ts > closes the owned adapter iterator after rejecting its completion
+AssertionError: expected +0 to be 1 // Object.is equality
+
+- Expected
++ Received
+
+- 1
++ 0
+
+ ❯ packages/llm/llm/tests/structured-output.spec.ts:122:20
+    120|   const { llm, closed } = await fixture(textChunks('{}'))
+    121|   await collect(llm.stream({ ...config, messages: [] }))
+    122|   expect(closed()).toBe(1)
+       |                    ^
+    123| })
+    124|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 11 passed (12)
+   Start at  11:12:35
+   Duration  668ms (transform 300ms, setup 174ms, import 210ms, tests 202ms, environment 0ms)

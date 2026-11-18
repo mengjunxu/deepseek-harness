@@ -1,0 +1,738 @@
+{
+  ".ai/tasks/dsh-p1-budget-atomic-storage/evidence/dsh-budget-atomic-before.log": {
+    "original": "4759fa4468ea529ae5ad9cf0d22c391e8c02c7f334a823a8d64e4c4b24906c49",
+    "normalized": "19f7b0a9ead57ad4919a000c85377e203bdd44ba32a3d8c26e4aca900ae41398"
+  },
+  ".ai/tasks/dsh-p1-budget-atomic-storage/evidence/dsh-budget-atomic-tests.log": {
+    "original": "4e51f77da670babbb8c61ebcfacb431e45e23fdb18802da02abb939eb411b597",
+    "normalized": "9b7ef42fb8ec12e765375562de53d174953cc77dad2293f285f9cfb7a0c7d137"
+  },
+  ".ai/tasks/dsh-p1-budget-atomic-storage/evidence/dsh-budget-storage-catalog-build-tail.log": {
+    "original": "be8066a85240e55083d4f41e332a915657dd5067ed976eaa1a0598152d9f0c96",
+    "normalized": "d0997588e820143840a7a47f0861d498fb35c4ec4047d001d1578d6e0b5dcc06"
+  },
+  ".ai/tasks/dsh-p1-budget-atomic-storage/evidence/dsh-budget-storage-corpus.log": {
+    "original": "6767b8d7794db0f3d1ad97924804fb1d5a4c65b24baf42296861fca4cc17f79d",
+    "normalized": "5c8ca0d4f6455925010d26f2289ef4f638f5446aac6a4ea9104dab462d833726"
+  },
+  ".ai/tasks/dsh-p1-budget-atomic-storage/evidence/dsh-budget-storage-coverage.log": {
+    "original": "d131028fadc7bb1f1f2a435427c6537d13860a600c0916e4f7231eb3d2caa654",
+    "normalized": "006d407e018877345180a12ba90aa84a612e9863c1faa8a1b1dd62bbdee98894"
+  },
+  ".ai/tasks/dsh-p1-budget-atomic-storage/evidence/dsh-budget-storage-final-owners.log": {
+    "original": "9a219ec55de2c1bb44e36960f5e2d01b0f987b2315911af88ac2955e200c8ea9",
+    "normalized": "7616e4355854bb67542ee914308aa2f4a3b6d74f55ea395ed0101e271f0c8575"
+  },
+  ".ai/tasks/dsh-p1-budget-atomic-storage/evidence/dsh-budget-storage-process-a.log": {
+    "original": "ab778bdd005ce7c615692ebe692dd2f99e911cce6756304f208a79d3a17c9513",
+    "normalized": "1c08a3417362974c3899c8669b9dfbc86d5edc3e1d058515570fe0afd9f48e76"
+  },
+  ".ai/tasks/dsh-p1-budget-atomic-storage/evidence/dsh-budget-storage-process-b.log": {
+    "original": "badc94ac3dba10f97e6eb471130ef1f4c687dfbf0c734e1ae7a752074c76139f",
+    "normalized": "d1e14a529fe77cbea328ea795ad37a78134bb2d3a97b8eaca554c90a9e9b6aed"
+  },
+  ".ai/tasks/dsh-p1-budget-atomic-storage/evidence/dsh-budget-storage-snapshot-refresh.log": {
+    "original": "13e16aa5c5c430b5461ac9193125e1f90e92fe7ad3f42c93a95c19ea2c350c11",
+    "normalized": "9f9ab50292dc6bc6f7904b7f91286707db8952e73c29f52e03f5e2ee01c38c4e"
+  },
+  ".ai/tasks/dsh-p1-budget-atomic-storage/evidence/dsh-budget-storage-snapshot-replay.log": {
+    "original": "aeddcf1d1a69e28813e5eaca78b04bd0b0ecfd96bcc9180f26289298eec9c10f",
+    "normalized": "6df8fc338ae87f3d389d2d7a79636f2d55b9c39c29f952118046f01c37d30c16"
+  },
+  ".ai/tasks/dsh-p1-budget-atomic-storage/evidence/dsh-budget-storage-two-process.log": {
+    "original": "ceea2dcc15780436b5dbd7c57a067f1728cf476a1075f12c3623fb0de93c70e9",
+    "normalized": "be10661056c453fefdf2e652837f9e12b30f0844652d69e85837e5d422b7dfdc"
+  },
+  ".ai/tasks/dsh-p1-budget-atomic-storage/evidence/dsh-budget-storage-v3-replay.log": {
+    "original": "32e5f2da8ee7df6a757b165d6c519e75e7ee7c58b62b54655cf296b52db50f89",
+    "normalized": "a4c74e7d1b90c693ef84ef733fc6d66159743646121aa888c7d0301d2bf3071d"
+  },
+  ".ai/tasks/dsh-p1-local-request-budget/evidence/activation-coverage.log": {
+    "original": "645a5f29fd9f3f892a8884061e8d8288a7728375ad45a912839cb109e5aad891",
+    "normalized": "4d2f8119e9c7b0ebad53985906cc203b637c2aa040a77d27b4905acb4e4638a9"
+  },
+  ".ai/tasks/dsh-p1-local-request-budget/evidence/activation-owners.log": {
+    "original": "bb915b9c8cc70e71247c66ef6bf8f3ecb3203a151fd4f78653b10ac4e0706b9c",
+    "normalized": "41fba7a0161021daee9ce961647bdd5389d3516cae63c2e55688c6702cfdff4c"
+  },
+  ".ai/tasks/dsh-p1-local-request-budget/evidence/activation-process.log": {
+    "original": "ef600431a79d08dd8bc0948803b74255f2ab925874b3ab4f50ba96a63960588e",
+    "normalized": "f0fcc060e27d3ec62432ca6d75699404d227b5db3d8fe2eb6e32be8399654413"
+  },
+  ".ai/tasks/dsh-p1-local-request-budget/evidence/changed-owners.log": {
+    "original": "cd2f4bb1eaece16d9c850f2e5ddcb47566cd5185bfdc55b432927da51820b6fa",
+    "normalized": "77cc1248ae11b55712968ceffa1de7be7f24fd57b053db4595e2d678262f106e"
+  },
+  ".ai/tasks/dsh-p1-local-request-budget/evidence/completion-build.log": {
+    "original": "c8af14010cf157bb9d969d493f378e40f6ac665ec688b92f4de403a2942c62cd",
+    "normalized": "52501c77c1b9455c74de71660d94426ef0e21e757674b60f502563b1c555cf0f"
+  },
+  ".ai/tasks/dsh-p1-local-request-budget/evidence/completion-doc-sync.log": {
+    "original": "4279e07993129abaf35ebf430006099008ae4914bfe23b6f56dd82c77b903370",
+    "normalized": "4e22409913d3f8f01e409cdbeaa63c4b2c9525386ca9551998d348174626e68f"
+  },
+  ".ai/tasks/dsh-p1-local-request-budget/evidence/completion-snapshots.log": {
+    "original": "5d096f021e9689a753f3e1599630582fc222dff6648f86bc3baf9c6340e2c192",
+    "normalized": "5e98f842c772a71552aded066586bd8a5e75758ffda3a9f0710b68af9e1f0cc1"
+  },
+  ".ai/tasks/dsh-p1-local-request-budget/evidence/dispatch-before.log": {
+    "original": "23e5bf796074ad7459a6cc6b7198d4a9e149995175e2659357173e41ce3869e4",
+    "normalized": "0750c9fee99994605530b038e351596e08d4e28043b277d07e11d459f7e01b6b"
+  },
+  ".ai/tasks/dsh-p1-local-request-budget/evidence/dsh-local-budget-adjacent-snapshots.log": {
+    "original": "19498ac8187ce1df28d0f0791171f7e0ff6f3c6afbf17b30710b4c35fc552545",
+    "normalized": "bba88531a91e8195af347d45071caa82f6ba3ed360f12f2e292388e7c1e61be8"
+  },
+  ".ai/tasks/dsh-p1-local-request-budget/evidence/dsh-local-budget-app-drain-tests.log": {
+    "original": "96d447c53ff78f6d9c35c36bd3c071305f12193726ed95846f561cdf6dfc3ff1",
+    "normalized": "36778b9243947241ded88fa80cf6d336181c2bc14f2d482fde42e9cf338e29cc"
+  },
+  ".ai/tasks/dsh-p1-local-request-budget/evidence/dsh-local-budget-dispatch-owners.log": {
+    "original": "161ea967680e4ee898725ae22055f999b95dd5ba2b21296a9f09b74ce53c5884",
+    "normalized": "87b2bca628c5b4896761565167964e8d8a9b7e5c5f2d8090736d5367afd92eca"
+  },
+  ".ai/tasks/dsh-p1-local-request-budget/evidence/dsh-local-budget-dispatch-tests.log": {
+    "original": "0a351e439b5aa66ea2ad47137938dce84bd51d88d4a8b781f20dbe3d65e9363f",
+    "normalized": "797e4154de4d2ef828d8fd69cb562c4e0ce05d6d0316ff31a2fb78899977208c"
+  },
+  ".ai/tasks/dsh-p1-local-request-budget/evidence/dsh-local-budget-final-coverage.log": {
+    "original": "8646f59010b1f96f72467e052385cf01900eac85711fc5c323911ef8928eab6a",
+    "normalized": "102018714835293dbfdbcef540ae90c6c95fdca0238fb28b484a1fee0a0ee5a9"
+  },
+  ".ai/tasks/dsh-p1-local-request-budget/evidence/dsh-local-budget-graceful-shutdown.log": {
+    "original": "73532c64bbee80eb025336c49f4dc45412583f932b67003afe706d92329249c3",
+    "normalized": "8a35cb777de9922afa8576a2d63c707c729cd87a3cf780eaedddc01fb8d83370"
+  },
+  ".ai/tasks/dsh-p1-local-request-budget/evidence/dsh-local-budget-hosts-process-a.log": {
+    "original": "96a5fc0e7264743bcaef6a9562c5bd69d2667d9b4c55e574870b12c26bc30486",
+    "normalized": "9d6951686a302cbece79b2297bf546999652ae2ff8446ec4354acd83d61879e3"
+  },
+  ".ai/tasks/dsh-p1-local-request-budget/evidence/dsh-local-budget-hosts-process-b.log": {
+    "original": "1238219379dd9e3f8c61db18b1a93d6b6208b3a996a5e291e3ef41fd7e052f8a",
+    "normalized": "ece54ebefaaeef5588782a492ce2e21bafe77981d6df267b7c8df8bc8828be0b"
+  },
+  ".ai/tasks/dsh-p1-local-request-budget/evidence/dsh-local-budget-kernel-owners.log": {
+    "original": "3052410de9ec69cc0b2e503272703fbe890a5693e419d1765ceab55f3c24f8dd",
+    "normalized": "76d43ce70b02f9b7575c178d84a00f74015a8f1a304b52cce1420f9c88109478"
+  },
+  ".ai/tasks/dsh-p1-local-request-budget/evidence/dsh-local-budget-policy-coverage.log": {
+    "original": "3cc6792087cc51a49e61b07666a038f5a508064ebdf963675c09fee726137d5c",
+    "normalized": "dcca7c07dfe41565fba3369b4c5b509f1260e130d3e47939df4534d80c9ad33d"
+  },
+  ".ai/tasks/dsh-p1-local-request-budget/evidence/dsh-local-budget-provider-drain.log": {
+    "original": "51fb1870e62e0c3269ba370f0934fd0eeab29e201289332d00271079924b3115",
+    "normalized": "095fc718f79f4750595350a1269923ec2344a9693d23bfad122919886191a4aa"
+  },
+  ".ai/tasks/dsh-p1-local-request-budget/evidence/dsh-local-budget-retained-v3.log": {
+    "original": "e2a6ac068fe903ee3278d77be00eddc4f62672adae82e748c01ec9d10a78e6b8",
+    "normalized": "8b7478a211650bbfa44941e3dba5186dabcebbcd3e177ac6bd816ff9432f8c9a"
+  },
+  ".ai/tasks/dsh-p1-local-request-budget/evidence/dsh-local-budget-snapshot-refresh.log": {
+    "original": "0e754437d22d6a72e51b07be4b2de346d3ead5c56801146e7d0ca63418b41f5c",
+    "normalized": "d65318ae5fe100f17dcc4cfd5c7794112c81353210bbba07c34512d49d547e84"
+  },
+  ".ai/tasks/dsh-p1-local-request-budget/evidence/dsh-local-budget-snapshot-replay.log": {
+    "original": "948b1e9b1511650ce2b68724a8680dd6b9c667ffdde2ea5aa5e668e84a5cda65",
+    "normalized": "e47391b927bef37a33c75fbf8ac8134644f079ba0928f7fae5f41d633153e23e"
+  },
+  ".ai/tasks/dsh-p1-local-request-budget/evidence/host-overlap-a.log": {
+    "original": "038f5f0b46436337d62b222317f4bd27008f7dda0ba7770190b16367459708e6",
+    "normalized": "7139cc668de6f3bece86977ff025f33cce41aec3228a2c6a3ecfc33f321c8a3e"
+  },
+  ".ai/tasks/dsh-p1-local-request-budget/evidence/host-overlap-b.log": {
+    "original": "6de64236b4d9dc5e0d9c8ddd9c48028fd027ffac2acb30fdac8d63b00ca87d45",
+    "normalized": "7f44cfdf079a829b1a14c8b604b28c115dcde279b77555ca617fbcf20a6251cb"
+  },
+  ".ai/tasks/dsh-p1-local-request-budget/evidence/invalid-startup-before.log": {
+    "original": "f16d9ca787458f19b5bd484f18771d90831702a5bce41fe843f8caf245c3594e",
+    "normalized": "7d08470a0b8a0056c10f68991ed35008b72760912364ef57e4880bae8b2be1a0"
+  },
+  ".ai/tasks/dsh-p1-native-structured-output/evidence/dsh-structured-build.log": {
+    "original": "a2b4a2c1cde2a162ce67d1d42c379f45469ab04d85fe19c61b32609e8da1eaca",
+    "normalized": "9e15740af8eb564e7f1759357fe79e8a2add12cc660ad568f6cd26f16dea9b8d"
+  },
+  ".ai/tasks/dsh-p1-native-structured-output/evidence/dsh-structured-composition-tests.log": {
+    "original": "af86a33f78c7d0b38560316d2f6fff3942672f88abb02bf5a6222276874632b8",
+    "normalized": "ee042451b854a995ee7615eb68d5e6505e2bfdbde4cf13b64449aecb8c0790a3"
+  },
+  ".ai/tasks/dsh-p1-native-structured-output/evidence/dsh-structured-coverage.log": {
+    "original": "33137db7215f9f83162192ae82683a3e2f7dd80579215e88e1b3bcfef5c0cc4a",
+    "normalized": "55e50d9df0be8973d02769d7357847a277dc83466385c9166d054a86777bc9be"
+  },
+  ".ai/tasks/dsh-p1-native-structured-output/evidence/dsh-structured-extra-tests.log": {
+    "original": "aeef55790f8bf931bfbf52e0107596c1b2b5b465d4604cd9e6416487ac475858",
+    "normalized": "e3bc8942e6b1578c1171ea48491e4a90c77446f6144e2c03a0e563c3208b67cf"
+  },
+  ".ai/tasks/dsh-p1-native-structured-output/evidence/dsh-structured-final-replay-tests.log": {
+    "original": "64dd97dc0dcffe7e45f6b4d825fd661ef75900c888635bb07794f0cb147c2637",
+    "normalized": "cdc6fad666d085764704caf1fe66fa0a185630b763c115c48acbcecc191afb0b"
+  },
+  ".ai/tasks/dsh-p1-native-structured-output/evidence/dsh-structured-final-tests.log": {
+    "original": "d6a42d45b7560f814f8b51dfc83ef444158fd90d2b04723867dd24113e73e3c9",
+    "normalized": "db280cd663a88e5706fed3e70b7fe2e0b1d702fdfed35e78492b43720f2fcff6"
+  },
+  ".ai/tasks/dsh-p1-native-structured-output/evidence/dsh-structured-replay-tests.log": {
+    "original": "26bbb6399a7d8ebc4f1eceb853e761fd0e9988767c09f2533092a084f2effdb2",
+    "normalized": "e6c0df083f37cf95c1bebd7bb1506b2a85b33458b2445cdfe753f9225af3aaf6"
+  },
+  ".ai/tasks/dsh-p1-native-structured-output/evidence/dsh-structured-snapshot-refresh.log": {
+    "original": "2264fac6f2d16f06799365dce6b062f83e2e9a2c0818414993f8134bd7f59297",
+    "normalized": "2ec36dd1a47ab680995d1e9d757e6218bab29bc1835030b37d158a68e341359c"
+  },
+  ".ai/tasks/dsh-p1-native-structured-output/evidence/dsh-structured-snapshot-replay.log": {
+    "original": "384184c751e9f40e2a59eecf4d30fe900a13af797e69e16c5646671b2bc76a29",
+    "normalized": "eb09f63e7e138d805e8d9f024c1bd3b43095a4af2999663cef3075d55395339a"
+  },
+  ".ai/tasks/dsh-p1-native-structured-output/evidence/dsh-structured-verified-doc-sync.log": {
+    "original": "b9f3b1f6eb846b6c8eb0b9ed9287304c6f94dead6356749a228027e4d9016d83",
+    "normalized": "906181ccef4e8b12a911b3f88c34ee76746da168a7f2f4284aea64f17ecffbfa"
+  },
+  ".ai/tasks/dsh-p1-native-structured-output/evidence/dsh-structured-workflow-guest-tests.log": {
+    "original": "536c3880e1e694dd630df463d5bc6c5ec5eedc16c624a26870feb78bacde13de",
+    "normalized": "02ce33227f01b7681a318942d05592d1ded6c447f10a119bc372915a22e32391"
+  },
+  ".ai/tasks/dsh-p1-paid-route-consent/evidence/dsh-paid-admission-tests.log": {
+    "original": "49819aae487949e1891ea686280968d238f921d565eaad2f02e0ca71c608e6c5",
+    "normalized": "61f25fd636b72474506dc5069bf8ce4cf32e0412ba6c16de1083ffc45420dfb5"
+  },
+  ".ai/tasks/dsh-p1-paid-route-consent/evidence/dsh-paid-before-hook.log": {
+    "original": "48bc961cdc05832374457acf668ec7ce5f21398bc3cc349b7d080968782bbcea",
+    "normalized": "2dded09b81baea9c710060589372ac53f6614eea0b28a9bef581251dd909a1d8"
+  },
+  ".ai/tasks/dsh-p1-paid-route-consent/evidence/dsh-paid-build.log": {
+    "original": "7e60ba9b1bed0090161c2ecf37b4484906c6c0469239cae5c03f9a326c795975",
+    "normalized": "fa236fd152a49476e117a0cfd13032e24b490eb665f5a5aa669cee075896f2fa"
+  },
+  ".ai/tasks/dsh-p1-paid-route-consent/evidence/dsh-paid-core-tests.log": {
+    "original": "337fe88f7215f0bce726af1177708117099356792e80039e1e1f1ffcb55a6054",
+    "normalized": "bcc5c38889995f4219b95ea7ab3349be7bf3e6082650fe316b07a632957d749b"
+  },
+  ".ai/tasks/dsh-p1-paid-route-consent/evidence/dsh-paid-final-build.log": {
+    "original": "2cc0f635783b4d8dac65c1be8e39bc83016ee8d1e8c91562ae54e35571cca791",
+    "normalized": "226e1db4f6aba241cf718fd7ca016747467b3c49a7f5ee27597f1bf69def5896"
+  },
+  ".ai/tasks/dsh-p1-paid-route-consent/evidence/dsh-paid-final-doc-sync.log": {
+    "original": "e484fb14a2cbf7fe57efae8fb4e8ad8b8998e2af71a27eaf03ed86b57c696a17",
+    "normalized": "85ce67025f01771c9d634add0d7971b8217c7bed5ab53acdfa067ac7215a4ee4"
+  },
+  ".ai/tasks/dsh-p1-paid-route-consent/evidence/dsh-paid-final-owner-tests.log": {
+    "original": "20252129297f709b573371bcf4133f16aba1c604776ac70feea707a057f5ac2e",
+    "normalized": "47da00777ab665d33c7481c614a7b40f75d4e9380c32163c69ac6ff0d96c4eb1"
+  },
+  ".ai/tasks/dsh-p1-paid-route-consent/evidence/dsh-paid-final-policy-tests.log": {
+    "original": "d632bf36f6221ce79bf9435034ecb02adb5852fec7413e8bfe529715be42bf32",
+    "normalized": "6c13eec6e903c8437951767810f8c94f0949d0c1b4ec58578dffbe65da12135e"
+  },
+  ".ai/tasks/dsh-p1-paid-route-consent/evidence/dsh-paid-late-check-before.log": {
+    "original": "6ec1c37f33bfdcd73223b4a21a64a78b92cd4834074a5a550fe67c79db891495",
+    "normalized": "2c049c0a6f0f13702ab377aef04db278cbebfc05ab9f14c8aa02190d221152bf"
+  },
+  ".ai/tasks/dsh-p1-paid-route-consent/evidence/dsh-paid-late-check-tests.log": {
+    "original": "a105fdbe7b2803b378fa1dd77aba0fece3c45d531728a44a94452529f1cc4f4f",
+    "normalized": "eb7522560031c335c052278766b7aa5f00242983cb867161bafec916e6cc011a"
+  },
+  ".ai/tasks/dsh-p1-paid-route-consent/evidence/dsh-paid-loader-tests.log": {
+    "original": "487a655f9b55dd3529459f56e6d456b437dd65323ff80b335dbfe59805510b5a",
+    "normalized": "af942be85954b9816aadad0f6d95ca600b19b18da6dd395c4ce9280dfd3202b9"
+  },
+  ".ai/tasks/dsh-p1-paid-route-consent/evidence/dsh-paid-positive-refresh.log": {
+    "original": "dde08e84fc90e4e2df082e0077b424b5b3fadf3ab9903738ed0a8b8e4562c3e6",
+    "normalized": "a27478941e77d0d4f6d97b8fbcfc0413782d89e8cd375279843192f76424d6de"
+  },
+  ".ai/tasks/dsh-p1-paid-route-consent/evidence/dsh-paid-snapshot-refresh.log": {
+    "original": "3f8a06d5929e9eb256ce394bc1d583d16c586c0aaba83ff382c6a6f0408d1951",
+    "normalized": "7a2adee716d778328a3229e8640bcb92daadb8c23941e5dfe67ae7de8f7ade84"
+  },
+  ".ai/tasks/dsh-p1-paid-route-consent/evidence/dsh-paid-snapshot-replay.log": {
+    "original": "194b5962673ee8aa5e543094a755ab6cdab8988e66512d295548988717202777",
+    "normalized": "d45e4c8c3214be25d35c4b6d78d4ea75e5d89e5887546898ef42fa2be99e1379"
+  },
+  ".ai/tasks/dsh-p1-paid-route-interactive/evidence/authorization-red.log": {
+    "original": "dd79b0449ee114579f788f87795c675881273364436d049467e4d60e2c4e8733",
+    "normalized": "aa0b63c46330b22f6b32ce4c7964dba88a9cc29f49ef0c6235b99b7d316ecbfb"
+  },
+  ".ai/tasks/dsh-p1-paid-route-interactive/evidence/dsh-paid-interactive-build-final2.log": {
+    "original": "77e9e6ad5216bffde05bd4d964555ecb35fbdf4f50b7a214765ef77f0d32531e",
+    "normalized": "aa55e812bc7b9a4883a261571b96158f680afb40e9f9037966d87deee2d2bc3c"
+  },
+  ".ai/tasks/dsh-p1-paid-route-interactive/evidence/dsh-paid-interactive-build2.log": {
+    "original": "2236ee274d473254c3b6a5b71fdd4f4d26775a01fb0faf3dd4f2b587532c0a92",
+    "normalized": "8f8728b88c91d60fe672cd2fda59610b82ae0964455e18bf8b29bdabd49be8d7"
+  },
+  ".ai/tasks/dsh-p1-paid-route-interactive/evidence/dsh-paid-interactive-confirmation.log": {
+    "original": "409cce5d79d2f4408e48fbc0598be82943c12280a446353b757f6793625b2d8c",
+    "normalized": "fe941299de0cf0bf946f141bf45da6a042b61ab039d095f91d8c6a1417f2f143"
+  },
+  ".ai/tasks/dsh-p1-paid-route-interactive/evidence/dsh-paid-interactive-corpus.log": {
+    "original": "16d5e01475435b0ab7a60f2f576880450a929451aa43e89a4b89fdbb2550bbbb",
+    "normalized": "5b0c02b9d2b6a419dce4ddd1f5486268b049a3b64aeaebb40c36ec1aea322315"
+  },
+  ".ai/tasks/dsh-p1-paid-route-interactive/evidence/dsh-paid-interactive-coverage.log": {
+    "original": "69d4df29dc954d7922a8ee7ac9a3c3f09a9ddf89b187bf5dd479cd1478d65497",
+    "normalized": "d397e3320765fbdf78c1ff313b072802cc4ed97b25f097df5bf63e31e69d0494"
+  },
+  ".ai/tasks/dsh-p1-paid-route-interactive/evidence/dsh-paid-interactive-coverage2.log": {
+    "original": "ba78259f148edf0674d130d367e53d72f60b46fd1bb9b5cecad8f6056f91cbcb",
+    "normalized": "a14c7e7d2dd577df60ed9551fd89bfd20f64dc189ff2210583de8f9d7b1c4f62"
+  },
+  ".ai/tasks/dsh-p1-paid-route-interactive/evidence/dsh-paid-interactive-dispatch.log": {
+    "original": "e53d8a76ac53fa5498175d702bb7357c73c26069e518017c37473cfa41bba0c5",
+    "normalized": "ae57224bc6943500e5ee084487d47f13aba08ec2349eaedaee5d42db425e23ce"
+  },
+  ".ai/tasks/dsh-p1-paid-route-interactive/evidence/dsh-paid-interactive-doc-sync.log": {
+    "original": "093d024ea5a6d381aa6e3ab90bd453b49e5b77dc22d0369d633265048bb21528",
+    "normalized": "49bf2e374509423560da061f187ce42bdf4c57192d4a4541760e4ee55286aad1"
+  },
+  ".ai/tasks/dsh-p1-paid-route-interactive/evidence/dsh-paid-interactive-first.log": {
+    "original": "0e2f785842a8156e2dd7420ee449d1370c5e598add9d4b2fb5da372ebf33bf84",
+    "normalized": "ec258acc43427c386e8ea358438e22254855b895d6b82a0bd62960a7097cdb8a"
+  },
+  ".ai/tasks/dsh-p1-paid-route-interactive/evidence/dsh-paid-interactive-host-final.log": {
+    "original": "369cb0a50286aba5da92ea6139daa919556ac1c21787d15b38447d030e61c1c9",
+    "normalized": "b5b94d11247ae40d0543819fc86520686b18ce470721e2eb046d0eb6af92cbe8"
+  },
+  ".ai/tasks/dsh-p1-paid-route-interactive/evidence/dsh-paid-interactive-loop-retry.log": {
+    "original": "c94d92a29725f6a298f80f55c034f16b4f5e238e5d75a8ae57bd1dc078104283",
+    "normalized": "9cbea3a3a84c2e20a97dbba5b2054b4f378ff81119e83ffe10428fc903fd5acc"
+  },
+  ".ai/tasks/dsh-p1-paid-route-interactive/evidence/dsh-paid-interactive-owners-final.log": {
+    "original": "99b64a2602d62385a632466a508ed81f37192d81df7f19997ce297abcff1ff80",
+    "normalized": "d7622b7913ec67a4f95db82e209d1cb66aca25bdfdec60bcab57b770e60f7cc7"
+  },
+  ".ai/tasks/dsh-p1-paid-route-interactive/evidence/dsh-paid-interactive-owners-verified.log": {
+    "original": "d0c4ed50b441c762f012eb5c149f7fc7322417a2f50e6da6e518931f6dccfedc",
+    "normalized": "f0d02060e81d5e373639869fd3380d2e377ed246dd99d91db6564c5ae5009241"
+  },
+  ".ai/tasks/dsh-p1-paid-route-interactive/evidence/dsh-paid-interactive-owners.log": {
+    "original": "fa90b94e5dc311f2594d7565cde9175981ce067ed6a2e8455292d944f34506d4",
+    "normalized": "7f2c3a55df0b8d0d2d4a1a592583f9922df9db81593bda4f60e8e7e2e272c813"
+  },
+  ".ai/tasks/dsh-p1-paid-route-interactive/evidence/dsh-paid-interactive-red.log": {
+    "original": "dd79b0449ee114579f788f87795c675881273364436d049467e4d60e2c4e8733",
+    "normalized": "aa0b63c46330b22f6b32ce4c7964dba88a9cc29f49ef0c6235b99b7d316ecbfb"
+  },
+  ".ai/tasks/dsh-p1-paid-route-interactive/evidence/dsh-paid-interactive-revocation-green.log": {
+    "original": "14ed86aa320c10851acac1e3d487b52c008253eee0b267117840397bec07e864",
+    "normalized": "e3db62d3f49df2520307144b8deba943ef351cdb803f7da10ca38fd03726db59"
+  },
+  ".ai/tasks/dsh-p1-paid-route-interactive/evidence/dsh-paid-interactive-revocation-red.log": {
+    "original": "3d4b5832ed42a6b0c9e732d4dbbd050d1c55d3dae70812a9f4a5705a6123bf82",
+    "normalized": "85ef8223c5601ef11ed859cdb32d3c160a42931e977b1e69f3713a7e81d8a158"
+  },
+  ".ai/tasks/dsh-p1-paid-route-interactive/evidence/dsh-paid-interactive-settings.log": {
+    "original": "5ee1bd6b4cad6eb21623d661e374b1cdba116d500dc575ae985dd15e1c1bb7fa",
+    "normalized": "77eae96c7469accb6c7ae9e5a063c2eaf5950fa77e1d4a0c9002f65a757ec8aa"
+  },
+  ".ai/tasks/dsh-p1-paid-route-interactive/evidence/dsh-paid-interactive-snapshots.log": {
+    "original": "23583b2774f9a2864c58cc781f5a5a2a8478ab4612579f56259a812b3319998b",
+    "normalized": "8e72443ce240f1583ec6fc31546509bd8afbee38c6bcf87d2ceebd58a62e108f"
+  },
+  ".ai/tasks/dsh-p1-paid-route-interactive/evidence/dsh-paid-interactive-web-refresh3.log": {
+    "original": "ac67e12e109a1a5fa93955392edaef4b284c548ad0d8b21762383ce5f9a86fa0",
+    "normalized": "b2674cccdefcbaa1afdb5624e1430ee604be3162ac6a80ec9f5a5fd58dc3933f"
+  },
+  ".ai/tasks/dsh-p1-paid-route-interactive/evidence/dsh-paid-interactive-web-replay.log": {
+    "original": "de3d612d00cf9e93caa16bfc1d8e2f03073a8da103266f25f773d8662bffda68",
+    "normalized": "5a5f82fb9097c073df782b3010166054fad0eb2052751643754d954a2be19822"
+  },
+  ".ai/tasks/dsh-p1-preparation-records/evidence/before.log": {
+    "original": "7e78acc106a20e586e62a7a347e1dd32758413391c8849fc01dd9ddf28b2859b",
+    "normalized": "188f3775547b38146fc4f4000c4ec285ded15268366916babb6d7621b8979198"
+  },
+  ".ai/tasks/dsh-p1-preparation-records/evidence/build.log": {
+    "original": "9ff659473fbd43a52905b61f4b0b27ac3b189e2875ab9e3308af1678462abdde",
+    "normalized": "06729de7bf3794556586b3c750d2b649fb528ca74648f3cc0bd6c986e1b83bd1"
+  },
+  ".ai/tasks/dsh-p1-preparation-records/evidence/corpus.log": {
+    "original": "60f589b15e9aa0334e54ae2b2419625fec311b6f050ab604ee16f3244d62dacf",
+    "normalized": "dd0fa510f70096550bab854f8e364618aba30969f042ce94147a4c8a48f943e3"
+  },
+  ".ai/tasks/dsh-p1-preparation-records/evidence/doc-sync.log": {
+    "original": "a187eb42ccb7f20e33f8128a7d6d740b7642720a4789b148c2adacf3925359cc",
+    "normalized": "b0ff24c3ab62c0bc887698a730ea2d30ace42837e605229710f888871a1e4c2b"
+  },
+  ".ai/tasks/dsh-p1-preparation-records/evidence/final-owners.log": {
+    "original": "bba9d24fa51ba2f4371cdf6c02f6ba8b0066df37f8f483c9d8d8b586bcc62e2c",
+    "normalized": "baa7bdcfcea3804bd4b133f6a07fa4f08e13753a94a54e1485afc30f9589b1c0"
+  },
+  ".ai/tasks/dsh-p1-preparation-records/evidence/full-lint.log": {
+    "original": "7366c8bfbac554823b8f9bddd4837d070bc75abbc0f756874ce186c245d0f6a0",
+    "normalized": "57746f4a429d435847a63e52dc9ceab10420e6117af04f7e63e5ff87b2d9a16f"
+  },
+  ".ai/tasks/dsh-p1-preparation-records/evidence/host-build.log": {
+    "original": "982e0e10346f20ab7f51794e7840a1c5184f08e3a7faeb7e5d11b70240165ca5",
+    "normalized": "fb1ace2865b2608c55558e7ae8c1354d6c40133070b3e830c0244d48e8301e9d"
+  },
+  ".ai/tasks/dsh-p1-preparation-records/evidence/owners-step2.log": {
+    "original": "3a0b9fc8997da465e377b6cf17da755cec5461a8de4c0727f93b86287a5049a0",
+    "normalized": "938f8a91e495a4a6cc4813bdb4fd5c6b9c347b772bd1333c7288f808a4e70770"
+  },
+  ".ai/tasks/dsh-p1-preparation-records/evidence/profile-refresh.log": {
+    "original": "c19f93531f7ab669ff44d469ef9f73a707854a05e70a81d01ab710065d377e0c",
+    "normalized": "a461babf04acb96393d33236b042b0e2f03315a4bc914e5827b822dd2ce71c37"
+  },
+  ".ai/tasks/dsh-p1-preparation-records/evidence/replays-final.log": {
+    "original": "22ae65d3d1f4b9fafa64c399351ca5370c12ba924f685206149d466f167bdc94",
+    "normalized": "72d8c25af30f2bcfcb6743ca75e38ae5c9f042b9989580b61f52740344d19c22"
+  },
+  ".ai/tasks/dsh-p1-preparation-records/evidence/sdk-wire-refresh.log": {
+    "original": "4b74702fbde255b3be39532112da8ee0ce10b81bf87b2d337f08a67dc7d3f971",
+    "normalized": "7b39bc74b70c0e2ee50a18a8866dd94c0f6f7fdf6b5c3cbda0ba05ccc2fe0318"
+  },
+  ".ai/tasks/dsh-p1-publication-hygiene/evidence/dependency-tests-42.log": {
+    "original": "5af3c00f1154ede294299c1a0f5d59e4ac9b8be4468d8468d102fa3bf7e518ff",
+    "normalized": "f86b76e3e9eb4913f75655c22c1c38dc41f9657fe1801165ceb7f3e5116f359a"
+  },
+  ".ai/tasks/dsh-p1-publication-hygiene/evidence/dsh-hygiene-dependency-tests.log": {
+    "original": "511e3f4c8bfa32a7f49d2654ad707150e2ccfee8e9882534c89ff18a9901f643",
+    "normalized": "8e567ec5dd720a6b787c2cc06620908ec372b804136c4b824d2b60a178c7d351"
+  },
+  ".ai/tasks/dsh-p1-publication-hygiene/evidence/probe-build.log": {
+    "original": "2f61e037ec266a362e910e52c7801a4df4e96e01c4e15b1e758b90ed1bc5b8aa",
+    "normalized": "e9482a46a5ebe1c91a87cbb44c4b76558bcce7ec2186830d91d425ad81f2f6cd"
+  },
+  ".ai/tasks/dsh-p1-request-attempt-link/evidence/before.log": {
+    "original": "98b36791bb42aee3486578619ce2875dec97cbfddfdbca8fbb98b6a6abf596be",
+    "normalized": "6796433e821042bdd2e3426cee3eac01f1b4bd16e9ab30e02b2912143cbb955f"
+  },
+  ".ai/tasks/dsh-p1-request-attempt-link/evidence/build.log": {
+    "original": "a6315ea65043a33eb1b742643a99cd492c5fca37957f18ac00164f64f27de881",
+    "normalized": "df5fb5f4a383b5093e29a5fd85b1b61e9aab5236a83efb4465833721c4ec9015"
+  },
+  ".ai/tasks/dsh-p1-request-attempt-link/evidence/corpus.log": {
+    "original": "173521c7da48b198326bc54344cfef4c83e60e0e81debe7e6e48473f683d9ff6",
+    "normalized": "d8c05f63e5b7a89e0014ec2d6b21a89ae0e51e86a480d1c66175da0cd9ea60b8"
+  },
+  ".ai/tasks/dsh-p1-request-attempt-link/evidence/doc-sync.log": {
+    "original": "5732132cedb58984e44f3983f6838cf4dddcdc7900ad0fda4ded23c9e0544166",
+    "normalized": "e7eb95880b57d9ed65486fe0644f639b91930cd3c34a9d7874b0f8ff137254a3"
+  },
+  ".ai/tasks/dsh-p1-request-attempt-link/evidence/final-owners.log": {
+    "original": "b06592d1d93ac049e6347c8dd4ac1165cf73c6fa03179172a623c4aba4e967ce",
+    "normalized": "e47589a570f1c28a6539ef9c4df06df1ce98d46550ffd8eb0abe6c09cf18413e"
+  },
+  ".ai/tasks/dsh-p1-request-attempt-link/evidence/host-restart-overlap-a.log": {
+    "original": "c4c0e679652237a06df1081818a4e27e4f9c1f5568e12b83150650fed68b1397",
+    "normalized": "0635fd69bf1c4eafadbcd3db21dc578fe5b6e9765b4b0c87c50e064b169ad96b"
+  },
+  ".ai/tasks/dsh-p1-request-attempt-link/evidence/host-restart-overlap-b.log": {
+    "original": "278864c631e173c2a7c4b74715993f9693fcc58cc46c83759e671689cfe180fd",
+    "normalized": "5738d1cd6ea4ac8ebbc67501e8743d66f9ee4546211389b4a3e799323ca344ed"
+  },
+  ".ai/tasks/dsh-p1-request-attempt-link/evidence/host-restart.log": {
+    "original": "d2151c0264391cce3231c8165d2564de602c37c90a1d9b6fc49cebcacd1d44fa",
+    "normalized": "0c947740633c1ec144d280cfd7b6a4d8da9d96d5a4e90ca3b9ce4d450ee82e4a"
+  },
+  ".ai/tasks/dsh-p1-request-attempt-link/evidence/owners-step2.log": {
+    "original": "a1aa45ab5e7803944bf75578c108bc02ff4118bfbfc91a69771b01a0bef9629b",
+    "normalized": "3a29acdb14e829a147289d23a2550461ceddf79a38430191c1bdb6d82bd51b04"
+  },
+  ".ai/tasks/dsh-p1-request-attempt-link/evidence/profile-refresh.log": {
+    "original": "a1f00ee2c44c3bbdd36db0228a3b5ff46e07b6ecf3bdf6523e91868078d462da",
+    "normalized": "bece9376179beb1d4fe8fbeef98e17a8e444b6cd99020365d0ee9bceaf3c6b2c"
+  },
+  ".ai/tasks/dsh-p1-request-attempt-link/evidence/replays.log": {
+    "original": "358f305a5ab82c59219a942bf304d857d83debbac0d8230c3156c6fa551bf2df",
+    "normalized": "a3b9855713170f74a6ec115e55ba3d060f7f83e66a44f69dd975d1543b4863a2"
+  },
+  ".ai/tasks/dsh-p1-request-attempt-link/evidence/resume-step2.log": {
+    "original": "48ad7f2f0360ac4d3bcafe3e0c4a74c6087f8649ccb5abb68875f03b735d19b4",
+    "normalized": "c3938cda82949498ce291155df79c3935104d344251d592ead71217dea99d5f2"
+  },
+  ".ai/tasks/dsh-p1-request-attempt-link/evidence/resume.log": {
+    "original": "48ad7f2f0360ac4d3bcafe3e0c4a74c6087f8649ccb5abb68875f03b735d19b4",
+    "normalized": "c3938cda82949498ce291155df79c3935104d344251d592ead71217dea99d5f2"
+  },
+  ".ai/tasks/dsh-p1-request-attempt-link/evidence/sdk-resume-unavailable.log": {
+    "original": "5a747abf246541a91e1b51ab7eac83b77885008cc92d392be462c8632673a649",
+    "normalized": "80c849d94dc5ba7e5351c8a0035a10b9fd883e5cc0d9cdd18827e9dd923538e3"
+  },
+  ".ai/tasks/dsh-p1-resume-semantics/evidence/dsh-resume-before-fix.log": {
+    "original": "52d7c43efcff8a96aeb08b94a5cd7bb258c17d3c6599802f5438176619f8553c",
+    "normalized": "36c8ad9393d07c0e79a82b681b2424b9cb9cf51036483e91312c61a4652749f2"
+  },
+  ".ai/tasks/dsh-p1-resume-semantics/evidence/dsh-resume-build.log": {
+    "original": "1178dd1ecd43d72f834bad4ef0c6335ac662351b6132ecf3c55ab4661701736b",
+    "normalized": "4620a7f3676d5cdf5646986099333520e0ca9d11aecee362c50b70d29df72b06"
+  },
+  ".ai/tasks/dsh-p1-resume-semantics/evidence/dsh-resume-doc-sync.log": {
+    "original": "371f882b16d8810b0b30e5e06f8341b457fe76619b25e656dae4ce8b431c23b3",
+    "normalized": "7370dacd59c5389cbe1f326757e93ffd8097034e5139f66a429ab6ae4ce38a40"
+  },
+  ".ai/tasks/dsh-p1-resume-semantics/evidence/dsh-resume-focused-tests.log": {
+    "original": "8d31152577b168c5b1e79b3306be0a8cf2dda32d5eabcc7b19ee313500556da6",
+    "normalized": "af8fb4017127f075dc2326fbef649ba97a6c254fbe169023aa469b01450edd07"
+  },
+  ".ai/tasks/dsh-p1-resume-semantics/evidence/dsh-resume-history-tests.log": {
+    "original": "9bdb328fd1849fde6529e5e9980e263edb08e1d809fc9572558d470c9492d101",
+    "normalized": "c4a3a5f55f1ae41b9af9bd5e756fd9bb88f2cc76507c9dcc244881f54bf80047"
+  },
+  ".ai/tasks/dsh-p1-resume-semantics/evidence/dsh-resume-owner-tests.log": {
+    "original": "574d0b690ce928929fc3e193df0c9537502413a609617dc64592b75e5ea8616e",
+    "normalized": "a0fc317eb778dcbeb769162bf3aadf81cec88a9db8055df63620971e223889c8"
+  },
+  ".ai/tasks/dsh-p1-resume-semantics/evidence/dsh-resume-snapshot-refresh.log": {
+    "original": "27a4b02db483eab6b2a9b3018f2ab895bc6d38bba53370f3625e5b74051587e0",
+    "normalized": "ab9ee137cd4608de6bdee80a593a14218c97bbe3368ba9b6e1df74bbbede01b1"
+  },
+  ".ai/tasks/dsh-p1-resume-semantics/evidence/dsh-resume-snapshot-regressions.log": {
+    "original": "34334f678733137ab2e10786646c4efa9ce97f4ac24681b8c756e270f037e8e3",
+    "normalized": "fc5cdb636cbff6d6b514d342797822a8f3b62d0cef5502ca477623093c7402b1"
+  },
+  ".ai/tasks/dsh-p1-resume-semantics/evidence/dsh-resume-snapshot-replay.log": {
+    "original": "48a85330cc7dc51505184cf682a2b529cd7dd2d66ce5321a34ea085bcbcf2826",
+    "normalized": "50b4eb8e0aadc453b137f50ed9646a187245f9afb8c86614644cfc6c3dc70f72"
+  },
+  ".ai/tasks/dsh-p1-session-request-budget/evidence/before.log": {
+    "original": "4792716a8b2ad0795eedc993e205bbec9ca5203aaa0124cfc57fdd2c069b69bb",
+    "normalized": "8788afb0c91c99ae7fdd59741f5aa3e7e101d4a513e0655d6cc0347b3be8a199"
+  },
+  ".ai/tasks/dsh-p1-session-request-budget/evidence/build.log": {
+    "original": "2fcbd379ac12e2a835a128f5c36670c98956faa557f80bcf81af93fa7eb18348",
+    "normalized": "076f3ee30a5b282d30dd9981a9e44881b668ffc8b4c4bee055690e74b16992be"
+  },
+  ".ai/tasks/dsh-p1-session-request-budget/evidence/corpus.log": {
+    "original": "3447d6d9fc0ab71f2628c2129a843175ec3b08697efd08f50cc49137f828768e",
+    "normalized": "c199e36d723cf5f1b2b0aa9c137bb9840d19f01157dcc1f415f6683b4f9d1fe0"
+  },
+  ".ai/tasks/dsh-p1-session-request-budget/evidence/coverage-final.log": {
+    "original": "cbcf7b7df4458772ca996d52b4c63501d16172918f1165f6491225675ccc5152",
+    "normalized": "e2038e6f9c137d024dff731179b245ff4c5b5f425f7a099398d31ed0b2535f4d"
+  },
+  ".ai/tasks/dsh-p1-session-request-budget/evidence/coverage-step2.log": {
+    "original": "0fe6eb5c63f5a24f0a9e6ac77da1ee598c54ff616095873aaf7a9c57b903cbd6",
+    "normalized": "fd18e73f0eb7f649177591e5e2b84ba0500ee714fe48b22f95cf928155bdf4c7"
+  },
+  ".ai/tasks/dsh-p1-session-request-budget/evidence/coverage-step3.log": {
+    "original": "cbcf7b7df4458772ca996d52b4c63501d16172918f1165f6491225675ccc5152",
+    "normalized": "e2038e6f9c137d024dff731179b245ff4c5b5f425f7a099398d31ed0b2535f4d"
+  },
+  ".ai/tasks/dsh-p1-session-request-budget/evidence/doc-sync.log": {
+    "original": "9a615f8b91b3494855b6edab6038fcb97a7aacf5b7fdb6be031a02fdad1bd007",
+    "normalized": "30195e79ed86713edbe102a55bd909ec070e5d67e61b510a69456ed939fe33a7"
+  },
+  ".ai/tasks/dsh-p1-session-request-budget/evidence/loader.log": {
+    "original": "8221c226a247960df98f28a03242f79fa762b2b216f242938469a45f3e84f4c1",
+    "normalized": "e36a71181497ec27fb6389204cddf162d698adf77a75b2da72f1fb8faa313a69"
+  },
+  ".ai/tasks/dsh-p1-session-request-budget/evidence/negative.log": {
+    "original": "d0dec9cb7d33e17ab3beeda58535231f3d83fd281e8d34c14bec42781e70e7ec",
+    "normalized": "402b776e9f9347ef54ed7fd49ed8a441cb18cc319b89459414c0d412951dd1bc"
+  },
+  ".ai/tasks/dsh-p1-session-request-budget/evidence/overlap-a.log": {
+    "original": "4b28a43d54da4a5a65bf5e67796105eae0ba167ec56b3859e408563f5c9ff211",
+    "normalized": "6758e04ff53d78d0403f91ae902cb9a4f45fd5ba4a8351b20bb272481ca18260"
+  },
+  ".ai/tasks/dsh-p1-session-request-budget/evidence/overlap-b.log": {
+    "original": "d8202195c184a7606fd19a963ab5b5bd593b98b4341f2b81f29c3303db8f233e",
+    "normalized": "639ad34512cbf32280393aae22ea0b9dcaa5a64d58e235fe98caeae790a95c57"
+  },
+  ".ai/tasks/dsh-p1-session-request-budget/evidence/process-step3.log": {
+    "original": "a35179e1a199dca1d8be2ed8bdd93f0d76023219c8443b985550955a45139676",
+    "normalized": "2691af52635b03b1e7ee9a4c8bf61e41eca1f73cff96e6b323c76d8b902c067b"
+  },
+  ".ai/tasks/dsh-p1-session-request-budget/evidence/replays.log": {
+    "original": "cf518ea73a869873ea358496db595d7b939019cf11df5c3407f0efa90440221e",
+    "normalized": "542b9e3083f064ccdafbcd6177d6e53621c70454fa026e4f37120158c4487245"
+  },
+  ".ai/tasks/dsh-p1-session-request-budget/evidence/retained-v3.log": {
+    "original": "e490a52ff43ae6dd3e49c14daf016409c29e92f76c23c73b2d4fb70eade1fb34",
+    "normalized": "b4669fa0d07cb2a5090fd214983f803fa33e59857829cbb61d18c144f18e5e89"
+  },
+  ".ai/tasks/dsh-p1-session-request-budget/evidence/snapshot-refresh.log": {
+    "original": "3c9659167e7c1b80adfdd8a67f84de5fe89aa489035810a599ccf28bd4961557",
+    "normalized": "b1c8db594932edcdb76bff94aaf525fe9ccfd878096d9e6a25c6f4e098f6bf96"
+  },
+  ".ai/tasks/dsh-p1-siwc-loader-session/evidence/dsh-siwc-corpus-replay.log": {
+    "original": "030877e7fc29ce639fa1f36b0e477a23437e93e2b98b74ada25b7e4808844294",
+    "normalized": "49d7e2e50eb20ce64f92f04938c5d940598046c146e6e172b97c1aa7cbdb93e4"
+  },
+  ".ai/tasks/dsh-p1-siwc-loader-session/evidence/dsh-siwc-corpus.log": {
+    "original": "1421efd769420bd46e1f1dbd92e282ffacf2f976c782dc18903704d9e849b2c3",
+    "normalized": "90f7a8cadbd8f072808c5563c6a8e6e310a0d84c136d8b0accebde8086a137f6"
+  },
+  ".ai/tasks/dsh-p1-siwc-loader-session/evidence/dsh-siwc-doc-sync.log": {
+    "original": "ff74206496da2e0f865f8f8b49f0abb2ce6c8cf478e66a40a4ebfacecc7522c4",
+    "normalized": "159b881327ea4c629d01df60f76687b1dbac0b3872b91b33d6034740af434287"
+  },
+  ".ai/tasks/dsh-p1-siwc-loader-session/evidence/dsh-siwc-loader-concurrent.log": {
+    "original": "06639c5ed35225ec855aac5f889e9279f4676dca4fb647b6dcdf138b25d140d1",
+    "normalized": "fae8f0eb07b23a1a42686f4373ecb83f19163033335c07f2bb745bec9cb26931"
+  },
+  ".ai/tasks/dsh-p1-siwc-loader-session/evidence/dsh-siwc-loader-negative.log": {
+    "original": "5922afa3be5172c39e911bb111443c0966e657cf6da9317fc367fb53fd246261",
+    "normalized": "6dbf36390351eea3538fa5c820e5e7554f8aa0f1b05a6688b12b63da54c99c93"
+  },
+  ".ai/tasks/dsh-p1-siwc-loader-session/evidence/dsh-siwc-owner-tests.log": {
+    "original": "d1a5ee7745cf218279611f55e639345e998353cc5167831496a0801d305806ef",
+    "normalized": "0749b0b0c3014b5e7b60c939bfc9f0e1dde6d14c685743aa6a72bec9fe5c7adc"
+  },
+  ".ai/tasks/dsh-p1-siwc-loader-session/evidence/dsh-siwc-snapshot-refresh.log": {
+    "original": "ff4aa38290801303ea1ec413da0abb713a9103f67bca168ac60141f9073cafd5",
+    "normalized": "4b5876cb7033663c2e776c503806727bc1c8572a85f03e389e0b633a6bdf4af5"
+  },
+  ".ai/tasks/dsh-p1-siwc-loader-session/evidence/dsh-siwc-snapshot-replay.log": {
+    "original": "751fbb45be4d06f7db09e288c0c14186c8d532d21f0211655765f7ba1f55c68b",
+    "normalized": "46276605e07ba85ff215a6f1f2019fb7366206fdd1458dd4ef8de9e368be3afe"
+  },
+  ".ai/tasks/dsh-p1-siwc-loader-session/evidence/lint-result.txt": {
+    "original": "9a824c4e13f874fae9e0917e3ff5abbe0b211a5f0df3fc87e381a71a114a2b4c",
+    "normalized": "441f0072f91568e975f6aeafc76425e4e5544aa4387f2073b72466d4f1994313"
+  },
+  ".ai/tasks/dsh-p1-turn-usage-source/evidence/before.log": {
+    "original": "7c4094205ce661f8d6c443f83366bf97284f5f882889f684f9e96d06585c22d1",
+    "normalized": "8f8484ee35dc000eea84692e77cef68bdfcff26d7632b752624ae6194763df6a"
+  },
+  ".ai/tasks/dsh-p1-turn-usage-source/evidence/build-final.log": {
+    "original": "8bd1387f4a86c60051e31ca9b5d3dd79b1ad803a652f35dd8e375c9d0eb911b3",
+    "normalized": "e641501543d6dcb4bd90002daa9ad305051476d87fdd9c6a7f5f7d1e3de8a847"
+  },
+  ".ai/tasks/dsh-p1-turn-usage-source/evidence/corpus.log": {
+    "original": "cbdff68e1c2fc1b3850552aa1ef33a5ac3e060a24bd77b34b727b3e3f4b71a48",
+    "normalized": "c891cd4ad28bb2fc42cba86ce6e88045284602408904eef3c8b4508e976b6573"
+  },
+  ".ai/tasks/dsh-p1-turn-usage-source/evidence/coverage.log": {
+    "original": "9566a525ffa757f38ef42b985e1017658889daf61a147435890bac7e78f502fb",
+    "normalized": "2b9b180fc1eb633f7b358f36df0e5d360deab7e9ceb6d0f446398830e080cb24"
+  },
+  ".ai/tasks/dsh-p1-turn-usage-source/evidence/doc-sync.log": {
+    "original": "b3ff3064d04710cdcdc28fe6a01dcbf33a5088f6a58e317717b26e44505474af",
+    "normalized": "1b5f0f31729a8481a17919ca22c92c02b4d1a96c95240f9f35d14e4bde232107"
+  },
+  ".ai/tasks/dsh-p1-turn-usage-source/evidence/final-owners.log": {
+    "original": "12473ebe4121969061c701c1f0345c0c728f8d7a05c26afcb9c4838abf4df33e",
+    "normalized": "36e6e7104b28fd2eb0a1ce3bc70c1c8435b8a4b86bc5337620b7aff4f456d1ed"
+  },
+  ".ai/tasks/dsh-p1-turn-usage-source/evidence/step2-coverage.log": {
+    "original": "52e029ac6c2576d6d3b99351f4b00a782ab66c07f053515e7d17c205f0ac04d9",
+    "normalized": "e6ca8a1c0f4b1381af4e539c4f05667b5bd0342a8671695ca05a8ad7939379fe"
+  },
+  ".ai/tasks/dsh-p1-turn-usage-source/evidence/web-refresh.log": {
+    "original": "7f83e59bf544eb06d525978b36ea706e07017b61f88689d67a73171211452840",
+    "normalized": "71e3c85e075f8fb03219bc6b08320cb3f0d61239541515da466e5c0f866ecc56"
+  },
+  ".ai/tasks/dsh-p1-turn-usage-source/evidence/web-replay.log": {
+    "original": "6f83cd739ded177dda4329e9bb5a571e96dab0fc2161b3d8d506a5065ef85346",
+    "normalized": "bf70be3815dfd5e74f5c5ae2fef7f0bae43ade6098c5e605730ebf9150d2ab61"
+  },
+  ".ai/tasks/dsh-p1-usage-measurement/evidence/coverage-step2.log": {
+    "original": "3da0a16bd47e79a19e417ab97ff2a2b8440feac5c66fbb79d0d53067041600c3",
+    "normalized": "f76be3ab5b84a57fa65e21efdfa94052ca2b839bd0b1810035ceef65a1e90eaf"
+  },
+  ".ai/tasks/dsh-p1-usage-measurement/evidence/dsh-usage-measurement-build-final.log": {
+    "original": "d39122ef114e8b185343505e14e4235ca84b4ea6417748e695705c1aaf230d33",
+    "normalized": "55ca93ba8391a959ea3fa06b4b5b9380b471cbdca514d4a850fbe12fd1b9d123"
+  },
+  ".ai/tasks/dsh-p1-usage-measurement/evidence/dsh-usage-measurement-build2.log": {
+    "original": "f60d5a1846b20b9a78a1004e5d6de8c863d9696f49e153205308391f600e8da2",
+    "normalized": "10efe62965d4e6309ba37138957ae9a933960eacf910d19481862379e6dba374"
+  },
+  ".ai/tasks/dsh-p1-usage-measurement/evidence/dsh-usage-measurement-build3.log": {
+    "original": "e75fa9812a570407a3c7a3e237825f15eaca6f6e16f545a6461c950a202af363",
+    "normalized": "2ceefabfc20df06af8f91b12baad3a3391fb636af6d85f20538b330a1f4a16f4"
+  },
+  ".ai/tasks/dsh-p1-usage-measurement/evidence/dsh-usage-measurement-corpus.log": {
+    "original": "7e3e8c3640f81fe846239477324d6246e230796c1849f588dd732b0f433ba9b8",
+    "normalized": "391c8ff5191d144de84e1bd7c117b6ab1306846f18e6cc77754a4313b82ba7a3"
+  },
+  ".ai/tasks/dsh-p1-usage-measurement/evidence/dsh-usage-measurement-coverage.log": {
+    "original": "3da0a16bd47e79a19e417ab97ff2a2b8440feac5c66fbb79d0d53067041600c3",
+    "normalized": "f76be3ab5b84a57fa65e21efdfa94052ca2b839bd0b1810035ceef65a1e90eaf"
+  },
+  ".ai/tasks/dsh-p1-usage-measurement/evidence/dsh-usage-measurement-doc-sync.log": {
+    "original": "e6fa237c01b1f0adea382ea1040e899cff259c4500eadbf93c45e4041e6f0944",
+    "normalized": "d38fc4ce26fe00d6b051d68a561fec0cd5d79b98053bb130c1c54b95118a7f7f"
+  },
+  ".ai/tasks/dsh-p1-usage-measurement/evidence/dsh-usage-measurement-first.log": {
+    "original": "040047fa7797e0bb50c114bd6d22ff8365f7cc763d1dc8d833372dc9187b967a",
+    "normalized": "f157924b98e58542ebd74e7cfdd9e281529f3e2f6462d780dba982d2fa3f8897"
+  },
+  ".ai/tasks/dsh-p1-usage-measurement/evidence/dsh-usage-measurement-invalid-record.log": {
+    "original": "a474b2839be8288e43aeb329364907d38b274ede0d43f1cc4cda690d6ab26254",
+    "normalized": "feab25e09aabd73ac7c433700b3f19bcfed87df498cf1729c56918afe44916d8"
+  },
+  ".ai/tasks/dsh-p1-usage-measurement/evidence/dsh-usage-measurement-owners-final.log": {
+    "original": "754f678eb583f4a34e6564ee2babb28031f4937dd4d71211e9741be5ae720663",
+    "normalized": "82dd0417c0b0370dfe2a32b18a0af02308e4e6933865108bd8e5af5af249a230"
+  },
+  ".ai/tasks/dsh-p1-usage-measurement/evidence/dsh-usage-measurement-owners1.log": {
+    "original": "ce234e966738af60634f33e96358d6988eede6968787f6a9c600223ec5c31456",
+    "normalized": "bb1dbe5aad7d87c9506d8656614aa1cfe12d696c66b360425f4056b564c79def"
+  },
+  ".ai/tasks/dsh-p1-usage-measurement/evidence/dsh-usage-measurement-red.log": {
+    "original": "cb615075d9a0e5384b0065432e1cc7d8deed715a40a675210bfa9cc9ebc9031c",
+    "normalized": "f19a6835abbb6f4cbb4b554232ca33b4bd6911e3a2e13140c87be13aca030306"
+  },
+  ".ai/tasks/dsh-p1-usage-measurement/evidence/dsh-usage-measurement-snapshot-refresh.log": {
+    "original": "06d00e2b78d36d86730771f1c3b6544327825d452e843804c6c503d887e231af",
+    "normalized": "408323ee539c9741b4c46ff3635ecf8134bfcf6d7d308fd92eca2c4d2a8c81d7"
+  },
+  ".ai/tasks/dsh-p1-usage-measurement/evidence/dsh-usage-measurement-snapshots-final.log": {
+    "original": "d62c2db4fdc5a321f7aa2e8f16d85444fbe6d7095cc1362067b217b3b4922fd9",
+    "normalized": "67cce2d88c8a0cf0269e52300c5c9288f90b7ae1db78cdf26ccae648ed3042e9"
+  },
+  ".ai/tasks/dsh-p1-usage-measurement/evidence/dsh-usage-measurement-web-refresh.log": {
+    "original": "df67386332ac856c9da076b934c2abda13dbe7d26b7ce55ddadd97acf6b9b971",
+    "normalized": "79d0f4094b9db12d02e2527140d67a2c504fd4186e60630773bc6ada757c8346"
+  },
+  ".ai/tasks/dsh-p1-usage-measurement/evidence/dsh-usage-measurement-web-replay.log": {
+    "original": "a476086f36100a5dcb51e5f914fba9b7d6cf40f1b7bab0d5501e3a3ce79ec7df",
+    "normalized": "411d4dab8120bf08b94355af44e764d90252030fe367597718eebea55949cc59"
+  },
+  ".ai/tasks/dsh-p1-usage-measurement/evidence/failure-first.log": {
+    "original": "cb615075d9a0e5384b0065432e1cc7d8deed715a40a675210bfa9cc9ebc9031c",
+    "normalized": "f19a6835abbb6f4cbb4b554232ca33b4bd6911e3a2e13140c87be13aca030306"
+  },
+  ".ai/tasks/dsh-p1-usage-measurement/evidence/negative-sdk-truncated.log": {
+    "original": "8dc54692c489c3e7665601dc646ff0af27cc0a55b8a7febe06aac2c1533dcc9f",
+    "normalized": "3f5d632a17fe33e0b81c677c163ec55f5f11dab238861b4771289fdeab38f6ff"
+  },
+  ".ai/tasks/dsh-p1-usage-records/evidence/before.log": {
+    "original": "2023cac77167d8c9cde116b6bab2be2cf7fc1571ca6be548c2deb9cba324a1d1",
+    "normalized": "20520a8833a59dc8170548de127efc3bd4abf423fb92a36f319de36eb4afdcbd"
+  },
+  ".ai/tasks/dsh-p1-usage-records/evidence/corpus-final.log": {
+    "original": "3b7014a92d60b85c70898d3ed2963751df8413c026367a959a05d0c3d85176a1",
+    "normalized": "fbe996e85402b7a28628fba52decc36380d6013fc332793e74ee8276760e84e9"
+  },
+  ".ai/tasks/dsh-p1-usage-records/evidence/doc-sync.log": {
+    "original": "0aeffeaa90d64362a2cd0b30f30f4737e089c9f06922d7043e366551d61f3196",
+    "normalized": "ed608eaee69c77b1b511e7673c21cebd43ce5e3dbe576d466ff718447650b99b"
+  },
+  ".ai/tasks/dsh-p1-usage-records/evidence/native-replays-final.log": {
+    "original": "ac5f6b5ecedbd7b27d586f75554932a86724d6a5f48f395030d0c68010b192ea",
+    "normalized": "51b95837b27ed87445aa48789bafb1e34712afaf99d6fd034f97b1c020887c05"
+  },
+  ".ai/tasks/dsh-p1-usage-records/evidence/owners-final.log": {
+    "original": "7607efa853a75322a711b11214fddea45ad7b1f5056f6dd0e37830e3ad84a6ea",
+    "normalized": "4d60f0eaf6c7ee7567f1729a507f093c3f935aef2307c447986cdb0a52c95faf"
+  },
+  ".ai/tasks/dsh-p1-usage-records/evidence/owners-step3.log": {
+    "original": "4587940f9123fde06169c0756667be09f47fceaa55004841f9d08f7300ef5ac2",
+    "normalized": "a1d5ac20893fd559d52adf375e64c25c02ebced0e3ac3782d4e19c7c2164bd76"
+  },
+  ".ai/tasks/dsh-p1-usage-records/evidence/replay-after.log": {
+    "original": "4121e3b827fc8d92abb8e8279ab56ed725b32c58f76516a64584b0c92c533598",
+    "normalized": "09cb0cdd5f000cbd234a27f07d5073ace22e292dd3f56757488b2c23327f2924"
+  },
+  ".ai/tasks/dsh-p1-usage-records/evidence/replay-before.log": {
+    "original": "5638bb0dff09cf730b65a08f1f15ec0f4280c3501d3cc3e3fc520785fedfc74f",
+    "normalized": "99816b9da91dc5bf59d011cd2ccd7ee33b4e14231d17804a78a8fd4617684e0f"
+  },
+  ".ai/tasks/dsh-p1-usage-records/evidence/retry-final.log": {
+    "original": "3a957a67a47e425ee78fc995fe4a2e000394ebf7433c5f5754647fddfb832568",
+    "normalized": "e63fc0b9a2bebf1f97d5fda5b2c80dca63f9f58420763857244523c684186d1d"
+  },
+  ".ai/tasks/dsh-p1-usage-records/evidence/sdk-refresh-restored.log": {
+    "original": "e0a047e4544535dbce3128ad3702dca05132e101234d920270a259bf695c87c1",
+    "normalized": "d48bf0c650cb8d43a21c03e92c5598373fb2c9f01d1fba227f89cc85fb074d69"
+  },
+  ".ai/tasks/dsh-p1-usage-records/evidence/unit-step2.log": {
+    "original": "1d0cae90b6f2d390d08708f32b1d88ae2d50ea2d4056ac4b5ba1ffccd8670d25",
+    "normalized": "dd208b8ba8c200db02ed42d0bc454cf29731bdd1dcc7bd12fad26017390486be"
+  },
+  "packages/guard/paid-route-policy/tests/adapter.ts": {
+    "original": "ace3edef691b705023beda936879349e2ce119a89a66f56a21bf5e8e00fda0e7",
+    "normalized": "a55d19a531f29ff276c73bdccc7dfe783a0af8b8f89b59f30cc7f02204479b0d"
+  }
+}

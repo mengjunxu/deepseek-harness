@@ -465,6 +465,8 @@ interface ModelSelectionCapture {
 ```ts type-equiv
 /** One explicit route; omission of effort restores the chosen model's default. */
 interface ConfiguredIntentRoute {
+  /** Native JSON Schema response requested for this intent, when set. */
+  responseFormat?: LlmResponseFormat
   /** Fixed-route mode; omission preserves the configured route. */
   selection?: 'configured'
   /** Registered provider route. */
@@ -481,6 +483,8 @@ interface ConfiguredIntentRoute {
 ```ts type-equiv
 /** Use the entry's current model selection while retaining this intent's requirements. */
 interface EntryIntentRoute {
+  /** Native response schema applied to the entry-selected model. */
+  responseFormat?: LlmResponseFormat
   /** Resolve through the installed entry selection owner; absence fails before a request. */
   selection: 'entry'
   /** Capabilities required of the user-selected route. */

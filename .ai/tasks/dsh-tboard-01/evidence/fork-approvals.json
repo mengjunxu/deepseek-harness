@@ -1,0 +1,22 @@
+[
+  {
+    "case": "allowed-once",
+    "tool": "write"
+  },
+  {
+    "case": "rejected",
+    "tool": "write"
+  },
+  {
+    "case": "cancelled",
+    "tool": "write"
+  },
+  {
+    "case": "bad-result",
+    "tool": "write"
+  },
+  {
+    "case": "grant-after-close",
+    "fileWritten": false
+  }
+]

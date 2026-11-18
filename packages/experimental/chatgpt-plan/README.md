@@ -29,7 +29,7 @@ Mount the built plugin beside `llm`, `credentials`, `authorization`, the authent
 
 The repository validation starts the normal `web` profile with an absolute-path overlay pointing at this package’s built `lib/index.js`, fresh data directories and the in-page picker overlay. See the [task record](../../../.ai/tasks/dsh-siwc-ui/plan.md) for commands and the distinction between tests and live evidence.
 
-In Settings → Models, choose Continue with ChatGPT, then open the sign-in page. Complete consent in the browser. The settings card shows the validated account and plan usage; the model picker reads that account’s current model list. Manage usage opens ChatGPT settings. Disconnect requires confirmed remote revocation before clearing local tokens; a network failure retains the account for retry.
+In Settings → Models, choose Continue with ChatGPT, then open the sign-in page. Complete consent in the browser. The settings card shows the validated account and plan usage; the model picker reads that account’s current model list. Manage usage opens ChatGPT settings. Disconnect requires confirmed remote revocation before clearing local tokens; a network failure retains the account for retry. The configured credential store preserves the account and usage acknowledgement across Host restarts.
 
 | Field | Default | Meaning |
 |---|---|---|
@@ -50,11 +50,13 @@ Streaming text does not complete a request. The stream must reach a terminal res
 <details>
 <summary>Implementation internals — click to expand</summary>
 
+The `./types` subpath exposes account-state declarations only. The published browser implementation is `lib/client.js`, with styles embedded by the Client build. The exported `cordis.patch.yml` is an explicit mounting patch; publishing it does not activate the plugin.
+
 The authorization flow owns PKCE, state, nonce and the temporary loopback listener. OpenID Connect verification checks the issuer, signature, audience, expiry and account identity before committing the grant through the existing authorization service. The issued client ID and host identity survive sign-out; access, refresh and ID tokens never cross Remote or enter Session events. Refresh uses the credential provider’s cross-process mutation lock.
 
 The adapter reuses pi-ai request-history and stream conversion. The SIWC payload preserves conversation history and system instructions, uses `store: false` and `stream: true`, and groups function definitions in a namespace with the required description. Explicit subscription-limit failures map to QUOTA; usage-check unavailability maps to SERVER, and other HTTP 429 responses from account requests map to RATE_LIMIT. Account-request failures retain the endpoint path, HTTP status, request ID when present, and response body. A subscription limit can apply to this app even when the account has remaining usage; manage app limits in ChatGPT settings → Usage. HTTP redirects are refused for credential-bearing requests.
 
-No `./invariant` installer is published: credential records are the sole account authority, state views read those records directly, and framework-owned registrations have no independent package-maintained index to compare.
+No runtime invariant companion is published; credential records are the sole account authority, state views read those records directly, and framework-owned registrations have no independent package-maintained index to compare.
 
 </details>
 
@@ -102,4 +104,4 @@ The current integration is local and experimental.
 <a id="dev-note"></a>
 ### Dev Note
 
-Live UI acceptance and recording status belong in the linked task checkpoint.
+Keyless [Loader tests](tests/loader.spec.ts) cover explicit enablement, configuration rejection, account reuse after restart and stream cancellation on removal. The [recorded Session](../../../snapshots/session/siwc-text-turn/snapshot.yml) drives the production SIWC adapter through the shipped headless profile with isolated Responses transport. Real-account long-response and UI/GIF acceptance remain pending in the [verification task](../../../.ai/tasks/dsh-p1-siwc-loader-session/handoff.md).

@@ -1,0 +1,3 @@
+$ tsx scripts/verify-translation-pairing.ts --write packages/experimental/chatgpt-plan/README.md
+verify-translation-pairing: recorded packages/experimental/chatgpt-plan/README.i18n.yaml
+verify-translation-pairing: 1 record(s) written; run the check to validate the pairs.

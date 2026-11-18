@@ -1,0 +1,12 @@
+{
+  "en": {
+    "summary": "Adds optional token-counter measurement to native usage samples and their accounting records.",
+    "compatibility": "TokenUsage gains optional measurement: provider-reported or estimated. Absent metadata remains unknown; payment source never supplies a default. Existing Session records stay valid and the envelope/storage versions are unchanged. Request-accounting cache version3 rebuilds version1/2 input from events; preparation caches remain version2. Released generation codecs and existing retained V3 inputs are unchanged.",
+    "verification": "749 affected source/client tests pass, with changed runtime executable coverage100%. Native headless and TypeScript SDK scenarios refresh successfully; Python SDK passes eight cases, including explicit estimated accounting. Removing only built accounting measurement fails the fixed Python SDK oracle; restoring exact artifact bytes passes. Actual Web native calls disclose reported/estimated samples with and without accounting, independently of cost source; legacy records remain unclassified. Retained V3 inputs are unchanged and current V4 is produced by the real writer. Final aggregate documentation gates are recorded in the owning Task; no real provider account or billing claim."
+  },
+  "zh": {
+    "summary": "为原生用量样本及其记账记录增加可选的 token 计数口径。",
+    "compatibility": "TokenUsage 增加可选 measurement：provider-reported 或 estimated。缺失元数据保持未知，不从费用来源填默认值。既有 Session 记录仍有效，信封及存储版本不变。请求记账缓存版本3从事件重建版本1/2输入；准备审计缓存保持版本2。已发布代际编解码器与既有保留 V3 输入不变。",
+    "verification": "749 项相关源码/客户端测试通过，变更运行时可执行覆盖率100%。原生 headless 与 TypeScript SDK 场景刷新通过；Python SDK 八项用例通过，包括显式估算记账。仅移除构建产物中的记账口径会使 Python SDK 固定断言失败；恢复完全相同产物字节后通过。真实 Web 原生调用在启用/关闭记账时均展示报告/估算口径，独立于费用来源；旧记录仍不分类。保留 V3 输入不变，当前 V4 由真实写入器生成。最终文档汇总门禁记录于拥有者 Task；不声明真实提供方账号或计费验证。"
+  }
+}

@@ -1,0 +1,5 @@
+lib/welcome/welcome.js                154.65 kB │ gzip: 49.82 kB
+✓ built in 434ms
+
+> @deepseek-ai/dsh-root@0.1.7-rc.2 lint:contracts-ready
+> tsx scripts/run-oxlint.ts .

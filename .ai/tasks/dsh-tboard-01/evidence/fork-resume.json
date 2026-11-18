@@ -1,0 +1,15 @@
+{
+  "restored": true,
+  "occupiedRefused": true,
+  "historyInNextRequest": true,
+  "missingRejected": true,
+  "requests": [
+    [
+      "g0-attach"
+    ],
+    [
+      "g0-attach",
+      "g0-continue"
+    ]
+  ]
+}

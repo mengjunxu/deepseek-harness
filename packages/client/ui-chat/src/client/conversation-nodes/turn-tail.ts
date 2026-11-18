@@ -9,6 +9,7 @@ import type {
   AssistantChatData, FinalAssistantChatData, TurnTailChatData,
 } from '../contract/chat-nodes.ts'
 import { CHAT_SYNTHETIC_SEQ_OFFSETS, chatNode } from './common.ts'
+import { requestAccountingDefinition } from './request-accounting.ts'
 
 declare module '../contract/chat-nodes.ts' {
   interface ChatNodeDataMap {
@@ -87,8 +88,13 @@ function tailData(context: ConversationNodeContext<TurnTailState>): TurnTailChat
       latestTranscriptSeq = candidate
     }
   }
-  const tokenUsage = context.start?.event.type === 'turn/start'
-    ? deriveTurnTokenUsage(context.matches.map(match => match.event).filter(isSessionEvent))
+  const startSeq = context.start?.event.type === 'turn/start' ? context.start.event.seq : undefined
+  const tokenUsage = startSeq !== undefined
+    ? deriveTurnTokenUsage([
+      ...context.matches.map(match => match.event).filter(isSessionEvent),
+      ...turn.steps.flatMap(step => step.data.get('request-accounting') ?? [])
+        .filter(event => event.seq < end.event.seq),
+    ].toSorted((left, right) => left.seq - right.seq))
     : undefined
   return {
     turn: end.event.data.turn,
@@ -144,5 +150,6 @@ export const turnTailDefinition: ConversationNodeDefinition<TurnTailState> = {
  * @param ctx - owning UI Conversation context.
  */
 export function registerTurnTailConversationNode(ctx: Context): void {
+  ctx.uiConversation.events.register(requestAccountingDefinition)
   ctx.uiConversation.events.register(turnTailDefinition)
 }

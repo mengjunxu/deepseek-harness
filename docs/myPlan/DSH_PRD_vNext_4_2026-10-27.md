@@ -359,7 +359,7 @@ FR-TB 指工具桥；TBOARD 和 FR-TASK 指任务工作台。专题 PRD 的 FR01
 |---|---|---|
 | FR-TASK-01 | 项目目录与接入检查；任务字段、排序、搜索、筛选和受状态规则约束的拖拽；启动前有目标和至少一条验收标准 | FR01–FR02；AC01、AC15、AC19 |
 | FR-TASK-02 | 需求修改产生版本；Run 固定输入快照；评论、历史执行和更正可追溯，重试不覆盖旧记录 | FR03–FR04；AC03–AC04 |
-| FR-TASK-03 | 启动幂等；同一任务、Session 和工作目录只有一个活动所有者；每次 Run 独占 runtime，停止须确认其退出；重试和继续均创建新 Run | FR05、FR07–FR09；AC02、AC11–AC13、AC15、AC17–AC18 |
+| FR-TASK-03 | 启动幂等；同一任务、Session 和工作目录只有一个活动所有者；每次 Run 独占 runtime，停止须确认其退出；重试和继续均创建新 Run；更换工作目录时新建 Session、保留原记录，材料由用户显式选择继承 | FR05、FR07–FR09；AC02、AC11–AC13、AC15、AC17–AC18 |
 | FR-TASK-04 | 真实事件驱动进度；待回答、待审批与连接状态分别展示；去重、乱序及重启对账不回退终态，未知输入接纳结果不盲目重发 | FR06、FR08、FR13；AC09–AC10、AC13–AC14 |
 | FR-TASK-05 | Delivery 绑定需求版本、Run、代码快照和逐条验证证据；提供只读 Diff；验收前核对需求、HEAD、未提交修改及纳入交付的未跟踪文件，需求过期或代码变化阻止接受旧交付 | FR10–FR12；AC05–AC08 |
 | FR-TASK-06 | 仅用户可接受、退回或记录验证豁免；无活动 Run、未决问题/审批且交付有效才可验收；完成后显式重开或新建关联任务，历史 Review 保留 | FR12–FR14；AC05–AC10 |
@@ -369,11 +369,11 @@ Task 的业务状态为 `backlog / todo / in_progress / in_review / blocked / do
 
 ### 9.4 接入方案与实施前决策
 
-专题 PRD 的默认提案为独立本地 Web 任务台，经官方 TypeScript SDK Adapter 驱动 Harness；原生插件入口列为后续扩展。这与本 PRD 的 D-01 原生 UI 优先及主 Plan 的复用要求存在差异，须由 TBOARD-00 在 G0 对独立外壳或原生入口、部署方式和数据拥有者形成决策；本次需求合并不批准平行 Daemon、重复 Task Store 或第二份 Session 权威。Task 业务状态由一个任务服务持有，Harness Session 日志继续拥有模型与工具事实，二者以引用关联。
+2026-11-16 用户确认首版工作台位于现有 DSH Web 内，复用 Web Host 与认证。任务服务持有业务库，每个 Run 经官方 TypeScript SDK 启动独占 runtime。 Harness Session 日志继续拥有模型与工具事实，业务库以引用关联。
 
 G0 须验证并冻结 Harness/SDK/runtime/操作系统组合、Session 创建与恢复、问题和审批语义、目标 runtime 停止隔离及目录归属；SDK 驱动 Harness 的方式不等于已接入 Codex/Codely 原生执行器。Provider/Executor 独立选择和既有费用/权限规则继续适用；启动沿用受支持的 dsh profile。任务级工具只允许受服务端绑定作用域的读取、进度、评论、阻塞和交付，不授予 Agent 人工完成或豁免权限。
 
-原生插件入口、有限并行、依赖关系和受控自动领取属于 G3；团队账号、PR/CI 和跨设备能力按 G4 与主 Plan 现有任务映射。Taskboard 的成本预算扩展不降低主产品已经要求的额度透明和付费授权。界面性能及可靠性数字仍是待验证目标，完整指标以专题 PRD 第 12–14 节为准。
+有限并行、依赖关系和受控自动领取属于 G3；团队账号、PR/CI 和跨设备能力按 G4 与主 Plan 现有任务映射。Taskboard 的成本预算扩展不降低主产品已经要求的额度透明和付费授权。界面性能及可靠性数字仍是待验证目标，完整指标以专题 PRD 第 12–14 节为准。
 
 ---
 
@@ -387,7 +387,7 @@ G0 须验证并冻结 Harness/SDK/runtime/操作系统组合、Session 创建与
 | **M2：Web 平级 Provider 产品化** | 基于前置验证完善独立插件、平级 UI、状态/诊断及可靠性；生产真实访问单独准入 | M2 不用于推迟第一优先验证，也不以 PoC 替代产品验收 |
 | **M3：可靠性与多端** | ContextEpoch、Checkpoint、QuotaPolicy、Executor 切换、Worker | 状态可恢复且不乱执行 |
 | **M4：可选 Tool Bridge** | MCP Gateway、Scoped Broker、ChatGPT 反向工具能力、长任务 | Tool Bridge 与 Executor 区分 |
-| **Taskboard MVP（G0–G2）** | 接入验证、看板/详情、版本化执行与交付、人工验收、恢复及备份 | 对应主 Plan 第 16 节；G2 通过才可发布，不以 G1 演示替代可靠性验收；独立入口待 G0 决策 |
+| **Taskboard MVP（G0–G2）** | 接入验证、看板/详情、版本化执行与交付、人工验收、恢复及备份 | 对应主 Plan 第 16 节；G2 通过才可发布，不以 G1 演示替代可靠性验收；首版入口复用现有 DSH Web |
 | **后续 TODO** | Agent 动态生成 Workflow、更多 Agent/Provider、复杂跨设备调度策略 | 不回填首期强制需求 |
 
 > Web 前置验证先于剩余里程碑工作；其完成或明确不可行结论由实际证据判断。M0–M4 是产品能力里程碑，不直接替换历史 V0–V2 研发阶段编号；开发 Plan 要依据仓库实际完成情况做增量映射。
@@ -459,6 +459,6 @@ Taskboard 增补验收沿用[专题 PRD 第 13–14 节](DeepSeek_Harness_Taskbo
 | D-07 | DSH 自行管理 Session/Memory/Task/Run/Checkpoint；额度来源、切换和权限透明 |
 | D-08 | 采用模板化自适应 Workflow + 用户 Override；Agent 动态 Workflow 属未来 TODO |
 | D-09 | Web ChatGPT Provider 的真实可行性是当前第一优先验证项；以 codex-chatgpt-web 为参考，Browser-only 不依赖 Full Harness/Executor，Mock 与真实结论分开 |
-| D-10 | Taskboard MVP 采用任务/执行/交付分离与人工验收；独立本地 Web 外壳仍为 G0 待决提案，不覆盖 D-01 或现有数据归属 |
+| D-10 | Taskboard MVP 采用任务/执行/交付分离与人工验收；首版工作台嵌入现有 DSH Web，复用 Host 和认证 |
 
 **本 PRD 是产品设计基线；任何与 vNext.2/vNext.3 相反的流程图和优先级描述，应以本版 D-01～D-10 为准。**

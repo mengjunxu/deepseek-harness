@@ -13,6 +13,24 @@ const t = makeTranslate(en, commonEn)
 afterEach(cleanup)
 
 describe('TurnUsagePanel', () => {
+  it.each(['provider-reported', 'estimated', 'mixed', undefined] as const)('discloses the %s counter measurement', (measurement) => {
+    const usage: TurnTokenUsage = { uncachedInputTokens: 10, outputTokens: 3, totalTokens: 13,
+      ...measurement === undefined ? {} : { measurement } }
+    const view = render(<TurnUsagePanel usage={usage} t={t} />)
+    fireEvent.click(view.getByRole('button'))
+    expect(view.container.ownerDocument.querySelector('[data-turn-usage-measurement]')?.textContent)
+      .toBe(measurement === 'provider-reported' ? 'Reported by provider'
+        : measurement === 'estimated' ? 'Estimated' : measurement === 'mixed' ? 'Mixed / partly unknown' : 'Unknown')
+  })
+  it('discloses the captured cost source for the recorded route', () => {
+    const usage = { uncachedInputTokens: 10, outputTokens: 3, totalTokens: 13,
+      routes: [{ provider: 'route', model: 'm', usageSource: 'local' as const }] }
+    const view = render(<TurnUsagePanel usage={usage} t={t} />)
+    fireEvent.click(view.getByRole('button'))
+    expect(view.getByRole('dialog').textContent).toContain('Cost source')
+    expect(view.getByRole('dialog').textContent).toContain('Local')
+  })
+
   it('shows an icon-and-total pill and opens the usage dialog on click', () => {
     const usage: TurnTokenUsage = {
       uncachedInputTokens: 5_060,
@@ -21,12 +39,13 @@ describe('TurnUsagePanel', () => {
       outputTokens: 5_800,
       reasoningTokens: 42,
       totalTokens: 15_800,
-      routes: [{ provider: 'deepseek', model: 'deepseek-chat' }],
+      routes: [{ provider: 'deepseek', model: 'deepseek-chat', usageSource: 'unknown' }],
     }
     const view = render(<TurnUsagePanel usage={usage} t={t} />)
 
     const trigger = view.getByRole('button')
     expect(trigger.textContent).toBe('Usage 15.8K tok')
+    expect(trigger.getAttribute('aria-label')).toBe('Usage 15.8K tok')
     expect(trigger.querySelector('svg')).not.toBeNull()
     expect(trigger.getAttribute('aria-haspopup')).toBe('dialog')
     expect(trigger.getAttribute('aria-expanded')).toBe('false')

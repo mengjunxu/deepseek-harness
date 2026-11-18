@@ -4,10 +4,28 @@ import { createPortal } from 'react-dom'
 import { IconDatabaseOutlineRegular } from '@deepseek-ai/dsh-client-ui-primitives'
 import type { TurnTokenUsage } from '../contract/chat-nodes.ts'
 import type { ChatViewSlotProps } from '../contract/slots.ts'
+import type { LlmUsageSource } from '@deepseek-ai/dsh-llm/types'
 import { formatCacheHitPercent, formatExactTokens, formatTokens } from './token-format.ts'
 import { MEASURE_STYLE, useStatDialog } from './stat-dialog.ts'
 import css from './TurnUsagePanel.module.css'
 import dialogCss from './stat-dialog.module.css'
+
+const sourceKeys = {
+  work_codex_shared: 'message.turnUsage.source.workCodex',
+  chatgpt_web_unofficial: 'message.turnUsage.source.web',
+  api_metered: 'message.turnUsage.source.api',
+  third_party: 'message.turnUsage.source.thirdParty',
+  local: 'message.turnUsage.source.local',
+  experimental_unverified: 'message.turnUsage.source.experimental',
+  unknown: 'message.turnUsage.source.unknown',
+} as const satisfies Record<LlmUsageSource, string>
+
+const measurementKeys = {
+  'provider-reported': 'message.turnUsage.measurement.reported',
+  estimated: 'message.turnUsage.measurement.estimated',
+  mixed: 'message.turnUsage.measurement.mixed',
+  unknown: 'message.turnUsage.measurement.unknown',
+} as const satisfies Record<NonNullable<TurnTokenUsage['measurement']> | 'unknown', string>
 
 export interface TurnUsagePanelProps {
   usage: TurnTokenUsage
@@ -35,19 +53,21 @@ export function TurnUsagePanel({ usage, t }: TurnUsagePanelProps) {
     ? null
     : formatCacheHitPercent(usage.cacheReadTokens, usage.totalTokens - usage.outputTokens, 1)
   const total = formatCompactCount(usage.totalTokens, t)
-  const routes = usage.routes?.map(route => `${route.provider}/${route.model}`).join(', ') ?? ''
+  const label = t('message.turnUsage.consumed', { total })
+  const routes = [...new Set(usage.routes?.map(route => `${route.provider}/${route.model}`))].join(', ')
 
   return (
     <span ref={rootRef} className={css.root}>
       <button
         type="button"
         className={css.trigger}
+        aria-label={label}
         aria-haspopup="dialog"
         aria-expanded={open}
         onClick={() => { setOpen(!open) }}
       >
         <IconDatabaseOutlineRegular />
-        <span className={css.label}>{t('message.turnUsage.consumed', { total })}</span>
+        <span className={css.label}>{label}</span>
       </button>
       {open && createPortal(
         <div
@@ -72,6 +92,18 @@ export function TurnUsagePanel({ usage, t }: TurnUsagePanelProps) {
                 <dd className={dialogCss.route}>{routes}</dd>
               </>
             )}
+            <dt>{t('message.turnUsage.source')}</dt>
+            <dd className={dialogCss.route} data-turn-usage-source>
+              {usage.routes?.length ? usage.routes.map(route => (
+                <div key={`${route.provider}\0${route.model}\0${route.usageSource}`}>
+                  {t('message.turnUsage.sourceRoute', {
+                    source: t(sourceKeys[route.usageSource]), route: `${route.provider}/${route.model}`,
+                  })}
+                </div>
+              )) : t(sourceKeys.unknown)}
+            </dd>
+            <dt>{t('message.turnUsage.measurement')}</dt>
+            <dd data-turn-usage-measurement>{t(measurementKeys[usage.measurement ?? 'unknown'])}</dd>
             {cacheHit !== null && (
               <>
                 <dt>{t('message.turnUsage.cacheHit')}</dt>

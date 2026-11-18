@@ -1,0 +1,8 @@
+{
+  "normalShutdownAcknowledged": true,
+  "targetRuntimeExited": true,
+  "targetChildGone": true,
+  "peerStillRunning": true,
+  "peerChildGoneAfterOwnClose": true,
+  "totalStopMs": 110
+}

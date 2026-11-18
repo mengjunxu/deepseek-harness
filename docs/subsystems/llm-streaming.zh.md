@@ -12,6 +12,25 @@
 
 `LlmValidationAdmission` 是进程内例外，限定显式选择的非默认 Harness home、单一 gated Web 路线、精确模型标识、绝对过期时间和有界准备额度。普通注册仍拒绝 gated 推理。替换共享额度并撤销旧代次；分派前重新检查过期和撤销状态。字段声明见 [validation-admission.ts](../../packages/llm/llm/src/validation-admission.ts)；[LLM README](../../packages/llm/llm/README.zh.md)负责配置及运行限制。
 
+## 按量计费路线预设策略
+
+可选[付费路线策略](../../packages/guard/paid-route-policy/README.zh.md)提供纯 `llm/admission` 拒绝判断。其 Config 保存实时的精确 Provider/model 预设，并可 opt-in 在预留前进行当次审批；拥有者 README 定义激活、撤销与尚未实现的预算限制。
+
+```ts type-equiv
+/** Live operator preauthorization; every grant names exact model ids on one provider route. */
+interface Config {
+  /** Missing exact grants deny by default; ask requires an available live Agent and approval answerer. */
+  onMissingGrant: Volatile<'deny' | 'ask'>
+  /** Complete preset grants; an empty list permits no declared API-metered route. */
+  grants: Volatile<{
+    /** Registered Provider route approved for declared API-metered inference. */
+    provider: string
+    /** Non-empty exact model allowlist, including auxiliary calls on these pairs. */
+    models: string[]
+  }[]>
+}
+```
+
 <a id="content-blocks-and-messages"></a>
 
 ## 内容块与消息
@@ -343,6 +362,8 @@ interface AppIdentity {
 
 ## `TokenUsage`
 
+`TokenUsage.measurement` 为可选字段：`provider-reported` 表示来自提供方字段的计数（可以经过规范化），`estimated` 表示近似估算。缺失时保持未知。付费路线、账单准确性与官方余额是独立事实。DeepSeek 直连适配器只有观察到合法的原始输入/输出计数后才声明报告口径；pi-ai 规范化结果不足以推断这一点。
+
 逐调用 token 记账。各计数**互不重叠**：`inputTokens` 只包含未缓存输入；缓存输入单独报告，计费输入是三者之和。若提供方把缓存命中折入单一提示词总数（如 DeepSeek 的 `prompt_tokens`），适配器会再将其扣除。可选的 `totalTokens` 是精确的提示词与输出聚合计数，由适配器保留提供方原值或从权威聚合计数重建；不可用或不一致时省略。`reasoningTokens` 存在时只是信息性细节，已经包含在 `outputTokens` 中；汇总时不得重复相加。
 
 ```ts type-equiv
@@ -350,17 +371,24 @@ interface AppIdentity {
  * Token accounting for one model call (cache fields are optional).
  *
  * Counts are DISJOINT: `inputTokens` is uncached input only; cached input is
- * reported separately as `cacheReadTokens`/`cacheWriteTokens` (billed input =
+ * reported separately as `cacheReadTokens`/`cacheWriteTokens` (aggregate input =
  * sum of the three). Adapters whose providers fold cache hits into a total
  * prompt count (DeepSeek's `prompt_tokens`) subtract them out.
  */
 interface TokenUsage {
+  /**
+   * Explicit counter measurement, independent of the payment route.
+   * provider-reported counts came from provider fields, including normalized
+   * arithmetic; estimated counts use an approximation. Absence is unknown.
+   * Neither value establishes official billing accuracy or account balance.
+   */
+  measurement?: 'provider-reported' | 'estimated'
   inputTokens: number
   outputTokens: number
   /**
-   * Exact full-call total including aggregate prompt and output tokens.
+   * Full-call aggregate count including prompt and output counters.
    *
-   * Adapters preserve a provider total or derive it from authoritative
+   * Adapters preserve a provider total or derive it from complete
    * aggregate prompt/output counters; they omit it when unavailable or
    * inconsistent.
    */
@@ -495,7 +523,11 @@ interface LlmProviderPolicy {
   readonly availability: LlmProviderAvailability
   /** Operator-facing explanation when the route cannot be used. */
   readonly gateReason?: string
-  /** Provider-wide declarations; model-specific support still requires exact-model metadata. */
+  /**
+   * Provider-wide declarations; model-specific support still requires exact-model metadata.
+   * `resume` means restoring a provider-owned conversation after process restart,
+   * distinct from message replay, DSH Session restore and external-agent continuation.
+   */
   readonly capabilities: Readonly<Record<'streaming' | 'tools' | 'structuredOutput' | 'vision' | 'resume', LlmCapabilitySupport>>
   /** No service balance is inferred from local request counts or successful login. */
   readonly balance: { readonly status: 'unknown' }
@@ -624,8 +656,24 @@ interface LlmModelReasoningInfo {
 ```
 
 ```ts type-equiv
+/** Native strict JSON Schema response request, retained in the request header. */
+interface LlmResponseFormat {
+  /** Native schema-constrained output mode. */
+  type: 'json_schema'
+  /** Protocol-safe schema name, one to 64 letters, digits, underscores or dashes. */
+  name: string
+  /** Synchronous JSON Schema compiled locally; native endpoints may support a narrower subset. */
+  schema: { [key: string]: JsonValue }
+  /** Native schema adherence is required, without best-effort downgrade. */
+  strict: true
+}
+```
+
+```ts type-equiv
 /** Exact-route model metadata resolved by its owning adapter. */
 interface LlmResolvedModelInfo extends LlmModelInfo {
+  /** Exact route support for native schema-constrained output; absence is unknown. */
+  structuredOutputSupport?: LlmCapabilitySupport
   /** Exact route support for incremental response content before the terminal result; absence is unknown. */
   streamingSupport?: LlmCapabilitySupport
   /** Exact model tool-call support; absence is unknown, independent of Provider declarations. */
@@ -663,12 +711,14 @@ type RequestMessage = Message | RequestUserInput
 ```ts type-equiv
 /** A single model request, fully assembled. */
 interface GenerateOptions {
+  /** Native structured response control, recorded by loop callers and enforced on completion. */
+  responseFormat?: LlmResponseFormat
   /** Registered provider route selecting the adapter instance. */
   provider: string
   model: string
   /** Explicit conversational intent, recorded in the request header and hidden from model content. */
   intent?: LlmRequestIntent
-  /** Required Provider declarations; vision, tools and streaming also need exact model support before streaming. */
+  /** Required Provider declarations; vision, tools, streaming and structured output also need exact model support. */
   requiredCapabilities?: LlmProviderCapability[]
   /** Adapter-owned reasoning effort selected for this exact model. */
   reasoningEffort?: ReasoningEffortId
@@ -702,12 +752,41 @@ interface GenerateOptions {
    * to separate cursors; adapters may map it to model-hidden transport metadata.
    */
   sessionId?: Branded<'SessionId'>
+  /** Main-loop invocation identity, hidden from model input and separate from call controls. */
+  loopAttempt?: LlmLoopAttemptRef
   /**
    * Provider-neutral classification for an auxiliary model call. Adapters may
    * map the purpose to model-hidden transport metadata or purpose-specific
    * generation policy. Ordinary conversation requests leave it unset.
    */
   purpose?: 'compaction' | 'session-title'
+}
+```
+
+注册分发扩展点提供捕获的元数据与可追加的传输取消源。`cancelOn` 须在委托前调用；策略不能更改模型可见输入，也不能重复使用继续调用。
+
+```ts type-equiv
+/** One resolved registered request, available to dispatch policies before adapter construction. */
+interface LlmDispatchContext {
+  /** Immutable metadata captured with the adapter registration. */
+  readonly provider: Readonly<LlmProviderInfo>
+  /** Resolved and projected request; policies must not rewrite its model-visible inputs. */
+  readonly options: Readonly<GenerateOptions>
+  /**
+   * Require a pure permission check immediately before native I/O.
+   * Authorization checks also run before resource reservation.
+   * Checks must not perform I/O or mutate request inputs; a returned failure
+   * refuses the continuation. Register before delegation.
+   * @param check - invocation-local permission check; undefined delegates.
+   */
+  checkBeforeDispatch(check: () => LlmFailure | undefined): void
+  /**
+   * Add a cancellation source before delegating. The original request signal
+   * remains active; a policy cannot replace it. Registration after delegation
+   * rejects with INVALID_DISPATCH_CONTROL.
+   * @param signal - additional lifetime that cancels this provider attempt.
+   */
+  cancelOn(signal: AbortSignal): void
 }
 ```
 
@@ -828,6 +907,8 @@ FIXME(call-config-shape)：重新审视其余哪些字段出于缓存目的确�
 interface LlmCallConfig {
   provider: string
   model: string
+  /** Native strict JSON Schema output, logged with the request controls. */
+  responseFormat?: LlmResponseFormat
   /** Explicit request purpose; omission preserves an unclassified request. */
   intent?: LlmRequestIntent
   /** Required provider declarations; unknown and unsupported both reject. */
@@ -1182,9 +1263,10 @@ async resolveCallConfig(config: LlmCallConfig, signal?: AbortSignal): Promise<Ll
  * so HMR cannot combine one adapter's capability result with another adapter.
  * @param config - provider/model route and optional request controls.
  * @param signal - optional cancellation for adapter-owned capability lookup.
- * @returns a prepared config and its registration-bound stream entry point.
+ * @param context - optional invocation identity for preparation-failure auditing, separate from call controls.
+ * @returns a prepared config and its registration-bound stream entry point; preparation failures are observed before rejection.
  */
-async prepareCall(config: LlmCallConfig, signal?: AbortSignal): Promise<PreparedLlmCall>
+async prepareCall(config: LlmCallConfig, signal?: AbortSignal, context?: LlmPreparationContext): Promise<PreparedLlmCall>
 
 /**
  * Stream one model call as raw chunks (token-level deltas). Replay state is
@@ -1228,6 +1310,92 @@ The provider topology changed: an adapter registered or unregistered routes, or 
 ```
 
 Source: [`packages/llm/llm/src/types.ts`](../../packages/llm/llm/src/types.ts)
+
+<a id="llmadmission--bail"></a>
+
+#### `llm/admission` — bail
+
+Refuse a registered route before adapter preparation and again before dispatch. Listeners read the captured registration and current controls without mutating either. Return undefined to delegate; no listener can approve around another refusal. Handlers are synchronous and pure; they must not reserve resources or perform I/O.
+
+```ts cordis-catalog
+/**
+ * Refuse a registered route before adapter preparation and again before dispatch.
+ * Listeners read the captured registration and current controls without mutating either.
+ * Return undefined to delegate; no listener can approve around another refusal.
+ * Handlers are synchronous and pure; they must not reserve resources or perform I/O.
+ * @mode bail
+ * @param provider - captured registration metadata, including its admitted usage source.
+ * @param config - current request controls; no credentials or message content are included.
+ * @returns the first policy refusal, or undefined when every listener delegates.
+ */
+'llm/admission'(this: LlmRuntime, provider: Readonly<LlmProviderInfo>, config: Readonly<LlmCallConfig>): LlmFailure | undefined
+```
+
+Source: [`packages/llm/llm/src/index.ts`](../../packages/llm/llm/src/index.ts)
+
+<a id="llmauthorize--waterfall"></a>
+
+#### `llm/authorize` — waterfall
+
+Authorize one captured native request before resource reservation. A refusal must not delegate. Calling next() once enters dispatch policies only after admission and composed cancellation have been rechecked. Retries require a new authorization; grants must not escape this invocation.
+
+```ts cordis-catalog
+/**
+ * Authorize one captured native request before resource reservation.
+ * A refusal must not delegate. Calling next() once enters dispatch policies
+ * only after admission and composed cancellation have been rechecked.
+ * Retries require a new authorization; grants must not escape this invocation.
+ * @mode waterfall
+ * @param dispatch - captured request and additive cancellation controls.
+ * @param next - single-use continuation into resource reservation.
+ * @returns authorized stream or the policy's terminal refusal.
+ */
+'llm/authorize'(this: LlmRuntime, dispatch: LlmDispatchContext, next: () => AsyncIterable<StreamChunk>): AsyncIterable<StreamChunk>
+```
+
+Source: [`packages/llm/llm/src/index.ts`](../../packages/llm/llm/src/index.ts)
+
+<a id="llmdispatch--waterfall"></a>
+
+#### `llm/dispatch` — waterfall
+
+Wrap one resolved registered dispatch for resource reservation and cleanup. Policies read the captured registration and may add cancellation sources before calling next() exactly once. Retries enter llm/stream separately. Admission is checked again when the native continuation starts. Policies emit finish chunks for owned refusals; their thrown defects remain thrown.
+
+```ts cordis-catalog
+/**
+ * Wrap one resolved registered dispatch for resource reservation and cleanup.
+ * Policies read the captured registration and may add cancellation sources
+ * before calling next() exactly once. Retries enter llm/stream separately.
+ * Admission is checked again when the native continuation starts. Policies
+ * emit finish chunks for owned refusals; their thrown defects remain thrown.
+ * @mode waterfall
+ * @param dispatch - resolved request and additional cancellation controls.
+ * @param next - single-use continuation into the next policy or adapter.
+ * @returns the policy-wrapped stream.
+ */
+'llm/dispatch'(this: LlmRuntime, dispatch: LlmDispatchContext, next: () => AsyncIterable<StreamChunk>): AsyncIterable<StreamChunk>
+```
+
+Source: [`packages/llm/llm/src/index.ts`](../../packages/llm/llm/src/index.ts)
+
+<a id="llmpreparation-failed--parallel"></a>
+
+#### `llm/preparation-failed` — parallel
+
+Observe a preparation failure before the native dispatch outlet is entered. Successful virtual middleware may still serve a missing-adapter route. Handlers are awaited; observer defects retain the original failure in AggregateError.
+
+```ts cordis-catalog
+/**
+ * Observe a preparation failure before the native dispatch outlet is entered.
+ * Successful virtual middleware may still serve a missing-adapter route.
+ * Handlers are awaited; observer defects retain the original failure in AggregateError.
+ * @mode parallel
+ * @param failure - detached metadata without messages, credentials or arbitrary error data.
+ */
+'llm/preparation-failed'(this: LlmRuntime, failure: Readonly<LlmPreparationFailure>): void | Promise<void>
+```
+
+Source: [`packages/llm/llm/src/index.ts`](../../packages/llm/llm/src/index.ts)
 
 <a id="llmstream--waterfall"></a>
 

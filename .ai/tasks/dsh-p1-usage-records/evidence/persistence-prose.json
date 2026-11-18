@@ -1,0 +1,12 @@
+{
+  "en": {
+    "summary": "Adds optional settled native-dispatch accounting and its bounded Session projection under token-meter/request-records.",
+    "compatibility": "Existing Sessions contain no accounting event and retain their behavior. New accounting records use the existing Session envelope and committed sequence identity. Readers without the required event type refuse these logs rather than dropping accounting data. The new projection begins at state version 1. No Session envelope grammar or physical storage schema changes; the opt-in plugin is absent from shipped defaults.",
+    "verification": "Focused recorder/projection and replay-helper coverage passes at 100%. Headless and TypeScript SDK native accounting cases refresh and replay successfully; Python SDK passes six cases and consumes the retained V3 input while receiving a new current accounting event. A built-artifact negative control omitting the accounting append fails the fixed one-record assertion and restores exact bytes. No provider account was called."
+  },
+  "zh": {
+    "summary": "在 token-meter/request-records 下增加可选的原生分发结算记录及有界 Session 投影。",
+    "compatibility": "既有 Session 不包含该记账事件，行为保持不变。新记录沿用 Session 信封及已提交序号作为身份。不认识该必读事件类型的读取器会拒绝日志，不会静默丢弃记账数据。新投影从状态版本 1 开始。Session 信封语法及物理存储 schema 不变；随附默认组合不启用该插件。",
+    "verification": "聚焦记录器/投影与回放辅助实现的覆盖率达到 100%。Headless 和 TypeScript SDK 的原生记账场景刷新及回放成功；Python SDK 六项测试通过，并在读取保留的 V3 输入时收到新的当前记账事件。移除构建产物记账追加的负向对照会触发固定的一条记录断言失败，随后恢复完全相同的文件。没有调用真实提供方账户。"
+  }
+}

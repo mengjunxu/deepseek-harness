@@ -1,0 +1,19 @@
+{
+  "deferredServiceResultBytes": 6858,
+  "criticalConstraintsVisible": true,
+  "firstTurnTokenDelta": 0,
+  "headerSources": {
+    "snapshots/session/cordis-inspect-jsdoc/system-prompt.expected.md": {
+      "bytesBefore": 27380,
+      "bytesAfter": 27380,
+      "sha256": "dd354c65ee21f347857cd7a745f01f8c9268376278cb47c218c65d53e190dfce",
+      "identical": true
+    },
+    "snapshots/session/cordis-inspect-jsdoc/tool-schemas.expected.json": {
+      "bytesBefore": 29830,
+      "bytesAfter": 29830,
+      "sha256": "c52514fa0c4cf9a3edf77ea466cc01bd0141e5eeed741832864ff773d0f984c8",
+      "identical": true
+    }
+  }
+}

@@ -1,0 +1,5 @@
+{
+  "omittedServiceDisposerYield": "FAIL_AS_EXPECTED",
+  "restoredSha256": "bd269f7e8436c72bd0c5dd84dc3da8a83354988474e0919883027327b93b19b0",
+  "oracle": "injected consumer final write or mounted form lost before drain completed"
+}

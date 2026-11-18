@@ -1,0 +1,30 @@
+$ vitest run --config vitest.web.config.ts apps/web/tests/paid-route-confirmation.e2e.ts
+The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
+
+ RUN  v4.1.8 /Users/x-dt/workspace/AI/Agents/deepseek-harness
+
+ ❯ apps/web/tests/paid-route-confirmation.e2e.ts (2 tests | 1 failed) 4673ms
+   × web e2e: one API-metered request confirmation (reject) 1620ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  apps/web/tests/paid-route-confirmation.e2e.ts > web e2e: one API-metered request confirmation (reject)
+AggregateError: web scaffold teardown failed
+ ❯ Object.close apps/web/tests/scaffold.ts:993:38
+    991|         restoreSkillRootEnvironment()
+    992|       }
+    993|       if (failures.length > 0) throw new AggregateError(failures, 'web…
+       |                                      ^
+    994|     },
+    995|   }
+ ❯ apps/web/tests/paid-route-confirmation.e2e.ts:105:7
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 1 passed (2)
+   Start at  12:12:22
+   Duration  5.61s (transform 526ms, setup 0ms, import 860ms, tests 4.67s, environment 0ms)
+
+[ELIFECYCLE] Command failed with exit code 1.

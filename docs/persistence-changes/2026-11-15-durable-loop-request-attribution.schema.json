@@ -1,0 +1,554 @@
+{
+  "formatVersion": 2,
+  "roots": [
+    {
+      "key": "event:llm/preparation-failed",
+      "kind": "event",
+      "event": "llm/preparation-failed",
+      "surface": false,
+      "digest": "4ba862098b06a8e106301df464d293bddbd89f51118b74d6cafab4b660904792",
+      "schema": {
+        "root": 0,
+        "nodes": [
+          {
+            "kind": "object",
+            "properties": [
+              {
+                "name": "data",
+                "type": 1,
+                "optional": false
+              },
+              {
+                "name": "ignorable",
+                "type": 30,
+                "optional": true
+              },
+              {
+                "name": "seq",
+                "type": 15,
+                "optional": false
+              },
+              {
+                "name": "time",
+                "type": 15,
+                "optional": false
+              },
+              {
+                "name": "type",
+                "type": 31,
+                "optional": false
+              }
+            ],
+            "indices": []
+          },
+          {
+            "kind": "object",
+            "properties": [
+              {
+                "name": "category",
+                "type": 2,
+                "optional": false
+              },
+              {
+                "name": "intent",
+                "type": 9,
+                "optional": true
+              },
+              {
+                "name": "loopAttempt",
+                "type": 14,
+                "optional": true
+              },
+              {
+                "name": "model",
+                "type": 16,
+                "optional": false
+              },
+              {
+                "name": "provider",
+                "type": 16,
+                "optional": false
+              },
+              {
+                "name": "purpose",
+                "type": 17,
+                "optional": true
+              },
+              {
+                "name": "stage",
+                "type": 20,
+                "optional": false
+              },
+              {
+                "name": "usageSource",
+                "type": 23,
+                "optional": false
+              }
+            ],
+            "indices": []
+          },
+          {
+            "kind": "union",
+            "types": [
+              3,
+              4,
+              5,
+              6,
+              7,
+              8
+            ]
+          },
+          {
+            "kind": "literal",
+            "value": "aborted"
+          },
+          {
+            "kind": "literal",
+            "value": "admission"
+          },
+          {
+            "kind": "literal",
+            "value": "unknown"
+          },
+          {
+            "kind": "literal",
+            "value": "capability"
+          },
+          {
+            "kind": "literal",
+            "value": "credentials"
+          },
+          {
+            "kind": "literal",
+            "value": "route"
+          },
+          {
+            "kind": "union",
+            "types": [
+              10,
+              11,
+              12,
+              13
+            ]
+          },
+          {
+            "kind": "literal",
+            "value": "chat"
+          },
+          {
+            "kind": "literal",
+            "value": "execute"
+          },
+          {
+            "kind": "literal",
+            "value": "plan"
+          },
+          {
+            "kind": "literal",
+            "value": "review"
+          },
+          {
+            "kind": "object",
+            "properties": [
+              {
+                "name": "attempt",
+                "type": 15,
+                "optional": false
+              },
+              {
+                "name": "stepStartSeq",
+                "type": 15,
+                "optional": false
+              }
+            ],
+            "indices": []
+          },
+          {
+            "kind": "primitive",
+            "type": "number"
+          },
+          {
+            "kind": "primitive",
+            "type": "string"
+          },
+          {
+            "kind": "union",
+            "types": [
+              18,
+              19
+            ]
+          },
+          {
+            "kind": "literal",
+            "value": "compaction"
+          },
+          {
+            "kind": "literal",
+            "value": "session-title"
+          },
+          {
+            "kind": "union",
+            "types": [
+              21,
+              22
+            ]
+          },
+          {
+            "kind": "literal",
+            "value": "prepare"
+          },
+          {
+            "kind": "literal",
+            "value": "stream"
+          },
+          {
+            "kind": "union",
+            "types": [
+              5,
+              24,
+              25,
+              26,
+              27,
+              28,
+              29
+            ]
+          },
+          {
+            "kind": "literal",
+            "value": "third_party"
+          },
+          {
+            "kind": "literal",
+            "value": "api_metered"
+          },
+          {
+            "kind": "literal",
+            "value": "work_codex_shared"
+          },
+          {
+            "kind": "literal",
+            "value": "chatgpt_web_unofficial"
+          },
+          {
+            "kind": "literal",
+            "value": "local"
+          },
+          {
+            "kind": "literal",
+            "value": "experimental_unverified"
+          },
+          {
+            "kind": "literal",
+            "value": true
+          },
+          {
+            "kind": "literal",
+            "value": "llm/preparation-failed"
+          }
+        ]
+      }
+    },
+    {
+      "key": "event:llm/request-accounting",
+      "kind": "event",
+      "event": "llm/request-accounting",
+      "surface": false,
+      "digest": "633fd528d0be127b8f0ddaee77c45a952975bccabb798949e187ec8805d40797",
+      "schema": {
+        "root": 0,
+        "nodes": [
+          {
+            "kind": "object",
+            "properties": [
+              {
+                "name": "data",
+                "type": 1,
+                "optional": false
+              },
+              {
+                "name": "ignorable",
+                "type": 30,
+                "optional": true
+              },
+              {
+                "name": "seq",
+                "type": 9,
+                "optional": false
+              },
+              {
+                "name": "time",
+                "type": 9,
+                "optional": false
+              },
+              {
+                "name": "type",
+                "type": 31,
+                "optional": false
+              }
+            ],
+            "indices": []
+          },
+          {
+            "kind": "object",
+            "properties": [
+              {
+                "name": "finishKind",
+                "type": 2,
+                "optional": true
+              },
+              {
+                "name": "intent",
+                "type": 3,
+                "optional": true
+              },
+              {
+                "name": "loopAttempt",
+                "type": 8,
+                "optional": true
+              },
+              {
+                "name": "model",
+                "type": 2,
+                "optional": false
+              },
+              {
+                "name": "outcome",
+                "type": 10,
+                "optional": false
+              },
+              {
+                "name": "provider",
+                "type": 2,
+                "optional": false
+              },
+              {
+                "name": "purpose",
+                "type": 15,
+                "optional": true
+              },
+              {
+                "name": "usage",
+                "type": 18,
+                "optional": false
+              },
+              {
+                "name": "usageSource",
+                "type": 23,
+                "optional": false
+              }
+            ],
+            "indices": []
+          },
+          {
+            "kind": "primitive",
+            "type": "string"
+          },
+          {
+            "kind": "union",
+            "types": [
+              4,
+              5,
+              6,
+              7
+            ]
+          },
+          {
+            "kind": "literal",
+            "value": "chat"
+          },
+          {
+            "kind": "literal",
+            "value": "execute"
+          },
+          {
+            "kind": "literal",
+            "value": "plan"
+          },
+          {
+            "kind": "literal",
+            "value": "review"
+          },
+          {
+            "kind": "object",
+            "properties": [
+              {
+                "name": "attempt",
+                "type": 9,
+                "optional": false
+              },
+              {
+                "name": "stepStartSeq",
+                "type": 9,
+                "optional": false
+              }
+            ],
+            "indices": []
+          },
+          {
+            "kind": "primitive",
+            "type": "number"
+          },
+          {
+            "kind": "union",
+            "types": [
+              11,
+              12,
+              13,
+              14
+            ]
+          },
+          {
+            "kind": "literal",
+            "value": "aborted"
+          },
+          {
+            "kind": "literal",
+            "value": "completed"
+          },
+          {
+            "kind": "literal",
+            "value": "error"
+          },
+          {
+            "kind": "literal",
+            "value": "unknown"
+          },
+          {
+            "kind": "union",
+            "types": [
+              16,
+              17
+            ]
+          },
+          {
+            "kind": "literal",
+            "value": "compaction"
+          },
+          {
+            "kind": "literal",
+            "value": "session-title"
+          },
+          {
+            "kind": "union",
+            "types": [
+              19,
+              22
+            ]
+          },
+          {
+            "kind": "object",
+            "properties": [
+              {
+                "name": "kind",
+                "type": 20,
+                "optional": false
+              },
+              {
+                "name": "tokens",
+                "type": 21,
+                "optional": false
+              }
+            ],
+            "indices": []
+          },
+          {
+            "kind": "literal",
+            "value": "adapter-reported"
+          },
+          {
+            "kind": "object",
+            "properties": [
+              {
+                "name": "cacheReadTokens",
+                "type": 9,
+                "optional": true
+              },
+              {
+                "name": "cacheWriteTokens",
+                "type": 9,
+                "optional": true
+              },
+              {
+                "name": "inputTokens",
+                "type": 9,
+                "optional": false
+              },
+              {
+                "name": "outputTokens",
+                "type": 9,
+                "optional": false
+              },
+              {
+                "name": "reasoningTokens",
+                "type": 9,
+                "optional": true
+              },
+              {
+                "name": "totalTokens",
+                "type": 9,
+                "optional": true
+              }
+            ],
+            "indices": []
+          },
+          {
+            "kind": "object",
+            "properties": [
+              {
+                "name": "kind",
+                "type": 14,
+                "optional": false
+              }
+            ],
+            "indices": []
+          },
+          {
+            "kind": "union",
+            "types": [
+              14,
+              24,
+              25,
+              26,
+              27,
+              28,
+              29
+            ]
+          },
+          {
+            "kind": "literal",
+            "value": "api_metered"
+          },
+          {
+            "kind": "literal",
+            "value": "chatgpt_web_unofficial"
+          },
+          {
+            "kind": "literal",
+            "value": "local"
+          },
+          {
+            "kind": "literal",
+            "value": "experimental_unverified"
+          },
+          {
+            "kind": "literal",
+            "value": "third_party"
+          },
+          {
+            "kind": "literal",
+            "value": "work_codex_shared"
+          },
+          {
+            "kind": "literal",
+            "value": true
+          },
+          {
+            "kind": "literal",
+            "value": "llm/request-accounting"
+          }
+        ]
+      }
+    }
+  ],
+  "types": []
+}

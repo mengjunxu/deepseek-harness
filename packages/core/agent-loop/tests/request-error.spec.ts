@@ -97,6 +97,8 @@ describe('agent/request-error', () => {
       expect.objectContaining({ mode: 'normal' }),
       expect.objectContaining({ mode: 'normal' }),
     ])
+    const stepStartSeq = agent.session.snapshotEvents().find(event => event.type === 'step/start')?.seq
+    expect(adapter.requests.map(request => request.loopAttempt)).toEqual([1, 2, 3].map(attempt => ({ stepStartSeq, attempt })))
     expect(statuses).toEqual(['running', 'idle'])
     expect(agent.session.snapshotEvents().flatMap(event =>
       event.type === 'request/header' ? [event.data.reason] : [])).toEqual(['initial'])

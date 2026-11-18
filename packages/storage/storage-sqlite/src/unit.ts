@@ -1,21 +1,22 @@
 /**
  * One opened SQLite KV unit: prepared per-table statements over the
  * `u_<unit>_<table>` record tables plus this unit's row in the shared
- * `unit_globals` table. Each primitive is a single statement, so atomicity
- * comes from SQLite itself — no explicit transactions, and no write queue
- * (write ordering is the caller's responsibility per the KV contract).
+ * `unit_globals` table. Record modification reads and writes inside one
+ * immediate transaction. Other writes use individual statements; ordering
+ * within one owner remains the caller's responsibility per the KV contract.
  * @module @deepseek-ai/dsh-storage-sqlite/unit
  */
 
 import type { DatabaseSync, StatementSync } from 'node:sqlite'
 import { StorageError } from '@deepseek-ai/dsh-storage'
-import type { KvUnit, KvUnitDescriptor } from '@deepseek-ai/dsh-storage'
+import type { KvTransaction, KvUnit, KvUnitDescriptor } from '@deepseek-ai/dsh-storage'
 import { recordTableName } from './schema.ts'
 
 /** Prepared statements for one declared table. */
 interface TableStatements {
   upsert: StatementSync
   remove: StatementSync
+  selectOne: StatementSync
   selectAll: StatementSync
 }
 
@@ -36,7 +37,7 @@ export class SqliteKvUnit implements KvUnit {
    * @param onClose - Backend callback releasing this unit's open-name slot.
    */
   constructor(
-    db: DatabaseSync,
+    private readonly db: DatabaseSync,
     private readonly descriptor: KvUnitDescriptor,
     private readonly onClose: () => void,
   ) {
@@ -49,6 +50,7 @@ export class SqliteKvUnit implements KvUnit {
           `INSERT INTO "${physical}" (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value`,
         ),
         remove: db.prepare(`DELETE FROM "${physical}" WHERE key = ?`),
+        selectOne: db.prepare(`SELECT value FROM "${physical}" WHERE key = ?`),
         selectAll: db.prepare(`SELECT key, value FROM "${physical}"`),
       })
     }
@@ -99,6 +101,53 @@ export class SqliteKvUnit implements KvUnit {
   putRecord(table: string, key: string, value: unknown): Promise<void> {
     return this.settle(() => {
       this.statementsFor(table).upsert.run(key, JSON.stringify(value))
+    })
+  }
+
+  modifyRecord(table: string, key: string, modify: (current: unknown) => unknown): Promise<unknown> {
+    return this.transaction((tx) => {
+      const next = modify(tx.get(table, key))
+      tx.set(table, key, next)
+      return next
+    })
+  }
+
+  transaction<T>(operation: (tx: KvTransaction) => T): Promise<T> {
+    return this.settle(() => {
+      this.db.exec('BEGIN IMMEDIATE')
+      let active = true
+      const statements = (table: string) => {
+        if (!active) throw new Error('SQLite transaction already settled')
+        return this.statementsFor(table)
+      }
+      try {
+        const result = operation({
+          get: (table, key) => {
+            const row = statements(table).selectOne.get(key) as { value: string } | undefined
+            return row === undefined ? undefined : this.parseValue(row.value, `table '${table}' key '${key}'`)
+          },
+          set: (table, key, value) => {
+            const target = statements(table)
+            if (value === undefined) target.remove.run(key)
+            else target.upsert.run(key, JSON.stringify(value))
+          },
+        })
+        if (result && typeof result === 'object' && 'then' in result && typeof result.then === 'function') {
+          void Promise.resolve(result).catch(() => {})
+          throw new TypeError('SQLite transaction callback must be synchronous')
+        }
+        this.db.exec('COMMIT')
+        return result
+      } catch (error) {
+        try {
+          if (this.db.isTransaction) this.db.exec('ROLLBACK')
+        } catch (rollbackError) {
+          throw new AggregateError([error, rollbackError], 'SQLite record modification and rollback failed', { cause: error })
+        }
+        throw error
+      } finally {
+        active = false
+      }
     })
   }
 

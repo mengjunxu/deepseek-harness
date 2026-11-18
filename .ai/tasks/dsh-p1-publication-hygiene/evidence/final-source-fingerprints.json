@@ -1,0 +1,12 @@
+{
+  "scripts/package-dependency-policy.ts": "7f96db4acafe01a63554303fc97bd3e1d5587e01c5a93d3ba8831cf97b38d42b",
+  "packages/core/agent-default-model/package.json": "f8546a122c1b87c370bfd0379d2b355c40125e6c1f4078a03abd916cf6fed1c3",
+  "packages/experimental/chatgpt-plan/package.json": "66d862061439f6530fe39a6e8d014458e09c24d119cb9f0196f531e17a2341c5",
+  "packages/core/session/package.json": "595ffd223d0d9688c02c6644a51e80e406883650a32b2b7764bb89a926a7041b",
+  "packages/experimental/chatgpt-plan/README.md": "f69ca71ecc95c62295e5b1ee712c9d4e6b50941385af54b06c7323b4dccf0ba1",
+  "packages/experimental/chatgpt-plan/README.zh.md": "85ce44abf5396d327a1e71fa3752138fca4b6c15f81ae2b5ee095b3f00816516",
+  "apps/cli/package.json": "cb1c6f2bc6dcb330468cfb36795f0c05538a7c9b7f01f6dd62e0340fc0c91d6e",
+  "pnpm-lock.yaml": "d5f407f9de967b9495f08f2d5fae5e76ff427c13d95d30a8d9485c2aad58c489",
+  ".agents/notes/implemented/process/2026-08-26-published-dependency-faces.md": "d31435c687b1e7862bb73910ffabd33d85a90294e7a87d2d10726a48071c69f8",
+  ".agents/notes/implemented/process/2026-08-26-published-dependency-faces.zh.md": "e2881633dd79ba600806c709aa36210b1009a670e0dbe6bd6df5e07883f31c94"
+}

@@ -1,0 +1,17 @@
+{
+  "baseline": [
+    {
+      "path": "snapshots/session/text-turn/system-prompt.expected.md",
+      "sha256": "940a58e80b52302c9fa89c4ca81368ea92ec63ebe22c3e75e2d507abed28c665",
+      "bytes": 2794
+    },
+    {
+      "path": "snapshots/session/text-turn/tool-schemas.expected.json",
+      "sha256": "46c67ea5d179b2153b5a0979b0f12f7d1474e3231ee4b7f0aeb4f4efb0b5e053",
+      "bytes": 25205
+    }
+  ],
+  "addedFirstTurnBytes": 0,
+  "addedFirstTurnTokens": 0,
+  "scope": "Non-surface metadata only; new SDK case retains the accounting case prompt."
+}

@@ -1,0 +1,38 @@
+The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
+The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
+The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
+
+ RUN  v4.1.8 /Users/x-dt/workspace/AI/Agents/deepseek-harness
+
+ ❯ |thread-safe| packages/core/agent-loop/tests/contract-regressions.spec.ts (45 tests | 1 failed | 44 skipped) 20ms
+     × rejects policy-bearing virtual routes before legacy middleware or header admission 19ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |thread-safe| packages/core/agent-loop/tests/contract-regressions.spec.ts > adapter registration, routing, and accepted-input ownership > rejects policy-bearing virtual routes before legacy middleware or header admission
+AssertionError: expected { provider: 'virtual', …(6) } to have property "loopAttempt" with value { stepStartSeq: 3, attempt: 1 }
+
+- Expected:
+{
+  "attempt": 1,
+  "stepStartSeq": 3,
+}
+
++ Received:
+undefined
+
+ ❯ packages/core/agent-loop/tests/contract-regressions.spec.ts:463:36
+    461|     expect(preparationFailures).toEqual([{ provider: 'virtual', model:…
+    462|       sessionId: agent.session.id, stage: 'prepare', usageSource: 'unk…
+    463|     expect(preparationFailures[0]).toHaveProperty('loopAttempt', {
+       |                                    ^
+    464|       stepStartSeq: events.find(event => event.type === 'step/start')?…
+    465|     })
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 44 skipped (45)
+   Start at  23:35:33
+   Duration  722ms (transform 476ms, setup 133ms, import 472ms, tests 20ms, environment 0ms)

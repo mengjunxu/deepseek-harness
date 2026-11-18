@@ -556,10 +556,14 @@ describe('LlmRuntime', () => {
 
   it('maps adapter failure to aborted when the request signal is aborted', async () => {
     const controller = new AbortController()
-    controller.abort('cancelled')
     const ctx = new Context()
     await ctx.plugin(LlmRuntime)
-    ctx.llm.registerAdapter(['test'], new ThrowingAdapter(new Error('stopped')))
+    ctx.llm.registerAdapter(['test'], new class extends ThrowingAdapter {
+      override stream(options: GenerateOptions): AsyncIterable<StreamChunk> {
+        controller.abort('cancelled')
+        return super.stream(options)
+      }
+    }(new Error('stopped')))
 
     const chunks = await collect(ctx.llm.stream({
       provider: 'test',

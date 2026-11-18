@@ -17,6 +17,7 @@ import { FiberState, type Context } from '@deepseek-ai/cordis'
 import type { PatchOptions } from '@deepseek-ai/cordis-plugin-include'
 import {
   boot,
+  disposeApplication,
   readProfilePatches,
   createRuntimeResolution,
   initProfile,
@@ -255,7 +256,7 @@ export async function runProfile(options: RunProfileOptions): Promise<{ ctx: Con
   let disposal: Promise<void> | undefined
   const dispose = (): Promise<void> => disposal ??= (async () => {
     const failures: unknown[] = []
-    for (const release of [() => app.current?.fiber.dispose(), disposeProxy]) {
+    for (const release of [() => app.current === undefined ? undefined : disposeApplication(app.current), disposeProxy]) {
       try { await release() } catch (error) { failures.push(error) }
     }
     if (failures.length === 1) throw failures[0]
@@ -280,7 +281,7 @@ export async function runProfile(options: RunProfileOptions): Promise<{ ctx: Con
     process.on('SIGTERM', () => { interrupt(0) })
     process.on('SIGINT', () => { interrupt(130) })
     installFailLoud(NAME, process, async () => {
-      await app.current?.fiber.dispose()
+      if (app.current !== undefined) await disposeApplication(app.current)
     })
 
     const rootConfig = join(composed.profile.dir, PROFILE_ROOT_FILENAME)

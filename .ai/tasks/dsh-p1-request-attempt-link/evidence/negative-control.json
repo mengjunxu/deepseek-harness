@@ -1,0 +1,5 @@
+{
+  "omittedSettlementAttemptRef": "FAIL_AS_EXPECTED",
+  "oracle": "Real SDK completes but the fixed Python metadata comparison requires loopAttempt.",
+  "restoredSha256": "47873db48666f4dcae58555d180a2353dc07e1f745141fb201a0db4aae6d05f1"
+}

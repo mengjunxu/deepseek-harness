@@ -1,0 +1,126 @@
+.......F                                                                 [100%]
+=================================== FAILURES ===================================
+____________ test_accounting_attempt_identity_survives_host_restart ____________
+
+tmp_path = PosixPath('/private/var/folders/tw/b9_d4hqs4bq2h1_qssz7x7hm0000gn/T/pytest-of-x-dt/pytest-21/test_accounting_attempt_identi0')
+
+    @pytest.mark.skipif(sys.platform == 'win32', reason='uses the POSIX shebang of the built dsh CLI')
+    @pytest.mark.skipif(not CLI.exists(), reason='requires the built dsh profile runtime')
+    def test_accounting_attempt_identity_survives_host_restart(tmp_path: Path) -> None:
+        scenario = ROOT / 'snapshots' / 'sdk' / 'request-accounting'
+        recording = scenario / 'session.v3.jsonl'
+        replay_patch = tmp_path / 'native-replay.json'
+        replay_patch.write_text(json.dumps([{'insert': [{
+            'id': 'llm-replay',
+            'name': str(ROOT / 'packages' / 'test-support' / 'llm-replay' / 'lib' / 'index.js'),
+            'config': {
+                'file': str(recording),
+                'providers': [{
+                    'id': 'intent-chat',
+                    'policy': {'usageSource': 'local', 'capabilities': {'tools': 'supported'}},
+                    'models': [{'id': 'chat-fixture', 'toolSupport': 'supported', 'contextWindow': 262144}],
+                }],
+            },
+        }]}]))
+        references = []
+        for turn in (1, 2):
+            with DeepSeekHarness(
+                dsh_bin=str(CLI), dsh_home=str(tmp_path / 'home'), cwd=str(tmp_path), profile='sdk',
+                patches=(str(scenario / 'cordis.yml'), str(scenario / 'cordis.snapshot.yml'), str(replay_patch)),
+                provider='intent-chat', model='chat-fixture',
+                env={
+                    'DSH_TELEMETRY_DISABLED': '1', 'DSH_SNAPSHOT': 'replay',
+                    'DSH_SNAPSHOT_FILE': str(recording), 'DSH_AGENTS_HOME': str(tmp_path / 'agents'),
+                },
+            ) as harness:
+>               result = harness.run('Reply with exactly INTENT_OK.', session_id='accounting-attempt-resume')
+
+python/sdk/tests/test_intent_routing_snapshot.py:113:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+python/sdk/src/deepseek_harness/api.py:131: in run
+    return self.start_session(session_id).run(input, on_notification=on_notification)
+python/sdk/src/deepseek_harness/api.py:162: in run
+    message_id = self.harness.client.session_prompt(
+python/sdk/src/deepseek_harness/client.py:181: in session_prompt
+    response = self.request(
+python/sdk/src/deepseek_harness/client.py:202: in request
+    result = self._request_raw(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <deepseek_harness.client.HarnessClient object at 0x106aa7b90>
+method = 'session/prompt'
+params = {'contentBlocks': [{'text': 'Reply with exactly INTENT_OK.', 'type': 'text'}], 'sessionId': 'accounting-attempt-resume'}
+
+    def _request_raw(
+        self,
+        method: str,
+        params: JsonObject | None = None,
+        *,
+        timeout_seconds: float | None = None,
+        on_notification: Callable[[Notification], None] | None = None,
+        notification_filter: NotificationFilter | None = None,
+        notification_subscription: "NotificationSubscription | None" = None,
+    ) -> JsonValue:
+        request_id = str(uuid.uuid4())
+        waiter: queue.Queue[JsonValue | BaseException] = queue.Queue(maxsize=1)
+        temp_subscription: NotificationSubscription | None = None
+        subscription = notification_subscription
+        with self._lock:
+            self._responses[request_id] = waiter
+        if on_notification is not None and subscription is None:
+            temp_subscription = self.subscribe_notifications(notification_filter)
+            subscription = temp_subscription
+        try:
+            message: JsonObject = {"jsonrpc": "2.0", "id": request_id, "method": method}
+            if params is not None:
+                message["params"] = params
+            self._write_message(message)
+        except BaseException:
+            with self._lock:
+                self._responses.pop(request_id, None)
+            if temp_subscription is not None:
+                temp_subscription.close()
+            raise
+        timeout = self.config.request_timeout_seconds if timeout_seconds is None else timeout_seconds
+        deadline = None if timeout is None else time.monotonic() + timeout
+        try:
+            while True:
+                if on_notification is not None and subscription is not None:
+                    subscription.drain(on_notification)
+                wait_timeout = None
+                if on_notification is not None:
+                    wait_timeout = 0.05
+                if deadline is not None:
+                    remaining = deadline - time.monotonic()
+                    if remaining <= 0:
+                        with self._lock:
+                            self._responses.pop(request_id, None)
+                        diagnostics = self._runtime_diagnostics()
+                        suffix = f"\n{diagnostics}" if diagnostics else ""
+                        raise TimeoutError(
+                            f"{method} timed out waiting for DeepSeek Harness runtime{suffix}"
+                        )
+                    wait_timeout = remaining if wait_timeout is None else min(wait_timeout, remaining)
+                try:
+                    item = waiter.get(timeout=wait_timeout)
+                    if on_notification is not None and subscription is not None:
+                        subscription.drain(on_notification)
+                    break
+                except queue.Empty:
+                    continue
+        except BaseException:
+            with self._lock:
+                self._responses.pop(request_id, None)
+            if temp_subscription is not None:
+                temp_subscription.close()
+            raise
+        finally:
+            if temp_subscription is not None:
+                temp_subscription.close()
+        if isinstance(item, BaseException):
+>           raise item
+E           deepseek_harness.errors.JsonRpcError: session "accounting-attempt-resume" already exists
+
+python/sdk/src/deepseek_harness/client.py:329: JsonRpcError
+=========================== short test summary info ============================
+FAILED python/sdk/tests/test_intent_routing_snapshot.py::test_accounting_attempt_identity_survives_host_restart

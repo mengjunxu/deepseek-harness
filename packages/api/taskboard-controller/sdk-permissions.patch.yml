@@ -1,0 +1,3 @@
+# A Taskboard Run can receive input only after its native permission services activate.
+- id: sdk-jsonrpc-server
+  inject: [sdkAppStartup, loader, approval, permissionPresets, sandboxPolicy, sandbox]

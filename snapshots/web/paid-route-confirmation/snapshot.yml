@@ -1,0 +1,8 @@
+version: 1
+scenario: paid-route-confirmation
+profile: web
+composition: web-paid-route-confirmation
+recording: authored
+header:
+  class: web-paid-route-confirmation
+  pin: true

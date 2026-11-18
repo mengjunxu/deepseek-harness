@@ -1,0 +1,2 @@
+$ tsx scripts/verify-translation-pairing.ts packages/llm/llm/README.md packages/llm/llm-pi-ai/README.md packages/core/agent-default-model/README.md packages/core/agent-loop/README.md packages/test-support/llm-replay/README.md docs/architecture.md docs/subsystems/core.md docs/subsystems/llm-streaming.md docs/capability-seams.md
+verify-translation-pairing: 9 named pair(s) consistent; the corpus-wide check still runs in doc-sync.

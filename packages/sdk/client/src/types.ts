@@ -54,6 +54,10 @@ export interface HarnessClientOptions {
 
 /** Options for the high-level {@link DeepSeekHarness} wrapper. */
 export interface DeepSeekHarnessOptions extends HarnessClientOptions {
+  /** Forward root Session approvals to the client request handler. */
+  approvalRequests?: boolean
+  /** Receive native user-question/ask requests through the client request handler. */
+  userQuestions?: boolean
   /** Workspace cwd recorded on every SDK-created session (default: the process cwd, else `process.cwd()`). */
   cwd?: string
   /** Provider route for SDK-created agents (default `deepseek-official`). */

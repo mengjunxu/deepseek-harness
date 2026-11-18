@@ -29,6 +29,8 @@ kind: "package-reference"
 
 ### 挂载它
 
+原生分发与记账测试必须配置非空 `providers` 目录。模型项可声明 `structuredOutputSupport`、`toolSupport` 和 `streamingSupport`，未知或不支持的声明仍被保留。Catch-all 回放绕过已注册适配器分发，不能验证其记账钩子。
+
 配置 `providers` 后，插件会注册仅用于回放的适配器，其模型目录可供测试模型发现功能的场景使用；未配置 `providers` 时，它安装无需模型发现功能的测试所用的 catch-all `llm/stream` waterfall（瀑布式事件）：
 
 ```yaml
@@ -62,6 +64,8 @@ kind: "package-reference"
 | `paceMs` | 无（突发） | 可选的每分片延迟（毫秒），用于真正的增量投递 |
 
 生成的[配置目录](../../../docs/config-catalog.zh.md#deepseek-aidsh-llm-replay)是每个受支持字段及其 JSDoc 的穷尽式真源。
+
+回放 Provider 可以声明 `policy`，每个模型可以声明 `structuredOutputSupport`。这些声明经过普通 LLM 准入校验；缺失支持仍为未知。[带格式的 headless 夹具](../../../snapshots/session/model-structured-output/cordis.snapshot.yml)借此无需提供方 I/O 即可验证 schema 准入和完整输出校验。
 
 ### fixture 的工作方式
 

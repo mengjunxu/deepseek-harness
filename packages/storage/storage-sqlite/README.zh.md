@@ -61,6 +61,8 @@ kind: "package-reference"
 <a id="understand-the-implementation"></a>
 ## 理解实现
 
+多记录命令使用一次立即事务。回调可以读到同一事务已写入的记录，回调抛错或提交失败将触发回滚。回调返回后事务句柄失效。
+
 <details>
 <summary>实现细节——点击展开</summary>
 
@@ -69,13 +71,15 @@ kind: "package-reference"
 ### 设计理念
 
 - **每行一份文档。** 每个单元表都变成一张物理 STRICT 表 `u_<unit>_<table> (key TEXT PRIMARY KEY, value TEXT)`，其 `value` 列保存记录的 JSON 文本；全局单例存放在共享的 `unit_globals` 表中。一个键的更新恰好触碰一行——这就是把高频变更领域路由到这里的原因。
-- **单语句原子性。** 每个写入原语都是一条预处理语句，因此 SQLite 的逐语句原子性无需显式事务即可满足 KV 约定；写入顺序仍由调用方负责（领域层的写入链）。
+- **原子记录修改。** `modifyRecord` 使用 `BEGIN IMMEDIATE` 在一个写事务中读取最新记录并提交同步转换。回调或序列化失败会回滚；锁竞争在回调运行前拒绝，不做隐式重试。其他写入仍使用独立预处理语句，由调用方确定顺序。
 - **名称在 DDL 之前校验。** 单元名与表名在进入 DDL 之前必须匹配 `UNIT_NAME_RE`，因此任何外部输入都不会被插值进 SQL 标识符。
 - **版本明确报错。** 物理布局版本存放在 `PRAGMA user_version`（全新数据库最后盖戳）；单元格式版本存放在 `units` 表中。任何其他已标记值都会被拒绝——不做迁移。
 
 ### 打开顺序
 
 打开数据库时会以 `0o700` 创建父目录、以 `0o600` 独占创建缺失文件、应用 `PRAGMA foreign_keys = ON` 与 journal mode、检查 `user_version`、创建 `units` 与 `unit_globals` 元数据表，并在最后给全新数据库盖戳，让失败留下未盖戳的介质。
+
+后端服务先撤回并等待注入的 domain 所有者排空，然后注销后端并关闭介质。两个 disposer 由同一个有序 effect yield。整机所有者仍须在根 Context 并行卸载前提供应用排空阶段。
 
 ### 源码地图
 

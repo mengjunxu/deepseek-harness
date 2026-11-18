@@ -1,6 +1,6 @@
 /** Profile patch edits and credential updates reach the next real adapter request. */
 
-import { mkdtemp, rm, writeFile } from 'node:fs/promises'
+import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { pathToFileURL } from 'node:url'
@@ -247,6 +247,30 @@ describe('llm-pi-ai real dormant composition', () => {
     expect(server.requests).toHaveLength(2)
   })
 
+  it('refuses a native cold resume claim without changing settings or issuing a provider request', async () => {
+    const server = await mockServer([{ events: textEvents }])
+    const { ctx, settingsPath } = await loadComposition()
+    await ctx.settings.update('llm-pi-ai', { providers: { 'resume-fixture': {
+      api: 'openai-completions', baseURL: server.url, apiKeyEnv: 'PI_COMPOSITION_KEY',
+      models: [{ id: 'chat' }], policy: { capabilities: { resume: 'unsupported' } },
+    } } })
+    const before = await readFile(settingsPath, 'utf8')
+    await expect(ctx.settings.update('llm-pi-ai', { providers: { 'resume-fixture': {
+      policy: { capabilities: { resume: 'supported' } },
+    } } })).rejects.toThrow('does not expose native provider session restore')
+    expect(await readFile(settingsPath, 'utf8')).toBe(before)
+    expect(ctx.llm.listProviders()).toMatchObject([{ policy: { capabilities: { resume: 'unsupported' } } }])
+    const config = { provider: 'resume-fixture', model: 'chat' }
+    await expect(ctx.llm.prepareCall({ ...config, requiredCapabilities: ['resume'] }))
+      .rejects.toMatchObject({ code: 'UNSUPPORTED_PROVIDER_CAPABILITY' })
+    expect(server.requests).toHaveLength(0)
+    expect((await assemble(ctx, { ...config, messages: [createUserMessage({
+      content: [{ type: 'text', text: 'Continue from the supplied history.' }], source: { kind: 'user' },
+    })] })).finish).toEqual({ kind: 'stop' })
+    expect(server.requests[0]).toMatchObject({ messages: [{ role: 'user', content: 'Continue from the supplied history.' }] })
+    expect(server.requests[0]).not.toHaveProperty('previous_response_id')
+  })
+
   it('uses settings-only route headers for model discovery', async () => {
     vi.stubEnv('PI_COMPOSITION_KEY', '')
     const server = await mockServer([{ body: JSON.stringify({ data: [{ id: 'acme-private' }] }) }])
@@ -404,4 +428,47 @@ describe('llm-pi-ai real dormant composition', () => {
       ],
     })
   })
+})
+
+it('keeps a prepared native schema request bound while model support changes through the Loader', async () => {
+  vi.stubEnv('PI_COMPOSITION_KEY', '')
+  const jsonText = '{"result":"ok"}'
+  const server = await mockServer([{ events: textEvents.map(event => event.replace('"hello"', JSON.stringify(jsonText))) }])
+  const { ctx, settingsPath } = await loadComposition()
+  await writeFile(settingsPath, [
+    '- id: llm-pi-ai',
+    '  config:',
+    '    providers:',
+    '      deepseek:',
+    '        apiKeyEnv: PI_COMPOSITION_KEY',
+    '        api: openai-completions',
+    `        baseURL: ${server.url}`,
+    '        policy:',
+    '          capabilities: { structuredOutput: supported }',
+    '        models:',
+    '          - id: native-json',
+    '            structuredOutputSupport: supported',
+    '',
+  ].join('\n'))
+  await vi.waitFor(async () => {
+    expect(await ctx.llm.resolveModelInfo('deepseek', 'native-json')).toMatchObject({ structuredOutputSupport: 'supported' })
+  }, { timeout: 5000 })
+  const responseFormat = { type: 'json_schema' as const, name: 'result', strict: true as const,
+    schema: { type: 'object', properties: { result: { type: 'string' } }, required: ['result'], additionalProperties: false } }
+  const config = { provider: 'deepseek', model: 'native-json', responseFormat }
+  const prepared = await ctx.llm.prepareCall(config)
+  await ctx.settings.update('llm-pi-ai', { providers: { deepseek: { models: [{
+    id: 'native-json', structuredOutputSupport: 'unsupported',
+  }] } } })
+  await vi.waitFor(async () => {
+    expect(await ctx.llm.resolveModelInfo('deepseek', 'native-json')).toMatchObject({ structuredOutputSupport: 'unsupported' })
+  }, { timeout: 5000 })
+  const chunks = []
+  for await (const chunk of prepared.stream({ ...prepared.config, messages: [] })) chunks.push(chunk)
+  expect(chunks.at(-1)).toMatchObject({ type: 'finish', reason: { kind: 'stop' } })
+  expect(server.requests).toHaveLength(1)
+  expect(server.requests[0]).toMatchObject({ response_format: {
+    type: 'json_schema', json_schema: { name: 'result', strict: true, schema: responseFormat.schema },
+  } })
+  await expect(ctx.llm.prepareCall(config)).rejects.toMatchObject({ code: 'UNSUPPORTED_MODEL_CAPABILITY' })
 })

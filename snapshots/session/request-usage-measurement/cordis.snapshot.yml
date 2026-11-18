@@ -1,0 +1,88 @@
+# Replay patch shared by the ordinary headless snapshot composition. The model
+# script comes from the scenario's committed session JSONL.
+
+- id: llm-deepseek
+  name: '@deepseek-ai/dsh-llm-deepseek-api-key'
+  disabled: true
+
+- id: plugin-package-inventory-deepseek
+  disabled: true
+
+- id: session-title-llm
+  disabled: true
+
+- id: session-persistence-jsonl
+  name: '@deepseek-ai/dsh-session-persistence-jsonl'
+  config:
+    root: !!js dshHomePath('sessions')
+    compression: none
+
+- id: sandbox
+  name: '@deepseek-ai/dsh-sandbox-local'
+  config:
+    runnerCommand:
+      - bash
+      - -c
+      - while [ "$1" != "--" ]; do shift; done; shift; exec "$@"
+      - passthrough-runner
+    runnerFailureSignatures:
+      - 'passthrough-runner: profile rejected'
+
+- insert:
+    - id: llm-replay
+      name: '@deepseek-ai/dsh-llm-replay'
+      config:
+        providers:
+          - id: deepseek-official
+            name: DeepSeek
+            models:
+              - id: deepseek-v4-flash
+              - id: deepseek-v4-pro
+          - id: budget-fixture
+            policy: { usageSource: local }
+            models: [{ id: m }]
+
+- id: agent-default-model
+  config:
+    provider: budget-fixture
+    model: m
+
+- insert:
+    - id: agent-intent-routing
+      name: '@deepseek-ai/dsh-agent-default-model/intent-routing'
+      config:
+        routing:
+          intent: execute
+          routes:
+            chat: { provider: unavailable-chat, model: unused }
+            plan: { provider: unavailable-plan, model: unused }
+            review: { provider: unavailable-review, model: unused }
+            execute:
+              selection: entry
+
+- id: storage-domain
+  config:
+    backend: json
+    routes:
+      request_budget: sqlite
+
+- insert:
+    - id: storage-sqlite
+      name: '@deepseek-ai/dsh-storage-sqlite'
+      config:
+        path: !!js dshHomePath('request-budgets.db')
+    - id: request-budget-policy
+      name: '@deepseek-ai/dsh-request-budget-policy'
+      config:
+        budgets:
+          - id: execute-fixture
+            usageSource: local
+            maxRequests: 1
+            reserveExecuteRequests: 1
+            routes:
+              - provider: budget-fixture
+                models: [m]
+
+- insert:
+    - id: request-accounting
+      name: '@deepseek-ai/dsh-token-meter/request-records'

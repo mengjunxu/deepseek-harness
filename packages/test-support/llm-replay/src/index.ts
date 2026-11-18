@@ -25,6 +25,8 @@ import type {
   LlmImageRequestPricing,
   LlmModelInfo,
   LlmProviderInfo,
+  LlmProviderPolicyInput,
+  LlmCapabilitySupport,
   LlmResolvedModelInfo,
   ModelModality,
   ResolvedRetryPolicy,
@@ -34,7 +36,10 @@ import type {
   TokenUsage,
   ToolUpdate,
 } from '@deepseek-ai/dsh-llm'
-import { LlmAdapter, LlmError, ReasoningEffortId, expandAssistantStream, offloadedImageText, requestImageHandleText, resolveRetryPolicy } from '@deepseek-ai/dsh-llm'
+import {
+  LlmAdapter, LlmError, ReasoningEffortId, expandAssistantStream, offloadedImageText,
+  requestImageHandleText, resolveProviderPolicy, resolveRetryPolicy,
+} from '@deepseek-ai/dsh-llm'
 import { assertNever } from '@deepseek-ai/dsh-util-values'
 
 const PACKED_CHUNK_ROW_TYPES = new Set(['text-chunks', 'reasoning-chunks', 'tool-call-chunks'])
@@ -74,6 +79,12 @@ export type ReplayEntry =
 export interface ReplayModelConfig {
   /** Model id used for replay requests. */
   id: string
+  /** Optional exact-model native JSON Schema support; omission remains unknown. */
+  structuredOutputSupport?: LlmCapabilitySupport
+  /** Optional exact-model tool support for native registered replay routes. */
+  toolSupport?: LlmCapabilitySupport
+  /** Optional exact-model incremental response support for native registered replay routes. */
+  streamingSupport?: LlmCapabilitySupport
   /** Selector label; defaults to {@link id}. */
   name?: string
   /** Optional selector description. */
@@ -115,6 +126,8 @@ export interface ReplayProviderConfig {
   id: string
   /** Selector label; defaults to {@link id}. */
   name?: string
+  /** Optional explicit provider admission policy for keyless capability scenarios. */
+  policy?: LlmProviderPolicyInput
   /** Advisory models exposed to replay scenarios that exercise discovery. */
   models?: ReplayModelConfig[]
   /** Optional provider-owned retry policy used by assembled recovery snapshots. */
@@ -866,7 +879,10 @@ class ReplayAdapter extends LlmAdapter {
     const configured = this.providers.get(provider)
     /* v8 ignore next -- LlmRuntime only asks about routes registered from this same map. */
     if (configured === undefined) return super.providerInfo(provider)
-    return { id: provider, name: configured.name ?? provider }
+    return {
+      id: provider, name: configured.name ?? provider,
+      ...configured.policy === undefined ? {} : { policy: resolveProviderPolicy(configured.policy) },
+    }
   }
 
   override providerRetryPolicy(provider: string): ResolvedRetryPolicy | undefined {
@@ -911,6 +927,11 @@ class ReplayAdapter extends LlmAdapter {
       provider,
       id: model,
       name: configuredModel?.name ?? model,
+      ...configuredModel?.structuredOutputSupport === undefined
+        ? {}
+        : { structuredOutputSupport: configuredModel.structuredOutputSupport },
+      ...configuredModel?.toolSupport === undefined ? {} : { toolSupport: configuredModel.toolSupport },
+      ...configuredModel?.streamingSupport === undefined ? {} : { streamingSupport: configuredModel.streamingSupport },
       ...configuredModel?.description === undefined ? {} : { description: configuredModel.description },
       ...configuredModel?.inputModalities === undefined
         ? {}
@@ -1145,7 +1166,14 @@ export interface Config {
 
 function validateConfiguredModels(providers: ReplayProviderConfig[] | undefined): void {
   for (const provider of providers ?? []) {
+    if (provider.policy !== undefined) resolveProviderPolicy(provider.policy)
     for (const model of provider.models ?? []) {
+      for (const field of ['structuredOutputSupport', 'toolSupport', 'streamingSupport'] as const) {
+        const support: unknown = model[field]
+        if (support !== undefined && support !== 'supported' && support !== 'unsupported' && support !== 'unknown') {
+          throw new Error(`llm-replay: provider "${provider.id}" model "${model.id}" ${field} is invalid`)
+        }
+      }
       const modalities: unknown = model.inputModalities
       if (modalities !== undefined && (!Array.isArray(modalities)
         || !modalities.every((modality: unknown) => modality === 'text' || modality === 'image'))) {

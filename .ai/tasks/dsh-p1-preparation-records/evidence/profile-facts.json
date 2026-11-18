@@ -1,0 +1,64 @@
+{
+  "session": {
+    "preparation": [
+      {
+        "provider": "budget-fixture",
+        "model": "m",
+        "stage": "prepare",
+        "purpose": "compaction",
+        "usageSource": "local",
+        "category": "capability"
+      }
+    ],
+    "accounting": [
+      {
+        "provider": "budget-fixture",
+        "model": "m",
+        "usageSource": "local",
+        "intent": "execute",
+        "outcome": "completed",
+        "finishKind": "stop",
+        "usage": {
+          "kind": "adapter-reported",
+          "tokens": {
+            "inputTokens": 1,
+            "outputTokens": 1
+          }
+        }
+      }
+    ],
+    "turn": "completed",
+    "retainedV3ContainsAudit": false
+  },
+  "sdk": {
+    "preparation": [
+      {
+        "provider": "intent-chat",
+        "model": "chat-fixture",
+        "stage": "prepare",
+        "purpose": "compaction",
+        "usageSource": "local",
+        "category": "capability"
+      }
+    ],
+    "accounting": [
+      {
+        "provider": "intent-chat",
+        "model": "chat-fixture",
+        "usageSource": "local",
+        "intent": "chat",
+        "outcome": "completed",
+        "finishKind": "stop",
+        "usage": {
+          "kind": "adapter-reported",
+          "tokens": {
+            "inputTokens": 1,
+            "outputTokens": 1
+          }
+        }
+      }
+    ],
+    "turn": "completed",
+    "retainedV3ContainsAudit": false
+  }
+}

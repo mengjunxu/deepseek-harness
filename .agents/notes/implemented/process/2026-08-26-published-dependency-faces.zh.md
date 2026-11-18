@@ -34,6 +34,14 @@ Client bundle 使用的 workspace import、纯类型 import、模块扩充、`ds
 
 验证器读取源码 manifest 和源码文件，因此可以在没有已构建 `lib/` 的干净工作树上运行。每个被选中的 Host face 都必须存在 `src/index.ts`。未分类的 Host 运行期导出属于策略违规，会阻止 `--fix` 的全部写入；维护者必须审查该导出，并选择分类该导出、修改源码关系或修改选包范围。源码安全检查通过后，`--fix` 只执行分类所确定的区段与范围变更，并删除失效的 peer 元数据。
 
+### 精确的默认主目录导出
+
+LLM 的[验证准入检查](../../../../packages/llm/llm/src/validation-admission.ts)导入 `defaultDshHome`，用于拒绝把普通 Harness 主目录用于隔离验证授权。复用所属 helper 可避免再硬编码一套默认目录计算。Host 导出分类负责 npm 依赖放置；授权校验仍由 LLM 检查负责。
+
+`@deepseek-ai/dsh-home-paths#defaultDshHome` 是一个精确的 Host 重复安装安全导出。它返回原始字符串 `join(homedir(), '.dsh')`，不注册服务、不保留可变模块状态，也不要求共享构造器或函数身份。两个独立导入的构建模块副本具有不同的函数身份，却返回同一操作系统默认目录；[评审证据](../../../../.ai/tasks/dsh-p1-publication-hygiene/evidence/host-export-review.md)记录了该验证及明确人工批准。这一分类允许受管 Host 消费方把该依赖边放在普通 `dependencies`，无需强制共享模块实例。
+
+例外只覆盖 `defaultDshHome`，不覆盖包的其他导出。若该函数以后增加依赖实例身份的状态或副作用，必须重新审查分类。相对地，`dsh-llm#validateLlmRequestPolicy` 仍要求 peer，因为其错误依赖共享的 `HarnessError` 构造器；仅有相同返回值不足以证明会抛出错误的 API 可安全重复安装。
+
 ### 维护流程
 
 不带 `--fix` 运行验证器，会以只读方式检查选包范围、导出分类、依赖区段、workspace range 与 peer metadata。未分类的运行期 import 会按每个导出分别报告可点击的 `path:line:column` 诊断。
@@ -74,7 +82,7 @@ pnpm run benchmark:npm-resolution:next -- --runs=1 --finalist-runs=5 --finalists
 
 [`verify-npm-install-layout`](../../../../scripts/verify-npm-install-layout.ts) 是 `Release (dsh)` workflow 在每个 pull request 和 master push 上运行的确定性包路径与版本检查；它不限制 resolver 耗时。[`benchmark-npm-resolution`](../../../../scripts/benchmark-npm-resolution.ts) 与 [`benchmark-next-package-dependency`](../../../../scripts/benchmark-next-package-dependency.ts) 保持为手动工具，因为 resolver 耗时会随机器负载和 metadata 完成顺序变化。它们通过全新 consumer 和仅 metadata 的运行，把 npm 依赖树计算与 registry 延迟、包归档下载分离，因此相对结果可以定位 peer 中继，但不构成发布时性能承诺。
 
-生成后的策略目前在 13 个包中留下 27 条位于 `dependencies` 的受管 Host 运行时边。两条边仍位于 `peerDependencies`：`dsh-api-remotes → dsh-scope` 使用 `carrierKeyOf`，`dsh-session → dsh-scope` 使用 `scopeOf` 与 `scopeTarget`。
+生成后的策略目前在 25 个包中留下 64 条位于 `dependencies` 的受管 Host 运行时边，并在七个包中保留九条依赖身份的 `peerDependencies` 边。[已执行的依赖边清单](../../../../.ai/tasks/dsh-p1-publication-hygiene/evidence/current-host-edges.log)记录各导出的分类。
 
 ## 考虑过的替代方案
 

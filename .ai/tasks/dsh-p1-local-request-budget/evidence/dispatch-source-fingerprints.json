@@ -1,0 +1,7 @@
+{
+  "packages/llm/llm/src/index.ts": "3b144254a4bdf730b2f385d0554dfbc351e546e5f2817a411bed951a1fec7ea3",
+  "packages/llm/llm/src/types.ts": "e1225ff37ced73f66c22d0e3b15b9880eac6a22e723c0c7c4f4d1993851ce385",
+  "packages/llm/llm/src/dispatch.ts": "2786db1abac9cb972f08bdd7a7ef113bee930c45da590b21f9d5b1db9822e2b4",
+  "packages/llm/llm/tests/dispatch.spec.ts": "20c1da997cc6ee88bec4615bf66d926bc5d0d21613f8139c9963966d27684989",
+  "packages/llm/llm/tests/service.spec.ts": "7feec87beffebf824d90e3d909263bd31a8e9e852891c29611517c1e1f434ddc"
+}

@@ -2,7 +2,7 @@
 
 English | [中文](cordis-primer.zh.md)
 
-Cordis is the vendored plugin framework underneath DeepSeek Harness. This primer teaches the Cordis ideas a harness plugin author needs before reading the generated service/event reference on the [subsystem pages](subsystems/core.md); the [Cordis tutorial](cordis-tutorial/index.md) walks the same ideas hands-on. The vendored source and sync procedure live in [vendor/README.md](../vendor/README.md).
+Cordis is DeepSeek Harness’s vendored plugin framework. This primer introduces its core concepts; the [subsystem pages](subsystems/core.md) provide the generated service/event reference, and the [Cordis tutorial](cordis-tutorial/index.md) provides practice. [vendor/README.md](../vendor/README.md) owns source and sync instructions.
 
 ## Cordis In Five Ideas
 
@@ -42,4 +42,4 @@ For single-decision events, short-circuiting is the design. A policy listener ca
 
 Encapsulate behavior into plugins: a tool pipeline event belongs to `ctx.tools`, model streaming belongs to `ctx.llm`, and live agent coordination belongs to `ctx.agents`. Prefer events for interception and policy; prefer service methods for direct capability calls.
 
-Every registration should have a disposer, either by returning one from `ctx.effect()` or using a Cordis helper that does it for you. If teardown order matters, keep the related work in one effect so disposal unwinds in the intended sequence.
+Every registration needs a disposer returned or yielded from `ctx.effect()`, or owned by a Cordis helper. Separate fiber effects may dispose concurrently. For ordered teardown, yield related disposers, including `ctx.provide()`’s result, from one generator effect; calling a helper without yielding its disposer leaves separate ownership. Whole-application owners first drain work through app-boot’s `disposeApplication`.

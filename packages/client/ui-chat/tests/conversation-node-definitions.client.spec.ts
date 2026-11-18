@@ -29,6 +29,7 @@ import { retryDefinition } from '../src/client/conversation-nodes/retry.ts'
 import { toolDefinition } from '../src/client/conversation-nodes/tool.ts'
 import { turnErrorDefinition } from '../src/client/conversation-nodes/turn-error.ts'
 import { turnMaxTokensDefinition } from '../src/client/conversation-nodes/turn-max-tokens.ts'
+import { requestAccountingDefinition } from '../src/client/conversation-nodes/request-accounting.ts'
 import { turnTailDefinition } from '../src/client/conversation-nodes/turn-tail.ts'
 import { turnProcessDefinition } from '../src/client/conversation-nodes/turn-process.ts'
 import type {
@@ -50,6 +51,7 @@ const DEFINITIONS: readonly ConversationNodeDefinition[] = [
   retryDefinition,
   turnErrorDefinition,
   turnMaxTokensDefinition,
+  requestAccountingDefinition,
   turnTailDefinition,
 ]
 
@@ -1626,6 +1628,43 @@ describe('built-in conversation node Definitions', () => {
     expect(tail.branchUnavailable).toBe(true)
   })
 
+  it.each(['replay', 'live', 'prepend'] as const)('joins Step accounting without a transcript row (%s)', (mode) => {
+    const entries = [
+      at(1, 'turn/start', { turn: 1 }), at(2, 'step/start', { turn: 1, step: 1 }),
+      at(3, 'llm/request-accounting', { provider: 'fake', model: 'fake', usageSource: 'local', outcome: 'completed',
+        loopAttempt: { stepStartSeq: 2, attempt: 1 }, usage: { kind: 'unknown' } }),
+      at(4, 'assistant/message', { turn: 1, step: 1, message: assistantMessage('source-assistant', 'done'),
+        usage: { inputTokens: 10, outputTokens: 3, totalTokens: 13 } }, { surfaceOp: 'append' }),
+      at(5, 'step/end', { turn: 1, step: 1 }), at(6, 'turn/end', { turn: 1, reason: { kind: 'completed' } }),
+    ]
+    const value = mode === 'replay' ? assembler(entries) : mode === 'prepend' ? assembler(entries.slice(2), true) : assembler()
+    if (mode === 'live') for (const entry of entries) value.append(entry)
+    else if (mode === 'prepend') {
+      expect((node(snapshot(value), 'turn-tail')?.data as TurnTailChatData).tokenUsage).toBeUndefined()
+      value.prepend(entries.slice(0, 2), false)
+    }
+    value.flush()
+    const tail = node(snapshot(value), 'turn-tail')?.data as TurnTailChatData
+    expect(tail.tokenUsage?.totalTokens).toBe(13)
+    expect(tail.tokenUsage?.routes).toEqual([{ provider: 'fake', model: 'fake', usageSource: 'local' }])
+    expect(node(snapshot(value), 'request-accounting')).toBeUndefined()
+  })
+
+  it('ignores accounting after its referenced Turn ends', () => {
+    const seq = 9
+    const value = assembler([
+      at(1, 'turn/start', { turn: 1 }), at(2, 'step/start', { turn: 1, step: 1 }),
+      at(4, 'assistant/message', { turn: 1, step: 1, message: assistantMessage('window-assistant', 'done'),
+        usage: { inputTokens: 10, outputTokens: 3, totalTokens: 13 } }, { surfaceOp: 'append' }),
+      at(5, 'step/end', { turn: 1, step: 1 }), at(6, 'turn/end', { turn: 1, reason: { kind: 'completed' } }),
+      at(seq, 'llm/request-accounting', { provider: 'fake', model: 'fake', usageSource: 'local', outcome: 'completed',
+        loopAttempt: { stepStartSeq: 2, attempt: 1 }, usage: { kind: 'unknown' } }),
+    ])
+    const tail = node(snapshot(value), 'turn-tail')?.data as TurnTailChatData
+    expect(tail.tokenUsage?.totalTokens).toBe(13)
+    expect(tail.tokenUsage?.routes?.[0]?.usageSource).toBe('unknown')
+  })
+
   it('publishes exact Turn usage only after pagination supplies the full lifecycle window', () => {
     const value = assembler([
       at(3, 'assistant/message', {
@@ -1660,7 +1699,7 @@ describe('built-in conversation node Definitions', () => {
       cacheReadTokens: 2,
       cacheWriteTokens: 1,
       reasoningTokens: 1,
-      routes: [{ provider: 'fake', model: 'fake' }],
+      routes: [{ provider: 'fake', model: 'fake', usageSource: 'unknown' }],
     })
   })
 
@@ -1795,11 +1834,11 @@ describe('built-in conversation node Definitions', () => {
       systemAt(1, '# Initial'),
       at(2, 'request/header', {
         reason: 'initial',
-        header: { config: { provider: 'fake', model: 'fake' }, tools },
+        header: { config: { provider: 'fake', model: 'fake', usageSource: 'unknown' }, tools },
       }),
       at(3, 'request/header', {
         reason: 'change',
-        header: { config: { provider: 'fake', model: 'fake' }, tools: expandedTools },
+        header: { config: { provider: 'fake', model: 'fake', usageSource: 'unknown' }, tools: expandedTools },
       }),
       at(4, 'request/header', {
         reason: 'change',
@@ -1844,7 +1883,7 @@ describe('built-in conversation node Definitions', () => {
     expect(current.nodes.values().filter(candidate => candidate.kind === 'unknown')).toEqual([])
     value.prepend([
       systemAt(1, '# Original'),
-      at(2, 'request/header', { reason: 'initial', header: { config: { provider: 'fake', model: 'fake' } } }),
+      at(2, 'request/header', { reason: 'initial', header: { config: { provider: 'fake', model: 'fake', usageSource: 'unknown' } } }),
     ], false)
     value.flush()
     const restored = snapshot(value)
@@ -1857,19 +1896,19 @@ describe('built-in conversation node Definitions', () => {
       systemAt(10, '# Resumed prompt', 5),
       at(11, 'request/header', {
         reason: 'resume',
-        header: { config: { provider: 'fake', model: 'fake' } },
+        header: { config: { provider: 'fake', model: 'fake', usageSource: 'unknown' } },
       }),
     ], true)
     const nodeless = assembler([
       at(11, 'request/header', {
         reason: 'resume',
-        header: { config: { provider: 'fake', model: 'fake' } },
+        header: { config: { provider: 'fake', model: 'fake', usageSource: 'unknown' } },
       }),
     ], true)
     const systemless = assembler([
       at(20, 'request/header', {
         reason: 'initial',
-        header: { config: { provider: 'fake', model: 'fake' } },
+        header: { config: { provider: 'fake', model: 'fake', usageSource: 'unknown' } },
       }),
     ])
     expect(node(snapshot(windowed), 'system-prompt')).toBeUndefined()
@@ -1880,7 +1919,7 @@ describe('built-in conversation node Definitions', () => {
       systemAt(5, '# Original prompt'),
       at(6, 'request/header', {
         reason: 'initial',
-        header: { config: { provider: 'fake', model: 'fake' } },
+        header: { config: { provider: 'fake', model: 'fake', usageSource: 'unknown' } },
       }),
     ]
     const promptTexts = (value: ConversationNodeAssembler) => {
@@ -1907,7 +1946,7 @@ describe('built-in conversation node Definitions', () => {
       }, { surfaceOp: 'append' }),
       at(6, 'request/header', {
         reason: 'initial',
-        header: { config: { provider: 'fake', model: 'fake' } },
+        header: { config: { provider: 'fake', model: 'fake', usageSource: 'unknown' } },
       }),
     ])
 
@@ -2008,7 +2047,7 @@ describe('built-in conversation node Definitions', () => {
       at(4, 'user/message', textMessage('first-user', 'first'), { surfaceOp: 'append' }),
       at(5, 'request/header', {
         reason: 'initial',
-        header: { config: { provider: 'fake', model: 'fake' }, tools: [] },
+        header: { config: { provider: 'fake', model: 'fake', usageSource: 'unknown' }, tools: [] },
       }),
       at(6, 'step/end', { turn: 1, step: 1 }),
       at(7, 'turn/end', { turn: 1, reason: { kind: 'completed' } }),
@@ -2030,7 +2069,7 @@ describe('built-in conversation node Definitions', () => {
     value.append(at(12, 'request/header', {
       reason: 'series',
       startsSeries: true,
-      header: { config: { provider: 'fake', model: 'fake' }, tools: [] },
+      header: { config: { provider: 'fake', model: 'fake', usageSource: 'unknown' }, tools: [] },
     }))
     value.flush()
     expect(cards()).toHaveLength(2)
@@ -2040,7 +2079,7 @@ describe('built-in conversation node Definitions', () => {
     value.append(at(15, 'request/header', {
       reason: 'series',
       startsSeries: true,
-      header: { config: { provider: 'fake', model: 'fake' }, tools: [] },
+      header: { config: { provider: 'fake', model: 'fake', usageSource: 'unknown' }, tools: [] },
     }))
     value.flush()
     expect(cards()).toEqual([
@@ -2058,7 +2097,7 @@ describe('built-in conversation node Definitions', () => {
       at(4, 'user/message', textMessage('first-user', 'first'), { surfaceOp: 'append' }),
       at(5, 'request/header', {
         reason: 'initial',
-        header: { config: { provider: 'fake', model: 'fake' }, tools: [] },
+        header: { config: { provider: 'fake', model: 'fake', usageSource: 'unknown' }, tools: [] },
       }),
       at(6, 'step/end', { turn: 1, step: 1 }),
       at(7, 'step/start', { turn: 1, step: 2 }),
@@ -2082,7 +2121,7 @@ describe('built-in conversation node Definitions', () => {
       }, { surfaceOp: 'append' }),
       at(6, 'request/header', {
         reason: 'initial',
-        header: { config: { provider: 'fake', model: 'fake' } },
+        header: { config: { provider: 'fake', model: 'fake', usageSource: 'unknown' } },
       }),
     ])
     const kinds = () => {
@@ -2125,7 +2164,7 @@ describe('built-in conversation node Definitions', () => {
       at(4, 'user/message', textMessage('first-user', 'first'), { surfaceOp: 'append' }),
       at(5, 'request/header', {
         reason: 'initial',
-        header: { config: { provider: 'fake', model: 'fake' } },
+        header: { config: { provider: 'fake', model: 'fake', usageSource: 'unknown' } },
       }),
       at(6, 'step/end', { turn: 1, step: 1 }),
       at(7, 'turn/end', { turn: 1, reason: { kind: 'completed' } }),
@@ -2154,7 +2193,7 @@ describe('built-in conversation node Definitions', () => {
         at(9, 'user/message', textMessage(`second-user-${reason}`, 'second'), { surfaceOp: 'append' }),
         at(10, 'request/header', {
           reason,
-          header: { config: { provider: 'fake', model: 'fake' } },
+          header: { config: { provider: 'fake', model: 'fake', usageSource: 'unknown' } },
         }),
       ], true)
 
@@ -2171,7 +2210,7 @@ describe('built-in conversation node Definitions', () => {
         at(4, 'user/message', textMessage(`first-user-${reason}`, 'first'), { surfaceOp: 'append' }),
         at(5, 'request/header', {
           reason: 'initial',
-          header: { config: { provider: 'fake', model: 'fake' } },
+          header: { config: { provider: 'fake', model: 'fake', usageSource: 'unknown' } },
         }),
       ], false)
       windowed.flush()
@@ -2192,7 +2231,7 @@ describe('built-in conversation node Definitions', () => {
       at(4, 'user/message', textMessage('first-user', 'first'), { surfaceOp: 'append' }),
       at(5, 'request/header', {
         reason: 'initial',
-        header: { config: { provider: 'fake', model: 'fake' } },
+        header: { config: { provider: 'fake', model: 'fake', usageSource: 'unknown' } },
       }),
       at(6, 'user/message', {
         ...textMessage('compacted', 'summary'),
@@ -2200,7 +2239,7 @@ describe('built-in conversation node Definitions', () => {
       }, { surfaceOp: { op: 'replace', startSeq: 4, endSeq: 4 } }),
       at(7, 'request/header', {
         reason: 'series',
-        header: { config: { provider: 'fake', model: 'fake' } },
+        header: { config: { provider: 'fake', model: 'fake', usageSource: 'unknown' } },
       }),
       at(8, 'step/end', { turn: 1, step: 1 }),
       at(9, 'turn/end', { turn: 1, reason: { kind: 'completed' } }),
@@ -2209,7 +2248,7 @@ describe('built-in conversation node Definitions', () => {
       at(12, 'user/message', textMessage('second-user', 'second'), { surfaceOp: 'append' }),
       at(13, 'request/header', {
         reason: 'series',
-        header: { config: { provider: 'fake', model: 'fake' } },
+        header: { config: { provider: 'fake', model: 'fake', usageSource: 'unknown' } },
       }),
     ])
 

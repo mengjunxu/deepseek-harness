@@ -31,6 +31,7 @@ Mount this plugin when a consumer needs token or context pressure for compaction
 
 Choose it when several plugins should agree on one replay-based measurement — compaction planning, occupancy UIs, and pressure checks all read the same fold. The measurements replay the durable session log, so they are deterministic, cost no model calls, and reflect exactly what is logged. Text and undeclared image routes use a fixed heuristic; reach for a provider tokenizer when a deployment needs exact billing-grade counts.
 
+<a id="measuring-pressure"></a>
 ### Measuring pressure
 
 `ctx.tokenMeter` exposes two operations. `measure(session, requestHeader?)` returns a detached, deeply immutable snapshot at one consumed-log revision: `totalTokens` is request-and-response pressure, and `surfaceTokens` is the surface-only route-priced total equal to the sum of `nodes[].tokens`. An optional `requestHeader` override selects the priced route and pressure fields; the node set still describes the current session. `estimateMessage(message)` prices one message with the fixed heuristic. Every call clones the positional surface nodes, so measurement is O(surface).
@@ -54,6 +55,8 @@ Image offload reprices existing node identities while preserving prior usage anc
 
 `deriveTurnTokenUsage(events)` folds one complete turn into exact per-attempt and whole-turn usage for browser consumers. It returns no result when lifecycle evidence is missing, counts are unsafe, or exact totals conflict; each corresponding aggregate appears only when every participating attempt reports its optional cache, reasoning, or route value.
 
+Turn routes carry `usageSource` only from unique accounting explicitly linked to their loop attempt; absent, duplicate or mismatched evidence yields `unknown`. Matching failed attempts can retain their captured route. The fold keeps separate entries when the same model uses different sources, while its existing adapter-sample arithmetic remains unchanged.
+
 ### Composition
 
 ```yaml
@@ -62,6 +65,23 @@ Image offload reprices existing node identities while preserving prior usage anc
 ```
 
 Both plugins have usable defaults. The meter consumes only the optional `llm` service, and only to resolve route-declared request-image pricing; compaction remains optional. A deployment configures capacity and image pricing on its LLM adapter and compaction policy on `dsh-compaction-basic`.
+
+<a id="request-records"></a>
+### Native request accounting
+
+Mount the optional `@deepseek-ai/dsh-token-meter/request-records` entry alongside `llm`, `sessions` and `sessionProjections` when settled native dispatches need durable route/source attribution. The default meter does not enable it.
+
+```yaml
+- insert:
+    - id: request-accounting
+      name: '@deepseek-ai/dsh-token-meter/request-records'
+```
+
+Read `ctx.sessionProjections.snapshot(session, ['requestAccounting'])` for `recordCount`, counts `bySource`, and the last record with its committed `seq`. Existing asynchronous [Session query](../../session-query/session-query/README.md) reads historical records; Session ID plus committed seq identifies each record. Adapter-returned counts may themselves be estimates and do not establish official billing or balance.
+
+The same entry exposes `preparationFailures`, a separate count and last-record view for failed native preparation. Read `ctx.sessionProjections.snapshot(session, ['preparationFailures'])` to inspect it. These audits do not increment dispatch counts or token totals. A missing native adapter may still be served by virtual middleware.
+
+Recorded token samples preserve optional `measurement: provider-reported | estimated`. Missing measurement stays unknown; it is never inferred from `usageSource`. Completed-Turn details show this measurement independently of cost source, and mark different or partly unknown attempts as mixed. Accounting cache version 3 rebuilds version-one/two caches from events. Neither measurement establishes billed amounts or official balance.
 
 ### Reading the numbers
 
@@ -104,6 +124,24 @@ Each `measure()` call synchronizes the fold to the current durable tail, then re
 
 `./estimate` exports the stateless text/content estimators used by tool-result retention. Model adapters supply request-image costs through `imageRequestPricing`.
 
+### Native record semantics
+
+Each `llm/request-accounting` event contains captured serving `provider`, resolved `model`, declared `usageSource`, optional `intent`/`purpose`, observed `outcome`, optional terminal `finishKind`, and `usage`. The serving registration stays fixed across replacement; model, intent and purpose are captured before delegation. Absent source declarations remain `unknown`.
+
+When supplied by the loop, `loopAttempt` joins a record to its committed `step/start` sequence and one-based attempt within that step. The enclosing Session completes the identity. Retries increment the attempt; resumed lifecycles commit new step sequences. The live `LlmAttemptId` remains lifecycle-local. Auxiliary and legacy records omit the reference, so consumers must not infer a join from arrival order or the current Provider directory.
+
+`usage.kind: adapter-reported` carries only the last returned token sample. These counters may themselves be estimates; the label identifies who returned them and makes no official billing or balance claim. Missing counters produce `usage.kind: unknown`. Heuristic measurements remain separately owned by [TokenMeter.measure](README.md#measuring-pressure), and are never substituted for missing reported counters. Repeated samples in one attempt replace each other; each retried dispatch receives its own record.
+
+`completed` means an observed `stop`, `tool-calls` or `max-tokens` terminal result. Errors and aborts retain their outcome without error messages or response bodies. Consumer closure without a terminal result, and unknown extensible finish reasons, produce `unknown`. A record does not prove provider acceptance, payment authorization or a refund.
+
+`llm/preparation-failed` records requested route, captured source, entry stage and a fixed failure category. It excludes arbitrary error codes/messages and all request content. Explicit preparation supplies Session identity through `prepareCall(config, signal, { sessionId, purpose? })`; the standard loop supplies its own Session ID. Direct streams use their existing invocation identity. Unknown failures retain `unknown`; successful preparation emits no failure audit. Preparation observers are awaited. An observer defect retains the original error in `AggregateError` and prevents proceeding without the required audit.
+
+The plugin copies only the named metadata and token counters; it records no prompt, response text, credentials or opaque provider replay data. One ordered effect owns its listener, bounded projection and active attempts. Application drain or plugin unload cancels owned transports, waits settlement writes, then withdraws contributions. Embedders use app-boot's `disposeApplication`; raw root disposal provides no application drain phase.
+
+The projection folds the existing Session log through the registry cursor and restores its JSON checkpoint. It keeps no second transcript or per-request index. Request accounting uses cache version 3, preparation failures use version 2; obsolete caches rebuild from the existing log; adding the required Session event does not change the Session envelope grammar. Older builds that do not know the event refuse the log.
+
+This entry needs no separate invariant companion: one atomic metadata event supplies the bounded projection, whose cursor and checkpoint validation belong to the existing registry. No independent submission or token total is persisted.
+
 </details>
 
 -----
@@ -142,6 +180,11 @@ These limits define where the measurement stops and future work begins. They are
 - **Provider usage is only reusable for an identical canonical envelope** — tools, provider, model, or call-config changes deliberately fall back to full heuristic estimation; system-prompt changes are signed surface deltas until the next successful call.
 - **A system-prompt rewrite carries no shadow price** — the loop replaces a system node without an adjacent metering event, so `contextPressure.projectedTokens` folds that replacement at zero delta until the next usage sample; `contextBreakdown.systemTokens` and `measure()` reprice the new prompt immediately.
 - **Composition checkpoints retain the current surface** — exact system/message classification needs positional entries; checkpoint size and surface-event folding are O(current retained surface).
+
+- Calls without a live local Session and virtual-route dispatches are outside settlement coverage. Preparation failures observed at the native preparation owner have separate audits; other outer middleware refusals are not covered.
+- Process death before settlement can leave no record. Existing budget receipts independently retain possibly submitted charges; accounting does not reclaim them.
+- Task/Run linkage, complete policy-decision history, official balance, external executors and authoritative measurement classification remain deferred. Raw adapter counters are not merged with local estimates.
+- Record counts describe observed dispatch settlements, including any downstream refusal; they are not confirmed provider submissions or billed-request totals.
 
 <a id="dev-note"></a>
 ### Dev Note

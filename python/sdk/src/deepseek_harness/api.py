@@ -35,6 +35,8 @@ class DeepSeekHarnessConfig:
     shutdown_timeout_seconds: float | None = 1.0
     base_url: str | None = None
     api_key: str | None = None
+    approval_requests: bool = False
+    user_questions: bool = False
 
 
 @dataclass(slots=True)
@@ -110,12 +112,20 @@ class DeepSeekHarness:
             model=self.config.model,
             reasoning_effort=self.config.reasoning_effort,
             max_tokens=self.config.max_tokens,
+            approval_requests=self.config.approval_requests,
+            user_questions=self.config.user_questions,
         )
         self._initialized = True
 
     def close(self) -> None:
         self._client.close()
         self._initialized = False
+
+    def resume_session(self, session_id: str) -> "Session":
+        """Restore an existing session from the configured runtime home."""
+        self.start()
+        self._client.resume_session(session_id)
+        return Session(self, session_id)
 
     def start_session(self, session_id: str | None = None) -> "Session":
         self.start()

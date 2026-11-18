@@ -1,0 +1,9 @@
+version: 1
+scenario: request-preparation-failed
+profile: sdk
+composition: sdk-request-preparation-failed
+recording: authored
+header:
+  class: request-preparation-failed
+  pin: true
+  toolSchemasSource: sdk/bash-tool

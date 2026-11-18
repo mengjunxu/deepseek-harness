@@ -38,8 +38,9 @@ export interface JsonRpcTransportPeer {
    * @param params - the request parameters object.
    * @returns the result; rejects with {@link JsonRpcResponseError} on an error
    * response, and with a plain `Error` on a write failure or closure.
+   * @param signal - abandon this pending request when aborted; ignore subsequent replies.
    */
-  request(method: string, params: object): Promise<unknown>
+  request(method: string, params: object, signal?: AbortSignal): Promise<unknown>
   /**
    * Send a notification; omitted params produce no `params` member.
    * @param method - the JSON-RPC method name.

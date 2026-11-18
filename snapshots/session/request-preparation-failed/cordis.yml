@@ -1,0 +1,58 @@
+- id: llm-pi-ai
+  name: '@deepseek-ai/dsh-llm-pi-ai'
+  config:
+    providers:
+      budget-fixture:
+        api: openai-completions
+        baseURL: http://127.0.0.1:9/v1
+        models: [{ id: m }]
+        policy: { usageSource: local }
+
+- id: agent-default-model
+  config:
+    provider: budget-fixture
+    model: m
+
+- insert:
+    - id: agent-intent-routing
+      name: '@deepseek-ai/dsh-agent-default-model/intent-routing'
+      config:
+        routing:
+          intent: execute
+          routes:
+            chat: { provider: unavailable-chat, model: unused }
+            plan: { provider: unavailable-plan, model: unused }
+            review: { provider: unavailable-review, model: unused }
+            execute:
+              selection: entry
+
+- id: storage-domain
+  config:
+    backend: json
+    routes:
+      request_budget: sqlite
+
+- insert:
+    - id: storage-sqlite
+      name: '@deepseek-ai/dsh-storage-sqlite'
+      config:
+        path: !!js dshHomePath('request-budgets.db')
+    - id: request-budget-policy
+      name: '@deepseek-ai/dsh-request-budget-policy'
+      config:
+        budgets:
+          - id: execute-fixture
+            usageSource: local
+            maxRequests: 1
+            reserveExecuteRequests: 1
+            routes:
+              - provider: budget-fixture
+                models: [m]
+
+- insert:
+    - id: request-accounting
+      name: '@deepseek-ai/dsh-token-meter/request-records'
+
+- insert:
+    - id: model-preparation-audit
+      name: '../../../packages/core/agent-loop/tests/fixtures/model-preparation-audit.ts'

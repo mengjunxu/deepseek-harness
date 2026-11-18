@@ -1,0 +1,5 @@
+{
+  "omittedAccountingAppend": "FAIL_AS_EXPECTED",
+  "oracle": "real SDK consumes retained V3, completes, but Python requires exactly one current accounting record",
+  "restoredSha256": "49de4c99871bf6474784e9100ad9ee2379c6da7c6a9fbcbd4d8e23301db65079"
+}

@@ -1,0 +1,23 @@
+- id: llm-deepseek
+  disabled: true
+- id: llm-pi-ai
+  disabled: true
+- insert:
+    - id: llm-replay
+      name: '@deepseek-ai/dsh-llm-replay'
+      config:
+        providers:
+          - id: intent-chat
+            policy:
+              usageSource: local
+              capabilities: { tools: supported }
+            models:
+              - id: chat-fixture
+                toolSupport: supported
+                contextWindow: 262144
+    - id: request-accounting
+      name: '@deepseek-ai/dsh-token-meter/request-records'
+
+- insert:
+    - id: model-preparation-audit
+      name: '../../../packages/core/agent-loop/tests/fixtures/model-preparation-audit.ts'

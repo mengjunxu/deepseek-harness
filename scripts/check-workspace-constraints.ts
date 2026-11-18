@@ -174,6 +174,10 @@ export function readWorkspaceManifests(repositoryRoot: string): WorkspaceManifes
 }
 
 const packageFileExtras: Readonly<Record<string, readonly string[]>> = {
+  // Taskboard requires native permission services before its SDK accepts input.
+  '@deepseek-ai/dsh-api-taskboard-controller': ['sdk-permissions.patch.yml'],
+  // The exported profile patch enables SIWC only when its caller applies it.
+  '@deepseek-ai/dsh-experimental-chatgpt-plan': ['cordis.patch.yml'],
   // Owned Worker bundles import this public bootstrap before their business entry.
   '@deepseek-ai/dsh-app-boot': ['lib/worker/profile-resolution-bootstrap.js'],
   // Statically linked client libraries keep their stylesheets next to the emitted

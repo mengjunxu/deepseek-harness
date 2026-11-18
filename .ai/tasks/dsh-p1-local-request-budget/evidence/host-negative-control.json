@@ -1,0 +1,5 @@
+{
+  "guardDisabledResult": "FAIL_AS_EXPECTED",
+  "oracle": "second adapter entry despite exhausted shared allowance",
+  "restoredSha256": "68a05ff2d606d4ae42e5cb9ec6435033427abd607064929d7f8e6e25985b7e2f"
+}

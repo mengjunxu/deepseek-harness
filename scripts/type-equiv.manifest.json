@@ -2411,6 +2411,21 @@
       "doc": "docs/subsystems/core.md",
       "symbol": "ModelSelectionCapture",
       "source": "packages/core/agent/src/model-selection.ts"
+    },
+    {
+      "doc": "docs/subsystems/llm-streaming.md",
+      "symbol": "LlmResponseFormat",
+      "source": "packages/llm/llm/src/types.ts"
+    },
+    {
+      "doc": "docs/subsystems/llm-streaming.md",
+      "symbol": "Config",
+      "source": "packages/guard/paid-route-policy/src/config.ts"
+    },
+    {
+      "doc": "docs/subsystems/llm-streaming.md",
+      "symbol": "LlmDispatchContext",
+      "source": "packages/llm/llm/src/types.ts"
     }
   ]
 }

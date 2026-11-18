@@ -1,0 +1,8 @@
+--- a/scripts/package-dependency-policy.ts
++++ b/scripts/package-dependency-policy.ts
+@@
+ const SAFE_HOST_DEPENDENCY_EXPORTS = {
++  '@deepseek-ai/dsh-home-paths': ['defaultDshHome'],
+@@
+ const PEER_REQUIRED_HOST_EXPORTS = {
++  '@deepseek-ai/dsh-llm': ['validateLlmRequestPolicy'],

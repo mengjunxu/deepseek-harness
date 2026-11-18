@@ -79,6 +79,8 @@ await ctx.agentDefaultModel.saveSelection({ provider, model, reasoningEffort: 'h
 
 `routing` 是一个实时配置值。每个 Turn 在提示词组装前捕获所选路线；配置变化影响后续 Turn。提示词的 provider/model 变量和请求头使用捕获的同一对值。不可用路线在准备请求时失败。要求的能力必须由 Provider 声明为支持；未知支持状态会拒绝。省略能力要求时不额外限制该能力。限额、传输失败或中断后，插件不会尝试其他意图的路线。Session 请求头记录意图、实际 provider/model 和能力要求；不会额外发送分类请求。
 
+两种路线形式都可以设置 [LLM 严格 JSON Schema 选项](../../llm/llm/README.zh.md#request-strict-json-schema-output) `responseFormat`。Turn 随路线捕获完整格式；省略时清除继承的格式。既有请求头在流式调用前记录格式，且 Provider 和精确模型都必须声明结构化输出支持。[带格式的 SDK 组合](../../../snapshots/sdk/model-structured-output/cordis.yml)提供完整示例。
+
 -----
 
 <a id="understand-the-implementation"></a>
@@ -137,7 +139,7 @@ await ctx.agentDefaultModel.saveSelection({ provider, model, reasoningEffort: 'h
 这些限制界定该服务的范围。它们是当前包约束，不是任务积压。
 
 - **路由政策与账户、额度授权分离**——提供方能力声明不授予账户访问，不预留预算，也不授权付费回退；本插件不提供精确到模型的能力匹配。
-- **没有独立运行时不变量**——默认选择没有派生注册表；路由插件为每个 Turn 保留一份私有捕获值。LLM 准入和请求/日志重建仍由各自服务检查。
+- **运行时不变量**——本包不发布运行时不变量伴生插件；默认选择直接读取 Config，路由插件为每个 Turn 保留一份私有捕获值。LLM 准入与请求/日志重建由各自服务检查。
 - **单一的进程级默认值**——该服务只拥有一个默认值；按会话的模型选择仍由入口负责。
 - **持久化需要 profile 配置编辑器**——没有编辑器时，保存默认值不会保留选择。
 

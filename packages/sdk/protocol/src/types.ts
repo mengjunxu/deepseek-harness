@@ -1,6 +1,6 @@
 /**
- * Named wire types for the DeepSeek Harness SDK runtime protocol: the three
- * request/result pairs and the four server-to-client notification payloads
+ * Named wire types for the DeepSeek Harness SDK runtime protocol: the
+ * request/result pairs and the server-to-client notification payloads
  * exchanged over the newline-delimited JSON-RPC stdio transport. The server
  * plugin (`@deepseek-ai/dsh-sdk-jsonrpc-server`) and SDK clients share these shapes;
  * `serverInfo.name` stays the wire-stable `deepseek-harness-sdk-runtime`.
@@ -8,12 +8,17 @@
  * @module @deepseek-ai/dsh-sdk-protocol/types
  */
 
+import type { AskUserQuestionAnswer, AskUserQuestionItem } from '@deepseek-ai/dsh-user-questions/types'
 import type { ContentBlock, ReasoningEffortId } from '@deepseek-ai/dsh-llm'
 import type { SessionEvent } from '@deepseek-ai/dsh-session'
 import type { SubagentStopReason } from '@deepseek-ai/dsh-subagent'
 
 /** Parameters for the process-wide SDK handshake. */
 export interface InitializeParams {
+  /** Forward one-shot approvals for SDK-owned root Agents to this client. */
+  approvalRequests?: boolean
+  /** Advertise optional native interactions this client can answer. */
+  capabilities?: { userQuestions?: boolean }
   /** Working directory recorded on every SDK-created session's header. */
   cwd: string
   /** Provider route every SDK-created agent runs on. */
@@ -30,6 +35,12 @@ export interface InitializeParams {
 export interface InitializeResult {
   /** Wire-stable server identity (`deepseek-harness-sdk-runtime`) and version. */
   serverInfo: { name: string; version: string }
+}
+
+/** Restore one persisted root Session without submitting a prompt. */
+export interface SessionResumeParams {
+  /** Existing Session id in the runtime's configured persistence store. */
+  sessionId: string
 }
 
 /** One user turn on one SDK session. */
@@ -105,15 +116,54 @@ export interface SubagentFinishedNotification {
 
 /** Server-to-client notifications by JSON-RPC method name. */
 export interface HarnessSdkNotificationMap {
+  'user-question.cancelled': Pick<SdkUserQuestionRequest, 'requestId' | 'sessionId'>
   'session.event': SessionEventNotification
   'session.status': SessionStatusNotification
   'subagent.started': SubagentStartedNotification
   'subagent.finished': SubagentFinishedNotification
 }
 
+/** One authorization prompt for the operation currently awaiting its user's decision. */
+export interface ApprovalRequestParams {
+  /** SDK-owned root Session whose operation is pending. */
+  sessionId: string
+  /** Name of the operation that requested approval. */
+  toolName: string
+  /** Tool call identity when supplied by the operation. */
+  callId?: string
+  /** Explanation provided by the operation. */
+  reason?: string
+}
+
+/** Structured question for one SDK-owned root Session. */
+export interface SdkUserQuestionRequest {
+  /** Identity used to withdraw this question. */
+  requestId: string
+  /** Session that owns the waiting operation. */
+  sessionId: string
+  /** Questions to present to the operator. */
+  questions: AskUserQuestionItem[]
+}
+
+/** Reply with an answer for each id, or dismiss the request. */
+export type SdkUserQuestionResult = AskUserQuestionAnswer | { cancelled: true }
+
+/** SDK runtime requests answered by the client. */
+export interface HarnessSdkHostRequestMap {
+  'approval/request': { params: ApprovalRequestParams; result: ApprovalRequestResult }
+  'user-question/ask': { params: SdkUserQuestionRequest; result: SdkUserQuestionResult }
+}
+
+/** Decisions a client may return for one pending operation. */
+export interface ApprovalRequestResult {
+  /** Only allowed-once permits that operation to proceed. */
+  outcome: 'allowed-once' | 'rejected' | 'cancelled'
+}
+
 /** Client-to-server request methods with their param and result shapes. */
 export interface HarnessSdkRequestMap {
   'initialize': { params: InitializeParams; result: InitializeResult }
+  'session/resume': { params: SessionResumeParams; result: Record<string, never> }
   'session/prompt': { params: SessionPromptParams; result: SessionPromptResult }
   'shutdown': { params: undefined; result: Record<string, never> }
 }

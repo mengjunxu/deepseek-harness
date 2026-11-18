@@ -1,0 +1,2 @@
+$ tsx scripts/gen-plugin-packages.ts --check
+gen-plugin-packages: packages/preset/agent-preset/skills/cordis-composition-reference/references/packages.md is up to date.
