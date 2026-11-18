@@ -1,0 +1,95 @@
+{
+  "verified_at": "2026-11-18T15:35:40.863835+00:00",
+  "source_commit": "844566ed37fe3acf548a5ee5b98b0e1cd2a53054",
+  "platform": "macOS arm64",
+  "node": "26.5.0",
+  "pnpm": "11.25.0",
+  "repository_declared_pnpm": "11.7.0",
+  "results": {
+    "affected_unit_files": 39,
+    "affected_unit_cases_passed": 1242,
+    "python_sdk_cases_passed": 38,
+    "workspace_constraints_cases_passed_after_fix": 105,
+    "selected_snapshot_cases_passed_across_initial_and_targeted_rerun": 17,
+    "selected_web_cases_passed_across_initial_and_targeted_rerun": 8,
+    "pnpm run build": "PASS",
+    "pnpm run lint:contracts-ready": "PASS",
+    "pnpm run hygiene": "18 PASS / 0 FAIL",
+    "pnpm run doc-sync": "38 PASS / 4 FAIL: doc-typecheck, markdown links, translation pairing, markdown wrap",
+    "fresh_checkout_pnpm install --offline --frozen-lockfile": "PASS",
+    "fresh_checkout_pnpm run build": "PASS",
+    "fresh_checkout_pnpm exec vitest run --config vitest.web.config.ts apps/web/tests/taskboard.e2e.ts": "1 PASS",
+    "git push origin codely_bridge": "PASS (normal pre-push typecheck passed)"
+  },
+  "limitations": [
+    "Fresh checkout used independent node_modules and empty build outputs on the same macOS host; dependency installation used the existing pnpm cache.",
+    "Target receiving machine, Linux/Windows, live provider e2e and remote CI have not been verified.",
+    "Initial tests precede the checkpoint commit; subsequent changes are the documented fixes, regenerated output and whitespace normalization. Fresh checkout checks use the exact source_commit."
+  ],
+  "logs": {
+    "unit": {
+      "path": "unit.log.gz",
+      "uncompressed_sha256": "8ed3131c44f0d247af0c050cbda00662177d9d0594f011d531e59cab8eafdbbe"
+    },
+    "python": {
+      "path": "python.log.gz",
+      "uncompressed_sha256": "9461cd1607a18096a9a4d1c95b2338c5e7113d7ebf4604f44cdaf94f696388dc"
+    },
+    "build": {
+      "path": "build.log.gz",
+      "uncompressed_sha256": "a01fb6cc4dbf55b62a62e69a6cfbbd04ccb505ec556300a977f29708f45e133e"
+    },
+    "doc": {
+      "path": "doc.log.gz",
+      "uncompressed_sha256": "52d25d7d9bed6edb27e98b43003783d4af7fd534020805b22faa700f0bddf89d"
+    },
+    "lint": {
+      "path": "lint.log.gz",
+      "uncompressed_sha256": "5ab93e893da8c5f0748aa794bd2eb7d7a9f0b0cd29d66dcb19d907219df202f5"
+    },
+    "hygiene-final": {
+      "path": "hygiene-final.log.gz",
+      "uncompressed_sha256": "3449dc5e4234f2640f8b77c32d335f089b94bada43649d44aeb2abec97bfc662"
+    },
+    "snapshots": {
+      "path": "snapshots.log.gz",
+      "uncompressed_sha256": "973b73ddac024629699fab009ce808a9843040927de557f2d40a3286b979b981"
+    },
+    "refresh": {
+      "path": "refresh.log.gz",
+      "uncompressed_sha256": "6e69b9dd2e762c5ae69cef4d11af8b7d09c32dc8d7d3bef8361a025e3f3abb90"
+    },
+    "replay": {
+      "path": "replay.log.gz",
+      "uncompressed_sha256": "e7a9e860e9067a5a069ff9bde8b2ef35eba1d1f72f0cdb31bbdcc0a5b5a4a6f2"
+    },
+    "web": {
+      "path": "web.log.gz",
+      "uncompressed_sha256": "daa929126ced52422ed5d62b248e765582cd7a867fc4fcbf0f678de620e57749"
+    },
+    "web-paid": {
+      "path": "web-paid.log.gz",
+      "uncompressed_sha256": "c5a5c9764bd8304b2692e13e57c5b2f61e24cfebfd9ddab1127618b2addc8e44"
+    },
+    "fresh-install": {
+      "path": "fresh-install.log.gz",
+      "uncompressed_sha256": "b163cf391793daae37fe5de44b168bcde7a863d2c37c733ba5e860b7fffaa4b0"
+    },
+    "fresh-build": {
+      "path": "fresh-build.log.gz",
+      "uncompressed_sha256": "d07b4896e4c8c0685df1ca80437c47a1d4d62e028ac683909dc7a181c99d9938"
+    },
+    "fresh-web": {
+      "path": "fresh-web.log.gz",
+      "uncompressed_sha256": "c0540066df51e5d756c38fedb6d4bcd58cfc18b0cc3cc9e5884bbc85c11690e4"
+    },
+    "constraints-tests": {
+      "path": "constraints-tests.log.gz",
+      "uncompressed_sha256": "aefe665919747daf6056575b903b47519563b8e5376a387dcffa90a4979e45ff"
+    },
+    "push": {
+      "path": "push.log.gz",
+      "uncompressed_sha256": "a504b229ca80c9864397578b68385414cea3318315b2fc77afb42625691a0a76"
+    }
+  }
+}

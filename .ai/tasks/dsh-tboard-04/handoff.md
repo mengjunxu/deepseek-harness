@@ -10,6 +10,8 @@ updated_at: "2026-11-16T16:18:27Z"
 
 # TBOARD-04 交接
 
+当前跨设备提交、验证和接续状态见 [最新交接](../dsh-cross-device-handoff/handoff.md)。下文的未提交状态及额度是本阶段原检查点记录，不能用于判断当前 Git 同步状态。
+
 TBOARD-00、01、02 已完成。TBOARD-04 已交付工作目录准备、原目录与前次工作树确认、独占 SDK 句柄停止、超时与显式强停、原生权限服务握手门槛。当前产品决策是任意工具运行后的强停在什么平台验收。[方案及实测差异](platform.md)。尚未确认该项，任务保持 IN_PROGRESS。按实施 Plan，TBOARD-03 的真实调度依赖此决定。
 
 可在仓库根目录用与 G0 相同的 Node 运行 `node .ai/tasks/dsh-tboard-04/evidence/stop.mjs --controlled-tool` 验证真实工具子进程结束与租约释放；省略参数验证根进程已退出、工具范围不明仍保留租约。运行 `node .ai/tasks/dsh-tboard-04/evidence/permission.mjs` 验证权限配置错误时模型请求和目录写入均为零。受控任务的模型响应由本机确定性服务提供。Web 端到端通过有效浏览器会话验证业务接口，工作台页面归 TBOARD-07。

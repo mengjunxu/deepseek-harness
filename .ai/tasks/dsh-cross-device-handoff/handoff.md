@@ -1,9 +1,11 @@
 ---
 schema_version: 1
 task_id: dsh-cross-device-handoff
-state: IN_PROGRESS
+state: HANDOFF_READY
 branch: codely_bridge
-writer: Codex
+previous_agent: Codex
+next_agent: receiver_pending
+updated_at: "2026-11-18T15:35:51Z"
 ---
 
 # 跨设备接续
@@ -16,9 +18,13 @@ TBOARD-00、01、02 完成。TBOARD-04 已有目录检查、worktree、定向停
 
 ## 当前验证
 
-当前源码完整构建通过。受影响的 39 个 Vitest 文件有 1242 项通过；Python SDK client 与 intent routing 有 38 项通过。本次修正 Taskboard 浏览器类型入口、发布权限补丁清单、Web 测试 SQLite 配置与原子存储回放结果。后续结果见 [执行日志](log.md)。本检查点提交后还要验证独立检出的安装和构建，以及远端同步。
+完整构建、lint、18 项发布卫生检查通过。受影响的 39 个 Vitest 文件有 1242 项通过；Python SDK client 与 intent routing 有 38 项通过。修正后另有 105 项发布清单测试通过，定向回放合计 17 项、Web 测试合计 8 项通过。本次修正 Taskboard 浏览器类型入口、发布权限补丁清单、Web 测试 SQLite 配置与原子存储回放结果。命令、日志与准确被测版本见 [验证记录](evidence/verification.json)及[执行日志](log.md)。
 
-全仓 doc-sync 有四类既有失败，涉及示例类型、Markdown 链接、双语配对和段落换行。凭证和本机运行数据不随代码移交。旧阶段证据中的文件哈希记录当时版本，不能直接用于断言最新源码相等。184 个尾随空白文件已规范化，原始字节保存在 [归档](evidence/original-whitespace-files.tar.gz)，对应原始及规范化哈希见 [映射](evidence/whitespace-normalization.json)。
+源码检查点已正常提交、推送至 origin/codely_bridge，并用 git ls-remote 确认远端一致；提交和推送钩子均通过。使用相同源码建立的独立检出，在无构建产物、独立 node_modules 下通过冻结依赖安装、完整构建和 1 项 Taskboard Web 冒烟。验证环境为 macOS arm64、Node 26.5.0、pnpm 11.25.0，安装使用本机 pnpm 缓存；未验证接收机器、其他操作系统或远端 CI。最终交接记录与验证日志另作提交，最终远端提交号由发送方报告，接收方须核对。
+
+全仓 doc-sync 为 38 PASS / 4 FAIL，涉及示例类型、Markdown 链接、双语配对和段落换行，详见压缩日志；未宣称全仓检查通过。凭证和本机运行数据不随代码移交。旧阶段证据中的文件哈希记录当时版本，不能直接用于断言最新源码相等。184 个尾随空白文件已规范化，原始字节保存在 [归档](evidence/original-whitespace-files.tar.gz)，对应原始及规范化哈希见 [映射](evidence/whitespace-normalization.json)。
+
+2026-11-18 23:35（上海）通过 get_usage_limits 读取 Codex 的 10080 分钟窗口，周剩余 88%，重置 Unix 1795512892。交接记录发布后 Codex 停止写入，接收 Agent 尚未指定。本次不新增架构决策，无需更新 Architecture、Memory 或 WORKFLOW。
 
 ## 接收机器
 

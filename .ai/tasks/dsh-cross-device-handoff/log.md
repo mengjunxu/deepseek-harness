@@ -13,3 +13,9 @@
 本次 Web 初测有 6 项通过、付费确认的 2 项失败。失败原因为新 Web 默认 SQLite 与测试再次注册的同名后端冲突。测试改为配置已存在的后端，并为 taskboard 和 request_budget 同时路由；2 项复验通过。
 
 17 项受影响快照初测有 16 项通过、原子存储 1 项失败。差异为实际新增的 Domain.transaction 与相关类型查询结果，已更新未提交的 V4 记录，保留 V3。检查器首次精确名称筛选选中零项，纠正名称后刷新 1 项并复验回放。
+
+2026-11-18 23:35（上海）检查点：lint:contracts-ready PASS，hygiene 18 PASS / 0 FAIL。正常提交通过所有 pre-commit 检查；生成的 capability-seams 中英图表同步并重新记录配对。独立检出从空构建产物和独立 node_modules 开始，pnpm install --offline --frozen-lockfile、pnpm run build、pnpm exec vitest run --config vitest.web.config.ts apps/web/tests/taskboard.e2e.ts 均 PASS，Web 1 项。安装复用本机依赖缓存，不代表目标机器的网络和系统环境已验证。
+
+源码检查点 git push origin codely_bridge PASS，pre-push 的 pnpm run typecheck PASS，git ls-remote 与本地源码提交相同。被测版本和压缩日志归 evidence/verification.json。最终交接记录作为后续文档提交推送，接收机器的同一提交核对待接收方执行。未运行完整单测/覆盖率、真实模型 e2e 或跨平台验证；本次范围不要求这些检查，不以已有结果替代。
+
+get_usage_limits 于 2026-11-18T15:35:51Z 返回 10080 分钟窗口周剩余 88%，重置 Unix 1795512892。产品 Plan 状态不变；本任务保存跨设备检查点，最终记录推送后释放单写权，不启动后续开发。不需要新增 Architecture、Memory 或 WORKFLOW 内容。
