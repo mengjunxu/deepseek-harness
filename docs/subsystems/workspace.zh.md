@@ -273,10 +273,10 @@ planContinuation(projectId: ProjectId, taskId: TaskId, priorRun: TaskRunId, conf
 /**
  * Prepare the exact workspace claimed by the active Run before launching its SDK.
  * @param owner - current runtime lease.
- * @param plan - directory facts selected before admission.
+ * @param plan - directory plan for direct admission when the Run has no saved plan.
  * @returns observed working directory, branch and commit.
  */
-async prepareWorkspace(owner: RuntimeBinding, plan: TaskWorkspacePlan): Promise<WorkspaceInspection>
+async prepareWorkspace(owner: RuntimeBinding, plan?: TaskWorkspacePlan): Promise<WorkspaceInspection>
 
 /**
  * Register a local project root selected by the operator.
@@ -291,6 +291,15 @@ async prepareWorkspace(owner: RuntimeBinding, plan: TaskWorkspacePlan): Promise<
  * @returns after the Host records the outcome.
  */
 @Remote async stopRun(request: TaskStopCommand): Promise<void>
+
+/**
+ * Recheck an unconfirmed stop without sending another shutdown or force request.
+ * @param projectId - project owning the Run's task.
+ * @param taskId - task owning the Run.
+ * @param runId - Run whose exit must be observed again.
+ * @returns after recording exit or keeping the lease when the Host lacks complete evidence.
+ */
+@Remote async recheckRunStop(projectId: ProjectId, taskId: TaskId, runId: TaskRunId): Promise<void>
 
 /**
  * List project bindings without opening their directories or Sessions.

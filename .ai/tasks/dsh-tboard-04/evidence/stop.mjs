@@ -14,17 +14,22 @@ const resolve = createRequire(new URL('../../../../packages/api/taskboard-contro
 const load = name => import(pathToFileURL(resolve.resolve(name)).href)
 const { Context } = await load('@deepseek-ai/cordis')
 const { default: Board } = await load('@deepseek-ai/dsh-api-taskboard-controller')
-const root = await realpath(await mkdtemp(join(tmpdir(), 'dsh-stop-evidence-')))
 const controlled = process.argv.includes('--controlled-tool')
+const forceDeadline = process.argv.includes('--force-deadline')
+assert.ok(!controlled || !forceDeadline, 'select one stop scenario')
+const root = await realpath(await mkdtemp(join(tmpdir(), 'dsh-stop-evidence-')))
+const fixtureTool = process.platform === 'win32'
+  ? { name: 'pwsh', command: 'Set-Content -LiteralPath child.pid -Value $PID; Start-Sleep -Seconds 90' }
+  : { name: 'bash', command: 'echo $$ > child.pid; exec /bin/sleep 90' }
 let requests = 0
 const model = createServer(async (req, res) => {
   for await (const _ of req) { /* Consume the local test prompt. */ }
   requests++
   const frames = [
     { type: 'message_start', message: { id: 'probe', model: 'deepseek-v4-pro', usage: { input_tokens: 1, output_tokens: 0 } } },
-    { type: 'content_block_start', index: 0, content_block: { type: 'tool_use', id: 'sleep', name: 'bash', input: {} } },
+    { type: 'content_block_start', index: 0, content_block: { type: 'tool_use', id: 'sleep', name: fixtureTool.name, input: {} } },
     { type: 'content_block_delta', index: 0, delta: { type: 'input_json_delta', partial_json: JSON.stringify({
-      command: 'echo $$ > child.pid; exec /bin/sleep 40', description: 'Wait for this test Run to stop',
+      command: fixtureTool.command, description: 'Wait for this test Run to stop',
     }) } },
     { type: 'content_block_stop', index: 0 },
     { type: 'message_delta', delta: { stop_reason: 'tool_use' }, usage: { output_tokens: 1 } },
@@ -65,7 +70,10 @@ try {
   await ctx.plugin((await load('@deepseek-ai/dsh-storage')).default)
   await ctx.plugin(await load('@deepseek-ai/dsh-storage-sqlite'), { path: join(root, 'tasks.sqlite') })
   await ctx.plugin(await load('@deepseek-ai/dsh-storage-domain'), { backend: 'sqlite' })
-  await ctx.plugin(Board, { worktreeRoot: join(root, 'worktrees') })
+  await ctx.plugin(Board, {
+    worktreeRoot: join(root, 'worktrees'),
+    ...(forceDeadline ? { stopTimeoutMs: 3_000 } : {}),
+  })
   const board = ctx.taskboardController
   const projectId = randomUUID(), taskId = randomUUID(), runId = randomUUID()
   const command = expectedVersion => ({ projectId, taskId, expectedVersion, commandId: randomUUID() })
@@ -82,25 +90,66 @@ try {
     const messageId = await target.client.prompt('stop-fixture', [{ type: 'text', text: 'Start the fixture tool' }])
     await board.executions.started(owner, messageId)
     const pid = await fixtureChild()
+    const toolObservedAt = performance.now()
     let canObserve = false
     await board.stops.attach(owner, target.client, async () => {
       if (!canObserve) return { state: 'unknown', source: 'fixture delayed scope observation' }
-      return { state: alive(pid) ? 'occupied' : 'empty', source: 'fixed fixture: bash execs one sleep, no other tool calls' }
+      return { state: alive(pid) ? 'occupied' : 'empty', source: `fixed ${fixtureTool.name} fixture process` }
     })
     await board.stopRun({ ...command(4), runId, force: false })
     assert.equal(await target.client.waitForExit(1000), true)
     assert.equal(alive(pid), false)
+    assert.ok(performance.now() - toolObservedAt < 60_000, 'fixture process could have reached its own exit')
     assert.equal((await board.executions.active(owner)).stopFailure, 'scope-unknown')
     canObserve = true
+    await board.recheckRunStop(projectId, taskId, runId)
     await board.recheckRunStop(projectId, taskId, runId)
     assert.equal(await peer.client.waitForExit(20), false)
     assert.equal(requests, 1)
     await assert.rejects(board.executions.active(owner), /no longer owns/)
-    const saved = board.detail(projectId, taskId).runs[0]
+    const detail = board.detail(projectId, taskId)
+    const saved = detail.runs[0]
     assert.equal(saved.state, 'interrupted')
     assert.equal(saved.receipt, messageId)
-    console.log(JSON.stringify({ fixedTool: '/bin/sleep', realSdkReceipt: true, localModelRequests: requests,
-      targetRuntimeExited: true, fixtureChildExited: true, otherRuntimeAlive: true, releasedAfterRecheck: owner.generation }, null, 2))
+    const terminalEvents = detail.activity.filter(event => event.action === 'run-ended').length
+    assert.equal(terminalEvents, 1)
+    console.log(JSON.stringify({ fixedTool: fixtureTool.name, realSdkReceipt: true, localModelRequests: requests,
+      targetRuntimeExited: true, fixtureChildExited: true, otherRuntimeAlive: true, releasedAfterRecheck: owner.generation,
+      terminalEvents }, null, 2))
+  } else if (forceDeadline) {
+    let observationCanceled = false
+    await board.stops.attach(owner, {
+      request: async () => { throw Error('fixture cannot deliver graceful shutdown') },
+      close: () => target.client.close(),
+      waitForExit: timeoutMs => target.client.waitForExit(timeoutMs),
+    }, signal => new Promise(resolve => {
+      signal.addEventListener('abort', () => {
+        observationCanceled = true
+        resolve({ state: 'empty', source: 'fixture observation after deadline' })
+      }, { once: true })
+    }))
+    await board.stopRun({ ...command(3), runId, force: false })
+    assert.equal((await board.executions.active(owner)).stopFailure, 'observation-failed')
+    assert.equal(await target.client.waitForExit(20), false)
+
+    const force = { ...command(4), runId, force: true }
+    await board.stopRun(force)
+    assert.equal(await target.client.waitForExit(1000), true)
+    assert.equal(await peer.client.waitForExit(20), false)
+    assert.equal(observationCanceled, true)
+    await board.stopRun(force)
+    const saved = await board.executions.active(owner)
+    assert.equal(saved.generation, admitted.generation)
+    assert.equal(saved.stopFailure, 'deadline')
+    assert.equal(saved.endedAt, null)
+    assert.equal(await realpath(root), root)
+    const detail = board.detail(projectId, taskId)
+    const { control, connection, stopFailure } = detail.runs[0]
+    assert.deepEqual({ control, connection, stopFailure }, { control: 'stop_requested', connection: 'suspect', stopFailure: 'deadline' })
+    assert.deepEqual(detail.activity.slice(-2).map(r => r.action), ['stop-requested', 'force-requested'])
+    console.log(JSON.stringify({ targetAliveBeforeForce: true, targetRuntimeExited: true, otherRuntimeAlive: true,
+      control, connection, stopFailure, scopeObservationCanceled: observationCanceled, lateEmptyIgnored: true,
+      retainedGeneration: saved.generation, directoryPresent: true, terminalRecorded: false }, null, 2))
   } else {
     await board.stops.attach(owner, target.client, async () => ({ state: 'unknown', source: 'no persistent OS scope available' }))
     const stop = { ...command(3), runId, force: false }

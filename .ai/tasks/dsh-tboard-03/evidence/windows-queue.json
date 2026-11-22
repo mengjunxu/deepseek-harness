@@ -1,0 +1,24 @@
+{
+  "platform": "Windows x64",
+  "node": "26.10.0",
+  "pnpm": "11.7.0",
+  "sourceSha256": {
+    "packages/api/taskboard-controller/src/domain.ts": "c3361c8503eead71c701f3837b1efdbbad5f517d46f8bfdf551532919fb546e3",
+    "packages/api/taskboard-controller/src/execution-domain.ts": "6a6ed78289b2bc45e03f7a9819ef3e61bb213a781dfec903ffb444d914da1f43",
+    "packages/api/taskboard-controller/src/execution.ts": "570dcbe00a3e609c844582afa2351452d04a28239de595699368ce56046bbe08",
+    "packages/api/taskboard-controller/src/index.ts": "b19220ed90a7e2b76c085d9c9d52f7eddaee43ca437fd9fcf9585bcd3dce12c2",
+    "packages/api/taskboard-controller/src/types.ts": "d47a0b74407a82db9b88dc29620289c08fd9c9f4793c979b99e85da29e3f8767",
+    "packages/api/taskboard-controller/tests/taskboard.host.spec.ts": "6ceee5ca0e3d539313b54c26eebae4ebecb91886ee2c5d17274b7d1bd3195af7",
+    "apps/web/tests/fixtures/taskboard-smoke.mjs": "61626b3d09ad7f65b3f20d1f1b2ac246b5ddcf6fd04d624d49d9f68b084b18ab",
+    "apps/web/tests/taskboard.e2e.ts": "c5b5a2e39094d6937b2da3d530f72989c74f44f9ae86434ac7c68735eee35377"
+  },
+  "hostTests": {
+    "command": "node_modules/.bin/vitest.CMD run packages/api/taskboard-controller/tests/taskboard.host.spec.ts --testTimeout 15000",
+    "passed": 14
+  },
+  "authenticatedWeb": {
+    "command": "node_modules/.bin/vitest.CMD run --config vitest.web.config.ts apps/web/tests/taskboard.e2e.ts",
+    "passed": 1,
+    "queueHistoryRestored": true
+  }
+}

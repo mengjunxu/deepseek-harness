@@ -36,6 +36,10 @@ Host Adapter 通过 `createTaskRuntime` 创建独占客户端。它在确认的�
 
 [任务数据域](src/domain.ts)在打开存储时校验项目及任务记录。[控制器](src/index.ts)在同一个 SQLite 事务内提交任务变更、活动和命令回执。Host Adapter 将 Run 与任务、固定输入、Session、工作目录和租约代次绑定。确认 runtime 退出后释放该代租约。人工决定保留交付版本、快照和豁免理由。version 统计已提交的操作，revision 标识需求快照。
 
+[执行记录](src/execution.ts)按提交顺序保存排队的 Run，重放时返回原命令回执。每个排队的 Run 预留其任务和选定的 Session，并保存已确认的目录或固定基线的工作树方案。Host 在同一个 SQLite 事务内将空闲租约分配给队首 Run。认领后，`prepareWorkspace` 使用保存的方案，核对实际目录、分支与基线。缺少已保存方案的等待项需要取消并重新确认后提交。取消等待中的 Run 会保留历史，释放任务预留以及为该 Run 预留的新 Session。已有数据库缺少队列记录时，以空队列打开。
+
+完成目录准备和 SDK 初始化后，`submitInput` 先提交投递尝试，再通过 Adapter 调用 `session/prompt`。重放返回保存的消息 ID，原尝试仍需对账时返回 `null`。任务详情显示尝试时间与回执。Adapter 可以使用 `started` 保存从绑定 Session 观察到的回执。
+
 <a id="model-experience"></a>
 ## 模型体验
 

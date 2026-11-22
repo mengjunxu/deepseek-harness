@@ -267,12 +267,12 @@ DONE 表示该行明确范围已有证据，PARTIAL 表示已验证一部分当�
 |---|---|---|
 | P1-01 | PARTIAL | 项目、任务、需求版本和操作回执已在 Web Host 工作台服务中实施；运行与交付验收关联待完成 |
 | P1-02 | PARTIAL | 任务与历史在独立 SQLite 域原子写入，已验证重启保留；正式业务库备份与 Session 关联待验收 |
-| P1-03 | PARTIAL | 项目内任务命令已校验期望版本与重放回执；启动意图及租约事务待实施 |
+| P1-03 | PARTIAL | 项目内任务命令和启动意图已支持期望版本与重放。队首认领与租约分配原子提交。Windows SDK 联调验证了先记录投递意图及回执丢失时防重发。正式调度和自动对账待实施 |
 | P1-04 | TODO | 通用 Task/验收 API、作用域与游标补偿尚未实施 |
 | P1-05 | PARTIAL | SIWC Loader/配置/持久化/取消与生产适配器回放已有证据；真实账号长回复/生命周期待补 |
 | P1-06 | PARTIAL | Session/context/compaction 基础已有；Task/Run 输入快照及统一 ContextBuilder 未贯通 |
 | P1-07 | PARTIAL | 原生 Codex/Codely 接入基础已验证；独立选择 UI、统一 Run 与完整生命周期未验收 |
-| P1-08 | TODO | 工作台串行队列、Run 所有权与重启协调尚未实施 |
+| P1-08 | PARTIAL | 已验证工作台 SQLite 串行队列与独占租约认领。真实运行时调度与重启对账待实施 |
 | P1-09 | PARTIAL | sandbox/workspace/interaction 基础已有；任务级目录租约与停止隔离未验收 |
 | P1-10 | TODO | 通用 ValidationResult、逐条 AC Matrix 与 Delivery 代码快照未实施 |
 | P1-11 | TODO | 可选模型 Review 产品链与独立人工验收未实施 |
@@ -342,7 +342,7 @@ Provider/额度/用量的具体证据集中在第 12.8 节，Taskboard 集中在
 | TBOARD-00 | DONE | [首版入口与归属决策](../../.ai/tasks/dsh-tboard-00/decision.md)已确认；SDK 组合验收归 TBOARD-01 |
 | TBOARD-01 | DONE | 专题 §10 八项 G0 用例在本分支通过；换目录时新建 Session，新旧 Run 保留引用，材料显式选择。已冻结 macOS 本地接入组合。[矩阵和实测范围](../../.ai/tasks/dsh-tboard-01/matrix.md) |
 | TBOARD-02 | DONE | [任务业务库验收](../../.ai/tasks/dsh-tboard-02/handoff.md)：现有 Web 认证、项目与任务、需求与 Run 快照、交付与人工 Review、请求与租约、版本冲突、排序、归档、重启和重放。调度、真实代码复核和 UI 由后续步骤接入 |
-| TBOARD-03 | TODO | 持久启动、输入回执、串行队列、重试与继续 |
+| TBOARD-03 | IN_PROGRESS | [Windows 验证](../../.ai/tasks/dsh-tboard-03/handoff.md)覆盖 SQLite 队列、重启后的目录复核和真实 SDK 的输入回执防重。正式调度、自动对账、重试与继续待接入 |
 | TBOARD-04 | IN_PROGRESS | 已验证工作树基线、原目录二次确认、[定向停止可核实的工具进程](../../.ai/tasks/dsh-tboard-04/evidence/controlled-stop.json)、[强停未确认保留租约](../../.ai/tasks/dsh-tboard-04/evidence/stop.json)及[无效审批配置阻断输入](../../.ai/tasks/dsh-tboard-04/evidence/permission.json)。[首发沿用 macOS G0 组合](../../.ai/tasks/dsh-tboard-04/platform.md)。同一 Host 的停止复核已实现，最新控制器待在首发 macOS 复验。 |
 | TBOARD-05 | TODO | 事件游标、问题/审批及服务端任务工具作用域 |
 | TBOARD-06 | TODO | 交付快照、只读 Diff、人工接受/退回/豁免 |
@@ -423,6 +423,8 @@ TBOARD 编号细化现有 P1/P2 任务的工作台缺口，不重复建立通用
 | TBOARD-11 / G4 | P3-01..06；identity、authorization、远程协调 | TBOARD-09 及团队/远程范围确认 | 团队账号/角色、协作编辑、PR/CI 与远程节点分别拆项；权限与跨设备恢复独立验收 |
 
 依赖顺序为 TBOARD-00 → 01 → 02 → 04 → 03 → 05 → 06；07 在 02–06 就绪后验收，08 在 03–06 就绪后加固，09 汇总 07/08 的发布证据。01 的停止隔离验证使用受控双实例，不代表 MVP 已允许两个业务任务并行。TBOARD-08 只承接工作台必需的本地恢复，P2-04 的更广恢复范围仍按原计划推进。
+
+TBOARD-03 可依据 Windows 已验证的停止隔离行为继续在该平台开发和联调。macOS 首发组合的验收需包含 TBOARD-04 在该平台的停止、进程范围观察和租约复验。
 
 ### 16.4 验证、证据与完成条件
 

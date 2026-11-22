@@ -22,3 +22,13 @@ Codex 取得 codely_bridge 单写权。TBOARD-02 数据层已经交接。本阶�
 - PASS · `node .ai/tasks/dsh-tboard-04/evidence/stop.mjs` 验证实际双 SDK 的未知范围路径。`node_modules/.bin/vitest.CMD run --config vitest.web.config.ts apps/web/tests/taskboard.e2e.ts` 验证认证 Web RPC 到达控制器并拒绝不存在的 Run，1 项通过。沙箱阻止访问测试自身的回环地址，主机原样重试通过。被测版本见 [Windows 验证记录](evidence/recheck-windows.json)。
 - FAIL · `node_modules/.bin/pnpm.CMD run test:docs` 16 通过、4 失败；`node_modules/.bin/pnpm.CMD run doc-sync` 34 通过、8 失败。失败涉及示例类型、目录鲜度、链接、配对、换行、仓库引用和 Windows 沙箱软链接。文档站构建及 151 项站点测试在主机各自原样重试通过。
 - NOT_RUN · `node .ai/tasks/dsh-tboard-04/evidence/stop.mjs --controlled-tool` 的最新 macOS 端到端验收等待目标环境。Windows 测试覆盖确认后的事务提交，实际工具范围在首发平台复验后再关闭 TBOARD-04。
+
+## 2026-11-21 Windows PC 实测
+
+- 23:22（上海），Codex 接手 Windows 验证。`get_usage_limits` 的 Codex 10080 分钟窗口起始及 23:32 检查时剩余 94%，重置于 11 月 27 日 15:04（上海）。
+- PASS · `node .ai/tasks/dsh-tboard-04/evidence/stop.mjs --controlled-tool` 在 Windows 主机单独执行。SDK 取得实际输入回执，固定 PowerShell 进程与目标 SDK 退出，另一 SDK 存活。复核前仍持有租约，复核后释放，重复复核只记录一次 Run 结束。
+- PASS · `node .ai/tasks/dsh-tboard-04/evidence/stop.mjs` 在范围未知时保留原租约。`node .ai/tasks/dsh-tboard-04/evidence/permission.mjs` 在错误审批配置下得到诊断，确认 SDK 退出、零模型请求与零目录写入。
+- 初次并行运行带工具和权限探针时出现 SDK 初始化超时。带工具探针在沙箱内未观察到工具进程启动。主机单独复跑带工具探针通过，权限探针在沙箱内单独复跑通过。
+- PASS · `node_modules/.bin/vitest.CMD run --config vitest.web.config.ts apps/web/tests/taskboard.e2e.ts` 在主机通过 1 项认证 Web 冒烟。`node_modules/.bin/vitest.CMD run packages/api/taskboard-controller/tests/taskboard.host.spec.ts --testTimeout 15000` 单独执行通过 12 项。结果和被测产物见 [Windows PC 实测记录](evidence/windows-pc-acceptance.json)。
+- NOT_RUN · macOS 复验延至下次使用首发环境。全仓文档检查本轮未重跑。
+- 23:48 至 23:52（上海），Codex 接手补验 AC18。`get_usage_limits` 的 Codex 10080 分钟窗口剩余 93%，重置于 11 月 27 日 15:04（上海）。PASS · `node .ai/tasks/dsh-tboard-04/evidence/stop.mjs --force-deadline` 确认独占 SDK 退出后范围观察超时仍保留原租约及目录，任务详情保持未确认，重放和迟到结果均未解除锁。默认场景与 `--controlled-tool` 复跑通过。`node --check`、定向 lint 与 `git diff --check` 通过。[Windows PC 实测记录](evidence/windows-pc-acceptance.json)

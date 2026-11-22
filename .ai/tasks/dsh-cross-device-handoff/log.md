@@ -19,3 +19,11 @@
 源码检查点 git push origin codely_bridge PASS，pre-push 的 pnpm run typecheck PASS，git ls-remote 与本地源码提交相同。被测版本和压缩日志归 evidence/verification.json。最终交接记录作为后续文档提交推送，接收机器的同一提交核对待接收方执行。未运行完整单测/覆盖率、真实模型 e2e 或跨平台验证；本次范围不要求这些检查，不以已有结果替代。
 
 get_usage_limits 于 2026-11-18T15:35:51Z 返回 10080 分钟窗口周剩余 88%，重置 Unix 1795512892。产品 Plan 状态不变；本任务保存跨设备检查点，最终记录推送后释放单写权，不启动后续开发。不需要新增 Architecture、Memory 或 WORKFLOW 内容。
+
+## 2026-11-22 Mac 接收准备
+
+09:33（上海），Codex 读取 `get_usage_limits` 的 10080 分钟窗口，周剩余 86%，重置于 11 月 27 日 15:04（上海）。`git ls-remote --exit-code origin refs/heads/codely_bridge` 在 Windows 主机通过，远端基线与送出前本地 HEAD 一致。沙箱内 SSH 因无法创建进程对象失败，主机原样复跑成功。
+
+PASS · 以同一基线建立独立 Git 检出，执行 `git diff --cached --binary` 和 `git apply --index` 恢复待提交内容。交接相对链接、输入所需脚本、权限补丁、锁文件及最新 Windows 验证记录的源码摘要一致。两份实际 SDK 探针均通过 `node --check`。隔离检出未重建产品或安装依赖，产品行为使用 TBOARD-03 与 TBOARD-04 的实际 Windows 证据。
+
+NOT_RUN · 当前会话未连接 Mac，实际接收、Mac 构建和首发平台验收待接收方执行。本轮授权为本地提交，远端同步留待确认。Obsidian 布局、本机运行数据和凭证排除在提交外。

@@ -2,7 +2,7 @@
 import { brandString } from '@deepseek-ai/dsh-brand'
 import { defineDomain, domainTable } from '@deepseek-ai/dsh-storage-domain'
 import { z } from 'zod'
-import { deliveryRecord, reviewRecord, runRecord, slotRecord, type DeliveryId, type TaskRunId } from './execution-domain.ts'
+import { deliveryRecord, queueRecord, reviewRecord, runRecord, slotRecord, type DeliveryId, type TaskRunId } from './execution-domain.ts'
 import type { CommandId, ProjectId, TaskId } from './types.ts'
 
 const id = z.uuid()
@@ -40,7 +40,7 @@ const activity = z.strictObject({
   commandId, version, revision: version, actor: z.enum(['operator', 'runtime']), time: z.iso.datetime(),
   action: z.enum([
     'created', 'edited', 'commented', 'planned', 'canceled', 'archived', 'reopened', 'reordered',
-    'run-requested', 'run-started', 'stop-requested', 'force-requested', 'run-ended', 'accepted', 'returned',
+    'run-requested', 'run-canceled', 'run-started', 'stop-requested', 'force-requested', 'run-ended', 'accepted', 'returned',
   ]), comment: text.optional(),
   runId: z.string().optional(), fingerprint: z.string().regex(/^[a-f0-9]{64}$/),
 })
@@ -55,6 +55,7 @@ const record = z.strictObject({ task: view, revisions: z.array(requirements.exte
 export const taskboardDomain = defineDomain({
   name: 'taskboard', version: 1, tables: {
     slots: domainTable<string, z.output<typeof slotRecord>>(slotRecord),
+    queue: domainTable<string, z.output<typeof queueRecord>>(queueRecord),
     runs: domainTable<TaskRunId, z.output<typeof runRecord>>(runRecord),
     deliveries: domainTable<DeliveryId, z.output<typeof deliveryRecord>>(deliveryRecord),
     reviews: domainTable<CommandId, z.output<typeof reviewRecord>>(reviewRecord),

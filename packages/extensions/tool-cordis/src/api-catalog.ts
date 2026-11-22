@@ -3136,9 +3136,9 @@ export const SERVICE_API: readonly ServiceApiEntry[] = [
         returns: 'the validated directory plan.',
       },
       {
-        signature: 'async prepareWorkspace(owner: RuntimeBinding, plan: TaskWorkspacePlan): Promise<WorkspaceInspection>',
+        signature: 'async prepareWorkspace(owner: RuntimeBinding, plan?: TaskWorkspacePlan): Promise<WorkspaceInspection>',
         description: 'Prepare the exact workspace claimed by the active Run before launching its SDK.',
-        parameters: [{ name: 'owner', description: 'current runtime lease.' }, { name: 'plan', description: 'directory facts selected before admission.' }],
+        parameters: [{ name: 'owner', description: 'current runtime lease.' }, { name: 'plan', description: 'directory plan for direct admission when the Run has no saved plan.' }],
         returns: 'observed working directory, branch and commit.',
       },
       {
@@ -3152,6 +3152,12 @@ export const SERVICE_API: readonly ServiceApiEntry[] = [
         description: 'Stop one Run and retain its directory while process exit remains unconfirmed.',
         parameters: [{ name: 'request', description: 'operator command scoped to the selected project, task and Run.' }],
         returns: 'after the Host records the outcome.',
+      },
+      {
+        signature: '@Remote async recheckRunStop(projectId: ProjectId, taskId: TaskId, runId: TaskRunId): Promise<void>',
+        description: 'Recheck an unconfirmed stop without sending another shutdown or force request.',
+        parameters: [{ name: 'projectId', description: 'project owning the Run\'s task.' }, { name: 'taskId', description: 'task owning the Run.' }, { name: 'runId', description: 'Run whose exit must be observed again.' }],
+        returns: 'after recording exit or keeping the lease when the Host lacks complete evidence.',
       },
       {
         signature: '@Remote listProjects(): TaskboardProject[]',
@@ -6559,7 +6565,7 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   },
   {
     name: 'RunStops',
-    declaration: 'export class RunStops {\n    constructor(private readonly executions: TaskExecutions, private readonly timeoutMs: number);\n    async attach(owner: RuntimeBinding, client: RuntimeStopTarget, scope: Target[\'scope\']): Promise<() => void>;\n    async stop(owner: RuntimeBinding, command: TaskStopCommand): Promise<void>;\n}',
+    declaration: 'export class RunStops {\n    constructor(private readonly executions: TaskExecutions, private readonly timeoutMs: number);\n    async attach(owner: RuntimeBinding, client: RuntimeStopTarget, scope: Target[\'scope\']): Promise<() => void>;\n    async stop(owner: RuntimeBinding, command: TaskStopCommand): Promise<void>;\n    recheck(owner: RuntimeBinding): Promise<void>;\n}',
   },
   {
     name: 'RuntimeBinding',
@@ -7719,7 +7725,7 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   },
   {
     name: 'TaskActivity',
-    declaration: 'export interface TaskActivity extends TaskReceipt {\n    actor: \'operator\' | \'runtime\';\n    time: string;\n    action: \'created\' | \'edited\' | \'commented\' | \'planned\' | \'canceled\' | \'archived\' | \'reopened\' | \'reordered\' | \'run-requested\' | \'run-started\' | \'stop-requested\' | \'force-requested\' | \'run-ended\' | \'accepted\' | \'returned\';\n    comment?: string | undefined;\n}',
+    declaration: 'export interface TaskActivity extends TaskReceipt {\n    actor: \'operator\' | \'runtime\';\n    time: string;\n    action: \'created\' | \'edited\' | \'commented\' | \'planned\' | \'canceled\' | \'archived\' | \'reopened\' | \'reordered\' | \'run-requested\' | \'run-canceled\' | \'run-started\' | \'stop-requested\' | \'force-requested\' | \'run-ended\' | \'accepted\' | \'returned\';\n    comment?: string | undefined;\n}',
   },
   {
     name: 'TaskboardProject',
@@ -7743,7 +7749,7 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   },
   {
     name: 'TaskExecutions',
-    declaration: 'export class TaskExecutions {\n    constructor(private readonly domain: Domain<typeof taskboardDomain>);\n    active(owner: RuntimeBinding): Promise<TaskRun>;\n    admit(input: RunAdmission): Promise<TaskRun>;\n    started(owner: RuntimeBinding, messageId: string): Promise<void>;\n    interaction(owner: RuntimeBinding, value: Interaction): Promise<void>;\n    requestStop(owner: RuntimeBinding, command: TaskCommand, force: boolean): Promise<{\n        receipt: TaskReceipt;\n        issued: boolean;\n    }>;\n    stopUnconfirmed(owner: RuntimeBinding, reason: StopFailure): Promise<void>;\n    exited(owner: RuntimeBinding, evidence: ExitEvidence, state: \'finished\' | \'interrupted\' | \'failed\', reason: string, output?: TaskDelivery): Promise<void>;\n    review(expectedVersion: number, decision: Omit<TaskReview, \'time\'>, observedSnapshot: string): Promise<TaskReceipt>;\n}',
+    declaration: 'export class TaskExecutions {\n    constructor(private readonly domain: Domain<typeof taskboardDomain>);\n    active(owner: RuntimeBinding): Promise<TaskRun>;\n    canRecheckStop(owner: RuntimeBinding): Promise<boolean>;\n    async admit(input: RunAdmission): Promise<TaskRun>;\n    async enqueue(input: RunAdmission, plan: TaskWorkspacePlan): Promise<TaskReceipt>;\n    claimNext(): Promise<TaskRun | null>;\n    cancelQueued(request: TaskCommand, runId: TaskRunId): Promise<TaskReceipt>;\n    async submitInput(owner: RuntimeBinding, prompt: (run: TaskRun) => Promise<string>): Promise<string | null>;\n    started(owner: RuntimeBinding, messageId: string): Promise<void>;\n    interaction(owner: RuntimeBinding, value: Interaction): Promise<void>;\n    requestStop(owner: RuntimeBinding, command: TaskCommand, force: boolean): Promise<{\n        receipt: TaskReceipt;\n        issued: boolean;\n    }>;\n    stopUnconfirmed(owner: RuntimeBinding, reason: StopFailure): Promise<void>;\n    exited(owner: RuntimeBinding, evidence: ExitEvidence, state: \'finished\' | \'interrupted\' | \'failed\', reason: string, output?: TaskDelivery): Promise<void>;\n    review(expectedVersion: number, decision: Omit<TaskReview, \'time\'>, observedSnapshot: string): Promise<TaskReceipt>;\n}',
   },
   {
     name: 'TaskOrderCommand',
@@ -7771,7 +7777,7 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   },
   {
     name: 'TaskRun',
-    declaration: 'export type TaskRun = z.output<typeof runRecord>;',
+    declaration: 'export type TaskRun = z.output<typeof claimedRun>;',
   },
   {
     name: 'TaskRunId',
@@ -7779,7 +7785,7 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   },
   {
     name: 'TaskRunSummary',
-    declaration: 'export interface TaskRunSummary {\n    runId: TaskRunId;\n    previousRun: TaskRunId | null;\n    state: \'preparing\' | \'running\' | \'finished\' | \'failed\' | \'interrupted\';\n    control: \'normal\' | \'stop_requested\' | \'finalizing\';\n    connection: \'connected\' | \'suspect\' | \'disconnected\';\n    stopFailure: StopFailure | null;\n    revision: number;\n    workspace: string;\n    branch: string | null;\n    sessionId: SessionId;\n    priorSessionId: SessionId | null;\n    mode: \'fresh\' | \'resume\';\n    materialReferences: string[];\n    receipt: string | null;\n    endReason: string | null;\n}',
+    declaration: 'export interface TaskRunSummary {\n    runId: TaskRunId;\n    previousRun: TaskRunId | null;\n    state: \'queued\' | \'preparing\' | \'running\' | \'finished\' | \'failed\' | \'canceled\' | \'interrupted\';\n    control: \'normal\' | \'stop_requested\' | \'finalizing\';\n    connection: \'connected\' | \'suspect\' | \'disconnected\';\n    stopFailure: StopFailure | null;\n    revision: number;\n    workspace: string;\n    branch: string | null;\n    sessionId: SessionId;\n    priorSessionId: SessionId | null;\n    mode: \'fresh\' | \'resume\';\n    materialReferences: string[];\n    inputAttemptedAt: string | null;\n    receipt: string | null;\n    endReason: string | null;\n}',
   },
   {
     name: 'TaskStatus',

@@ -2,7 +2,7 @@
 import { Context, Service } from '@deepseek-ai/cordis'
 import z from '@deepseek-ai/schemastery'
 import { TaskWorkspaces, type TaskWorkspacePlan, type WorkspaceConfig } from './workspaces.ts'
-import type { RuntimeBinding } from './execution-domain.ts'
+import { matchesWorkspace, type RuntimeBinding } from './execution-domain.ts'
 import { brandString } from '@deepseek-ai/dsh-brand'
 import type { TaskRunId } from './execution-domain.ts'
 import { createHash } from 'node:crypto'
@@ -148,15 +148,20 @@ export default class TaskboardController extends TypertRemoteService {
   /**
    * Prepare the exact workspace claimed by the active Run before launching its SDK.
    * @param owner - current runtime lease.
-   * @param plan - directory facts selected before admission.
+   * @param plan - directory plan for direct admission when the Run has no saved plan.
    * @returns observed working directory, branch and commit.
    */
-  async prepareWorkspace(owner: RuntimeBinding, plan: TaskWorkspacePlan): Promise<WorkspaceInspection> {
+  async prepareWorkspace(owner: RuntimeBinding, plan?: TaskWorkspacePlan): Promise<WorkspaceInspection> {
     const run = await this.executions.active(owner)
     const expected = run.admission.workspace
-    if (run.state !== 'preparing' || run.control !== 'normal' || expected.directory !== plan.directory
-      || expected.branch !== plan.branch || expected.baseline !== plan.baseline) throw new Error('workspace differs from active admission')
-    return this.workspaces.materialize(plan, this.lifetime.signal)
+    const selected = run.workspacePlan ?? plan
+    if (run.state !== 'preparing' || run.control !== 'normal' || !selected || !matchesWorkspace(selected, expected)
+      || (plan && !matchesWorkspace(plan, expected))) throw new Error('workspace differs from active admission')
+    const observed = await this.workspaces.materialize(selected, this.lifetime.signal)
+    if (!matchesWorkspace({ directory: observed.directory, branch: observed.branch, baseline: observed.head }, expected)) {
+      throw new Error('prepared directory does not match the active admission')
+    }
+    return observed
   }
 
   /** Open the authoritative domain before advertising a ready service. */
@@ -218,7 +223,7 @@ export default class TaskboardController extends TypertRemoteService {
 
   private stopTarget(projectId: ProjectId, taskId: TaskId, runId: TaskRunId): RuntimeBinding {
     const run = this.domain.table('runs').get(runId)
-    if (!run || run.admission.projectId !== projectId || run.admission.taskId !== taskId) throw new Error('unknown stop target')
+    if (!run || run.generation === null || run.admission.projectId !== projectId || run.admission.taskId !== taskId) throw new Error('unknown stop target')
     return { ...run.admission, generation: run.generation }
   }
 
@@ -336,7 +341,8 @@ export default class TaskboardController extends TypertRemoteService {
         control: run.control, connection: run.connection, stopFailure: run.stopFailure ?? null,
         revision: run.taskRevision, workspace: a.workspace.directory,
         branch: a.workspace.branch, sessionId: a.session.sessionId, priorSessionId: prior?.admission.session.sessionId ?? null,
-        mode: a.mode, materialReferences: a.materials.map(m => m.reference), receipt: run.receipt, endReason: run.endReason }
+        mode: a.mode, materialReferences: a.materials.map(m => m.reference), inputAttemptedAt: run.inputAttemptedAt ?? null,
+        receipt: run.receipt, endReason: run.endReason }
     })
     const deliveries = record.deliveryIds.map((id) => {
       const d = this.domain.table('deliveries').get(id)

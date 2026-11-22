@@ -4,14 +4,51 @@ import { spawn } from 'node:child_process'
 import { randomUUID } from 'node:crypto'
 import { once } from 'node:events'
 import { mkdir, mkdtemp, realpath, rm, stat } from 'node:fs/promises'
+import { createRequire } from 'node:module'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import { fileURLToPath } from 'node:url'
+import { fileURLToPath, pathToFileURL } from 'node:url'
 
 const root = await mkdtemp(join(tmpdir(), 'web-taskboard-'))
 const projectRoot = join(root, 'project')
 const cli = fileURLToPath(new URL('../../../cli/lib/bin.js', import.meta.url))
 const picker = fileURLToPath(new URL('../pin-browse-picker.overlay.yml', import.meta.url))
+const database = join(root, 'home', 'taskboard', 'tasks.sqlite')
+
+async function seedQueue(projectId, directory, requirements) {
+  const requireFromController = createRequire(new URL('../../../../packages/api/taskboard-controller/package.json', import.meta.url))
+  const load = name => import(pathToFileURL(requireFromController.resolve(name)).href)
+  const { Context } = await load('@deepseek-ai/cordis')
+  const ctx = new Context()
+  try {
+    await ctx.plugin((await load('@deepseek-ai/dsh-storage')).default)
+    await ctx.plugin(await load('@deepseek-ai/dsh-storage-sqlite'), { path: database })
+    await ctx.plugin(await load('@deepseek-ai/dsh-storage-domain'), { backend: 'sqlite' })
+    await ctx.plugin((await load('@deepseek-ai/dsh-session')).default)
+    await ctx.plugin((await load('@deepseek-ai/dsh-subprocess-local')).default)
+    await ctx.plugin((await load('@deepseek-ai/dsh-api-taskboard-controller')).default, { worktreeRoot: join(root, 'worktrees') })
+
+    const board = ctx.taskboardController
+    const taskId = randomUUID()
+    const command = expectedVersion => ({ projectId, taskId, expectedVersion, commandId: randomUUID() })
+    await board.createTask({ ...command(0), requirements })
+    await board.planTask(command(1))
+    const makeIntent = version => ({ ...command(version), runId: randomUUID(), runtimeId: randomUUID(), previousRun: null,
+      mode: 'fresh', configurationRef: 'sdk', materials: [], feedback: [], workspace: { directory, baseline: null, branch: null },
+      session: { sessionId: 'queued-web-fixture', home: join(root, 'home', 'queue-session'), workspace: directory,
+        provider: 'deepseek-official', compatibility: 'g0' } })
+    const first = makeIntent(2)
+    const plan = await board.planWorkspace(projectId, first.runId, await board.inspectProject(projectId))
+    const queued = await board.executions.enqueue(first, plan)
+    const canceled = await board.executions.cancelQueued(command(queued.version), first.runId)
+    const next = makeIntent(canceled.version)
+    await board.executions.enqueue(next, plan)
+    return { taskId, canceledRun: first.runId, queuedRun: next.runId }
+  } finally {
+    await ctx.fiber.dispose()
+  }
+}
+
 async function boot() {
   const child = spawn(process.execPath, [cli, '--profile', 'web', '--patch', picker, '--no-open', '--port', '0'], {
     cwd: projectRoot, env: { HOME: root, PATH: process.env.PATH, DSH_HOME: join(root, 'home'), DSH_AGENTS_HOME: join(root, 'agents'), DSH_TELEMETRY_DISABLED: '1' },
@@ -75,14 +112,20 @@ try {
   assert.equal(before.revisions.length, 2)
   await server.stop()
   server = undefined
-  const size = (await stat(join(root, 'home', 'taskboard', 'tasks.sqlite'))).size
+  const size = (await stat(database)).size
   assert.ok(size > 0)
+  const queue = await seedQueue(projectId, inspected.directory, request.requirements)
   server = await boot()
   assert.deepEqual(await server.rpc('detail', { projectId, taskId }), before)
   assert.deepEqual(await server.rpc('createTask', { request }), created)
-  assert.equal((await server.rpc('listTasks', { projectId, includeArchived: false })).length, 1)
+  assert.equal((await server.rpc('listTasks', { projectId, includeArchived: false })).length, 2)
+  const { runs } = await server.rpc('detail', { projectId, taskId: queue.taskId })
+  assert.deepEqual(runs.map(({ runId, state, inputAttemptedAt, receipt }) => ({ runId, state, inputAttemptedAt, receipt })), [
+    { runId: queue.canceledRun, state: 'canceled', inputAttemptedAt: null, receipt: null },
+    { runId: queue.queuedRun, state: 'queued', inputAttemptedAt: null, receipt: null },
+  ])
   console.log(JSON.stringify({ webProfile: true, browserSession: true, sqliteFile: true, restoredVersion: before.task.version,
-    revisions: before.revisions.length, activity: before.activity.length, originalReceiptReplayed: true }, null, 2))
+    revisions: before.revisions.length, activity: before.activity.length, originalReceiptReplayed: true, queueHistoryRestored: true }, null, 2))
 } finally {
   if (server) await server.stop()
   await rm(root, { recursive: true, force: true })

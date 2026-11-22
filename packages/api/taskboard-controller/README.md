@@ -36,6 +36,10 @@ Host adapters construct the exclusive client with `createTaskRuntime`. It launch
 
 [The task domain](src/domain.ts) validates project and task records when storage opens. The [controller](src/index.ts) commits each task mutation, activity entry and command receipt in one SQLite transaction. The Host adapter binds a Run to its task, immutable input, Session, workspace and lease generation. Confirmed runtime exit releases that generation. Human decisions preserve the delivery version, snapshot and any waiver reasons. Version counts committed actions. Revision identifies a requirements snapshot.
 
+The [execution store](src/execution.ts) saves queued Runs in commit order and returns the original command receipt on replay. Each queued Run reserves its task and selected Session and stores the confirmed directory or pinned worktree plan. The Host assigns the available lease to the first queued Run in one SQLite transaction. After a claim, `prepareWorkspace` uses the stored plan and checks the observed directory, branch, and baseline. A waiting Run with no saved plan needs cancellation and a new confirmed request. Canceling a waiting Run preserves its history and releases its task reservation and any fresh Session reservation. Existing databases without a queue record start with an empty queue.
+
+After workspace preparation and SDK initialization, `submitInput` commits the attempt before invoking `session/prompt` through the adapter. A replay returns the saved message ID or `null` while the original attempt still needs reconciliation. The task detail shows the attempt time and receipt. An adapter can record an observed receipt from the bound Session with `started`.
+
 <a id="model-experience"></a>
 ## Model Experience
 

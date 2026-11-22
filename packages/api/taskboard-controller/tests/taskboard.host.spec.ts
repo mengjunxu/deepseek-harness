@@ -7,11 +7,12 @@ import * as Sqlite from '@deepseek-ai/dsh-storage-sqlite'
 import * as StorageDomain from '@deepseek-ai/dsh-storage-domain'
 import { execFileSync } from 'node:child_process'
 import { randomUUID } from 'node:crypto'
-import { mkdir, mkdtemp, readFile, realpath, rm, symlink, writeFile } from 'node:fs/promises'
+import { mkdir, mkdtemp, readFile, realpath, rename, rm, symlink, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { expect, it, onTestFinished, vi } from 'vitest'
 import TaskboardController from '../src/index.ts'
+import type { RunAdmission } from '../src/execution-domain.ts'
 import type { ScopeObservation } from '../src/stop.ts'
 import type { CommandId, ProjectId, TaskId, TaskRequirements, TaskRunId } from '../src/types.ts'
 
@@ -44,6 +45,157 @@ async function fixture(stopTimeoutMs = 10_000) {
   const create = { taskId, projectId, expectedVersion: 0, commandId: commandId(), requirements: fields }
   return { root, open, service, close, project, create }
 }
+
+async function admissionFor(f: Awaited<ReturnType<typeof fixture>>, sessionId: string): Promise<RunAdmission> {
+  const { projectId } = f.create
+  const taskId = brandString<TaskId>(randomUUID())
+  const command = { projectId, taskId }
+  await f.service.createTask({ ...f.create, ...command, commandId: commandId() })
+  await f.service.planTask({ ...command, expectedVersion: 1, commandId: commandId() })
+  return { ...command, expectedVersion: 2, commandId: commandId(), runId: brandString<TaskRunId>(randomUUID()),
+    runtimeId: randomUUID(), previousRun: null, mode: 'fresh', configurationRef: 'sdk', materials: [], feedback: [],
+    workspace: { directory: f.root, branch: null, baseline: null },
+    session: { sessionId, workspace: f.root, home: f.root, provider: 'deepseek-official', compatibility: 'g0' } }
+}
+
+it('reopens queued starts in commit order and assigns the oldest Run to one Host', async () => {
+  const f = await fixture()
+  const first = await admissionFor(f, 'queued-first')
+  const second = await admissionFor(f, 'queued-second')
+  const other = await admissionFor(f, 'outside-queue')
+  const confirmation = await f.service.inspectProject(first.projectId)
+  const plan = await f.service.planWorkspace(first.projectId, first.runId, confirmation)
+  const receipt = await f.service.executions.enqueue(first, plan)
+  expect(await f.service.executions.enqueue(first, plan)).toEqual(receipt)
+  await expect(f.service.executions.enqueue({ ...first, feedback: ['changed'] }, plan)).rejects.toThrow('command identity reused')
+  const changed = { ...plan, confirmation: { ...confirmation, fingerprint: 'a'.repeat(64) } }
+  await expect(f.service.executions.enqueue(first, changed)).rejects.toThrow('command identity reused')
+  await expect(f.service.executions.enqueue({ ...first, expectedVersion: receipt.version, commandId: commandId() }, plan))
+    .rejects.toThrow('slot is occupied')
+  await expect(f.service.stopRun({ expectedVersion: receipt.version, commandId: commandId(), force: false,
+    projectId: first.projectId, taskId: first.taskId, runId: first.runId })).rejects.toThrow('unknown stop target')
+  await f.service.executions.enqueue(second, plan)
+  const { taskId, projectId } = first
+  await f.service.editTask({ taskId, projectId, commandId: commandId(), expectedVersion: receipt.version,
+    requirements: { ...fields, description: 'Edited after queuing' } })
+  expect(f.service.detail(projectId, taskId)?.runs[0]).toMatchObject({ state: 'queued', revision: 1, receipt: null })
+  await f.close()
+
+  const a = (await f.open()).service.executions
+  const b = (await f.open()).service.executions
+  const winners = (await Promise.all([a.claimNext(), b.claimNext()])).filter(run => run !== null)
+  expect(winners).toHaveLength(1)
+  const [claimed] = winners
+  if (!claimed) throw new Error('the queue head was not claimed')
+  expect(claimed).toMatchObject({ state: 'preparing', generation: 1, admission: { runId: first.runId },
+    taskRevision: 1, input: { description: fields.description } })
+  const owner = { ...claimed.admission, generation: claimed.generation }
+  expect(await b.enqueue(first, plan)).toEqual(receipt)
+  expect(await b.claimNext()).toBeNull()
+  await a.exited(owner, { runtimeId: owner.runtimeId, source: 'test supervisor' }, 'interrupted', 'stopped')
+  await expect(a.admit(other)).rejects.toThrow('slot is occupied')
+  expect(await b.claimNext()).toMatchObject({ generation: 2, admission: { runId: second.runId } })
+  expect(await a.claimNext()).toBeNull()
+})
+
+it('cancels a queued Run without releasing a live lease or losing the last Session', async () => {
+  const f = await fixture()
+  const prior = await admissionFor(f, 'resumable')
+  const run = await f.service.executions.admit(prior)
+  const owner = { ...run.admission, generation: run.generation }
+  await f.service.executions.started(owner, 'prior input')
+  await f.service.executions.exited(owner, { runtimeId: owner.runtimeId, source: 'test supervisor' }, 'interrupted', 'stopped')
+  const { projectId, taskId } = prior
+  const ready = await f.service.planTask({ projectId, taskId, commandId: commandId(), expectedVersion: 5 })
+  const peer = await f.service.executions.admit(await admissionFor(f, 'peer'))
+  const resume: RunAdmission = { ...prior, runId: brandString<TaskRunId>(randomUUID()), commandId: commandId(), runtimeId: randomUUID(),
+    previousRun: prior.runId, expectedVersion: ready.version, mode: 'resume' }
+  const confirmation = await f.service.inspectPriorWorkspace(projectId, taskId, prior.runId)
+  const plan = await f.service.planContinuation(projectId, taskId, prior.runId, confirmation)
+  const queued = await f.service.executions.enqueue(resume, plan)
+  const cancel = { projectId, taskId, expectedVersion: queued.version, commandId: commandId() }
+  await expect(f.service.executions.cancelQueued({ ...cancel, expectedVersion: ready.version }, resume.runId)).rejects.toThrow('version conflict')
+  const canceled = await f.service.executions.cancelQueued(cancel, resume.runId)
+  expect(await f.service.executions.cancelQueued(cancel, resume.runId)).toEqual(canceled)
+  expect(await f.service.executions.enqueue(resume, plan)).toEqual(queued)
+  expect(f.service.detail(projectId, taskId)?.runs[1]).toMatchObject({ runId: resume.runId, state: 'canceled', receipt: null })
+  const peerOwner = { ...peer.admission, generation: peer.generation }
+  expect(await f.service.executions.active(peerOwner)).toEqual(peer)
+  const retry = { ...resume, expectedVersion: canceled.version, runId: brandString<TaskRunId>(randomUUID()),
+    commandId: commandId(), runtimeId: randomUUID() }
+  const accepted = await f.service.executions.enqueue(retry, plan)
+  await f.service.executions.exited(peerOwner, { runtimeId: peerOwner.runtimeId, source: 'test supervisor' }, 'interrupted', 'stopped')
+  expect(await f.service.executions.claimNext()).toMatchObject({ admission: { runId: retry.runId, previousRun: prior.runId } })
+  const stop = { projectId, taskId, commandId: commandId(), expectedVersion: accepted.version }
+  await expect(f.service.executions.cancelQueued(stop, retry.runId)).rejects.toThrow('not queued for this task')
+})
+
+it('refuses a replaced workspace after reopening a queued Run', async () => {
+  const f = await fixture()
+  const directory = join(f.root, 'selected')
+  const moved = join(f.root, 'moved')
+  await mkdir(directory)
+  const projectId = brandString<ProjectId>(randomUUID())
+  await f.service.createProject({ ...f.project, commandId: commandId(), project: { id: projectId, title: 'Selected', root: directory } })
+  const taskId = f.create.taskId
+  const command = (expectedVersion: number) => ({ projectId, taskId, expectedVersion, commandId: commandId() })
+  await f.service.createTask({ ...command(0), requirements: fields })
+  await f.service.planTask(command(1))
+  const runId = brandString<TaskRunId>(randomUUID())
+  const confirmation = await f.service.inspectProject(projectId)
+  const plan = await f.service.planWorkspace(projectId, runId, confirmation)
+  const input: RunAdmission = { ...command(2), runId, previousRun: null, runtimeId: randomUUID(), mode: 'fresh',
+    configurationRef: 'sdk', materials: [], feedback: [], workspace: { directory, baseline: null, branch: null },
+    session: { sessionId: 'workspace-confirmation', workspace: directory, home: f.root, provider: 'deepseek-official', compatibility: 'g0' } }
+  await expect(f.service.executions.enqueue(input, { ...plan, source: moved })).rejects.toThrow('does not match')
+  await f.service.executions.enqueue(input, plan)
+  await f.close()
+  await rename(directory, moved)
+  await symlink(moved, directory, 'junction')
+
+  const { service } = await f.open()
+  const run = await service.executions.claimNext()
+  if (!run) throw new Error('the queued Run was not claimed')
+  const owner = { ...run.admission, generation: run.generation }
+  await expect(service.prepareWorkspace(owner)).rejects.toThrow('confirm it again')
+  const replacement = { ...plan, source: moved, confirmation: { ...confirmation, directory: moved } }
+  await expect(service.prepareWorkspace(owner, replacement)).rejects.toThrow('confirm it again')
+  expect(await service.executions.active(owner)).toMatchObject({ state: 'preparing', receipt: null, workspacePlan: plan })
+})
+
+it('grants one input attempt across Hosts and returns the committed SDK receipt on replay', async () => {
+  const f = await fixture()
+  const input = await admissionFor(f, 'input-attempt')
+  const { projectId, taskId, runId } = input
+  const plan = await f.service.planWorkspace(projectId, runId, await f.service.inspectProject(projectId))
+  await f.service.executions.enqueue(input, plan)
+  const run = await f.service.executions.claimNext()
+  if (!run) throw new Error('the Run was not claimed')
+  const owner = { ...run.admission, generation: run.generation }
+  await f.service.prepareWorkspace(owner)
+  await expect(f.service.executions.started(owner, 'premature receipt')).rejects.toThrow('attempt was not recorded')
+
+  const { service: peer } = await f.open()
+  const invoked = Promise.withResolvers<undefined>()
+  const sdkReply = Promise.withResolvers<string>()
+  const prompt = vi.fn(async () => { invoked.resolve(undefined); return sdkReply.promise })
+  await expect(peer.executions.submitInput({ ...owner, generation: owner.generation + 1 }, prompt)).rejects.toThrow('no longer owns')
+  const sending = f.service.executions.submitInput(owner, prompt)
+  await invoked.promise
+  try {
+    expect(await peer.executions.submitInput(owner, prompt)).toBeNull()
+    expect(f.service.detail(projectId, taskId)?.runs[0]).toMatchObject({ state: 'preparing', inputAttemptedAt: expect.any(String), receipt: null })
+  } finally {
+    sdkReply.resolve('accepted input')
+    await sending
+  }
+  expect(await sending).toBe('accepted input')
+  await expect(peer.executions.started(owner, 'different receipt')).rejects.toThrow('unexpected SDK receipt')
+  await peer.executions.exited(owner, { runtimeId: owner.runtimeId, source: 'test supervisor' }, 'finished', 'completed')
+  expect(await f.service.executions.submitInput(owner, prompt)).toBe('accepted input')
+  expect(prompt).toHaveBeenCalledTimes(1)
+  expect(prompt).toHaveBeenCalledWith(expect.objectContaining({ input: expect.objectContaining({ description: fields.description }) }))
+})
 
 it('commits requirements and activity atomically and replays the original receipt after reopen', async () => {
   const f = await fixture()
@@ -259,26 +411,30 @@ it('rechecks original changes and prepares a pinned isolated checkout only under
   const base = (n: number) => ({ projectId, taskId, commandId: commandId(), expectedVersion: n })
   await f.service.createTask({ ...f.create, projectId })
   await f.service.planTask(base(1))
-  const admitted = await f.service.executions.admit({ ...base(2), runId, runtimeId: randomUUID(), previousRun: null,
+  await f.service.executions.enqueue({ ...base(2), runId, runtimeId: randomUUID(), previousRun: null,
     mode: 'fresh', materials: [], configurationRef: 'sdk', feedback: [], workspace: { directory: isolated.directory,
       baseline: isolated.baseline, branch: isolated.branch }, session: { sessionId: randomUUID(), workspace: isolated.directory,
-      home: f.root, provider: 'deepseek-official', compatibility: 'g0' } })
+      home: f.root, provider: 'deepseek-official', compatibility: 'g0' } }, isolated)
+  await f.close()
+  const { service } = await f.open()
+  const admitted = await service.executions.claimNext()
+  if (!admitted) throw new Error('the isolated Run was not claimed')
   const owner = { ...admitted.admission, generation: admitted.generation }
-  await expect(f.service.prepareWorkspace({ ...owner, generation: owner.generation + 1 }, isolated)).rejects.toThrow('no longer owns')
-  await expect(f.service.prepareWorkspace(owner, original)).rejects.toThrow('differs')
-  const started = await f.service.prepareWorkspace(owner, isolated)
+  await expect(service.prepareWorkspace({ ...owner, generation: owner.generation + 1 })).rejects.toThrow('no longer owns')
+  await expect(service.prepareWorkspace(owner, original)).rejects.toThrow('differs')
+  const started = await service.prepareWorkspace(owner)
   expect(started).toMatchObject({ directory: isolated.directory, branch: isolated.branch, head: git('rev-parse', 'HEAD'), dirty: false })
   expect(await readFile(join(started.directory, 'tracked'), 'utf8')).toBe('base')
   expect(await readFile(join(sub, 'tracked'), 'utf8')).toBe('dirty')
   expect(await readFile(join(sub, 'new'), 'utf8')).toBe('two')
-  await expect(f.service.prepareWorkspace(owner, isolated)).rejects.toThrow('EEXIST')
-  await f.service.executions.started(owner, 'SDK receipt')
-  await f.service.executions.exited(owner, { runtimeId: owner.runtimeId, source: 'test supervisor' }, 'finished', 'completed')
-  const previous = await f.service.inspectPriorWorkspace(projectId, taskId, runId)
-  expect((await f.service.planContinuation(projectId, taskId, runId, previous)).directory).toBe(started.directory)
+  await expect(service.prepareWorkspace(owner)).rejects.toThrow('EEXIST')
+  expect(await service.executions.submitInput(owner, async () => 'SDK receipt')).toBe('SDK receipt')
+  await service.executions.exited(owner, { runtimeId: owner.runtimeId, source: 'test supervisor' }, 'finished', 'completed')
+  const previous = await service.inspectPriorWorkspace(projectId, taskId, runId)
+  expect((await service.planContinuation(projectId, taskId, runId, previous)).directory).toBe(started.directory)
   execFileSync('git', ['-C', started.directory, 'checkout', '--quiet', '--detach'])
-  const detached = await f.service.inspectPriorWorkspace(projectId, taskId, runId)
-  expect(() => f.service.planContinuation(projectId, taskId, runId, detached)).toThrow('branch changed')
+  const detached = await service.inspectPriorWorkspace(projectId, taskId, runId)
+  expect(() => service.planContinuation(projectId, taskId, runId, detached)).toThrow('branch changed')
 })
 
 it('retains an unconfirmed stop through Host restart and requires an explicit, versioned force request', async () => {

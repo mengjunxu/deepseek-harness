@@ -1,0 +1,34 @@
+{
+  "platform": "Windows x64",
+  "node": "26.10.0",
+  "pnpm": "11.7.0",
+  "sha256": {
+    "packages/api/taskboard-controller/src/execution-domain.ts": "5439b566716bb6a170f2f926f63f2cd0ad6c42f864f0baf446edd654e62e6332",
+    "packages/api/taskboard-controller/src/execution.ts": "0ac1264a74de65a61d97a9bcca36e2d9962bc501a626510e8df415fb7c6fd980",
+    "packages/api/taskboard-controller/src/index.ts": "4f03e709d09263bd133085d17f1100c55b0f0a7c310a14bfdc06a112f9e3914b",
+    "packages/api/taskboard-controller/src/types.ts": "f1ee6d51a15d5b581cd8dabcf7ff412d9654e7b43ce1b80861d2e3546fa9bcc5",
+    "packages/api/taskboard-controller/tests/taskboard.host.spec.ts": "7781208addb33fe6d54e37d537d99a481fbbbbbf364b55de686898b1dd7e9aea",
+    "apps/web/tests/fixtures/taskboard-smoke.mjs": "7dd8cb4712b08892faa6f3792a6725a09ba7d84625551a1a98cfca676916dffa",
+    ".ai/tasks/dsh-tboard-03/evidence/submit-input.mjs": "ed1994ceeb62cb044d76fa87d984bb99a11256fae53f418076ed060ee3156b95",
+    "packages/api/taskboard-controller/lib/index.js": "55faeabffc9e6eb1760e767275b9c6a9c0f773cf4fc1a028387f0b080555f955",
+    "packages/api/taskboard-controller/lib/typert.host.js": "f2d7896439f6348dc877aa8485685c4f9191fc7834d6dbc0b6b5f61eb4ae49a7"
+  },
+  "sdkProbe": {
+    "command": "node .ai/tasks/dsh-tboard-03/evidence/submit-input.mjs",
+    "recordedBeforeSend": true,
+    "sdkAccepted": true,
+    "receiptWriteClosed": true,
+    "unconfirmedAfterReopen": true,
+    "recoveredFromSession": true,
+    "replayCalls": 0,
+    "modelRequests": 1
+  },
+  "hostTests": {
+    "command": "node_modules/.bin/vitest.CMD run packages/api/taskboard-controller/tests/taskboard.host.spec.ts --testTimeout 15000",
+    "passed": 16
+  },
+  "authenticatedWeb": {
+    "command": "node_modules/.bin/vitest.CMD run --config vitest.web.config.ts apps/web/tests/taskboard.e2e.ts",
+    "passed": 1
+  }
+}

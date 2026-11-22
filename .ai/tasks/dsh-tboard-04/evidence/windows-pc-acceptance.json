@@ -1,0 +1,64 @@
+{
+  "verifiedOn": "2026-11-21",
+  "platform": "win32 x64",
+  "node": "26.10.0",
+  "pnpm": "11.7.0",
+  "sha256": {
+    ".ai/tasks/dsh-tboard-04/evidence/stop.mjs": "246b5e87c85dab3164cc65d68333c923734329ac22ff75610cb44c95c133a900",
+    ".ai/tasks/dsh-tboard-04/evidence/permission.mjs": "246fd8021aba8d6a13096802e44a8d804ad12da69a7d7382d24d8b50c53c1eed",
+    "packages/api/taskboard-controller/lib/index.js": "2cc7f1f40ea9f47440b52c33b60383fe627ddcc4d0e06004cee851ea487c5e8d",
+    "packages/api/taskboard-controller/lib/typert.host.js": "2d6832d31f2368640350a05bbee8de9fd606b70022516870dabc9c4533213dca"
+  },
+  "controlledStop": {
+    "command": "node .ai/tasks/dsh-tboard-04/evidence/stop.mjs --controlled-tool",
+    "fixedTool": "pwsh",
+    "realSdkReceipt": true,
+    "localModelRequests": 1,
+    "targetRuntimeExited": true,
+    "fixtureChildExited": true,
+    "otherRuntimeAlive": true,
+    "releasedAfterRecheck": 1,
+    "terminalEvents": 1
+  },
+  "unknownScope": {
+    "command": "node .ai/tasks/dsh-tboard-04/evidence/stop.mjs",
+    "targetRuntimeExited": true,
+    "otherRuntimeAlive": true,
+    "fullScopeObserved": false,
+    "gracefulStopRetainedLease": true,
+    "explicitForceAndRecheckRetainedSameGeneration": true,
+    "replayAddedActions": 0,
+    "modelInputs": 0
+  },
+  "forcedStopObservationDeadline": {
+    "command": "node .ai/tasks/dsh-tboard-04/evidence/stop.mjs --force-deadline",
+    "targetAliveBeforeForce": true,
+    "targetRuntimeExited": true,
+    "otherRuntimeAlive": true,
+    "control": "stop_requested",
+    "connection": "suspect",
+    "stopFailure": "deadline",
+    "scopeObservationCanceled": true,
+    "lateEmptyIgnored": true,
+    "retainedGeneration": 1,
+    "directoryPresent": true,
+    "terminalRecorded": false
+  },
+  "invalidApprovalPolicy": {
+    "command": "node .ai/tasks/dsh-tboard-04/evidence/permission.mjs",
+    "policy": "invalid-test-policy",
+    "sdkRejected": true,
+    "approvalDiagnostic": true,
+    "targetRuntimeExited": true,
+    "modelRequests": 0,
+    "workDirectoryWrites": 0
+  },
+  "authenticatedWeb": {
+    "command": "node_modules/.bin/vitest.CMD run --config vitest.web.config.ts apps/web/tests/taskboard.e2e.ts",
+    "passed": 1
+  },
+  "hostTests": {
+    "command": "node_modules/.bin/vitest.CMD run packages/api/taskboard-controller/tests/taskboard.host.spec.ts --testTimeout 15000",
+    "passed": 12
+  }
+}

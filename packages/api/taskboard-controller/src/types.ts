@@ -89,7 +89,7 @@ export interface TaskReceipt {
 export interface TaskActivity extends TaskReceipt {
   actor: 'operator' | 'runtime'
   time: string
-  action: 'created' | 'edited' | 'commented' | 'planned' | 'canceled' | 'archived' | 'reopened' | 'reordered' | 'run-requested' | 'run-started' | 'stop-requested' | 'force-requested' | 'run-ended' | 'accepted' | 'returned'
+  action: 'created' | 'edited' | 'commented' | 'planned' | 'canceled' | 'archived' | 'reopened' | 'reordered' | 'run-requested' | 'run-canceled' | 'run-started' | 'stop-requested' | 'force-requested' | 'run-ended' | 'accepted' | 'returned'
   comment?: string | undefined
 }
 
@@ -111,7 +111,7 @@ export type StopFailure = 'runtime-unavailable' | 'deadline' | 'runtime-alive' |
 export interface TaskRunSummary {
   runId: TaskRunId
   previousRun: TaskRunId | null
-  state: 'preparing' | 'running' | 'finished' | 'failed' | 'interrupted'
+  state: 'queued' | 'preparing' | 'running' | 'finished' | 'failed' | 'canceled' | 'interrupted'
   control: 'normal' | 'stop_requested' | 'finalizing'
   connection: 'connected' | 'suspect' | 'disconnected'
   stopFailure: StopFailure | null
@@ -122,6 +122,8 @@ export interface TaskRunSummary {
   priorSessionId: SessionId | null
   mode: 'fresh' | 'resume'
   materialReferences: string[]
+  /** When the Host committed a send attempt. A null receipt then requires reconciliation. */
+  inputAttemptedAt: string | null
   receipt: string | null
   endReason: string | null
 }

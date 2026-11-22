@@ -5,7 +5,7 @@ state: HANDOFF_READY
 previous_agent: Codex
 next_agent: receiver_pending_macos
 branch: codely_bridge
-updated_at: "2026-11-18T16:29:07Z"
+updated_at: "2026-11-21T15:52:05Z"
 ---
 
 # TBOARD-04 交接
@@ -14,12 +14,14 @@ updated_at: "2026-11-18T16:29:07Z"
 
 ## 验证与工作区
 
-Windows 上的 Taskboard Host 测试 12 项、认证 Web 冒烟 1 项、实际双 SDK 的未知范围场景、控制器类型检查与 Host 构建、定向 lint、双语配对均通过。Windows 双 SDK 场景验证目标退出、另一实例存活、强停和再次核对后仍持有原租约。退出确认后释放租约与重复核对只结算一次由 Host 测试验证。命令和失败重试见[日志](log.md)，被测源码、构建产物和双 SDK 结果见 [Windows 验证记录](evidence/recheck-windows.json)。全仓文档检查仍有失败。
+2026-11-21 的 [Windows PC 实测](evidence/windows-pc-acceptance.json)已通过。固定 PowerShell 进程与目标 SDK 均退出，复核后释放对应租约，重复复核仅记录一次中断，另一 SDK 继续运行。范围未知时保留原租约。无效审批配置使 SDK 退出，模型请求与工作目录写入均为零。当天复跑的 12 项 Host 测试和 1 项认证 Web 冒烟通过。命令与首次运行诊断见[日志](log.md)。
 
-本轮文件归属为 `packages/api/taskboard-controller`、Web 冒烟夹具、主实施计划 TBOARD-04 条目及本任务记录。提交前已核对 `codely_bridge` 的本地基线与实际远端分支一致。接收方须在 macOS 上核对包含本记录的提交。工作区另有 `docs/.obsidian/workspace.json` 及 `docs/tutorial/` 的修改。上个源码检查点记录见[跨设备交接](../dsh-cross-device-handoff/handoff.md)。
+补测显式强停场景。夹具模拟正常停止无法送达，Host 对仍存活的目标 SDK 调用关闭。目标退出、另一 SDK 存活。进程范围观察超时后，任务详情显示停止未确认，目录和原租约仍然保留，迟到的空范围结果被忽略。该场景真实启动两个 SDK，停止请求故障及观察超时由夹具控制。
+
+测试夹具、证据和任务记录随 [跨设备检查点](../dsh-cross-device-handoff/handoff.md)移交。控制器源码和构建产物的前一轮证据见 [Windows 验证记录](evidence/recheck-windows.json)。
 
 ## 接续
 
-在首发 macOS 检出相同源码并构建后，运行 `node .ai/tasks/dsh-tboard-04/evidence/stop.mjs --controlled-tool` 和 `node .ai/tasks/dsh-tboard-04/evidence/stop.mjs`。第一项验证真实固定工具退出后通过复核释放租约，第二项验证范围未知时保留租约。保存 macOS 平台、被测版本、观察结果后完成 TBOARD-04，再进入 TBOARD-03。
+在首发 macOS 检出相同源码并构建后，运行 `node .ai/tasks/dsh-tboard-04/evidence/stop.mjs --controlled-tool` 和 `node .ai/tasks/dsh-tboard-04/evidence/stop.mjs`。第一项验证真实固定工具退出后通过复核释放租约，第二项验证范围未知时保留租约。保存 macOS 平台、被测版本和观察结果后关闭 TBOARD-04。[TBOARD-03 调度](../dsh-tboard-03/plan.md)可在 Windows 开发和联调，这两项结果用于 macOS 首发验收。
 
-2026-11-19 00:29（上海），`get_usage_limits` 的 Codex 10080 分钟窗口剩余 41%，重置于 2026-11-20 14:51（上海）。Codex 已释放本任务写入权。Memory、Architecture 和 WORKFLOW 无需更新。
+2026-11-21 23:52（上海），`get_usage_limits` 的 Codex 10080 分钟窗口剩余 93%，重置于 2026-11-27 15:04（上海）。Codex 已释放本任务写入权。Memory、Architecture 和 WORKFLOW 无需更新。

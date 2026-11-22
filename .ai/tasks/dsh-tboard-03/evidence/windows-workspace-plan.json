@@ -1,0 +1,26 @@
+{
+  "platform": "Windows x64",
+  "node": "26.10.0",
+  "pnpm": "11.7.0",
+  "sha256": {
+    "packages/api/taskboard-controller/src/execution-domain.ts": "fcaa3f8a2f89bebd75a248f6dd18c7e9fbbab58487695f0b3401d279d348dac7",
+    "packages/api/taskboard-controller/src/execution.ts": "acc69aba01586be9bef01d1e5376d21dccc75fc57135274ec2a5fbd2ce71b2b9",
+    "packages/api/taskboard-controller/src/index.ts": "f9d43fedd0ed4557bbbe02bfbbb92ce06aa0f884e303eec9597a92be55797b69",
+    "packages/api/taskboard-controller/tests/taskboard.host.spec.ts": "bbbdf69e8801fc596ac9716045df4548f550af9b33b0e9bda54738e373e1d5ec",
+    "apps/web/tests/fixtures/taskboard-smoke.mjs": "debbc54b8acadec64abb4950620b0d3b89b135e5dafd74298f781911f3bb009f",
+    "packages/api/taskboard-controller/lib/index.js": "9efc8008c5a0c763f12a5ce4b811b66ab5bcf38d89b62e4a90ea803f2d627488",
+    "packages/api/taskboard-controller/lib/typert.host.js": "e771b9284dcc5a755cfd25321c6ca34bbf6cc2b75ec44bb29b5844f03754e2c2"
+  },
+  "hostTests": {
+    "command": "node_modules/.bin/vitest.CMD run packages/api/taskboard-controller/tests/taskboard.host.spec.ts --testTimeout 15000",
+    "passed": 15,
+    "savedWorktreePlanAfterReopen": true,
+    "rejectedReplacedDirectory": true,
+    "rejectedWrongLeaseGeneration": true,
+    "rejectedChangedConfirmationOnReplay": true
+  },
+  "authenticatedWeb": {
+    "command": "node_modules/.bin/vitest.CMD run --config vitest.web.config.ts apps/web/tests/taskboard.e2e.ts",
+    "passed": 1
+  }
+}
