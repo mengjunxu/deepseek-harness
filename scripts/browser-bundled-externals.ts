@@ -143,7 +143,14 @@ async function collectShell(
     await vite.build({
       root: dir,
       logLevel: 'error',
-      plugins: [browserDependencyAnalysis(), recorder(seen, workspaceNames, true)],
+      plugins: [browserDependencyAnalysis(), recorder(seen, workspaceNames, true), {
+        name: 'dsh-browser-notice-pages',
+        enforce: 'post',
+        config(merged: ShellConfig) {
+          // Replace the named shipping inputs after Vite merges the app and analysis configurations.
+          merged.build.rollupOptions = { ...merged.build.rollupOptions, input: pages }
+        },
+      }],
       resolve: { alias: browserSourceAliases(root) },
       build: {
         write: false,
@@ -151,7 +158,6 @@ async function collectShell(
         sourcemap: false,
         reportCompressedSize: false,
         rollupOptions: {
-          input: pages.length === 1 ? pages[0] : pages,
           // Chunk coloring expects full third-party bodies; the disclosure walk stops at their imports.
           output: { manualChunks: () => undefined },
         },

@@ -168,7 +168,7 @@ interface SessionActivity {
 
 ## Taskboard projects and tasks
 
-The Web Host registers Taskboard projects separately from chat Workspaces. Each task retains its requirements versions, activity, Run references and human decisions. [Taskboard operator commands](../../packages/api/taskboard-controller/README.md)
+The Web Host registers Taskboard projects separately from chat Workspaces. Each requirements revision includes the task’s goal, optional execution constraints and acceptance criteria. Each task retains its requirements versions, activity, Run references and human decisions. A `TaskRunInputSnapshot` contains the admitted requirements, review feedback and selected materials used for the SDK message. A Run history entry includes its saved SDK provider and model when available. A `TaskActivityPage` returns a slice of that history and a `TaskActivityCursor` identifying the last processed entry in the task. [Taskboard operator commands](../../packages/api/taskboard-controller/README.md)
 
 <!-- BEGIN GENERATED cordis-surface (gen-cordis-catalog.ts) — do not edit between markers -->
 
@@ -252,6 +252,24 @@ Business state and history are committed together in one authoritative task row.
 planWorkspace(projectId: ProjectId, runId: TaskRunId, confirmation: WorkspaceInspection | null): Promise<TaskWorkspacePlan>
 
 /**
+ * Read the original SDK input of a queued or historical Run without opening its Session.
+ * @param projectId - project owning the Run.
+ * @param taskId - task owning the Run.
+ * @param runId - Run whose saved input was selected.
+ * @returns the admitted task content, feedback and explicitly selected material text.
+ */
+@Remote runInput(projectId: ProjectId, taskId: TaskId, runId: TaskRunId): TaskRunInputSnapshot
+
+/**
+ * Read the requirements, execution workspace and consent captured for one Run.
+ * @param projectId - owning project.
+ * @param taskId - owning task.
+ * @param runId - queued or historical Run selected by the operator.
+ * @returns the versioned TaskSpec with the original SDK input and available authorization.
+ */
+@Remote runTaskSpec(projectId: ProjectId, taskId: TaskId, runId: TaskRunId): RunTaskSpec
+
+/**
  * Inspect the prior Run before the operator selects its directory again.
  * @param projectId - owning project.
  * @param taskId - task whose execution is being continued.
@@ -279,11 +297,52 @@ planContinuation(projectId: ProjectId, taskId: TaskId, priorRun: TaskRunId, conf
 async prepareWorkspace(owner: RuntimeBinding, plan?: TaskWorkspacePlan): Promise<WorkspaceInspection>
 
 /**
+ * Create a versioned Taskboard backup after active execution has settled.
+ * @returns a JSON archive with a checksum and an explicit Session manifest.
+ */
+@Remote exportBackup(): Promise<string>
+
+/**
+ * Export a project for handoff outside the Taskboard.
+ * @param projectId - project chosen by the operator.
+ * @returns a JSON document with requirements, Run summaries and review history.
+ */
+@Remote exportHandoff(projectId: ProjectId): Promise<string>
+
+/**
+ * Restore a verified archive into an empty Taskboard without replaying execution or requests.
+ * @param archive - JSON backup selected by the operator.
+ * @returns restored record counts and missing or canceled execution references.
+ */
+@Remote restoreBackup(archive: string): Promise<TaskboardRestore>
+
+/**
+ * Notify a connected Taskboard of its initial state and subsequent durable changes.
+ * @param signal - authenticated stream lifetime.
+ * @returns coalesced invalidations without exposing stored payloads.
+ */
+@Remote({ mode: 'stream' }) async *watchChanges(signal: AbortSignal): AsyncIterable<'changed'>
+
+/**
  * Register a local project root selected by the operator.
  * @param request - idempotent creation with its absolute directory and optional configuration.
  * @returns the canonical persisted project.
  */
 @Remote async createProject(request: ProjectCreateCommand): Promise<TaskboardProject>
+
+/**
+ * Queue a confirmed task snapshot and a Host-selected SDK route, with an explicit Session continuation option.
+ * @param request - operator command, directory selection and explicit materials.
+ * @returns the original queue receipt and Run ID on equivalent replays.
+ */
+@Remote async startRun(request: TaskStartCommand): Promise<TaskStartReceipt>
+
+/**
+ * Cancel a Run that is still waiting for the execution slot.
+ * @param request - versioned operator command scoped to the queued Run.
+ * @returns the original cancellation receipt on equivalent replays.
+ */
+@Remote cancelQueuedRun(request: TaskCommand & { runId: TaskRunId }): Promise<TaskReceipt>
 
 /**
  * Stop one Run and retain its directory while process exit remains unconfirmed.
@@ -293,13 +352,84 @@ async prepareWorkspace(owner: RuntimeBinding, plan?: TaskWorkspacePlan): Promise
 @Remote async stopRun(request: TaskStopCommand): Promise<void>
 
 /**
- * Recheck an unconfirmed stop without sending another shutdown or force request.
+ * Recheck an unconfirmed shutdown without sending another signal.
  * @param projectId - project owning the Run's task.
  * @param taskId - task owning the Run.
  * @param runId - Run whose exit must be observed again.
  * @returns after recording exit or keeping the lease when the Host lacks complete evidence.
  */
 @Remote async recheckRunStop(projectId: ProjectId, taskId: TaskId, runId: TaskRunId): Promise<void>
+
+/**
+ * Read the outstanding native questions and approvals for one Run.
+ * @param projectId - project owning the Run's task.
+ * @param taskId - task owning the Run.
+ * @param runId - Run whose live requests the operator opened.
+ * @returns requests still accepting an operator response.
+ */
+@Remote pendingRunInteractions(projectId: ProjectId, taskId: TaskId, runId: TaskRunId): TaskPendingInteraction[]
+
+/**
+ * Submit one response to the Run's exact pending native request.
+ * @param request - scoped operator response including the native request identity and kind.
+ * @returns after the Host records and forwards the response to the original SDK responder.
+ */
+@Remote answerRunInteraction(request: TaskInteractionReply): Promise<void>
+
+/**
+ * Show pending requests grouped by the attached Run.
+ * @returns the Run inboxes that need an operator response.
+ */
+@Remote inbox(): TaskboardInbox[]
+
+/**
+ * Show the selected SDK route and whether this project can dispatch.
+ * @param projectId - project whose execution configuration the operator opened.
+ * @returns configured launcher facts. The SDK validates credentials and permissions at launch.
+ */
+@Remote executionRoute(projectId: ProjectId): TaskboardExecutionRoute
+
+/**
+ * Read the sealed evidence and file inventory for one Delivery.
+ * @param projectId - project that owns the task.
+ * @param taskId - task that owns the Delivery.
+ * @param deliveryId - immutable Delivery identity.
+ * @returns verification, coverage and revision information.
+ */
+@Remote deliveryDetail(projectId: ProjectId, taskId: TaskId, deliveryId: DeliveryId): TaskDeliveryDetail
+
+/**
+ * Export validation coverage and risk for one sealed delivery without project text, paths or Session content.
+ * @param projectId - owning project.
+ * @param taskId - owning task.
+ * @param deliveryId - sealed version selected by the operator.
+ * @returns a compact JSON review package.
+ */
+@Remote exportReviewPackage(projectId: ProjectId, taskId: TaskId, deliveryId: DeliveryId): string
+
+/**
+ * Request one coverage assessment without changing the delivery or the human decision.
+ * @param request - operator-confirmed delivery fingerprint, route and response language.
+ * @returns the recorded attempt; replay reads its current outcome without contacting the model.
+ */
+@Remote requestModelReview(request: ModelReviewCommand): Promise<ModelReviewAttempt>
+
+/**
+ * Read one file from the workspace while its fingerprint still matches the Delivery.
+ * @param projectId - project that owns the task.
+ * @param taskId - task that owns the Delivery.
+ * @param deliveryId - immutable Delivery identity.
+ * @param path - exact workspace-relative path from its file inventory.
+ * @returns a read-only comparison, new file content or a display status.
+ */
+@Remote deliveryDiff(projectId: ProjectId, taskId: TaskId, deliveryId: DeliveryId, path: string): Promise<DeliveryFileDiff>
+
+/**
+ * Record an operator’s acceptance or return for an exact Delivery and task version.
+ * @param request - original delivery identity, snapshot and decision.
+ * @returns the committed decision receipt, including on equivalent replay.
+ */
+@Remote reviewDelivery(request: TaskReviewCommand): Promise<TaskReceipt>
 
 /**
  * List project bindings without opening their directories or Sessions.
@@ -372,12 +502,59 @@ async prepareWorkspace(owner: RuntimeBinding, plan?: TaskWorkspacePlan): Promise
 @Remote detail(projectId: ProjectId, taskId: TaskId): TaskDetail | null
 
 /**
+ * Read task activity in commit order, starting immediately after the saved cursor.
+ * @param projectId - owning project.
+ * @param taskId - selected task.
+ * @param cursor - checkpoint from a prior page, or null to start at the beginning.
+ * @param limit - positive maximum number of entries to return.
+ * @returns the activity and next checkpoint, or null for an absent or out-of-project task.
+ * @throws When the checkpoint does not match the selected task's stored history.
+ */
+@Remote activityPage(projectId: ProjectId, taskId: TaskId, cursor: TaskActivityCursor | null, limit: number): TaskActivityPage | null
+
+/**
  * List task cards for one project, including archived records only when requested.
  * @param projectId - owning project.
  * @param includeArchived - whether to include archived cards.
  * @returns the project's task cards.
  */
 @Remote listTasks(projectId: ProjectId, includeArchived: boolean): TaskView[]
+
+/**
+ * List project cards with their current or latest Run’s status and event position.
+ * @param projectId - project owning the displayed cards.
+ * @param includeArchived - whether archived cards are visible.
+ * @returns project cards in operator-defined order.
+ */
+@Remote listBoardCards(projectId: ProjectId, includeArchived: boolean): TaskboardCard[]
+
+/**
+ * Set the parent and prerequisites for a task before its next admission.
+ * @param request - operator-selected links and expected task version.
+ * @returns the receipt for the saved relationships.
+ */
+@Remote setRelations(request: TaskCommand & { relations: TaskRelations }): Promise<TaskReceipt>
+
+/**
+ * List accounts and the selected project's grants for the Host operator.
+ * @param projectId - project being administered.
+ * @returns account identities and current roles.
+ */
+@Remote projectMembers(projectId: ProjectId): Promise<ProjectMember[]>
+
+/**
+ * Provision a named account with an initial project role.
+ * @param request - new identity, project role and credential verifier.
+ * @returns after the account and first grant commit.
+ */
+@Remote createMember(request: CreateMember): Promise<void>
+
+/**
+ * Change a project grant, rotate a credential or disable an account.
+ * @param request - selected change at the observed account version.
+ * @returns after the new permissions commit.
+ */
+@Remote changeMember(request: ChangeMember): Promise<void>
 ```
 
 Source: [`packages/api/taskboard-controller/src/index.ts`](../../packages/api/taskboard-controller/src/index.ts)

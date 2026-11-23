@@ -1,0 +1,26 @@
+{
+  "verified_at": "2026-11-22T02:07:47Z",
+  "platform": "macOS arm64",
+  "node": "26.5.0",
+  "sha256": {
+    "packages/api/taskboard-controller/src/index.ts": "00f5ed922d13af6144bac761c496e7964a574017965b5e8457d28f55cd7e9acc",
+    "packages/api/taskboard-controller/src/dispatch.ts": "e0bd298b6bbf9cdb502feec5f2c4859021a032f6c73294d7cd90487a8983f6f6",
+    "packages/api/taskboard-controller/lib/index.js": "cb64cab3d98fe5395e756f55e9a34be5bcc90e704031334da4c423ab000fe8f4",
+    "apps/web/tests/fixtures/taskboard-smoke.mjs": "44b0d5742fdbac653e98eb85181e8b36d4bde40189b1fd049e19b9335e805cde",
+    "apps/web/tests/fixtures/taskboard-receipt-write-fault.mjs": "6b24d3743e6ba57efb3e7ab18a23d2501abd18d49540d479490b1c23a9dc2320"
+  },
+  "checks": {
+    "pnpm exec tsc -b packages/api/taskboard-controller/tsconfig.json": "PASS",
+    "pnpm exec tsdown --env.DSH_BUILD_FACE host --filter @deepseek-ai/dsh-api-taskboard-controller": "PASS",
+    "pnpm exec vitest run --config vitest.web.config.ts apps/web/tests/taskboard.e2e.ts": "3 PASS"
+  },
+  "first_write_injected_failure": {
+    "sameReceipt": true,
+    "modelRequests": 1
+  },
+  "invalid_approval": {
+    "retainedLease": true,
+    "inputAttempted": false,
+    "modelRequests": 0
+  }
+}

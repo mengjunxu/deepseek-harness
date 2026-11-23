@@ -79,7 +79,7 @@ Every write resolves only after the backend acknowledges durability, and each em
 <a id="understand-the-implementation"></a>
 ## Understand the implementation
 
-A domain transaction reads current persisted records and commits multiple table changes together. Use the synchronous callback passed to `domain.transaction()` for related records such as task history and project order. All local cache changes precede publication of the first change event. Callback errors roll back every write.
+A domain transaction reads current persisted records and commits multiple table changes together. Use the synchronous callback passed to `domain.transaction()` for related records such as task history and project order. `tx.entries(table)` reads validated values from the same persisted view as `tx.get`. All local cache changes precede publication of the first change event. Callback errors roll back every write.
 
 <details>
 <summary>Implementation internals — click to expand</summary>
@@ -155,7 +155,7 @@ Independent: domain reads and writes never touch request prefixes, so nothing he
 These limits define when the domain layer is a poor fit or needs special operational care. They are current package constraints, not a task backlog.
 
 - **Local change visibility** — `domain/changed` does not push other processes’ changes. Cached reads stay local; `modify` refreshes its key from the transaction result, and reopening refreshes the complete domain.
-- **No cross-table transactions, secondary indexes, or multi-segment keys** — each write touches one record; these extensions are deferred in the Agent Note's out-of-scope list.
+- **No secondary indexes or multi-segment keys** — use declared tables and single record keys.
 - **No data migration** — a domain whose stored version differs from its spec rejects at open (`version-mismatch`); changing a schema requires migrating the stored data by hand.
 
 <a id="dev-note"></a>

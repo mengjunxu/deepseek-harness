@@ -1,0 +1,35 @@
+{
+  "when": "2026-11-23T18:06:25.039277+08:00",
+  "scope": "UAT-06, local macOS Web and SDK, controlled local model fixture",
+  "web": {
+    "passed": 3,
+    "filter": "passed project check|restores a checked backup|runs an SDK task"
+  },
+  "calls": {
+    "executor": 6,
+    "independentReviewer": 0
+  },
+  "checks": [
+    "typecheck, complete build",
+    "scoped lint and JS syntax",
+    "two README translation pairs",
+    "generated Cordis catalog verified",
+    "git diff --check"
+  ],
+  "cases": [
+    "Passed independent Git check and met criterion enable manual acceptance; prior to click no human decision is shown",
+    "Saved no-model-review status and distinct human decision visible after acceptance and restore",
+    "Legacy delivery returns null when sealing Host recorded no status"
+  ],
+  "sha256": {
+    "packages/api/taskboard-controller/src/types.ts": "5681c946965fb785050126f7b168f5db29782cd469c38c17264407b015ae1f52",
+    "packages/api/taskboard-controller/src/execution-domain.ts": "e98e644628deec30fe5ce473dcbd741515ef3ab9a4a4d2e289a0684738726e57",
+    "packages/api/taskboard-controller/src/execution.ts": "562c459d506a1f54c7bd95032d3477b3d3e6c009bc762f11ad16f5b6fa195608",
+    "packages/api/taskboard-controller/src/index.ts": "c9aa1126b3c56ab7c9ec9b28b007dff517f2d3e43bbe34ab45c9475246879d2a",
+    "packages/client/ui-taskboard/src/client/DeliveryPanel.tsx": "e73856e4ee20d734018f76fd3457492052f859f3dfc1ae723dd9f879037ddafc",
+    "apps/web/tests/taskboard.e2e.ts": "e5f101d55a65ab14e715454867d48f43b3c19d604cd683f80abf5fdec9f88be6",
+    "apps/web/tests/fixtures/taskboard-browser.mjs": "dbec5352b51d3754fa64ef65652211b7b249bc8deb18e9ee8e726d4bbd791be3",
+    "apps/web/tests/fixtures/taskboard-smoke.mjs": "0ef1f0509820c3ae1c0d0b5f231a4d019eabd77559303acca1d56aceab5cb4a8",
+    "packages/client/ui-taskboard/lib/client.js": "f4a8bcb9d0f2850b9caa58bd11ef89f9193573d7aa6d9dec86d28da5d2653e0f"
+  }
+}

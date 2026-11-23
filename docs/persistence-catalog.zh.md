@@ -65,6 +65,7 @@
 | `event:subagent/descriptor` | event | `b79ada42962cad0190a9d465805260567621fa3a4abd757eb31e6016b52d5ab5` | [`{ type: "subagent/descriptor" }`](#persistence-type-sha256-b79ada42962cad0190a9d465805260567621fa3a4abd757eb31e6016b52d5ab5) |
 | `event:subagent/model-selection-policy` | event | `a6567ccb2e530606b775371eb4fa31468d72084339968e8b0440a516a23b39dc` | [`{ type: "subagent/model-selection-policy" }`](#persistence-type-sha256-a6567ccb2e530606b775371eb4fa31468d72084339968e8b0440a516a23b39dc) |
 | `event:system/message` | event | `69081694be231d56fd9580ba14645fd5e35373202605d5c5c841a9435b5fa3b1` | [`{ type: "system/message" }`](#persistence-type-sha256-69081694be231d56fd9580ba14645fd5e35373202605d5c5c841a9435b5fa3b1) |
+| `event:taskboard/review-request` | event | `b19096eb6d9ef3ec5237c2e8c94a5ff79894f3cf0e8a9b730fb7e71907ea611f` | [`{ type: "taskboard/review-request" }`](#persistence-type-sha256-b19096eb6d9ef3ec5237c2e8c94a5ff79894f3cf0e8a9b730fb7e71907ea611f) |
 | `event:team/member` | event | `4fb59762612c3e3ac3a3bd4f84c9c148d3c3893bd422ba2b201cc039fabd49bc` | [`{ type: "team/member" }`](#persistence-type-sha256-4fb59762612c3e3ac3a3bd4f84c9c148d3c3893bd422ba2b201cc039fabd49bc) |
 | `event:team/message/delivered` | event | `48f9c19417a1abbedfa59f4667bba36b93ac2db407adf5e84cb3ba0de30942cb` | [`{ type: "team/message/delivered" }`](#persistence-type-sha256-48f9c19417a1abbedfa59f4667bba36b93ac2db407adf5e84cb3ba0de30942cb) |
 | `event:team/message/queued` | event | `21fb6a90d5068f6a0003b7ab316ed2f56342477146a65c00db0f13c4d8df667d` | [`{ type: "team/message/queued" }`](#persistence-type-sha256-21fb6a90d5068f6a0003b7ab316ed2f56342477146a65c00db0f13c4d8df667d) |
@@ -987,6 +988,29 @@ export type SessionEvent<T extends SessionEventType = SessionEventType> = {
 ```
 
 来源：[`packages/core/session/src/types.ts:330`](../packages/core/session/src/types.ts)
+
+### `taskboard/*`
+
+<a id="taskboardreview-request--log-only"></a>
+
+#### `taskboard/review-request` — log-only
+
+```ts persistence-catalog
+/** Exact tool-free request authorized for one Taskboard delivery. */
+'taskboard/review-request': {
+  commandId: CommandId
+  deliveryId: DeliveryId
+  snapshot: string
+  provider: string
+  model: string
+  intent: 'review'
+  system: string
+  messages: Message[]
+  maxTokens: number
+}
+```
+
+来源：[`packages/api/taskboard-controller/src/model-review.ts:11`](../packages/api/taskboard-controller/src/model-review.ts)
 
 ### `team/*`
 
@@ -2748,6 +2772,14 @@ SHA-256: `1c5a58f4599bd4a9711712551ffe2442a5e5fcd0758bafe630cc4ead850bdaa7`
 SHA-256: `f05fb85e715af4ab4de0b6ba111166dd0435bd8bb74a0fa0f32b9d174113fc7c`
 
 `"task-result"`
+
+<a id="persistence-type-sha256-5362ddef8b0a4ccb7b3f95cd8286b529573f51609313d7a81a63e45f96dfd56d"></a>
+
+### `"taskboard/review-request"`
+
+SHA-256: `5362ddef8b0a4ccb7b3f95cd8286b529573f51609313d7a81a63e45f96dfd56d`
+
+`"taskboard/review-request"`
 
 <a id="persistence-type-sha256-2e4debca12f2c449f96dc6574f3fbf2fb346193443114a241d01a236362ec48c"></a>
 
@@ -5623,6 +5655,8 @@ SHA-256: `5d03ba38734809bcbd2a55221bd938b3b3fc34b49bb686c6113e9e4931e3aa78`
 
 <a id="persistence-type-compactionid"></a>
 
+<a id="persistence-type-deliveryid"></a>
+
 <a id="persistence-type-goalid"></a>
 
 <a id="persistence-type-messagefeedbackversion"></a>
@@ -5630,6 +5664,10 @@ SHA-256: `5d03ba38734809bcbd2a55221bd938b3b3fc34b49bb686c6113e9e4931e3aa78`
 <a id="persistence-type-messageid"></a>
 
 <a id="persistence-type-packagesapisession-controllersrctypestssessionrequestid"></a>
+
+<a id="persistence-type-packagesapitaskboard-controllersrctypestscommandid"></a>
+
+<a id="persistence-type-packagesapitaskboard-controllersrctypestsdeliveryid"></a>
 
 <a id="persistence-type-packagesattachmentattachmentsrcbrandtsattachmentid"></a>
 
@@ -5709,7 +5747,7 @@ SHA-256: `5d03ba38734809bcbd2a55221bd938b3b3fc34b49bb686c6113e9e4931e3aa78`
 
 SHA-256: `4cd48f3e5108bd6ebedf7301c3638839b8b2b9db8dbd493974177fbdeb91a01b`
 
-来源：[`packages/api/session-controller/src/types.ts:398`](../packages/api/session-controller/src/types.ts) · [`packages/attachment/attachment/src/brand.ts:6`](../packages/attachment/attachment/src/brand.ts) · [`packages/compaction/compaction/src/brand.ts:4`](../packages/compaction/compaction/src/brand.ts) · [`packages/core/session/src/types.ts:20`](../packages/core/session/src/types.ts) · [`packages/experimental/agent-team/src/types.ts:20`](../packages/experimental/agent-team/src/types.ts) · [`packages/experimental/agent-team/src/types.ts:32`](../packages/experimental/agent-team/src/types.ts) · [`packages/experimental/agent-team/src/types.ts:8`](../packages/experimental/agent-team/src/types.ts) · [`packages/feedback/message-feedback/src/types.ts:14`](../packages/feedback/message-feedback/src/types.ts) · [`packages/goal/goal/src/types.ts:17`](../packages/goal/goal/src/types.ts) · [`packages/interaction/commands/src/brand.ts:31`](../packages/interaction/commands/src/brand.ts) · [`packages/interaction/user-approval/src/types.ts:17`](../packages/interaction/user-approval/src/types.ts) · [`packages/llm/llm-retry/src/brand.ts:4`](../packages/llm/llm-retry/src/brand.ts) · [`packages/llm/llm/src/brand.ts:16`](../packages/llm/llm/src/brand.ts) · [`packages/llm/llm/src/brand.ts:31`](../packages/llm/llm/src/brand.ts) · [`packages/llm/llm/src/brand.ts:43`](../packages/llm/llm/src/brand.ts) · [`packages/llm/llm/src/brand.ts:67`](../packages/llm/llm/src/brand.ts) · [`packages/schedule/schedule/src/types.ts:14`](../packages/schedule/schedule/src/types.ts) · [`packages/session/session-title/src/index.ts:42`](../packages/session/session-title/src/index.ts) · [`packages/session/session-title/src/types.ts:17`](../packages/session/session-title/src/types.ts) · [`packages/webhook/webhook/src/brand.ts:12`](../packages/webhook/webhook/src/brand.ts) · [`packages/webhook/webhook/src/brand.ts:6`](../packages/webhook/webhook/src/brand.ts) · [`packages/webhook/webhook/src/brand.ts:9`](../packages/webhook/webhook/src/brand.ts) · [`packages/workflow/workflow/src/types.ts:13`](../packages/workflow/workflow/src/types.ts)
+来源：[`packages/api/session-controller/src/types.ts:398`](../packages/api/session-controller/src/types.ts) · [`packages/api/taskboard-controller/src/types.ts:10`](../packages/api/taskboard-controller/src/types.ts) · [`packages/api/taskboard-controller/src/types.ts:77`](../packages/api/taskboard-controller/src/types.ts) · [`packages/attachment/attachment/src/brand.ts:6`](../packages/attachment/attachment/src/brand.ts) · [`packages/compaction/compaction/src/brand.ts:4`](../packages/compaction/compaction/src/brand.ts) · [`packages/core/session/src/types.ts:20`](../packages/core/session/src/types.ts) · [`packages/experimental/agent-team/src/types.ts:20`](../packages/experimental/agent-team/src/types.ts) · [`packages/experimental/agent-team/src/types.ts:32`](../packages/experimental/agent-team/src/types.ts) · [`packages/experimental/agent-team/src/types.ts:8`](../packages/experimental/agent-team/src/types.ts) · [`packages/feedback/message-feedback/src/types.ts:14`](../packages/feedback/message-feedback/src/types.ts) · [`packages/goal/goal/src/types.ts:17`](../packages/goal/goal/src/types.ts) · [`packages/interaction/commands/src/brand.ts:31`](../packages/interaction/commands/src/brand.ts) · [`packages/interaction/user-approval/src/types.ts:17`](../packages/interaction/user-approval/src/types.ts) · [`packages/llm/llm-retry/src/brand.ts:4`](../packages/llm/llm-retry/src/brand.ts) · [`packages/llm/llm/src/brand.ts:16`](../packages/llm/llm/src/brand.ts) · [`packages/llm/llm/src/brand.ts:31`](../packages/llm/llm/src/brand.ts) · [`packages/llm/llm/src/brand.ts:43`](../packages/llm/llm/src/brand.ts) · [`packages/llm/llm/src/brand.ts:67`](../packages/llm/llm/src/brand.ts) · [`packages/schedule/schedule/src/types.ts:14`](../packages/schedule/schedule/src/types.ts) · [`packages/session/session-title/src/index.ts:42`](../packages/session/session-title/src/index.ts) · [`packages/session/session-title/src/types.ts:17`](../packages/session/session-title/src/types.ts) · [`packages/webhook/webhook/src/brand.ts:12`](../packages/webhook/webhook/src/brand.ts) · [`packages/webhook/webhook/src/brand.ts:6`](../packages/webhook/webhook/src/brand.ts) · [`packages/webhook/webhook/src/brand.ts:9`](../packages/webhook/webhook/src/brand.ts) · [`packages/workflow/workflow/src/types.ts:13`](../packages/workflow/workflow/src/types.ts)
 
 `string`
 
@@ -6171,6 +6209,26 @@ SHA-256: `a81059ca06999da1e712414520c2c65e491d052fcf9640fae20aa38f0a5dc735`
 | `code` | 必需 | `string` |
 | `name` | 必需 | `string` |
 | `reason` | 可选 | `string` |
+
+<a id="persistence-type-sha256-ff171dd31a3e81181eb5cde76bfc5f3f03db0bff82f9c181a3c44a93a79f991a"></a>
+
+### `{ commandId, deliveryId, intent, maxTokens, … }`
+
+SHA-256: `ff171dd31a3e81181eb5cde76bfc5f3f03db0bff82f9c181a3c44a93a79f991a`
+
+来源：[`packages/api/taskboard-controller/src/model-review.ts:11`](../packages/api/taskboard-controller/src/model-review.ts)
+
+| 属性 | 存在性 | 类型 |
+|---|---|---|
+| `commandId` | 必需 | `string` |
+| `deliveryId` | 必需 | `string` |
+| `intent` | 必需 | `"review"` |
+| `maxTokens` | 必需 | `number` |
+| `messages` | 必需 | [`Message[]`](#persistence-type-sha256-fc8242857caf7450d7f68a1f509dce83e237bd21571666006895124cb2246a83) |
+| `model` | 必需 | `string` |
+| `provider` | 必需 | `string` |
+| `snapshot` | 必需 | `string` |
+| `system` | 必需 | `string` |
 
 <a id="persistence-type-sha256-5b6fb1f226ff56402db08a6aae82af76100b14056271875f69ec526a1ae05d51"></a>
 
@@ -8875,6 +8933,22 @@ SHA-256: `69081694be231d56fd9580ba14645fd5e35373202605d5c5c841a9435b5fa3b1`
 | `surfaceOp` | 必需 | [`SurfaceOp`](#persistence-type-sha256-335e242de1fcc17b6ca920fc420d71bec2d76e53e37955c00948b65ab77f05c5) |
 | `time` | 必需 | `number` |
 | `type` | 必需 | `"system/message"` |
+
+<a id="persistence-type-sha256-b19096eb6d9ef3ec5237c2e8c94a5ff79894f3cf0e8a9b730fb7e71907ea611f"></a>
+
+<a id="persistence-type-eventtaskboardreview-request"></a>
+
+### `{ type: "taskboard/review-request" }`
+
+SHA-256: `b19096eb6d9ef3ec5237c2e8c94a5ff79894f3cf0e8a9b730fb7e71907ea611f`
+
+| 属性 | 存在性 | 类型 |
+|---|---|---|
+| `data` | 必需 | [`{ commandId, deliveryId, intent, maxTokens, … }`](#persistence-type-sha256-ff171dd31a3e81181eb5cde76bfc5f3f03db0bff82f9c181a3c44a93a79f991a) |
+| `ignorable` | 可选 | `true` |
+| `seq` | 必需 | `number` |
+| `time` | 必需 | `number` |
+| `type` | 必需 | `"taskboard/review-request"` |
 
 <a id="persistence-type-sha256-4fb59762612c3e3ac3a3bd4f84c9c148d3c3893bd422ba2b201cc039fabd49bc"></a>
 

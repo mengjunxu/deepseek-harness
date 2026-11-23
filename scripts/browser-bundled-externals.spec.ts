@@ -101,6 +101,7 @@ describe('browser dependency discovery', () => {
   ] as const)('follows shell aliases, CSS and lazy imports without writing output (%s, symlinked root: %s, retained alias: %s)', async (bundler, linked, preserveAlias) => {
     const root = fixture()
     library(root, 'shell-lib')
+    library(root, 'second-page-lib')
     library(root, 'lazy-lib')
     library(root, 'asset-lib')
     write(root, 'node_modules/asset-lib/package.json', JSON.stringify({
@@ -124,6 +125,8 @@ describe('browser dependency discovery', () => {
     symlinkSync(viteDirectory, viteLink, 'junction')
     dependencyLinks.push(viteLink)
     write(root, 'apps/web/index.html', '<script type="module" src="./main.ts"></script>')
+    write(root, 'apps/web/team.html', '<script type="module" src="./team.ts"></script>')
+    write(root, 'apps/web/team.ts', 'import { value } from "second-page-lib"; console.log(value)')
     write(root, 'apps/web/main.ts', 'import { output, lazy } from "@fixture/static"; console.log(output); void lazy()')
     write(root, 'apps/web/vite.config.ts', `
       import { productWebBundleIsolation } from ${JSON.stringify(resolve(repositoryRoot, 'apps/web/product-isolation.ts').replaceAll('\\', '/'))}
@@ -137,7 +140,7 @@ describe('browser dependency discovery', () => {
               if (actual !== ${JSON.stringify(bundler)}) throw new Error('unexpected bundler: ' + actual)
             },
           }],
-          build: { rollupOptions: { input: { index: ${JSON.stringify(join(app, 'index.html'))}, preview: "missing-preview.ts" } } }
+          build: { rollupOptions: { input: { index: ${JSON.stringify(join(app, 'index.html'))}, team: ${JSON.stringify(join(app, 'team.html'))}, preview: "missing-preview.ts" } } }
         }
       }
     `)
@@ -147,7 +150,7 @@ describe('browser dependency discovery', () => {
     if (linked) symlinkSync(root, scanRoot, 'junction')
     if (preserveAlias) filesystem.preservedAlias = scanRoot
     try {
-      expect(await browserBundledExternals(scanRoot)).toEqual(new Set(['shell-lib', 'lazy-lib', 'asset-lib']))
+      expect(await browserBundledExternals(scanRoot)).toEqual(new Set(['shell-lib', 'lazy-lib', 'asset-lib', 'second-page-lib']))
     } finally {
       filesystem.preservedAlias = undefined
       if (linked) unlinkSync(scanRoot)

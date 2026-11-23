@@ -1,11 +1,10 @@
 ---
 schema_version: 1
 task_id: dsh-tboard-04
-state: HANDOFF_READY
+state: DONE
 previous_agent: Codex
-next_agent: receiver_pending_macos
 branch: codely_bridge
-updated_at: "2026-11-21T15:52:05Z"
+updated_at: "2026-11-22T01:49:32Z"
 ---
 
 # TBOARD-04 交接
@@ -20,8 +19,8 @@ updated_at: "2026-11-21T15:52:05Z"
 
 测试夹具、证据和任务记录随 [跨设备检查点](../dsh-cross-device-handoff/handoff.md)移交。控制器源码和构建产物的前一轮证据见 [Windows 验证记录](evidence/recheck-windows.json)。
 
-## 接续
+## macOS 验收
 
-在首发 macOS 检出相同源码并构建后，运行 `node .ai/tasks/dsh-tboard-04/evidence/stop.mjs --controlled-tool` 和 `node .ai/tasks/dsh-tboard-04/evidence/stop.mjs`。第一项验证真实固定工具退出后通过复核释放租约，第二项验证范围未知时保留租约。保存 macOS 平台、被测版本和观察结果后关闭 TBOARD-04。[TBOARD-03 调度](../dsh-tboard-03/plan.md)可在 Windows 开发和联调，这两项结果用于 macOS 首发验收。
+固定 Bash 工具和目标 SDK 退出后，复核释放对应租约，另一 SDK 存活。范围未知及强停观察超时仍保留原租约与目录。证据覆盖固定进程和显式未知范围。[macOS 验证记录](../dsh-cross-device-handoff/evidence/macos-receipt.json)。
 
-2026-11-21 23:52（上海），`get_usage_limits` 的 Codex 10080 分钟窗口剩余 93%，重置于 2026-11-27 15:04（上海）。Codex 已释放本任务写入权。Memory、Architecture 和 WORKFLOW 无需更新。
+2026-11-22T01:49:32Z，`get_usage_limits` 的 Codex 10080 分钟窗口剩余 68%，11 月 24 日 17:34:52（上海）重置。 TBOARD-04 完成。后续正式调度见 [TBOARD-03](../dsh-tboard-03/handoff.md)。 本步无需更新 Architecture、Memory 或 WORKFLOW。

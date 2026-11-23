@@ -1,25 +1,21 @@
 ---
 schema_version: 1
 task_id: dsh-tboard-03
-state: HANDOFF_READY
+state: DONE
 branch: codely_bridge
 previous_agent: Codex
 next_agent: Codex
-updated_at: "2026-11-21T17:39:20Z"
+updated_at: "2026-11-22T12:28:45Z"
 ---
 
 # TBOARD-03 交接
 
-[Taskboard 执行记录](../../../packages/api/taskboard-controller/src/execution.ts)已在同一 SQLite 数据域支持 `enqueue`、`cancelQueued` 和 `claimNext`。排队时保存确认过的输入、任务版本和 Session 引用。只有认领队首的 Host 取得租约代次。取消排队保留历史，原 Session 可继续恢复。已有数据库在缺少队列记录时以空队列打开。
+macOS 已接收 Windows 检查点并完成 TBOARD-04 平台复验。在认证 Web Host 接入 `startRun`、`cancelQueuedRun` 及可显式启用的串行 SDK 调度。SQLite 提交 Run 和确认输入后分配租约，Host 复核路线和目录，再完成 SDK 权限握手与投递。权限失败和目录变更均无模型调用。[macOS 验证](evidence/macos-web-acceptance.json)。
 
-入队同时保存原目录确认或固定基线的工作树方案。只有保存方案的队首才能取得租约。认领后，`prepareWorkspace` 读取已存方案并校验实际目录、分支与基线。早期缺少方案的排队 Run 保留原历史及取消入口，操作者可取消后重新确认并提交。
+输入写库失败时重存实际 SDK 回执。回执在传输中丢失时，在同一 Host 从绑定 Session 核对原消息 ID。停止确认后到达的回执写入原 Run 历史。原目录继续用新 Run 复用原 Session，换目录使用新 Session 与显式材料。恢复会校验保存的 cwd、空收件队列及目录确认，缺失 Session 的恢复失败留在原 Run 历史中。跨 Host 启动与退出对账归 TBOARD-08。
 
-[目录准备验证](evidence/windows-workspace-plan.json)确认 Host 重启后按保存的基线创建隔离工作树，原目录被换成 junction 时拒绝启动准备。原有队列和取消记录的回放结果见 [SQLite 队列证据](evidence/windows-queue.json)。
+macOS 正式 SDK 启动时通过 launchd 分配一次性 job，中继核验套接字对端，Host 绑定内核资源 coalition 后才向 SDK 传递环境与输入。真实 Bash 后代脱离原进程组，SDK 根退出后下一项仍等候。活动成员归零后 Host 卸载 job、释放租约并启动队首。观察失败或超时时保留租约。本轮正式验证没有测试范围观察器。[原生与 Web 验收](evidence/macos-launchd-scope.json)。
 
-`submitInput` 在发送前为 Run 写入投递意图。回执未入库时，重放仍显示待对账并保留原租约。回执确认后，后续调用返回原消息 ID。[Windows 真实 SDK 验证](evidence/windows-sdk-input.json)用本机确定性模型触发实际 `session/prompt`，在 SDK 接受后关闭 Taskboard 数据库。重开数据库后重放产生零次附加投递，夹具从绑定 Session 观察原回执并补写。控制器测试 16 项与认证 Web 冒烟 1 项通过。
+针对性验证通过。全仓 `doc-sync` 为 37 PASS / 5 FAIL，现存失败涉及旧文档示例、链接、双语配对、换行及历史验证记录中的提交号。版本和命令见 [最终验收](evidence/macos-web-acceptance.json)与[日志](log.md)。
 
-按 [计划](plan.md)继续将队首认领、准备目录及 SDK 生命周期接入 Windows 正式调度，并从绑定 Session 自动对账结果未知的输入。macOS 首发组合的启用仍需 [TBOARD-04 的平台复验](../dsh-tboard-04/plan.md)，Windows 开发和联调继续进行。
-
-Mac 接收本轮控制器、Web 测试、生成目录、实施清单及验证记录的步骤见 [跨设备检查点](../dsh-cross-device-handoff/handoff.md)。已有 Obsidian 布局属于本机工作区。Memory、Architecture 和 WORKFLOW 维持现有规则。
-
-2026-11-22 01:39（上海），`get_usage_limits` 的 Codex 10080 分钟窗口剩余 86%，重置于 11 月 27 日 15:04（上海）。Codex 已释放写入权。定向检查及此前全仓文档检查结果见 [日志](log.md)。
+2026-11-22T12:28:45Z，Codex 10080 分钟窗口剩余 67%，11 月 24 日 17:34:52（上海）重置。TBOARD-03 完成并释放任务写入权，下一项为 [TBOARD-05](../dsh-tboard-05/plan.md)。改动与验收证据保留在本地工作区。Architecture 和 Memory 已补充 SDK 范围索引。WORKFLOW 无需更新。

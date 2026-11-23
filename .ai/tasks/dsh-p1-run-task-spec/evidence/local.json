@@ -1,0 +1,13 @@
+{
+  "checkedAt": "2026-11-23T19:25:15+08:00",
+  "artifact": "task-spec.json",
+  "specVersion": 1,
+  "webScenarios": 3,
+  "checks": [
+    "operator browser download with actual selected contents, baseline, route and consent",
+    "two restored specifications equal their source revisions",
+    "legacy unknown route, consent and checkpoint preserved",
+    "cross-project/task reads rejected",
+    "inconsistent admission and workspace plan rejected before restore"
+  ]
+}

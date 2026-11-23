@@ -9,7 +9,25 @@
   ],
   "references": [
     {
+      "path": "../../../native/system/packages/entry"
+    },
+    {
       "path": "../../sdk/client"
+    },
+    {
+      "path": "../../sdk/server"
+    },
+    {
+      "path": "../../shell/shell"
+    },
+    {
+      "path": "../../sandbox/sandbox-policy"
+    },
+    {
+      "path": "../../llm/llm"
+    },
+    {
+      "path": "../../core/tools"
     },
     {
       "path": "../../../vendor/cordis"
@@ -19,6 +37,12 @@
     },
     {
       "path": "../../core/session"
+    },
+    {
+      "path": "../../session/session-persistence"
+    },
+    {
+      "path": "../../session/session-persistence-jsonl"
     },
     {
       "path": "../../storage/storage"
@@ -37,6 +61,12 @@
     },
     {
       "path": "../../typert/protocol"
+    },
+    {
+      "path": "../../client/connection/tsconfig.host.json"
+    },
+    {
+      "path": "../../host/webserver"
     }
   ]
 }

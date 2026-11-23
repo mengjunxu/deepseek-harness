@@ -1,6 +1,12 @@
-# DSH ChatGPT 集成工程进度总结（截至 2026-11-02）
+# DSH ChatGPT 集成工程进度总结（截至 2026-11-23）
 
 本文件是[主实施计划](../docs/workflows/DSH_IMPLEMENTATION_PLAN.md)第 12 节 Checklist 与各任务记录的人工可读叙事投影，回答"完成了什么、已经可以使用什么"。状态权威始终以主计划第 12 节与对应任务记录为准，本文件不另建状态体系；每次重要里程碑后更新本文件。
+
+## 2026-11-23 工作台交接
+
+P1-11 已在本地独立安装的 CLI 上验证人工退回、显式授权一次修复及再次验收。初次构建退出 17，修复后同一检查退出 0。审查请求、操作者编辑的反馈、两份交付及两次人工决定可分别追溯。模型端点使用本地夹具。详见[交接记录](tasks/dsh-p1-reviewed-repair/handoff.md)。
+
+用户要求在本步后暂停，写入权已释放。恢复时先核对主计划 P1-10 的自定义 npm / pnpm 检查脚本范围。TBOARD-11 的设备验收、G2 参考机复测和草稿 PR 按原约定保留。以下为 11 月 2 日阶段记录。
 
 ## 工程目标
 
@@ -32,7 +38,7 @@ Web ChatGPT Provider 验证（WB-01 / VN4-06 DONE，2026-11-01 至 11-02）：�
 
 P0 基线与探测：.ai/tasks/dsh-p0-baseline/、dsh-p0-status/、dsh-p0-siwc/、dsh-p0-executor-probes/。Provider 政策与路由：.ai/tasks/dsh-p1-provider-policy/、dsh-p1-provider-config/、dsh-p1-intent-routing/。SIWC 产品集成（进行中）：.ai/tasks/dsh-siwc-ui/。Web Provider 验证：.ai/tasks/dsh-web-provider-poc/（任务四文件 + evidence/ + summary.md）。共享规则：.ai/tasks/dsh-incremental-handoff/。历史规划与审计：.ai/tasks/dsh-chatgpt-plan-update/、dsh-vnext4-audit/、docs/legacy/。
 
-## 当前状态与下一步候选
+## 11 月 2 日的状态与下一步候选
 
 Git：分支 codely_bridge 领先 origin 3 个 commit（含本轮两个新提交），未推送；工作区仅剩用户个人 .codely-cli/settings.json 未提交。环境：隔离 DEV launcher 运行中（本机 pid 66262，登录态经 2026-11-02 真实请求验证有效）；参考源码、Bun 工具与私有浏览器数据均在忽略目录，不随 git 提交。
 

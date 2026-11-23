@@ -62,7 +62,7 @@ kind: "package-reference"
 <a id="understand-the-implementation"></a>
 ## 理解实现
 
-可选 KV 事务用同步回调访问同一单元的多条记录。SQLite 将这些修改一起提交；数据域负责带类型的访问与变更事件。
+可选 KV 事务用同步回调访问同一单元的多条记录。事务可枚举已声明表中持久化的键和值。SQLite 将这些修改一起提交；数据域负责带类型的访问与变更事件。
 
 <details>
 <summary>实现细节——点击展开</summary>

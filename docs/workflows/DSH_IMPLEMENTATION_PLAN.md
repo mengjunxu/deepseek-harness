@@ -1,6 +1,6 @@
 # DSH v2 — Codex / Codely 通用开发执行计划
 
-> 更新：2026-11-16｜状态：实施与验收进行中，完整产品尚未验收。
+> 更新：2026-11-23｜状态：实施与验收进行中，完整产品尚未验收。
 >
 > **需求来源仅限 `docs/myPlan/` 的两份当前 Markdown PRD**：[主 PRD vNext.4](../myPlan/DSH_PRD_vNext_4_2026-10-27.md)与[Taskboard PRD v0.1](../myPlan/DeepSeek_Harness_Taskboard_PRD_v0.1.md)。本文件负责拆解实施、跟踪进度和关联证据，不补充第三套产品要求，也不沿 PRD 中的旧链接重新引入历史计划。
 >
@@ -183,7 +183,7 @@ Task 领取、单一写入者、检查点、Git 安全和周额度停止线以 [
 | 逐 Turn 选择/能力拒绝 | QR-03 的真实 Web 组合、受控模型与 SDK 回放 | 全部明确回退流程、真实模型 GUI 验收 |
 | 本地预算/付费授权 | QR-04 的原子请求名额、Session cap、预设/当次确认 | 官方余额、token/金额及 Task 预算、状态展示 |
 | 用量与来源/口径 | QR-05/06 的原生记录、准备失败、尝试引用、弹窗 | 完整政策/Task/Run/外部执行器账本 |
-| Taskboard | 已实测部分 G0 SDK 能力，G0–G2 尚未通过 | TBOARD-00..09；不能由已有组件推定 PARTIAL |
+| Taskboard | 本地 macOS 的 G0、工作台任务与交付、重启恢复、真实编码及人工验收已有实测 | G2 的 8 核 16 GB Mac 性能复测待验。逐项记录见[工作台清单](#1210-taskboard-增量-checklist) |
 
 ### 10.2 Provider、执行模式与额度
 
@@ -265,19 +265,19 @@ DONE 表示该行明确范围已有证据，PARTIAL 表示已验证一部分当�
 
 | ID | 状态 | 已验证部分或剩余范围 |
 |---|---|---|
-| P1-01 | PARTIAL | 项目、任务、需求版本和操作回执已在 Web Host 工作台服务中实施；运行与交付验收关联待完成 |
-| P1-02 | PARTIAL | 任务与历史在独立 SQLite 域原子写入，已验证重启保留；正式业务库备份与 Session 关联待验收 |
-| P1-03 | PARTIAL | 项目内任务命令和启动意图已支持期望版本与重放。队首认领与租约分配原子提交。Windows SDK 联调验证了先记录投递意图及回执丢失时防重发。正式调度和自动对账待实施 |
-| P1-04 | TODO | 通用 Task/验收 API、作用域与游标补偿尚未实施 |
+| P1-01 | PARTIAL | Web/SQLite 已验证 Run 输入、交付与人工决定关联到各自的需求版本，恢复后仍可追溯。[本机验收](../../.ai/tasks/dsh-p1-revision-lineage/handoff.md)。[执行约束](../../.ai/tasks/dsh-p1-task-constraints/handoff.md)已进入需求历史、SDK 输入与任务读取工具。[SDK 路线确认](../../.ai/tasks/dsh-p1-confirmed-sdk-route/handoff.md)已覆盖配置切换与旧命令重放；[SDK 补丁内容核验](../../.ai/tasks/dsh-p1-sdk-patch-identity/handoff.md)覆盖入队后原路径替换及旧 Session 续接。[风险等级](../../.ai/tasks/dsh-p1-task-risk/handoff.md)已关联到需求修订与确认输入；[SDK 启动授权](../../.ai/tasks/dsh-p1-run-authorization/handoff.md)区分操作者确认的路线和部署默认。[快速与常规工作流](../../.ai/tasks/dsh-p1-versioned-workflow/handoff.md)已绑定需求修订和 SDK 输入；[按 Run 读取的 TaskSpec](../../.ai/tasks/dsh-p1-run-task-spec/handoff.md)已包含工作区基线、材料与启动授权；原生执行器授权待贯通 |
+| P1-02 | DONE | 本地 Web/SQLite：任务与活动原子写入；[恢复与兼容升级](../../.ai/tasks/dsh-tboard-08/handoff.md)及[业务备份二次恢复](../../.ai/tasks/dsh-p1-business-backup/handoff.md)已验收。两次 Run 的回执对应原 Session 中两条输入，恢复后交付与人工决定保留，排队时取消的 Run 保留原状态。[恢复历史核对](../../.ai/tasks/dsh-p1-restored-run-chain/handoff.md)覆盖启动先后、Session 与回执关联；[退回意见恢复](../../.ai/tasks/dsh-p1-review-feedback-recovery/handoff.md)核对人工原命令与下一次 Run 输入 |
+| P1-03 | DONE | macOS Web/SQLite 与正式 SDK 已验证期望版本、合法状态转移、启动意图先落库、幂等重放及崩溃对账。原 Run 与排队 Run 各保留一条启动记录，输入不确定时不重发。[UAT-16 文件追加验收](../../.ai/tasks/dsh-p1-recovery-side-effects/handoff.md)验证重启和命令重放后仅写入一次。[本机验收](../../.ai/tasks/dsh-p1-start-reconciliation/evidence/local.json) |
+| P1-04 | DONE | 认证工作台的任务与人工验收命令、角色和项目作用域已有实测。[浏览器断线补读](../../.ai/tasks/dsh-p1-board-reconnect/handoff.md)保留当前任务，重放的评论只显示一次。[任务活动游标](../../.ai/tasks/dsh-p1-activity-cursor/handoff.md)支持按提交顺序分页，Host 重启及备份恢复后可从已读位置继续 |
 | P1-05 | PARTIAL | SIWC Loader/配置/持久化/取消与生产适配器回放已有证据；真实账号长回复/生命周期待补 |
-| P1-06 | PARTIAL | Session/context/compaction 基础已有；Task/Run 输入快照及统一 ContextBuilder 未贯通 |
+| P1-06 | PARTIAL | 工作台 Run 按次保存需求、约束、退回反馈与选入文件。SDK、回执恢复与[历史输入查看](../../.ai/tasks/dsh-p1-run-input-history/handoff.md)共用同一输入投影。[续接位置核验](../../.ai/tasks/dsh-p1-restored-session-position/handoff.md)拒绝回执或已观察事件与原记录不符的 Session 副本；[前序恢复位置](../../.ai/tasks/dsh-p1-run-checkpoint-reference/handoff.md)已进入受理事务、启动窗口、历史输入及项目交接。通用 Chat/Task ContextBuilder 与 ContextEpoch 待贯通 |
 | P1-07 | PARTIAL | 原生 Codex/Codely 接入基础已验证；独立选择 UI、统一 Run 与完整生命周期未验收 |
-| P1-08 | PARTIAL | 已验证工作台 SQLite 串行队列与独占租约认领。真实运行时调度与重启对账待实施 |
-| P1-09 | PARTIAL | sandbox/workspace/interaction 基础已有；任务级目录租约与停止隔离未验收 |
-| P1-10 | TODO | 通用 ValidationResult、逐条 AC Matrix 与 Delivery 代码快照未实施 |
-| P1-11 | TODO | 可选模型 Review 产品链与独立人工验收未实施 |
-| P1-12 | PARTIAL | 聊天、模型选择和用量/付费确认有证据；任务看板/详情/验收仍 TODO |
-| P1-13 | TODO | 干净环境全链路和 G2 发布证据未完成 |
+| P1-08 | DONE | 首发 macOS Web/SDK 的默认串行队列、Session 续接、租约释放与 Host 重启对账已验收。强停超时保留目录，双执行范围退出后等待队列继续。[本机验收](../../.ai/tasks/dsh-p1-queue-recovery/evidence/local.json) |
+| P1-09 | DONE | macOS 首发工作台通过 AC12/15/18/19。子目录别名与原工作树串行，独立工作树可继续；权限激活失败不发送输入，强停超时保留目录，目标进程范围退出后才放行。[目录租约与停止隔离验收](../../.ai/tasks/dsh-p1-workspace-lease-acceptance/handoff.md) |
+| P1-10 | PARTIAL | [工作台交付](../../.ai/tasks/dsh-tboard-06/handoff.md)已有逐条验收证据、代码快照与只读 Diff；[按项目启用的 Git 检查](../../.ai/tasks/dsh-p1-delivery-git-check/handoff.md)已有 Host 结果、人工豁免与恢复验收；[ValidationResult](../../.ai/tasks/dsh-p1-validation-results/handoff.md)关联交付指纹、真实退出码和未执行原因。[npm 项目构建与测试](../../.ai/tasks/dsh-p1-project-script-validation/handoff.md)已在正式 SDK 和安装包验证，涵盖失败原因、人工接受与子进程退出；下一步是项目自定义 npm / pnpm 检查脚本，当前暂停、尚未开工 |
+| P1-11 | PARTIAL | 人工接受、退回和豁免已按具体交付保存，[交付页可复核历史决定](../../.ai/tasks/dsh-p1-human-review-history/handoff.md)。[无模型审查的成功交付](../../.ai/tasks/dsh-p1-model-review-status/handoff.md)已验收。[按交付下载的审查摘要](../../.ai/tasks/dsh-p1-review-package/handoff.md)提供去除项目文本的覆盖证据；[主动模型审查](../../.ai/tasks/dsh-p1-optional-coverage-review/handoff.md)已验证脱敏模型输入、显式重试、次数上限与恢复；[人工授权修复与再次验收](../../.ai/tasks/dsh-p1-reviewed-repair/handoff.md)已在独立安装的 Web Host 验证，原构建由退出 17 变为 0；审查模型使用 OpenAI 兼容环回端点，线上模型效果未验 |
+| P1-12 | PARTIAL | 聊天、模型选择及用量确认已有证据。[工作台](../../.ai/tasks/dsh-tboard-07/handoff.md)的任务、Run、待处理请求、交付审查及人工验收可用；[快速与常规工作流选择](../../.ai/tasks/dsh-p1-versioned-workflow/handoff.md)覆盖操作者与团队编辑；通用 Executor 选择和里程碑工作流待实施 |
+| P1-13 | PARTIAL | macOS arm64 [安装包验收](../../.ai/tasks/dsh-p1-packed-workbench/handoff.md)已验证全新 npm 安装、Web/SQLite 重启、SDK 交付与浏览器二次恢复。[两个实际构建的升级/回滚演练](../../.ai/tasks/dsh-p1-upgrade-rehearsal/handoff.md)保留原始修订与活动。[真实 OpenAI 编码链](../../.ai/tasks/dsh-tboard-09/acceptance.md)已有独立证据。[OpenAI 安装包配置](../../.ai/tasks/dsh-p1-openai-deployment/handoff.md)通过本地协议重试验收。[安装包恢复复核](../../.ai/tasks/dsh-p1-package-recovery-acceptance/handoff.md)覆盖新恢复位置、交付检查和 27 项工作台 Web 回归。G2 参考机性能待复测 |
 
 ### 12.3 P2 / V1：记忆、上下文优化、替换执行器
 
@@ -289,11 +289,11 @@ P3-01..06 均 TODO；未形成独立节点、权限、过期所有者及恢复�
 
 ### 12.5 P4：后续待办（不阻塞）
 
-专题 G3/G4 和主 PRD 的后续动态 Workflow、复杂调度、编辑器均未启动；需保持与首期范围分离。
+专题 G3 的有限并行、依赖及受控领取已有本机验收。G4 已验证团队角色、交付记录及人工决定；草稿 PR 暂缓，跨设备及远程节点待验。各项证据见[工作台清单](#1210-taskboard-增量-checklist)。主 PRD 后续的动态 Workflow、复杂调度和编辑器仍待实施。
 
 ### 12.6 贯穿全程的验收案例
 
-UAT-01–16 与 AC01–AC20 均须按当前 PRD 逐项验收；本计划未声明已通过完整 UAT 或工作台 AC。局部自动化、PoC、版本/平台限制见相应实施 Task。
+[UAT-06](../../.ai/tasks/dsh-p1-model-review-status/handoff.md) 已在首发 macOS Web/SDK 路径验证。项目检查通过、未请求模型审查时，操作者能看到验证结果并独立决定是否接受。其余 UAT 按[主 PRD](../myPlan/DSH_PRD_vNext_4_2026-10-27.md#11-关键验收用例uat)逐项验收。工作台 AC01–AC20 和 NFR 项目的实测范围见[验收矩阵](../../.ai/tasks/dsh-tboard-09/acceptance.md)。
 
 ### 12.7 任务证据台账（执行时逐行补充）
 
@@ -323,8 +323,8 @@ Provider/额度/用量的具体证据集中在第 12.8 节，Taskboard 集中在
 | VN4-00 | DONE | 当前两份 PRD 的实施映射与证据分类；文档完成不是产品完成 |
 | VN4-01 | PARTIAL | 元数据、路由和受控 Web 验证；平级 Provider 完整 UI 待补 |
 | VN4-02 | TODO | Provider/Executor/Workflow 的独立产品选择与 Run 绑定 |
-| VN4-03 | TODO | 通用 TaskSpec、需求版本与可选 Plan |
-| VN4-04 | TODO | 版本化自适应 Workflow 与可选 Review |
+| VN4-03 | PARTIAL | [工作台 TaskSpec v1](../../.ai/tasks/dsh-p1-run-task-spec/handoff.md)已关联需求修订、工作区、材料与 SDK 授权；常规任务可保留有序人工步骤。通用原生执行器和独立 Plan 待贯通 |
+| VN4-04 | PARTIAL | [工作台模板选择](../../.ai/tasks/dsh-p1-versioned-workflow/handoff.md)已有快速与常规两种版本；[按需模型 Review](../../.ai/tasks/dsh-p1-optional-coverage-review/handoff.md)已在交付页验收；自适应路由与里程碑待贯通 |
 | VN4-05 | PARTIAL | 正式 Provider/原生执行器基础；完整产品闭环待补 |
 | VN4-06 | DONE | 仅受控 Web PoC；M2 及生产准入未完成 |
 | VN4-07 | PARTIAL | 原生尝试引用/预算/失败基础；统一 Run/回执/屏障待补 |
@@ -342,15 +342,15 @@ Provider/额度/用量的具体证据集中在第 12.8 节，Taskboard 集中在
 | TBOARD-00 | DONE | [首版入口与归属决策](../../.ai/tasks/dsh-tboard-00/decision.md)已确认；SDK 组合验收归 TBOARD-01 |
 | TBOARD-01 | DONE | 专题 §10 八项 G0 用例在本分支通过；换目录时新建 Session，新旧 Run 保留引用，材料显式选择。已冻结 macOS 本地接入组合。[矩阵和实测范围](../../.ai/tasks/dsh-tboard-01/matrix.md) |
 | TBOARD-02 | DONE | [任务业务库验收](../../.ai/tasks/dsh-tboard-02/handoff.md)：现有 Web 认证、项目与任务、需求与 Run 快照、交付与人工 Review、请求与租约、版本冲突、排序、归档、重启和重放。调度、真实代码复核和 UI 由后续步骤接入 |
-| TBOARD-03 | IN_PROGRESS | [Windows 验证](../../.ai/tasks/dsh-tboard-03/handoff.md)覆盖 SQLite 队列、重启后的目录复核和真实 SDK 的输入回执防重。正式调度、自动对账、重试与继续待接入 |
-| TBOARD-04 | IN_PROGRESS | 已验证工作树基线、原目录二次确认、[定向停止可核实的工具进程](../../.ai/tasks/dsh-tboard-04/evidence/controlled-stop.json)、[强停未确认保留租约](../../.ai/tasks/dsh-tboard-04/evidence/stop.json)及[无效审批配置阻断输入](../../.ai/tasks/dsh-tboard-04/evidence/permission.json)。[首发沿用 macOS G0 组合](../../.ai/tasks/dsh-tboard-04/platform.md)。同一 Host 的停止复核已实现，最新控制器待在首发 macOS 复验。 |
-| TBOARD-05 | TODO | 事件游标、问题/审批及服务端任务工具作用域 |
-| TBOARD-06 | TODO | 交付快照、只读 Diff、人工接受/退回/豁免 |
-| TBOARD-07 | TODO | 看板、详情、待处理、设置与异常状态 |
-| TBOARD-08 | TODO | 重启对账、导出/备份恢复及升级 |
-| TBOARD-09 | TODO | 全部 AC/NFR 与真实编码链的 G2 发布验收 |
-| TBOARD-10 | TODO | G3 扩展，未启动 |
-| TBOARD-11 | TODO | G4 团队/远程扩展，未启动 |
+| TBOARD-03 | DONE | 认证 Web 已验收串行调度、输入回执、取消与恢复。macOS 正式 SDK 路径等待完整 launchd 范围退出后释放租约并继续队列。[实机证据](../../.ai/tasks/dsh-tboard-03/evidence/macos-launchd-scope.json) |
+| TBOARD-04 | DONE | 已验证工作树基线、原目录二次确认、[定向停止可核实的工具进程](../../.ai/tasks/dsh-tboard-04/evidence/controlled-stop.json)、[强停未确认保留租约](../../.ai/tasks/dsh-tboard-04/evidence/stop.json)及[无效审批配置阻断输入](../../.ai/tasks/dsh-tboard-04/evidence/permission.json)。[首发沿用 macOS G0 组合](../../.ai/tasks/dsh-tboard-04/platform.md)。[首发 macOS 复验](../../.ai/tasks/dsh-cross-device-handoff/evidence/macos-receipt.json)覆盖固定工具退出、范围未知及观察超时。 |
+| TBOARD-05 | DONE | [事件、交互及任务工具验收](../../.ai/tasks/dsh-tboard-05/handoff.md) |
+| TBOARD-06 | DONE | [交付快照、只读 Diff 及人工验收](../../.ai/tasks/dsh-tboard-06/handoff.md) |
+| TBOARD-07 | DONE | [看板、详情、待处理、设置与异常状态](../../.ai/tasks/dsh-tboard-07/plan.md) |
+| TBOARD-08 | DONE | [重启对账、导出/备份恢复及升级](../../.ai/tasks/dsh-tboard-08/plan.md) |
+| TBOARD-09 | BLOCKED | [真实编码验收已通过，参考机性能待复测](../../.ai/tasks/dsh-tboard-09/plan.md) |
+| TBOARD-10 | DONE | 有限并行、父子任务、前置验收和单次自动领取已通过 macOS Web/SDK 验证；[并发、定向停止与崩溃恢复证据](../../.ai/tasks/dsh-tboard-10/evidence/macos-parallel.json) |
+| TBOARD-11 | IN_PROGRESS | 本地团队账号、项目权限、双人编辑冲突和恢复后重新授权通过；[实际提交与 push CI](../../.ai/tasks/dsh-tboard-11/evidence/branch-ci.json)已关联，[人工接受并通过重启复核](../../.ai/tasks/dsh-tboard-11/evidence/accepted-restart.json)。草稿 PR 暂缓，远程节点及跨设备恢复留作待验；[检查点](../../.ai/tasks/dsh-tboard-11/handoff.md) |
 
 ## 13. P0 执行器能力与实施基线（2026-10-30）
 
@@ -366,7 +366,7 @@ Provider/额度/用量的具体证据集中在第 12.8 节，Taskboard 集中在
 
 当前可在相应配置下验证逐 Turn 原生模型选择、精确能力拒绝、本地请求预算/Session cap、API 预设或当次确认、原生结算/准备失败记录，以及用量弹窗的路线/费用来源/计数口径。操作、受控模型性质和未验证范围见[Provider 使用指南](../user/guide/providers.md)与第 12.8 节 Task 证据。
 
-这些成果不代表通用 TaskSpec、Taskboard、Delivery 或人工验收已实现。SIWC 产品完整生命周期、Web 生产产品化、官方余额、Task 预算、完整回退、Provider/Executor/Workflow 独立 UI 和任务闭环仍需实施；普通聊天与工程执行的路线不能混为一谈。
+macOS 本地 Web 工作台可以创建和修订任务，查看每次 Run 的输入、交付 Diff 与检查结果，并由操作者接受或退回。SQLite 记录支持停机升级、兼容版本回滚和元数据备份恢复。[工作台验收记录](#1210-taskboard-增量-checklist)。SIWC 完整生命周期、Web 生产准入、官方余额、Task 预算、完整回退及 Provider/Executor/Workflow 独立选择仍待验收。
 
 ## 15. 当前第一优先：Web ChatGPT Provider 可行性验证
 
@@ -405,7 +405,7 @@ TBOARD-00 先处理下列差异；G0 决策、技术验证和功能完成分别�
 
 ### 16.3 可领取任务与验收映射
 
-TBOARD 编号细化现有 P1/P2 任务的工作台缺口，不重复建立通用 Session、Task API 或 Executor。FR/AC/NFR 编号均指专题 PRD；T/UAT 继续使用原编号。下表依赖是工作台内部最小实施顺序，须结合第 11 节的通用能力依赖领取；G0 已通过，业务数据层已完成，当前推进 TBOARD-04 的工作目录与运行隔离。
+TBOARD 编号细化现有 P1/P2 任务的工作台缺口，不重复建立通用 Session、Task API 或 Executor。FR/AC/NFR 编号均指专题 PRD；T/UAT 继续使用原编号。下表依赖是工作台内部最小实施顺序，须结合第 11 节的通用能力依赖领取。Web 工作台、重启对账及备份恢复已验收。TBOARD-09 已通过真实 OpenAI 编码闭环，G2 仍待参考硬件性能复测。
 
 | ID / 阶段 | 复用任务与拥有者候选 | 依赖 | 最小交付与验收映射 |
 |---|---|---|---|
@@ -419,12 +419,12 @@ TBOARD 编号细化现有 P1/P2 任务的工作台缺口，不重复建立通用
 | TBOARD-07 / G1 | P1-12、VN4-02；现有 Web Client/Host | TBOARD-02..06 | 项目导航、看板/列表、搜索/筛选/拖拽、详情中的需求/执行/变更/验收、待我处理与设置；FR01–FR14；AC01–AC10 的 UI E2E、异常态回放和演示 |
 | TBOARD-08 / G2 | P1-02/08/13、P2-04；Session/storage、subprocess | TBOARD-03..06 | 重启对账、输入未知状态不重发、旧 runtime 确认退出后恢复；版本化导出/备份、冲突拒绝和兼容升级；NFR03–NFR09；AC11、AC13、AC14、AC16、AC17、AC18、AC20 |
 | TBOARD-09 / G2 | P1-13；发布配置、测试与文档 | TBOARD-07/08 | 全部 AC01–AC20、NFR01–NFR09、真实工程闭环、版本矩阵与恢复指南；不得以 Mock 代替 G0 或真实发布验收 |
-| TBOARD-10 / G3 | P2-07；Client Slots、任务服务、调度 | TBOARD-09 及扩展范围确认 | 有限并行、父子任务/阻塞依赖、受控自动领取；新增并发/权限回归，入口不争抢同一 Session |
+| TBOARD-10 / G3 | P2-07；Client Slots、任务服务、调度 | 扩展范围已确认，用户同意 G2 的 NFR02 参考机复测后置 | 有限并行、父子任务/阻塞依赖、受控自动领取；新增并发/权限回归，入口不争抢同一 Session |
 | TBOARD-11 / G4 | P3-01..06；identity、authorization、远程协调 | TBOARD-09 及团队/远程范围确认 | 团队账号/角色、协作编辑、PR/CI 与远程节点分别拆项；权限与跨设备恢复独立验收 |
 
 依赖顺序为 TBOARD-00 → 01 → 02 → 04 → 03 → 05 → 06；07 在 02–06 就绪后验收，08 在 03–06 就绪后加固，09 汇总 07/08 的发布证据。01 的停止隔离验证使用受控双实例，不代表 MVP 已允许两个业务任务并行。TBOARD-08 只承接工作台必需的本地恢复，P2-04 的更广恢复范围仍按原计划推进。
 
-TBOARD-03 可依据 Windows 已验证的停止隔离行为继续在该平台开发和联调。macOS 首发组合的验收需包含 TBOARD-04 在该平台的停止、进程范围观察和租约复验。
+TBOARD-04 的 [macOS 停止、进程范围观察与租约复验](../../.ai/tasks/dsh-cross-device-handoff/evidence/macos-receipt.json)已通过。
 
 ### 16.4 验证、证据与完成条件
 

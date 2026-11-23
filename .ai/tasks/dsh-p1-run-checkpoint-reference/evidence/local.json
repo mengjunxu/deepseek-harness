@@ -1,0 +1,19 @@
+{
+  "when": "2026-11-23T18:42:02+08:00",
+  "platform": "macOS arm64",
+  "web": 3,
+  "host": 4,
+  "sdkReplay": 1,
+  "verified": [
+    "Browser displays prior Run, Session, receipt and event both at confirmation and from saved input",
+    "New Session keeps predecessor checkpoint, independently of the new prompt",
+    "Project export includes source checkpoint and actual new Session ID",
+    "A mismatched checkpoint receipt is rejected on restore",
+    "Historical records without captured checkpoints remain readable"
+  ],
+  "checks": [
+    "controller/client typecheck",
+    "Host and Client bundles",
+    "2 named documentation pairs, scoped lint, git diff --check"
+  ]
+}

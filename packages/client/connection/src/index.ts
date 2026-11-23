@@ -49,6 +49,8 @@ export {
 } from './rpc-schema.ts'
 export { HostConnectionService } from './rpc-host.ts'
 
+export { bridge as bridgeHttpRequest } from './http-bridge.ts'
+export { isTrustedApiRequest } from './api-request-trust.ts'
 export { API_PATH } from './api-path.ts'
 
 /** Stable Cordis plugin name. */

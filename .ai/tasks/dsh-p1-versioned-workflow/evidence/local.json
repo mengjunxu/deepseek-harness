@@ -1,0 +1,13 @@
+{
+  "checkedAt": "2026-11-23T19:17:40+08:00",
+  "workflowTemplates": [
+    "task.quick.v1",
+    "task.standard.v1"
+  ],
+  "hostRevisionAndRestart": 1,
+  "webScenarios": 7,
+  "finalTeamRerun": 1,
+  "sdkSnapshot": 1,
+  "loopbackOnly": true,
+  "weeklyRemaining": 31
+}

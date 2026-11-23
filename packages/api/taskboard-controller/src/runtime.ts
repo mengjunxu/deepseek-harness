@@ -3,7 +3,7 @@ import { fileURLToPath } from 'node:url'
 import { DeepSeekHarness, type DeepSeekHarnessOptions } from '@deepseek-ai/dsh-sdk-client'
 
 /** Host-resolved deployment settings for an admitted Run. */
-export type TaskRuntimeOptions = Pick<DeepSeekHarnessOptions, 'patches' | 'initializeTimeoutMs' | 'requestTimeoutMs'> & {
+export type TaskRuntimeOptions = Pick<DeepSeekHarnessOptions, 'patches' | 'initializeTimeoutMs' | 'requestTimeoutMs' | 'processScope'> & {
   cwd: string
   dshHome: string
   provider: string
@@ -21,6 +21,7 @@ export function createTaskRuntime(options: TaskRuntimeOptions): DeepSeekHarness 
   return new DeepSeekHarness({
     profile: 'sdk', processCwd: options.cwd, cwd: options.cwd, dshHome: options.dshHome, provider: options.provider, model: options.model,
     env: options.env, patches: [...options.patches ?? [], policy], approvalRequests: true, userQuestions: true,
+    ...options.processScope === undefined ? {} : { processScope: options.processScope },
     ...options.initializeTimeoutMs === undefined ? {} : { initializeTimeoutMs: options.initializeTimeoutMs },
     ...options.requestTimeoutMs === undefined ? {} : { requestTimeoutMs: options.requestTimeoutMs },
   })

@@ -64,9 +64,12 @@ async function tempDir(prefix: string): Promise<string> {
 
 describe('DeepSeekHarness', () => {
   it('returns the original session handle only after the restore acknowledgement', async () => {
-    const harness = harnessWith()
-    const restored = await harness.resumeSession('existing')
+    const cwd = await tempDir('dsh-sdk-resume-')
+    const wire = join(cwd, 'params.json')
+    const harness = harnessWith({ FAKE_RECORD_RESUME: wire })
+    const restored = await harness.resumeSession('existing', { expectedCwd: cwd, requireEmptyInbox: true })
     expect(restored.id).toBe('existing')
+    expect(JSON.parse(await readFile(wire, 'utf8'))).toEqual({ sessionId: 'existing', expectedCwd: cwd, requireEmptyInbox: true })
     const malformed = harnessWith({ FAKE_BAD_RESUME: '1' })
     await expect(malformed.resumeSession('existing')).rejects.toThrow(SdkProtocolError)
   })

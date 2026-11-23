@@ -22,11 +22,13 @@
   },
   "files": [
     "lib/index.js",
+    "macos-runtime.mjs",
     "lib/types/**/*.d.ts"
   ],
   "license": "MIT",
   "dependencies": {
-    "@deepseek-ai/dsh": "workspace:*"
+    "@deepseek-ai/dsh": "workspace:*",
+    "koffi": "^3.1.0"
   },
   "peerDependencies": {
     "@deepseek-ai/dsh-llm": "workspace:*",

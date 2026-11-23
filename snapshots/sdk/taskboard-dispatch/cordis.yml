@@ -1,0 +1,14 @@
+- id: skill-filesystem
+  config:
+    includeDefaultRoots: false
+- id: session-persistence-jsonl
+  config:
+    root: !!js dshHomePath('sessions')
+    compression: none
+- id: sdk-jsonrpc-server
+  inject: [sdkAppStartup, loader, approval, permissionPresets, sandboxPolicy, sandbox, sessionPersistence]
+- insert:
+    - id: taskboard-sdk-tools
+      name: '../../../packages/api/taskboard-controller/src/sdk-tools.ts'
+    - id: taskboard-question-tool
+      name: '@deepseek-ai/dsh-tool-ask-user'

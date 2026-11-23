@@ -5,7 +5,8 @@ import { constants } from 'node:fs'
 import { basename, dirname, isAbsolute, join, relative, resolve, sep } from 'node:path'
 import { SubprocessExecutableNotFoundError, type SubprocessRuntime } from '@deepseek-ai/dsh-subprocess'
 import { GitRunner } from '@deepseek-ai/dsh-workspace-changes'
-import type { TaskRunId, TaskboardProject, WorkspaceInspection } from './types.ts'
+import { gitCheckStatus } from './execution-domain.ts'
+import type { DeliveryCodeSnapshot, DeliveryFile, DeliveryFileDiff, TaskRunId, TaskboardProject, WorkspaceInspection } from './types.ts'
 
 /** Git subprocess limits and the Host-owned parent of isolated worktrees. */
 export interface WorkspaceConfig {
@@ -55,17 +56,24 @@ async function hasGitMarker(root: string): Promise<boolean> {
 }
 
 /** Record paths and contents without following untracked symlink targets. */
-async function untrackedDigest(cwd: string, path: string): Promise<string> {
+async function localEntry(cwd: string, path: string) {
   const file = resolve(cwd, path)
-  if (!inside(cwd, file) || !inside(cwd, await realpath(dirname(file)))) throw new Error('untracked path outside workspace')
-  const info = await lstat(file)
+  if (!path || isAbsolute(path) || relative(cwd, file).split(sep).join('/') !== path
+    || !inside(cwd, file) || !inside(cwd, await realpath(dirname(file)))) throw new Error('file path outside workspace')
+  return { file, info: await lstat(file) }
+}
+
+async function untrackedDigest(cwd: string, path: string, signal: AbortSignal): Promise<string> {
+  const { file, info } = await localEntry(cwd, path)
   const hash = createHash('sha256').update(String(info.mode)).update('\0')
   if (info.isSymbolicLink()) hash.update(await readlink(file))
   else if (info.isFile()) {
-    const handle = await open(file, constants.O_RDONLY | constants.O_NOFOLLOW)
+    const handle = await open(file, constants.O_RDONLY | constants.O_NOFOLLOW | constants.O_NONBLOCK)
     try {
+      if (!(await handle.stat()).isFile()) throw new Error('workspace file changed during fingerprinting')
       const buffer = Buffer.alloc(64 * 1024)
       for (;;) {
+        signal.throwIfAborted()
         const { bytesRead } = await handle.read(buffer)
         if (!bytesRead) break
         hash.update(buffer.subarray(0, bytesRead))
@@ -73,6 +81,25 @@ async function untrackedDigest(cwd: string, path: string): Promise<string> {
     } finally { await handle.close() }
   } else throw new Error('untracked entry cannot be fingerprinted')
   return hash.digest('hex')
+}
+
+function parseReviewChanges(names: string): DeliveryFile[] {
+  const parts = names.split('\0')
+  if (parts.pop() !== '' || parts.length % 2 !== 0) throw new Error('invalid Git change listing')
+  const statuses = { A: 'added', D: 'deleted', M: 'modified', T: 'modified' } as const
+  const files: DeliveryFile[] = []
+  for (let i = 0; i < parts.length; i += 2) {
+    const [code, path] = parts.slice(i, i + 2)
+    if (!path || (code !== 'A' && code !== 'D' && code !== 'M' && code !== 'T')) throw new Error('unsupported Git change status')
+    files.push({ path, status: statuses[code] })
+  }
+  return files
+}
+
+function diffArguments(baseline: string, path: string, detail: string): string[] {
+  if (!/^(?:[a-f0-9]{40}|[a-f0-9]{64})$/.test(baseline)) throw new Error('invalid delivery baseline')
+  return ['--literal-pathspecs', 'diff', detail, '--relative', '--no-renames', '--no-ext-diff', '--no-textconv', '--no-color',
+    '--ignore-submodules=none', '-z', baseline, '--', path]
 }
 
 /** Git operations run through the configured Host subprocess service. */
@@ -109,11 +136,15 @@ export class TaskWorkspaces {
    * @returns canonical confirmation facts; non-Git roots have no Git fingerprint.
    */
   async inspect(directory: string, signal: AbortSignal): Promise<WorkspaceInspection> {
+    return this.observe(directory, signal, false)
+  }
+
+  private async observe(directory: string, signal: AbortSignal, forDelivery: boolean): Promise<WorkspaceInspection> {
     signal.throwIfAborted()
     if (!isAbsolute(directory)) throw new Error('workspace must be absolute')
     const cwd = await realpath(directory)
     if (!(await stat(cwd)).isDirectory()) throw new Error('workspace is not a directory')
-    await access(cwd, constants.R_OK | constants.W_OK | constants.X_OK)
+    await access(cwd, constants.R_OK | constants.X_OK | (forDelivery ? 0 : constants.W_OK))
     const git = await this.git()
     const found = git && await git.run(['rev-parse', '--show-toplevel'], { cwd, signal })
     if (!git || !found || found.exitCode !== 0) {
@@ -127,16 +158,146 @@ export class TaskWorkspaces {
     const branch = (await read(['branch', '--show-current'])).trimEnd() || null
     const status = await read(['status', '--porcelain=v1', '-z', '--untracked-files=all', '--', '.'])
     const hash = createHash('sha256').update(JSON.stringify([cwd, branch, head, status]))
-    for (const args of [[], ['--cached']]) {
-      const patch = await read(['diff', ...args, '--no-ext-diff', '--no-textconv', '--binary', '--', '.'])
-      hash.update('\0').update(patch)
+    if (forDelivery) {
+      const staged = await read(['diff', '--cached', '--raw', '--no-abbrev', '--no-renames', '--no-ext-diff', '--no-textconv', '-z', '--', '.'])
+      const unstaged = await read(['diff', '--name-status', '--no-renames', '--no-ext-diff', '--no-textconv', '--relative', '-z', '--', '.'])
+      hash.update('\0').update(staged).update('\0').update(unstaged)
+      for (const { path, status } of unstaged ? parseReviewChanges(unstaged) : []) {
+        if (status !== 'deleted') hash.update('\0').update(path).update('\0').update(await untrackedDigest(cwd, path, signal))
+      }
+    } else {
+      for (const args of [[], ['--cached']]) {
+        const patch = await read(['diff', ...args, '--no-ext-diff', '--no-textconv', '--binary', '--', '.'])
+        hash.update('\0').update(patch)
+      }
     }
     const paths = await read(['ls-files', '--others', '--exclude-standard', '-z', '--', '.'])
     for (const path of paths.split('\0').filter(Boolean)) {
       signal.throwIfAborted()
-      hash.update('\0').update(path).update('\0').update(await untrackedDigest(cwd, path))
+      hash.update('\0').update(path).update('\0').update(await untrackedDigest(cwd, path, signal))
     }
     return { directory: cwd, repository, head, branch, dirty: status.length > 0, fingerprint: hash.digest('hex') }
+  }
+
+  /**
+   * Capture the changes covered by a Delivery with its independently observed code fingerprint.
+   * @param directory - workspace owned by the original Run.
+   * @param baseline - confirmed Git commit at Run admission, or null outside Git.
+   * @param declaredPaths - explicitly reported workspace-relative files for non-Git evidence.
+   * @param signal - cancellation during observation.
+   * @param checkTrackedDiff - run the project’s tracked diff check during capture.
+   * @returns the observed Git identities, file list, fingerprint and any project check result.
+   */
+  async captureDelivery(
+    directory: string, baseline: string | null, declaredPaths: readonly string[], signal: AbortSignal, checkTrackedDiff = false,
+  ): Promise<DeliveryCodeSnapshot> {
+    const seen = await this.observe(directory, signal, true)
+    if (seen.directory !== directory || (baseline === null) !== (seen.repository === null)) throw new Error('delivery workspace scope changed')
+    const hash = createHash('sha256').update(JSON.stringify([seen.directory, baseline, seen.fingerprint]))
+    const files: DeliveryFile[] = []
+    let checkExit: number | null = null
+    if (baseline) {
+      const git = await this.git()
+      if (!git) throw new Error('delivery Git executable unavailable')
+      if (checkTrackedDiff) {
+        try {
+          const result = await git.run(diffArguments(baseline, '.', '--check'), { cwd: directory, signal })
+          checkExit = result.exitCode
+        } catch (error) {
+          // A failed Git invocation leaves the check unexecuted. Host shutdown cancels the entire capture.
+          if (signal.aborted) throw error
+        }
+      }
+      const names = await this.read(git, directory, diffArguments(baseline, '.', '--name-status'), signal)
+      const paths = new Map((names ? parseReviewChanges(names) : []).map(file => [file.path, file]))
+      const untracked = await this.read(git, directory, ['ls-files', '--others', '--exclude-standard', '-z', '--', '.'], signal)
+      for (const path of untracked.split('\0').filter(Boolean)) paths.set(path, { status: 'untracked', path })
+      files.push(...paths.values())
+    } else {
+      const paths = [...new Set(declaredPaths)].sort()
+      const fileDigests = async () => {
+        const digests: string[] = []
+        for (const path of paths) digests.push(await untrackedDigest(directory, path, signal))
+        return JSON.stringify(digests)
+      }
+      const observed = await fileDigests()
+      if (observed !== await fileDigests()) throw new Error('declared files changed during capture')
+      hash.update(JSON.stringify(paths)).update(observed)
+      for (const path of paths) files.push({ status: 'declared', path })
+    }
+    const checked = await this.observe(directory, signal, true)
+    if (checked.directory !== seen.directory || checked.repository !== seen.repository || checked.fingerprint !== seen.fingerprint) {
+      throw new Error('workspace changed during delivery capture')
+    }
+    files.sort((a, b) => a.path < b.path ? -1 : a.path === b.path ? 0 : 1)
+    return { scope: baseline === null ? 'declared-files' : 'git', baseline, head: seen.head, fingerprint: hash.digest('hex'), files,
+      ...checkTrackedDiff && { gitDiffCheck: gitCheckStatus(checkExit),
+        gitDiffObservation: { observedAt: new Date().toISOString(), exitCode: checkExit } } }
+  }
+
+  /**
+   * Read a path in a saved Delivery after checking that its workspace still matches.
+   * @param directory - workspace bound to the Delivery's Run.
+   * @param saved - sealed code snapshot with its list of reviewable files.
+   * @param path - exact workspace-relative path from that list.
+   * @param signal - cancellation during observation or read.
+   * @returns a Git patch, the contents of an added file, or a display status.
+   */
+  async readDeliveryFile(directory: string, saved: DeliveryCodeSnapshot, path: string, signal: AbortSignal): Promise<DeliveryFileDiff> {
+    const record = saved.files.find(file => file.path === path)
+    if (!record) throw new Error('file outside the delivery snapshot')
+    const declared = saved.scope === 'declared-files' ? saved.files.map(file => file.path) : []
+    const confirm = async () => {
+      const current = await this.captureDelivery(directory, saved.baseline, declared, signal)
+      if (current.fingerprint !== saved.fingerprint) throw new Error('delivery workspace has changed')
+    }
+    await confirm()
+    const result = saved.baseline && record.status !== 'untracked' ? await this.gitDeliveryPatch(directory, saved.baseline, path, signal)
+      : await this.localDeliveryFile(directory, path, signal)
+    await confirm()
+    return result
+  }
+
+  private async gitDeliveryPatch(directory: string, baseline: string, path: string, signal: AbortSignal): Promise<DeliveryFileDiff> {
+    const git = await this.git()
+    if (!git) throw new Error('delivery Git executable unavailable')
+    const stats = await this.read(git, directory, diffArguments(baseline, path, '--numstat'), signal)
+    if (stats.startsWith('-\t-\t')) return { kind: 'binary' }
+    const patch = await git.run(diffArguments(baseline, path, '--patch'), { cwd: directory, signal })
+    if (patch.exitCode !== 0) throw new Error('git diff failed')
+    return patch.truncated ? { kind: 'oversized' } : { kind: 'patch', text: patch.stdout }
+  }
+
+  private async localDeliveryFile(directory: string, path: string, signal: AbortSignal): Promise<DeliveryFileDiff> {
+    const { file, info } = await localEntry(directory, path)
+    if (info.isSymbolicLink()) return { kind: 'symlink' }
+    if (!info.isFile()) throw new Error('delivery entry is not a regular file')
+    const handle = await open(file, constants.O_RDONLY | constants.O_NOFOLLOW | constants.O_NONBLOCK)
+    try {
+      const metadata = await handle.stat()
+      if (!metadata.isFile()) throw new Error('delivery file changed during read')
+      const { size } = metadata
+      if (size > this.config.gitOutputMaxBytes) return { kind: 'oversized' }
+      const buffer = Buffer.alloc(size + 1)
+      let count = 0
+      while (count < buffer.length) {
+        signal.throwIfAborted()
+        const { bytesRead } = await handle.read(buffer, count)
+        if (!bytesRead) break
+        count += bytesRead
+      }
+      if (count !== size) throw new Error('delivery file changed during read')
+      const bytes = buffer.subarray(0, count)
+      if (bytes.includes(0)) return { kind: 'binary' }
+      try {
+        return { kind: 'file', text: new TextDecoder('utf-8', { fatal: true }).decode(bytes) }
+      } catch (error) {
+        if (!(error instanceof TypeError)) throw error
+        return { kind: 'binary' }
+      }
+    } finally {
+      await handle.close()
+    }
   }
 
   private async confirmed(source: string, confirmation: WorkspaceInspection, signal: AbortSignal): Promise<WorkspaceInspection> {

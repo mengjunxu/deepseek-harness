@@ -1,11 +1,10 @@
 ---
 schema_version: 1
 task_id: dsh-cross-device-handoff
-state: HANDOFF_READY
+state: DONE
 branch: codely_bridge
 previous_agent: Codex
-next_agent: macos_receiver_pending
-updated_at: "2026-11-22T01:33:02Z"
+updated_at: "2026-11-22T01:49:32Z"
 ---
 
 # 跨设备接续
@@ -22,9 +21,9 @@ TBOARD-04 已在 Windows 实测固定 PowerShell 进程退出后释放租约、�
 
 当前源码在 Windows 通过 16 项 Host 测试、认证 Web 冒烟、真实 SDK 回执探针、控制器类型与构建、定向 lint、双语配对和 Cordis 目录检查。[Windows 验证记录](../dsh-tboard-03/evidence/windows-sdk-input.json)记录被测文件与产物摘要。全仓 `doc-sync` 最近一次运行仍有失败，见 [TBOARD-03 日志](../dsh-tboard-03/log.md)。
 
-旧检查点曾在 macOS arm64 的独立检出中通过冻结依赖安装、完整构建和 Web 冒烟。[历史验证记录](evidence/verification.json)只对应当时版本。新检查点的 macOS 接收、构建与平台复验均待执行。
+旧检查点曾在 macOS arm64 的独立检出中通过冻结依赖安装、完整构建和 Web 冒烟。[历史验证记录](evidence/verification.json)只对应当时版本。当前检查点也已在 macOS arm64 核对远端并通过完整构建、双 SDK 停止场景、SDK 输入回执和认证 Web 冒烟。[macOS 验证记录](evidence/macos-receipt.json)。
 
-本次提交范围为 TBOARD-03 与 TBOARD-04 的代码、测试、证据和交接。Obsidian 布局、凭证、本机运行数据及构建产物均留在本机。包含本记录的 Git 提交由发送方最终报告，远端同步及接收待确认。架构、Memory 与共享工作流维持现有规则。
+本次提交范围为 TBOARD-03 与 TBOARD-04 的代码、测试、证据和交接。Obsidian 布局、凭证、本机运行数据及构建产物均留在本机。接收前本地源码提交与远端一致。macOS 验证记录留在本地工作区。架构、Memory 与共享工作流维持现有规则。
 
 ## Mac 接手步骤
 
@@ -65,3 +64,7 @@ node .ai/tasks/dsh-tboard-03/evidence/submit-input.mjs
 ```
 
 核对写入权并查询实时周额度后登记接手。将 Mac 实测版本、进程退出结果和租约状态写入 TBOARD-04。之后从 [TBOARD-03 计划中的正式调度步骤](../dsh-tboard-03/plan.md)继续。两项 Mac 停止探针分别要求确认目标工具退出后释放租约，以及范围未知时保留原租约。
+
+2026-11-22T01:46:45Z，Codex 在 macOS arm64 接手并取得单写权。接收前工作区干净，远端分支与本地 HEAD 一致。Codex 10080 分钟窗口剩余 68%（`get_usage_limits`），11 月 24 日 17:34:52（上海）重置，本轮停止线 20%。
+
+2026-11-22T01:49:32Z，`get_usage_limits` 的 Codex 10080 分钟窗口剩余 68%，11 月 24 日 17:34:52（上海）重置。 交接已验收，后续工作见 [TBOARD-03](../dsh-tboard-03/handoff.md)。 本步无需更新 Architecture、Memory 或 WORKFLOW。

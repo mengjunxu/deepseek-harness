@@ -1,0 +1,18 @@
+{
+  "verified_at": "2026-11-22T13:46:17Z",
+  "system": "macOS 15.6.1 (24G90) arm64",
+  "node": "26.5.0",
+  "sha256": {
+    "packages/sdk/client/src/macos-scope.ts": "6a4857ba34d85909271738f395a797f668e797511898635031898a22fbe9e514",
+    "packages/api/taskboard-controller/lib/index.js": "32951a35b149b55e4a3db8aabc742881aee3c94eb7bac682c9ed1bfbc7aad721",
+    "packages/sdk/client/lib/index.js": "dbc4421d84a49b72df26830f010b3c3b4b18d60fbac3946019bddfb690f8660f",
+    "apps/web/tests/fixtures/taskboard-smoke.mjs": "e2cdff20ba6977ada18c80a36669da883ddc22d4b41a0a1411be3884bfd8d0c9"
+  },
+  "check": "/opt/homebrew/bin/node apps/web/tests/fixtures/taskboard-smoke.mjs --host-crash",
+  "result": {
+    "hostCrashed": true,
+    "detachedMemberHeldLease": true,
+    "oldInputReplayed": false,
+    "ranNextAfterScopeExit": true
+  }
+}

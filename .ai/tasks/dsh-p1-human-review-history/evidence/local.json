@@ -1,0 +1,25 @@
+{
+  "when": "2026-11-23T17:31:35.217905+08:00",
+  "sha256": {
+    "packages/client/ui-taskboard/src/client/DeliveryPanel.tsx": "d349b914f405866442ee2e6eef76b2f03ce138a4d49daa22fb2b48e8fe4fc2f9",
+    "packages/client/ui-taskboard/src/client/TaskboardPage.tsx": "38b67dbeb5048050d9f3527223581a904221b8d2f3f7d1ea1748402db9346a04",
+    "packages/client/ui-taskboard/src/client/locales.ts": "ad965e5cdfe50655c49f807cfcb2075b13e16035f23961cc545a97a48a4b0b98",
+    "apps/web/tests/fixtures/taskboard-browser.mjs": "51f7c9ed9c7efc42ae59efd38ae613a70d26348c42d2b9656d59f1a790dad049",
+    "packages/client/ui-taskboard/lib/client.js": "5634255cf270db8189f32d1defca3aaab4bb8962f8130a50645eed200d7a7870"
+  },
+  "web": {
+    "passed": 2,
+    "finalRestoreRerun": 1
+  },
+  "checks": [
+    "client types and browser bundle",
+    "scoped lint",
+    "taskboard UI documentation pair",
+    "git diff --check"
+  ],
+  "cases": [
+    "Returned delivery shows its own feedback after restore",
+    "Accepted revision shows recorded time and criterion-specific waiver reasons",
+    "Reviewed deliveries remain read only"
+  ]
+}

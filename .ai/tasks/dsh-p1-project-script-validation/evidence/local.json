@@ -1,0 +1,38 @@
+{
+  "checkedAt": "2026-11-23T19:40:28+08:00",
+  "platform": "macOS arm64",
+  "signedInWeeklyRemaining": 30,
+  "scenarios": {
+    "npm test": {
+      "exitCode": 0,
+      "humanDecision": "accept"
+    },
+    "npm run build": {
+      "exitCode": 17,
+      "humanDecision": "accept after explicit reason"
+    },
+    "stop": {
+      "sdkExitedBeforeDetachedScriptChild": true,
+      "directoryHeldUntilChildExited": true,
+      "nextTaskStarted": true
+    }
+  },
+  "restore": {
+    "originalResultsAndAcceptance": true,
+    "changedScriptOrRemovedResultRejected": true
+  },
+  "host": 31,
+  "web": 28,
+  "sdkSnapshot": 1,
+  "release": {
+    "version": "0.1.7-rc.2",
+    "installedTarballs": 334,
+    "cliOnlyDirectDependency": true,
+    "installedProbes": [
+      "passing test",
+      "failed build",
+      "stopped script scope"
+    ]
+  },
+  "modelRequests": "loopback fixture only"
+}

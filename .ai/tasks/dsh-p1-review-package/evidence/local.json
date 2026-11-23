@@ -1,0 +1,16 @@
+{
+  "when": "2026-11-23T19:08:20+08:00",
+  "coverage": [
+    "scoped retrieval for original and revised sealed delivery",
+    "stable result after requirements change",
+    "bounded counts and fixed enum fields only",
+    "legacy validation has unknown exit status",
+    "actual browser JSON download before human acceptance"
+  ],
+  "web": {
+    "initialPass": 2,
+    "initialFailure": "browser remote client bundle needed regeneration",
+    "correctedBrowserPass": 2
+  },
+  "modelRequestsFromDownload": 0
+}

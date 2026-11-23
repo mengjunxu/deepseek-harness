@@ -802,7 +802,35 @@ async function verifyHeaders(
   }
 }
 
+async function restoreCoverageReview(scenario: CorpusScenario): Promise<void> {
+  const directory = await mkdtemp(join(tmpdir(), 'dsh-review-sdk-'))
+  const sessionId = 'taskboard-review-fixture'
+  const sessions = join(directory, 'sessions')
+  const owner = join(sessions, '_no-cwd', sessionId)
+  const patch = join(directory, 'persistence.yml')
+  const fixture = join(scenario.dir, scenario.manifest.session!.source)
+  const [header, event] = records(await readFile(fixture, 'utf8'))
+  const log = join(owner, basename(fixture))
+  const saved = { ...event, seq: 0, time: 1 }
+  const harness = new DeepSeekHarness({ profile: 'sdk', patches: [patch], dshHome: directory, processCwd: directory,
+    env: { PATH: process.env.PATH ?? '', HOME: directory, DSH_TELEMETRY_DISABLED: '1' } })
+  try {
+    await mkdir(owner, { recursive: true })
+    await writeFile(log, [JSON.stringify({ ...header, id: sessionId }), JSON.stringify(saved), ''].join('\n'))
+    await writeFile(patch, JSON.stringify([{ id: 'session-persistence-jsonl', config: { root: sessions, compression: 'none' } }]))
+    try {
+      expect((await harness.resumeSession(sessionId, { requireEmptyInbox: true })).id).toBe(sessionId)
+    } finally { await harness.close() }
+    const restored = records(await readFile(log, 'utf8'))
+    const requests = restored.filter(record => record.type === 'taskboard/review-request')
+    expect(requests).toEqual([saved])
+    expect({ inboxEmpty: true, reviewRequests: requests.length, conversationTurns: restored.filter(record => record.type === 'turn/start').length })
+      .toEqual(JSON.parse(await readFile(join(scenario.dir, 'resume.expected.json'), 'utf8')))
+  } finally { await rm(directory, { recursive: true, force: true }) }
+}
+
 describe('TypeScript SDK snapshots over the jsonrpc runtime', () => {
+
   it('restores the retained V3 max-tokens recording after an interrupted next-turn restart', async () => {
     const path = join(corpusRoot, 'sdk/max-tokens-continue/session.v3.jsonl')
     const fixture = await readFile(path, 'utf8')
@@ -827,6 +855,7 @@ describe('TypeScript SDK snapshots over the jsonrpc runtime', () => {
       ? it.skip
       : it
     scenarioTest(`${mode}s ${scenario.name} through dsh --profile sdk`, async () => {
+      if (scenario.name === 'taskboard-review-resume') return restoreCoverageReview(scenario)
       const scenarioDir = scenario.dir
       const retained = scenario.manifest.sessionFormat !== undefined
       const notificationsExpectedPath = join(scenarioDir, retained ? 'notifications.current.expected.jsonl' : 'notifications.expected.jsonl')

@@ -1,0 +1,26 @@
+{
+  "when": "2026-11-23T18:23:38+08:00",
+  "platform": "macOS arm64",
+  "red": "queued Run finished against a replacement patch at the same path",
+  "fixed": {
+    "oldInputAttempts": 0,
+    "oldModelRequests": 0,
+    "freshRequests": 1,
+    "oldReceiptReplayed": true,
+    "changedPatchResumeRejected": true,
+    "legacyHistoryRestored": true
+  },
+  "checks": [
+    "4 focused Web tests",
+    "2 focused Web tests after adding legacy restore",
+    "3 Host queue, workspace and Session tests",
+    "controller typecheck and Host bundle, scoped lint, README pair and git diff --check"
+  ],
+  "sha256": {
+    "packages/api/taskboard-controller/src/index.ts": "cd9ed8f6cc07174ead994cc2a9399cb265c37f2dba37428c8aa816a0070a9e0f",
+    "packages/api/taskboard-controller/src/dispatch.ts": "16fe7b6ecd5acc4ee6d607a6ce436f725234a76a04fbf17b13a1f8845798b5b5",
+    "packages/api/taskboard-controller/src/execution-domain.ts": "572a95e21daf218977265d3024b27b9df4db27fab675e406652e35d09a9d55a3",
+    "apps/web/tests/taskboard.e2e.ts": "6a3d23fb5b60c2666f9e6bfed4ba260a78a3cd7a5b7f9648c2c4eaa170401d08",
+    "apps/web/tests/fixtures/taskboard-smoke.mjs": "a8dbd95b70b5fe7a594f8f94a3a53679f920277ad14c5a61ec985f83cb086698"
+  }
+}

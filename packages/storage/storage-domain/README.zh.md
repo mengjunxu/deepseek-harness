@@ -79,7 +79,7 @@ domain.table('workspaces').update(id, (r) => ({ ...r, path: newPath }))
 <a id="understand-the-implementation"></a>
 ## 理解实现
 
-`domain.transaction()` 的同步回调读取最新持久化记录，可一起提交多个表的修改，例如任务历史与项目排序。所有本地缓存均更新后才发布第一条变更事件。回调抛错时整笔写入回滚。
+`domain.transaction()` 的同步回调读取最新持久化记录，可一起提交多个表的修改，例如任务历史与项目排序。`tx.entries(table)` 和 `tx.get` 从同一持久化视图读取经过校验的值。所有本地缓存均更新后才发布第一条变更事件。回调抛错时整笔写入回滚。
 
 <details>
 <summary>实现细节——点击展开</summary>
@@ -155,7 +155,7 @@ domain.table('workspaces').update(id, (r) => ({ ...r, path: newPath }))
 这些限制说明领域层何时不合适，或何时需要特别的运维注意。它们是当前包约束，不是任务积压。
 
 - **本地变更可见性**——`domain/changed` 不推送其他进程的变更。缓存读取保留本地值；`modify` 根据事务结果刷新当前键，重新打开则刷新整个领域。
-- **没有跨表事务、二级索引或多段键**——每次写入只触碰一条记录；这些扩展列在 Agent Note 的范围外清单中。
+- **没有二级索引或多段键**——使用已声明的表和单一记录键。
 - **没有数据迁移**——领域的已存版本与 spec 不同时，打开操作会被拒绝（`version-mismatch`）；修改 schema 需要手工迁移已存数据。
 
 <a id="dev-note"></a>

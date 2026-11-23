@@ -1,0 +1,8 @@
+version: 1
+scenario: taskboard-dispatch
+profile: sdk
+composition: sdk-taskboard-dispatch
+recording: authored
+header:
+  class: taskboard-dispatch
+  pin: true

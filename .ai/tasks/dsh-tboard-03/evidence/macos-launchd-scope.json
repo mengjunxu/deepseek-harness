@@ -1,0 +1,42 @@
+{
+  "verified_at": "2026-11-22T12:28:45Z",
+  "system": "macOS 15.6.1 (24G90) arm64",
+  "node": "26.5.0",
+  "sha256": {
+    "packages/sdk/client/src/client.ts": "72d23d6c2309a3862d04ac799d2161b8be013662a431b07f08ae36ddd86e1cc1",
+    "packages/sdk/client/src/macos-scope.ts": "48fa9ee950d8fb842be81bb49fd92f2c48782c7e1abbaa95f032cc8907f60738",
+    "packages/sdk/client/macos-runtime.mjs": "e90d3a9877e77ea749aba3ef1b63d4bf76957782a03feed312fda0859be6dcaa",
+    "packages/sdk/client/lib/index.js": "f8dfac65269729c70ad7875e7765e14626b5ec98e4580b406e8e072fe80169ab",
+    "packages/sdk/client/package.json": "db2ff62fe882e9e962e6d9b166aa6fc7bc0baebbb381d264820cbbd7c6807cbb",
+    "packages/api/taskboard-controller/src/dispatch.ts": "e2ab2ce1f91e9ccd5c03e642015c5a12a840a7171273bcbc7d9fe3572693ed2e",
+    "packages/api/taskboard-controller/lib/index.js": "dc282780d3b87cd8ea089b2ccc1fce914423edde3231e9bb942b0a6bbfb12401",
+    "apps/web/tests/taskboard.e2e.ts": "5521241d97cf40b4fd1f3c396e75b7226ecafdbd8348de2bae47d46912f995a5",
+    "apps/web/tests/fixtures/taskboard-smoke.mjs": "0a8d8478721b5b35db9b739bc5f831dc52987a0c12855c34c6c5229abc8cca65",
+    "apps/web/tests/fixtures/taskboard-mac-scope-tool.mjs": "737fed07e5b76a3e1a055fb49241ae8775eacfa8b5a402ca1ef3b35817d35472"
+  },
+  "probes": {
+    "native_launchd": [
+      "distinct coalition at unprivileged GUI launch",
+      "alive detached member after job root exit",
+      "kernel counts equal after last member exit"
+    ],
+    "authenticated_web": {
+      "custom_scope_observer": false,
+      "sdk_root_exited_with_member_alive": true,
+      "second_run_remained_queued": true,
+      "second_run_received_input_after_scope_empty": true
+    }
+  },
+  "checks": {
+    "focused SDK and Taskboard typecheck": "PASS",
+    "filtered Host SDK client and Taskboard builds": "PASS",
+    "pnpm exec vitest run --config vitest.web.config.ts apps/web/tests/taskboard.e2e.ts": "6 PASS",
+    "pnpm exec vitest run scripts/check-workspace-constraints.spec.ts": "106 PASS",
+    "pnpm run verify-application-entrypoints": "PASS",
+    "pnpm run constraints": "PASS",
+    "pnpm run test:snapshot -t taskboard-dispatch": "1 PASS",
+    "pnpm run verify-export-jsdoc": "PASS",
+    "bilingual named pairs and targeted lint": "PASS",
+    "SDK pnpm pack relay payload": "PASS"
+  }
+}

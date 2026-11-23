@@ -1,0 +1,50 @@
+{
+  "observedAt": "2026-11-23T07:07:18+00:00",
+  "platform": "macOS arm64",
+  "node": "26.5.0",
+  "sourceAndArtifactSha256": {
+    "apps/web/tests/fixtures/taskboard-smoke.mjs": "32e48baac4e5c7f02ad18bda3c26a2cb74ba672eefb8015876a03061c5280bc6",
+    "apps/web/tests/taskboard.e2e.ts": "5988296d6c025c1fd6a51fa9301eab6f212bed169387682d7297d7ddd0866bcc",
+    "packages/api/taskboard-controller/src/backup.ts": "5452b63763c2b71c56d37a62f754688baa1bec87dc283f2be81b5a9a7899179c",
+    "packages/api/taskboard-controller/src/execution-domain.ts": "55f7bb1b99cd96c010ad3527a4f036435a55ec22b22af708e18ce717e9b1fd7f",
+    "packages/api/taskboard-controller/src/types.ts": "ef2d7d66bfa132ef9c794a367519722a798f357715b07753f483fddf19911535",
+    "packages/api/taskboard-controller/lib/index.js": "4c280a6eed0fbe6418fcf8a54dff208b6f583425b513cf3a7a2f476f8cc83bcd",
+    "packages/session/session-persistence-jsonl/lib/index.js": "0845707017acc2b4a8a75eab2244fa3fd88587b8094ab32014321dce7ca1e31b",
+    "packages/storage/storage-domain/lib/index.js": "da5eab4103e83e768f24e733bfd8992e985746e0c7c213b7584771b7410c3476",
+    "packages/client/ui-taskboard/lib/client.js": "e417d4bb3f796cddafc02f90e8321690c11abeef917aa46322d2f98f01f17f20"
+  },
+  "checks": {
+    "browser": "vitest run --config vitest.web.config.ts apps/web/tests/taskboard.e2e.ts -t 'restores a checked backup'",
+    "browserCasesPassed": 1,
+    "hostAndStorage": "vitest run packages/storage/storage-domain/tests/atomic-record.spec.ts packages/storage/storage-sqlite/tests/atomic-record.spec.ts packages/api/taskboard-controller/tests/taskboard.host.spec.ts",
+    "hostAndStorageCasesPassed": 38,
+    "snapshot": "vitest run --config vitest.snapshot.config.ts -t taskboard-dispatch",
+    "snapshotCasesPassed": 1,
+    "controllerTypecheckAndBundle": "PASS",
+    "scopedOxlint": "PASS",
+    "controllerReadmePair": "PASS",
+    "frozenWorkspaceLock": "PASS",
+    "docSync": {
+      "passed": 37,
+      "failed": [
+        "doc-typecheck",
+        "markdown links",
+        "translation pairing",
+        "markdown wrap",
+        "repository references"
+      ],
+      "scope": "existing legacy and planning documents (including the implementation plan without a bilingual pair) and prior handoff references"
+    }
+  },
+  "observations": {
+    "provider": "local deterministic fixture through shipped Web and SDK profiles",
+    "priorAndContinuedInputsInOriginalSession": 2,
+    "distinctMissingSessionReferences": 3,
+    "queueReplayedOnSecondRestore": false,
+    "newModelRequestsFromRestores": 0,
+    "previousBuild": "second restore of a never-started Run adds sessionNotIncluded=true",
+    "fixedBuild": "canceled Run history matches on both restores, old marked archive reads and reexports without that field",
+    "deliveryAndHumanReviewHistoryPreserved": true,
+    "incompatibleSessionPreserved": true
+  }
+}

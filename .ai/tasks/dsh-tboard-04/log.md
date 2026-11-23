@@ -32,3 +32,7 @@ Codex 取得 codely_bridge 单写权。TBOARD-02 数据层已经交接。本阶�
 - PASS · `node_modules/.bin/vitest.CMD run --config vitest.web.config.ts apps/web/tests/taskboard.e2e.ts` 在主机通过 1 项认证 Web 冒烟。`node_modules/.bin/vitest.CMD run packages/api/taskboard-controller/tests/taskboard.host.spec.ts --testTimeout 15000` 单独执行通过 12 项。结果和被测产物见 [Windows PC 实测记录](evidence/windows-pc-acceptance.json)。
 - NOT_RUN · macOS 复验延至下次使用首发环境。全仓文档检查本轮未重跑。
 - 23:48 至 23:52（上海），Codex 接手补验 AC18。`get_usage_limits` 的 Codex 10080 分钟窗口剩余 93%，重置于 11 月 27 日 15:04（上海）。PASS · `node .ai/tasks/dsh-tboard-04/evidence/stop.mjs --force-deadline` 确认独占 SDK 退出后范围观察超时仍保留原租约及目录，任务详情保持未确认，重放和迟到结果均未解除锁。默认场景与 `--controlled-tool` 复跑通过。`node --check`、定向 lint 与 `git diff --check` 通过。[Windows PC 实测记录](evidence/windows-pc-acceptance.json)
+
+2026-11-22T01:46:45Z，Codex 在 macOS arm64 接手并取得单写权。接收前工作区干净，远端分支与本地 HEAD 一致。Codex 10080 分钟窗口剩余 68%（`get_usage_limits`），11 月 24 日 17:34:52（上海）重置，本轮停止线 20%。
+
+2026-11-22T01:49:32Z，`get_usage_limits` 的 Codex 10080 分钟窗口剩余 68%，11 月 24 日 17:34:52（上海）重置。 PASS · 冻结安装、完整构建、固定工具停止复核、未知范围保留租约、强停观察超时、SDK 回执保存与认证 Web 冒烟。命令、平台与源码指纹见 [macOS 验证记录](../dsh-cross-device-handoff/evidence/macos-receipt.json)。TBOARD-04 完成。后续正式调度见 [TBOARD-03](../dsh-tboard-03/handoff.md)。

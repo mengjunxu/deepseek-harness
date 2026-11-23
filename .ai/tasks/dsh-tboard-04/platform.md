@@ -14,3 +14,5 @@ G0 在本机确认了正常 shutdown、目标 runtime 退出、测试 shell 子�
 | 将完整强停验收放在有持久 OS 范围的环境 | 用实际支持的 Linux 用户级 systemd 环境重新验证 SDK/runtime、工具范围、强停与隔离，再决定支持组合。macOS 保留已有接入验证。 |
 
 两案都保留已确认的 Web 入口、独占 runtime 和换目录新 Session。前者限定自动解锁的适用场景，后者调整首发环境并需新的运行验证。
+
+Taskboard 的正式 macOS 启动器使用用户级 launchd job。Host 绑定独立资源 coalition，等待内核活动计数归零，并卸载一次性 job 后释放租约。真实 Web 测试覆盖脱离原进程组的 Bash 后代在 SDK 根退出后继续存活，以及该后代退出后继续队列。通用 subprocess-local 仍根据自身实际范围能力报告退出。[验收证据](../dsh-tboard-03/evidence/macos-launchd-scope.json)。

@@ -1,0 +1,17 @@
+{
+  "time": "2026-11-23T19:01:41+08:00",
+  "webRuns": [
+    3,
+    2
+  ],
+  "host": 2,
+  "checked": [
+    "authenticated queued Run confirms SDK route or uses deployment default",
+    "replay without configuration returns original receipt",
+    "one-shot after accepted prerequisites",
+    "source, scope and timestamp preserved in project handoff",
+    "changed consent rejected by original start command fingerprint",
+    "browser shows the original authorization and legacy records omit it"
+  ],
+  "localOnly": true
+}

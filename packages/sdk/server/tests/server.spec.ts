@@ -12,7 +12,7 @@ import AgentRegistry, { type Agent, type AgentHandle } from '@deepseek-ai/dsh-ag
 import AgentLoop from '@deepseek-ai/dsh-agent-loop'
 import { mountAgentLoopTestDependencies } from '@deepseek-ai/dsh-agent-loop-testkit'
 
-import SessionStore, { SessionId } from '@deepseek-ai/dsh-session'
+import SessionStore, { SessionId, SessionSeq } from '@deepseek-ai/dsh-session'
 import JsonlSessionPersistence from '@deepseek-ai/dsh-session-persistence-jsonl'
 import * as LlmDeepSeek from '@deepseek-ai/dsh-llm-deepseek-api-key'
 import SubagentRuntime, { type SubagentResult, type SubagentRunEndInfo } from '@deepseek-ai/dsh-subagent'
@@ -1104,6 +1104,8 @@ describe('HarnessSdkJsonRpcServer', () => {
       vi.stubEnv('DEEPSEEK_API_KEY', 'test-key')
       await server.initialize({ cwd: storageDir, provider: 'deepseek-official', model: 'deepseek-v4-pro' })
       await expect(server.handleRequest('session/resume', {})).rejects.toThrow('non-empty sessionId')
+      await expect(server.handleRequest('session/resume', { sessionId: 'saved', expectedCwd: 'relative' })).rejects.toThrow('must be absolute')
+      await expect(server.handleRequest('session/resume', { sessionId: 'saved', requireEmptyInbox: 'yes' })).rejects.toThrow('must be boolean')
       await expect(resume('missing')).rejects.toThrow()
       for (const name of ['saved', 'child']) {
         const owned = await ctx.agents.create({
@@ -1117,9 +1119,27 @@ describe('HarnessSdkJsonRpcServer', () => {
       }
       const resumeAgent = vi.spyOn(ctx.agents, 'resume')
       await expect(resume('child')).rejects.toThrow('root session')
+      await expect(server.handleRequest('session/resume', {
+        sessionId: 'saved', expectedCwd: join(storageDir, 'different'),
+      })).rejects.toThrow('workspace differs')
       expect(resumeAgent).not.toHaveBeenCalled()
       expect(ctx.agents.get(SessionId('child'))).toBeUndefined()
-      const opening = resume('saved')
+      const detached = ctx.sessions.prepare(SessionId('pending'), { meta: { cwd: storageDir } })
+      const writer = await ctx.sessionPersistence.create(detached.header)
+      try {
+        const message = createUserMessage({ content: [{ type: 'text', text: 'prior unfinished input' }], source: { kind: 'user' } })
+        await writer.append([{
+          type: 'agent/inbox/spliced', seq: SessionSeq(0), time: 1,
+          data: { target: 'next-turn', start: 0, inserted: [message] },
+        }])
+      } finally {
+        await writer.close()
+      }
+      await expect(server.handleRequest('session/resume', {
+        sessionId: 'pending', expectedCwd: storageDir, requireEmptyInbox: true,
+      })).rejects.toThrow('pending input')
+      expect(ctx.agents.get(SessionId('pending'))).toBeUndefined()
+      const opening = server.handleRequest('session/resume', { sessionId: 'saved', expectedCwd: storageDir, requireEmptyInbox: true })
       await expect(resume('saved')).rejects.toThrow('already open or opening')
       await expect(opening).resolves.toEqual({})
       expect(ctx.agents.get(SessionId('saved'))?.session.header.cwd).toBe(storageDir)

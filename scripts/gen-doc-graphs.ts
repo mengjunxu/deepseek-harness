@@ -316,6 +316,14 @@ const SERVICE_ROLES: ServiceRole[] = [
     note: 'Owns project records, immutable Run inputs and operator review history in the task database.',
   },
   {
+    key: 'sdkHost',
+    pkg: 'sdk-jsonrpc-server',
+    title: 'SDK-owned tool requests to the client',
+    mode: 'core',
+    consumers: ['api-taskboard-controller'],
+    note: 'Forwards selected capabilities from a live SDK root Agent to its owning client.',
+  },
+  {
     key: 'workspaceController',
     pkg: 'api-workspace-controller',
     title: 'Host Workspace Remote controller',

@@ -1,0 +1,137 @@
+{
+  "system": "macOS 15.6.1 (24G90) arm64",
+  "node": "v26.5.0",
+  "provider": "openai",
+  "model": "gpt-5.4-mini",
+  "projectId": "747822ee-28a1-44db-b7c4-188580428486",
+  "taskId": "fd3b7791-ec2b-4361-8aef-2fe994e149c2",
+  "stages": [
+    {
+      "name": "failed",
+      "seconds": 3.1,
+      "runId": "127bca75-3a36-4dd9-a52b-481e573da69a"
+    },
+    {
+      "name": "explicit-retry",
+      "seconds": 4.5
+    },
+    {
+      "name": "first-delivery",
+      "seconds": 17.7
+    },
+    {
+      "name": "operator-returned",
+      "seconds": 18.8
+    },
+    {
+      "name": "revised-delivery",
+      "seconds": 37.7
+    },
+    {
+      "name": "operator-accepted",
+      "seconds": 39.5
+    }
+  ],
+  "artifacts": {
+    "video": "taskboard-openai.webm",
+    "videoScope": "complete acceptance",
+    "browser": "Chromium via repository Playwright",
+    "viewport": [
+      1440,
+      900
+    ],
+    "gif": {
+      "localPath": ".playwright-mcp/tboard-09-openai-final/taskboard-openai.gif",
+      "sha256": "55b043d2297afff27199a05fbf340f1cb591854a0a58e861b6d580a780dc3613",
+      "durationSeconds": 18.8,
+      "sourceIntervalSeconds": [
+        2.2,
+        40.4
+      ],
+      "playbackSpeed": 2.4,
+      "finalHoldSeconds": 2.8,
+      "width": 1000,
+      "height": 626,
+      "bytes": 4847829
+    },
+    "pilotOutcome": "The pilot completed the UI chain but a reported non-string test was absent from its revised test file. The final run required a named non-string test and verified unchanged parser and test file hashes before acceptance."
+  },
+  "failed": {
+    "runId": "127bca75-3a36-4dd9-a52b-481e573da69a",
+    "sessionId": "127bca75-3a36-4dd9-a52b-481e573da69a",
+    "inputReceipt": "4e4d48e4-e04f-4680-bc01-ee54e7cf9f09",
+    "failure": "missing credential reference in isolated SDK patch",
+    "preparedContexts": 1,
+    "assistantMessages": 0
+  },
+  "retry": {
+    "runId": "b223fd45-e686-4815-af71-9101799819ca",
+    "previousRun": "127bca75-3a36-4dd9-a52b-481e573da69a",
+    "sessionId": "b223fd45-e686-4815-af71-9101799819ca",
+    "inputReceipt": "c9bcd467-a182-4182-a5f7-bc3c7eb98d38",
+    "deliveryId": "c12a97ca-a516-8040-8a12-7935f13ec83a",
+    "deliverySnapshot": "a67ea18d340ccfe6b8e119c9db42a5dc43fac76c8eee903bb645f87065f46735",
+    "testCount": 3,
+    "independentCases": 12,
+    "parserSha256": "27b8ed9b321b74ea546bb497528b065d9d60e9bd1756d228995ca28e208b5f63",
+    "testSha256": "67c85bbc0d3c74b17ba561da10ac5b34da0b89a097e0d05f29008216bbab4dfb",
+    "assistantMessages": 6,
+    "toolNames": [
+      "taskboard_read",
+      "glob",
+      "read",
+      "write",
+      "bash",
+      "taskboard_submit_delivery"
+    ],
+    "requestContextRecords": 1
+  },
+  "returned": {
+    "deliveryId": "c12a97ca-a516-8040-8a12-7935f13ec83a",
+    "reviewId": "2fc857f0-892d-418f-b581-247204562434"
+  },
+  "revision": {
+    "runId": "089a8135-3cf7-4451-b227-1e0a3fd967b0",
+    "previousRun": "b223fd45-e686-4815-af71-9101799819ca",
+    "sessionId": "089a8135-3cf7-4451-b227-1e0a3fd967b0",
+    "inputReceipt": "14885fab-6625-4e2b-acbf-95b1adf6816d",
+    "feedbackRecordedInSession": true,
+    "deliveryId": "ab9ea510-3f07-8481-8405-036adaf4a102",
+    "deliverySnapshot": "9b0d61c987654c4af113ab6e447bd3cb3589bb55e92e52cff25a7b15057c18fd",
+    "testCount": 3,
+    "independentCases": 12,
+    "parserSha256": "27b8ed9b321b74ea546bb497528b065d9d60e9bd1756d228995ca28e208b5f63",
+    "testSha256": "67c85bbc0d3c74b17ba561da10ac5b34da0b89a097e0d05f29008216bbab4dfb",
+    "examplesSha256": "62b9261da3160758f11df69f88c56e453445f97f3c1156805ff73c88a4157208",
+    "assistantMessages": 11,
+    "toolNames": [
+      "taskboard_read",
+      "glob",
+      "read",
+      "write",
+      "bash",
+      "taskboard_submit_delivery"
+    ],
+    "requestContextRecords": 1
+  },
+  "accepted": {
+    "deliveryId": "ab9ea510-3f07-8481-8405-036adaf4a102",
+    "reviewId": "e02d5c5d-19e1-460d-9c25-fb68571901f6",
+    "taskState": "done"
+  },
+  "persistedAfterWebRestart": true,
+  "verifiedReviewScope": {
+    "parserUnchanged": true,
+    "testsUnchanged": true,
+    "exampleOutcomesVerified": true
+  },
+  "verifiedAt": "2026-11-22T15:58:27.871Z",
+  "buildSha256": {
+    "apps/cli/lib/bin.js": "87dd715bb2f03ba14de9d4db67877d5ff37b6c036510abd8826006eaa65b0aff",
+    "packages/api/taskboard-controller/lib/index.js": "0b9037a2d8162d0c4dfc283dd972698a91333084dad6f692a8a5ebbb4dbf1741",
+    "packages/client/ui-taskboard/lib/client.js": "f81cd99bdff76fe1c3f9eac0897c8ba9f418750570d51aa9cc422462d8f4df5d",
+    "packages/sdk/client/lib/index.js": "bcdb8a6868e0246e2a5d40bc035c7822be976964895930a1fb60c5ee7eb60515"
+  },
+  "dshVersion": "0.1.7-rc.2 local workspace build",
+  "operator": "Codex operated the authenticated review UI against a disposable acceptance task"
+}

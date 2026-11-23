@@ -47,7 +47,7 @@ console.log(result.finalResponse)
 
 子进程在首次使用时惰性启动，并在多次 `run()` 调用之间持续归实例所有；请调用 `close()`（或使用 `await using`），子进程才总能被回收。`start()` 会记忆化有界的 `initialize` 握手，其中包含工作区 cwd、提供方／模型路由、可选且由适配器持有的 `reasoningEffort`，以及可选的正整数 `maxTokens` 输出上限。服务器会在接受提示词前校验该确切路由；省略推理强度时保留模型自身的默认值。`initializeTimeoutMs` 默认 10 秒，诊断会写明所选 profile 并附带保留的 stderr 尾部。`run(input, { sessionId?, onNotification? })` 接受文本或 `SdkPromptContentBlock[]`；内联栅格图像块携带规范 base64 与 `mimeType`，并在运行时内变成持久附件。该调用拥有一个活动区间：它将提示词排入队列，等待其消息 id 出现在持久入队回执中，然后持续收集到整个 agent 下一次进入 `idle`。它返回 `RunResult { sessionId, finalResponse, events, notifications }`，其中 `finalResponse` 是该区间内根会话最后提交的助手文本——并非因果上归属于该提示词的响应，因为 steering（中途引导）、注入的上下文和其他排队工作都可能在 idle 前参与其中。`session(id?)` 打开具名或全新的会话句柄。握手失败且清理成功时，实例会换入全新客户端，使后续调用用新进程重试，直到终结性的 `close()`；如果初始化和清理均失败，`start()` 会返回保留两个原因的有序 `AggregateError`，并继续保留失败的客户端，避免在原进程退出尚未得到证明时启动另一个进程。`maxTokens` 限制每个根 agent 请求的输出量，并由进程内后代继承；压缩（compaction）插件单独持有摘要上限。
 
-复用原 `dshHome`，调用 `await harness.resumeSession(savedId)` 可恢复持久根 Session。恢复本身不排入输入，缺失或占用的会话会报错。
+复用原 `dshHome`，调用 `await harness.resumeSession(savedId)` 可恢复持久根 Session。恢复本身不排入输入，缺失或占用的会话会报错。传入 `{ expectedCwd, requireEmptyInbox: true }` 可核对保存的工作目录，并在 Agent 启用前拒绝有待处理输入的 Session。
 
 构造时传入 `approvalRequests: true` 或 `userQuestions: true`，在 `harness.client.start()` 后注册 `harness.client.onRequest(handler)`，然后调用 `harness.start()`。按方法分别回答审批和用户问题。通过 `subscribe()` 接收 `user-question.cancelled`，按 requestId 和 sessionId 关闭对应表单。 模型调用问答工具时，profile 还需加载 `@deepseek-ai/dsh-tool-ask-user`。
 
@@ -88,7 +88,7 @@ console.log(result.finalResponse)
 
 ### 错误与关闭
 
-需要协作停止时，先调用 `client.request('shutdown', {}, timeoutMs)`，再用 `client.waitForExit(timeoutMs)` 观察 SDK runtime 进程是否退出。观察超时会保留进程。管理进程树的应用还需确认子孙进程退出，才能释放独占资源。
+需要协作停止时，先调用 `client.request('shutdown', {}, timeoutMs)`，再用 `client.waitForExit(timeoutMs)` 观察 SDK runtime 进程是否退出。观察超时会保留进程。管理进程树的应用还需确认子孙进程退出，才能释放独占资源。 在 macOS 上，`processScope: 'macos-launchd'` 会在当前图形登录用户的 launchd 域使用一次性任务启动 SDK。中继在传递 SDK 环境和输入前核验套接字对端。运行时退出后，`waitForProcessScope(signal)` 等到内核资源 coalition 的活动成员计数归零，再卸载任务。工具派生进程在重设父进程或进程组后仍属于同一 coalition。无法观察时返回 `unknown`，到达期限时中止等待。 在启动该进程的客户端上，`macosProcessScopeIdentity` 读取已验证的 launchd 任务、系统启动和 coalition 标识，供 Host 保存所有权。接管的 Host 取得原锁后，可用 `observeSavedMacosProcessScope` 核对该进程范围，无需重新连接旧 SDK。
 
 每种失败模式都映射到一个导出的错误类——协议错误响应、请求时限已到、响应超出文档化协议、运行时死亡——调用方可以按失败类型分支处理；这四个类从 [src/index.ts](src/index.ts) 导出。关闭采用私有的幂等阶梯（stdin EOF → SIGTERM → SIGKILL），位于 [src/dispose.ts](src/dispose.ts)，只在进程真正退出时结束。
 

@@ -1,0 +1,23 @@
+{
+  "verified_at": "2026-11-22T14:06:00Z",
+  "system": "macOS 15.6.1 (24G90) arm64",
+  "node": "26.5.0",
+  "sha256": {
+    "apps/web/tests/fixtures/taskboard-smoke.mjs": "3eacace5415ab08502e183d72bfb3f476203ba7f6b7f847c8c0f32ca0d41d945",
+    "apps/web/tests/taskboard.e2e.ts": "cca57973b8930197e1e794ba39c7a2ad2814a5ab3e1ffeac8e87238f1dc004ca",
+    "packages/api/taskboard-controller/src/backup.ts": "81cf756228ead04e7247382c2af7e0ea91867401363093ca5f2c3bdeac554ee6",
+    "packages/api/taskboard-controller/lib/index.js": "b51456c1c3ef972a43104a0f074027507eec1efbbcb63f839347d83be96704fe",
+    "packages/client/ui-taskboard/lib/client.js": "55ed41da1fa8519c2a40e86aacb0fae3b08ce7d5afb607fb6d18404729330b64"
+  },
+  "checks": {
+    "pnpm run test:web:built apps/web/tests/taskboard.e2e.ts": "16 PASS",
+    "focused SDK client, Host, SQLite and storage domain": "109 PASS",
+    "pnpm run test:snapshot -t taskboard-dispatch": "1 PASS",
+    "scoped typecheck, bundles, oxlint and six bilingual pairs": "PASS"
+  },
+  "upgrade": {
+    "futureSessionRejected": true,
+    "futureAndOriginalBytesPreserved": true,
+    "compatibleOriginalSessionContinued": true
+  }
+}

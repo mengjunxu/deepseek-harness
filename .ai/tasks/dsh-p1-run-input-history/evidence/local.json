@@ -1,0 +1,46 @@
+{
+  "when": "2026-11-23T09:24:44.523533+00:00",
+  "sha256": {
+    "packages/api/taskboard-controller/src/types.ts": "3240c7705b3ffb0b3d6e2f25e8bf93d396a8227467fd29d7b7cd2f97a7d17aca",
+    "packages/api/taskboard-controller/src/index.ts": "563449828067787cc107a02c4fdce82ecc331dd87120a1e1c50a2554ee37f16c",
+    "packages/api/taskboard-controller/src/session-recovery.ts": "0e439fb39a634e91250555e420283ae5a9b29ab6cd2b5ff8195323c5c8cc28ae",
+    "packages/client/ui-taskboard/src/client/RunPanel.tsx": "34bf170fdd8545b2ae832e6d61f99a15417dd1eb2331881e3370e1c6f6222901",
+    "apps/web/tests/fixtures/taskboard-smoke.mjs": "5950daefa2ca0b5124d71708e4024a9c324d8a6aa761778445be4f2e73574146",
+    "apps/web/tests/fixtures/taskboard-browser.mjs": "ebc3f2500771016255b1f67af28d42f94aed56d7878aa9f9a6a56ddb25136536",
+    "packages/api/taskboard-controller/lib/index.js": "7b9d10621ae91bd2cec3c9a3b54f9d50eebfab502e73c1ef1900d31e94c50f4d",
+    "packages/client/ui-taskboard/lib/client.js": "38780ed4769628a8dc5516aee887778d19d0e8ded5798e98be2b824acdf2876d"
+  },
+  "platform": "macOS Web/SQLite and SDK with local controlled provider",
+  "web": {
+    "passed": 5,
+    "filter": "claims the queue|recovers a lost SDK|reopens the confirmed Session|restores a checked backup|runs an SDK task"
+  },
+  "snapshot": {
+    "passed": 1,
+    "filter": "taskboard-dispatch"
+  },
+  "cases": [
+    "Saved input matches the recorded user message sent through the SDK",
+    "Cross-task and cross-project reads fail",
+    "Canceled prelaunch input and original resumed Run materials remain readable",
+    "After restore, returned feedback and revised constraints appear only on the subsequent Run; reads do not send another model request",
+    "Browser shows original goal, acceptance and selected file content"
+  ],
+  "checks": [
+    "controller and client type checks",
+    "host and two client bundles",
+    "scoped run-oxlint",
+    "three translation pairs",
+    "git diff --check"
+  ],
+  "docSync": {
+    "passed": 37,
+    "failed": [
+      "doc-typecheck",
+      "markdown links",
+      "translation pairing",
+      "markdown wrap",
+      "repository references"
+    ]
+  }
+}

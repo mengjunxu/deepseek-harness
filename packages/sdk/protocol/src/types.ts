@@ -41,6 +41,10 @@ export interface InitializeResult {
 export interface SessionResumeParams {
   /** Existing Session id in the runtime's configured persistence store. */
   sessionId: string
+  /** Absolute workspace that must match the stored Session. */
+  expectedCwd?: string
+  /** Refuse to publish a Session with pending input. */
+  requireEmptyInbox?: boolean
 }
 
 /** One user turn on one SDK session. */
@@ -116,6 +120,7 @@ export interface SubagentFinishedNotification {
 
 /** Server-to-client notifications by JSON-RPC method name. */
 export interface HarnessSdkNotificationMap {
+  'approval.cancelled': { sessionId: string; requestId: string }
   'user-question.cancelled': Pick<SdkUserQuestionRequest, 'requestId' | 'sessionId'>
   'session.event': SessionEventNotification
   'session.status': SessionStatusNotification
@@ -123,8 +128,22 @@ export interface HarnessSdkNotificationMap {
   'subagent.finished': SubagentFinishedNotification
 }
 
+/** Arguments from a runtime tool to its owning SDK client. */
+export interface SdkHostToolRequest {
+  /** SDK-owned root Session which made the call. */
+  sessionId: string
+  /** Registry-owned identity of the tool invocation. */
+  callId: string
+  /** Host capability selected by the tool implementation. */
+  tool: string
+  /** Parsed arguments for that capability. */
+  args: object
+}
+
 /** One authorization prompt for the operation currently awaiting its user's decision. */
 export interface ApprovalRequestParams {
+  /** Runtime-issued identity shared with its withdrawal notification. */
+  requestId?: string
   /** SDK-owned root Session whose operation is pending. */
   sessionId: string
   /** Name of the operation that requested approval. */
@@ -151,6 +170,7 @@ export type SdkUserQuestionResult = AskUserQuestionAnswer | { cancelled: true }
 /** SDK runtime requests answered by the client. */
 export interface HarnessSdkHostRequestMap {
   'approval/request': { params: ApprovalRequestParams; result: ApprovalRequestResult }
+  'host/tool': { params: SdkHostToolRequest; result: unknown }
   'user-question/ask': { params: SdkUserQuestionRequest; result: SdkUserQuestionResult }
 }
 

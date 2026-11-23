@@ -121,10 +121,12 @@ class DeepSeekHarness:
         self._client.close()
         self._initialized = False
 
-    def resume_session(self, session_id: str) -> "Session":
-        """Restore an existing session from the configured runtime home."""
+    def resume_session(
+        self, session_id: str, *, expected_cwd: str | None = None, require_empty_inbox: bool = False
+    ) -> "Session":
+        """Restore an existing session with optional workspace and inbox requirements."""
         self.start()
-        self._client.resume_session(session_id)
+        self._client.resume_session(session_id, expected_cwd=expected_cwd, require_empty_inbox=require_empty_inbox)
         return Session(self, session_id)
 
     def start_session(self, session_id: str | None = None) -> "Session":

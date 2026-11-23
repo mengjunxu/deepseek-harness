@@ -1,0 +1,248 @@
+{
+  "format": "dsh-taskboard-backup",
+  "version": 1,
+  "createdAt": "2026-11-23T05:57:34.311Z",
+  "domainVersion": 1,
+  "sha256": "3dc613f4d8f3a7811c92ee418543c3046ce1843e378a3e77d356892937e51070",
+  "payload": {
+    "includesSessions": false,
+    "projects": [
+      {
+        "project": {
+          "id": "e9be4e02-b45d-4608-b059-d02e2bd2eab7",
+          "title": "Restricted project",
+          "root": "/private/var/folders/tw/b9_d4hqs4bq2h1_qssz7x7hm0000gn/T/web-taskboard-D6N89y/project"
+        },
+        "commandId": "3927175c-fa8a-4ea3-b6ed-e7fa98f49790",
+        "fingerprint": "151dbfcfa413e67cea84e7c226ff92b55fa0fac83b4824fb4ddec5365549bdfa",
+        "order": [
+          "b052a059-aab6-47d7-acd3-bf2e235c4c2b"
+        ]
+      },
+      {
+        "project": {
+          "id": "ee00f794-4dea-48cd-9355-24474a589c8c",
+          "title": "SDK review",
+          "root": "/private/var/folders/tw/b9_d4hqs4bq2h1_qssz7x7hm0000gn/T/web-taskboard-D6N89y/project"
+        },
+        "commandId": "29b582a6-9284-4eeb-8d7e-e9ad9ea5fcb8",
+        "fingerprint": "81dea32d70e5506b497eba9123ca93540866a320edbd7e87f1a7900220e89507",
+        "order": [
+          "9fa97841-5bf6-4cd8-8519-650663d35008"
+        ]
+      }
+    ],
+    "tasks": [
+      {
+        "task": {
+          "title": "Dispatch fixture",
+          "description": "Both editors reviewed the goal",
+          "acceptance": [
+            "Record a receipt"
+          ],
+          "priority": "normal",
+          "labels": [],
+          "id": "9fa97841-5bf6-4cd8-8519-650663d35008",
+          "projectId": "ee00f794-4dea-48cd-9355-24474a589c8c",
+          "version": 7,
+          "revision": 4,
+          "archived": false,
+          "status": "todo"
+        },
+        "revisions": [
+          {
+            "title": "Dispatch fixture",
+            "description": "Check member access",
+            "acceptance": [
+              "Record a receipt"
+            ],
+            "priority": "normal",
+            "labels": [],
+            "revision": 1
+          },
+          {
+            "title": "Dispatch fixture",
+            "description": "Team edit accepted",
+            "acceptance": [
+              "Record a receipt"
+            ],
+            "priority": "normal",
+            "labels": [],
+            "revision": 2
+          },
+          {
+            "title": "Dispatch fixture",
+            "description": "First editor revision",
+            "acceptance": [
+              "Record a receipt"
+            ],
+            "priority": "normal",
+            "labels": [],
+            "revision": 3
+          },
+          {
+            "title": "Dispatch fixture",
+            "description": "Both editors reviewed the goal",
+            "acceptance": [
+              "Record a receipt"
+            ],
+            "priority": "normal",
+            "labels": [],
+            "revision": 4
+          }
+        ],
+        "activity": [
+          {
+            "commandId": "edd7015a-24de-47af-aa77-794a8fe8f12e",
+            "version": 1,
+            "revision": 1,
+            "actor": "operator",
+            "time": "2026-11-23T05:57:33.203Z",
+            "action": "created",
+            "fingerprint": "9b29cb3fff4c1fa607c07573c3ce24b6ecc930f70e5a00261d2ce2c1de24dc27"
+          },
+          {
+            "commandId": "2f8ce388-2b41-46b5-a46a-065b9cc01aa9",
+            "version": 2,
+            "revision": 1,
+            "actor": "operator",
+            "time": "2026-11-23T05:57:33.207Z",
+            "action": "planned",
+            "fingerprint": "88f764130f7fd622244830a152b95059eb3b7787fc68ee27fa2bf32bd3facbec"
+          },
+          {
+            "member": {
+              "id": "ec30a96b-6103-44c3-8d78-223d4087e01f",
+              "name": "Lin"
+            },
+            "commandId": "46e5e1c8-c7fc-4e0a-b191-9ae82d64bef8",
+            "version": 3,
+            "revision": 1,
+            "actor": "member",
+            "time": "2026-11-23T05:57:33.700Z",
+            "action": "commented",
+            "comment": "Reviewed by Lin",
+            "fingerprint": "b78307e17bdf602b73f212b03bbe5f327d6107d467044bb88fb70e8d104caa48"
+          },
+          {
+            "member": {
+              "id": "ec30a96b-6103-44c3-8d78-223d4087e01f",
+              "name": "Lin"
+            },
+            "commandId": "f163fbd6-ae0d-467c-be05-545b3753bb16",
+            "version": 4,
+            "revision": 2,
+            "actor": "member",
+            "time": "2026-11-23T05:57:33.749Z",
+            "action": "edited",
+            "fingerprint": "c063121c477269a4c19b603a7869ef3890d5d9913d83eabfa0b356ae8f45e37d"
+          },
+          {
+            "member": {
+              "id": "ec30a96b-6103-44c3-8d78-223d4087e01f",
+              "name": "Lin"
+            },
+            "commandId": "b0f64bb0-f4ec-418e-b954-9ffe5317874c",
+            "version": 5,
+            "revision": 3,
+            "actor": "member",
+            "time": "2026-11-23T05:57:34.058Z",
+            "action": "edited",
+            "fingerprint": "9452fdd52b4f806012e297e519b4590942a78bb75da2b11c47d9a65a751dcb91"
+          },
+          {
+            "member": {
+              "id": "036bd350-6a82-4222-bacc-49f08ba7f477",
+              "name": "Kai"
+            },
+            "commandId": "f3f0dfa3-9b0d-419a-9e71-606e13c8831a",
+            "version": 6,
+            "revision": 4,
+            "actor": "member",
+            "time": "2026-11-23T05:57:34.183Z",
+            "action": "edited",
+            "fingerprint": "3e2c0f019ec504d3c10e1c7f03d5eb1b04c98801e6681746780d3f85901e3824"
+          },
+          {
+            "member": {
+              "id": "ec30a96b-6103-44c3-8d78-223d4087e01f",
+              "name": "Lin"
+            },
+            "commandId": "c488fdef-b377-4e52-a329-4deb72b499d5",
+            "version": 7,
+            "revision": 4,
+            "actor": "member",
+            "time": "2026-11-23T05:57:34.282Z",
+            "action": "commented",
+            "comment": "Signed comment",
+            "fingerprint": "056ef91784ee4e9a1533f0cc84eaa3073713e24d435105787ae1d619802a8397"
+          }
+        ],
+        "activeRun": null,
+        "latestRun": null,
+        "deliveryIds": [],
+        "currentDelivery": null,
+        "lastReview": null
+      },
+      {
+        "task": {
+          "title": "Dispatch fixture",
+          "description": "Confidential",
+          "acceptance": [
+            "Record a receipt"
+          ],
+          "priority": "normal",
+          "labels": [],
+          "id": "b052a059-aab6-47d7-acd3-bf2e235c4c2b",
+          "projectId": "e9be4e02-b45d-4608-b059-d02e2bd2eab7",
+          "version": 2,
+          "revision": 1,
+          "archived": false,
+          "status": "todo"
+        },
+        "revisions": [
+          {
+            "title": "Dispatch fixture",
+            "description": "Confidential",
+            "acceptance": [
+              "Record a receipt"
+            ],
+            "priority": "normal",
+            "labels": [],
+            "revision": 1
+          }
+        ],
+        "activity": [
+          {
+            "commandId": "b1e8afb5-4616-44d1-a3ec-f9ad314ac029",
+            "version": 1,
+            "revision": 1,
+            "actor": "operator",
+            "time": "2026-11-23T05:57:33.209Z",
+            "action": "created",
+            "fingerprint": "6f50e6b95061c3563e02a9dcebeecc93ffe42119ae2969ce7d518f6346329020"
+          },
+          {
+            "commandId": "4eac49b7-3c93-4317-945a-eeaf2c10952a",
+            "version": 2,
+            "revision": 1,
+            "actor": "operator",
+            "time": "2026-11-23T05:57:33.212Z",
+            "action": "planned",
+            "fingerprint": "14f919a65c20319c2577f15e65df37689e8d5081f8177f61ba4afcd925afc512"
+          }
+        ],
+        "activeRun": null,
+        "latestRun": null,
+        "deliveryIds": [],
+        "currentDelivery": null,
+        "lastReview": null
+      }
+    ],
+    "runs": [],
+    "deliveries": [],
+    "reviews": [],
+    "queue": [],
+    "generation": null
+  }
+}

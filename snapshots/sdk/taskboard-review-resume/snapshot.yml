@@ -1,0 +1,9 @@
+version: 1
+scenario: taskboard-review-resume
+profile: sdk
+composition: sdk-taskboard-dispatch
+recording: authored
+session:
+  source: ../../web/taskboard-coverage-review/session.v4.jsonl
+header:
+  class: taskboard-dispatch

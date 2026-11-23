@@ -1,0 +1,48 @@
+{
+  "version": "0.1.7-rc.2",
+  "platform": "macOS arm64",
+  "installation": "fresh consumer outside repository with @deepseek-ai/dsh as its only direct dependency",
+  "clientArtifacts": 355,
+  "tarballs": 334,
+  "tarballSetSha256": "ff54d24508bfab1c78e9199514f303c1ac3c9306ac46e1011ef350f10c68a20f",
+  "verifiedProductPackages": 608,
+  "backup": {
+    "archiveDownloaded": true,
+    "archiveUploaded": true,
+    "corruptIncompatibleAndConflictsRejected": true,
+    "reviewHistoryPreserved": true,
+    "missingSessionReported": true,
+    "queuedRunNotStarted": true,
+    "incompatibleSessionKept": true,
+    "compatibleSessionContinued": true,
+    "receiptsMatchedSession": true,
+    "secondRestorePreservedHistory": true,
+    "explicitFreshSession": true,
+    "queuedRestoreRechecked": true,
+    "staleSessionRejected": true,
+    "wrongInputRejected": true
+  },
+  "openai": {
+    "failedInputRetained": true,
+    "freshRetryLinked": true,
+    "modelRequests": 2,
+    "provider": "openai",
+    "model": "gpt-5.4-mini",
+    "endpoint": "/v1/responses"
+  },
+  "externalModelCalls": 0,
+  "taskboardWebTests": 27,
+  "when": "2026-11-23T18:56:28+08:00",
+  "hostTests": 29,
+  "docSync": {
+    "passed": 37,
+    "historicalFailures": [
+      "markdown links",
+      "doc-typecheck",
+      "markdown wrap",
+      "repository references",
+      "translation pairing"
+    ]
+  },
+  "catalogs": "Regenerated Cordis API and configuration catalog; both standalone gates and final doc-sync catalog checks passed."
+}

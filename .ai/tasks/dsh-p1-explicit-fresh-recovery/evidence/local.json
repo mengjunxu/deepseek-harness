@@ -1,0 +1,28 @@
+{
+  "when": "2026-11-23T18:11:15.639403+08:00",
+  "web": {
+    "passed": 1,
+    "filter": "restores a checked backup"
+  },
+  "scope": "macOS Web/SQLite and SDK, controlled local provider, missing original SDK directory",
+  "checks": [
+    "UI typecheck and browser bundle",
+    "scoped lint and JS syntax checks",
+    "taskboard UI README pairing",
+    "git diff --check"
+  ],
+  "cases": [
+    "Resume in the actual browser rejects missing Session without another Run or model request",
+    "Operator explicitly selects original folder, fresh Session and one material",
+    "Distinct Session and receipt linked to previous Run; one new model request contains only newly selected material",
+    "Old Run history unchanged and missing original Session stays absent"
+  ],
+  "sha256": {
+    "packages/client/ui-taskboard/src/client/RunPanel.tsx": "45671ec65f590facc929383758f771eacf3bbc53c52ab8db33484337ef7ff815",
+    "packages/client/ui-taskboard/src/client/locales.ts": "e352b5eaf6e9261b2f9a013026734bec104c918db881920e384e07688189e8f2",
+    "apps/web/tests/taskboard.e2e.ts": "debe072c0aae4edede095db3a70f422826f51b4e159b5fb7d8a98c86561d8306",
+    "apps/web/tests/fixtures/taskboard-smoke.mjs": "1cb846a067e43d5a6dda5d55c9ed45e44f1673bf4f3a3badd1f528b4009c4f35",
+    "apps/web/tests/fixtures/taskboard-browser.mjs": "778410fb76bf63ff737895f146543ed6bdfd2727191f086f4b31774dd1aa83ea",
+    "packages/client/ui-taskboard/lib/client.js": "abafad85a8c12df999a3969f6bee347464d72edc631c3355b8f1e2f59125bd38"
+  }
+}

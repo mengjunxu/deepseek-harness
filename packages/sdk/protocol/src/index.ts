@@ -21,6 +21,7 @@ export type {
   InitializeParams,
   InitializeResult,
   SdkEncodedImageBlock,
+  SdkHostToolRequest,
   SdkPromptContentBlock,
   SdkRunStatus,
   SessionEventNotification,

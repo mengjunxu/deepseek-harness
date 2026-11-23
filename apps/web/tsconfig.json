@@ -185,6 +185,8 @@
     "tests/workflow-run.e2e.ts"
   ],
   "references": [
+    { "path": "../../packages/util/crypto" },
+    { "path": "../../packages/api/taskboard-controller" },
     { "path": "../../packages/experimental/auto-review" },
     {
       "path": "../../packages/client/store"

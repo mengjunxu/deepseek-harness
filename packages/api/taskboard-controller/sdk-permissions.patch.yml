@@ -1,3 +1,11 @@
 # A Taskboard Run can receive input only after its native permission services activate.
 - id: sdk-jsonrpc-server
-  inject: [sdkAppStartup, loader, approval, permissionPresets, sandboxPolicy, sandbox]
+  inject: [sdkAppStartup, loader, approval, permissionPresets, sandboxPolicy, sandbox, sessionPersistence]
+- id: session-persistence-jsonl
+  config:
+    root: !!js dshHomePath('sessions')
+- insert:
+    - id: taskboard-sdk-tools
+      name: ./lib/types/sdk-tools.js
+    - id: taskboard-question-tool
+      name: '@deepseek-ai/dsh-tool-ask-user'

@@ -71,9 +71,7 @@ export class SqliteKvUnit implements KvUnit {
         // Null prototype: record keys are arbitrary strings, so '__proto__'
         // must land as an own property instead of mutating the prototype.
         const records: Record<string, unknown> = Object.create(null) as Record<string, unknown>
-        for (const row of statements.selectAll.all() as Array<{ key: string; value: string }>) {
-          records[row.key] = this.parseValue(row.value, `table '${name}' key '${row.key}'`)
-        }
+        for (const [key, value] of this.readEntries(name, statements)) records[key] = value
         tables[name] = records
       }
       let global: unknown = null
@@ -83,6 +81,11 @@ export class SqliteKvUnit implements KvUnit {
       }
       return { tables, global }
     })
+  }
+
+  private readEntries(table: string, statements: TableStatements): ReadonlyArray<readonly [string, unknown]> {
+    const rows = statements.selectAll.all() as Array<{ key: string; value: string }>
+    return rows.map(row => [row.key, this.parseValue(row.value, `table '${table}' key '${row.key}'`)])
   }
 
   /** Parse one stored value column, mapping bad JSON to `malformed-medium`. */
@@ -126,6 +129,7 @@ export class SqliteKvUnit implements KvUnit {
             const row = statements(table).selectOne.get(key) as { value: string } | undefined
             return row === undefined ? undefined : this.parseValue(row.value, `table '${table}' key '${key}'`)
           },
+          entries: table => this.readEntries(table, statements(table)),
           set: (table, key, value) => {
             const target = statements(table)
             if (value === undefined) target.remove.run(key)

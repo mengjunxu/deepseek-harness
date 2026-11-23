@@ -1,0 +1,17 @@
+{
+  "when": "2026-11-23T18:35:26+08:00",
+  "platform": "macOS arm64",
+  "red": "An earlier readable copy was accepted as the complete prior Session",
+  "cases": {
+    "oldLogCreatedByOriginalPersistenceWriter": "declined before admission",
+    "alteredPriorInputWithSameReceiptId": "declined before admission",
+    "originalFiles": "accepted, new receipt in original Session",
+    "replacedAfterEnqueue": "failed before launch, no input or receipt",
+    "explicitFreshAfterMissingSession": "completed using only newly selected material"
+  },
+  "checks": [
+    "controller build and typecheck",
+    "3 focused shipped Web and SDK cases",
+    "targeted lint, syntax, named README pair and git diff --check"
+  ]
+}

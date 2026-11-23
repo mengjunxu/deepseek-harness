@@ -1,0 +1,26 @@
+{
+  "when": "2026-11-23T17:52:36.538136+08:00",
+  "platform": "macOS arm64, Node 26.5.0",
+  "previousBuild": "codely_bridge committed source, feat(taskboard): persist queued runs and SDK input receipts",
+  "currentBuild": "local working tree with versioned task risk",
+  "previousHostSha256": "55faeabffc9e6eb1760e767275b9c6a9c0f773cf4fc1a028387f0b080555f955",
+  "currentHostSha256": "a4bcd9abe5f2572ea65b3f10eea5f7a90ef16a29a6393d6af09d9776baa657a7",
+  "probeSha256": "64395589c4748aa706e20d3927a68fc7dce1d1587ccf749613ad87d1581a0c26",
+  "result": {
+    "oldRevisions": 2,
+    "oldActivities": 3,
+    "upgradedRevisions": 3,
+    "oldCommandReplayed": true,
+    "upgradedCommandReplayed": true,
+    "rollbackFromStoppedCopy": true,
+    "originalDatabaseUntouched": true
+  },
+  "checks": [
+    "isolated detached checkout, pnpm install --offline --frozen-lockfile, pnpm run build",
+    "node apps/web/tests/fixtures/taskboard-smoke.mjs --upgrade-from <built previous dsh CLI>",
+    "node --check fixture",
+    "taskboard-controller documentation pair",
+    "git diff --check"
+  ],
+  "scope": "task requirements and comment history; dispatch disabled on all four Host launches"
+}

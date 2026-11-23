@@ -1,0 +1,43 @@
+{
+  "verified_at": "2026-11-22T02:22:27Z",
+  "platform": "macOS arm64",
+  "node": "26.5.0",
+  "sha256": {
+    "apps/web/tests/taskboard.e2e.ts": "1a2a776d8665b2116dad9a3e92b8545459fb8580cc19372fca401417cc83c111",
+    "apps/web/tests/fixtures/taskboard-smoke.mjs": "fe3fb9f4f3ca88d0f66b2123b94664e392c7dd849bc2b0a7af3c8a1d170fc3c6",
+    "apps/web/tests/fixtures/taskboard-drop-sdk-ack.mjs": "66dd50af6875d455887be633dc5877bce02d43387034f99826cdfc7431e60c8c",
+    "apps/web/tests/fixtures/taskboard-receipt-write-fault.mjs": "6b24d3743e6ba57efb3e7ab18a23d2501abd18d49540d479490b1c23a9dc2320",
+    "apps/web/tests/fixtures/taskboard-text-only-scope.mjs": "0e13f53c6b6467e97c109a8c1df70f600e29776f7cb8d547054e2d9525ab9a37",
+    "packages/api/taskboard-controller/src/dispatch.ts": "45862eb85f26514752be0b24146bedbd24d88a6323122eb4f41e93651d5c4913",
+    "packages/api/taskboard-controller/src/execution.ts": "e948eafc34747d243175fe2843a7e6501bfbb03f04144ddd0b01ad4b4a472e1b",
+    "packages/api/taskboard-controller/src/index.ts": "2dc999fc01d13df954298f5f454047afa933013e426aa819eb98c721b955de89",
+    "packages/api/taskboard-controller/src/stop.ts": "d0d95ee98f237f6f36e8d5b4aa62cdf6e0736b4466eb37a13dcbb2f0841caf88",
+    "packages/api/taskboard-controller/tests/taskboard.host.spec.ts": "f9310e5c433b73019fd2b2987da02e73910df96a38903a910c6a8a611009c08f",
+    "packages/api/taskboard-controller/lib/index.js": "97db41bc3acaa504df01fcd8d0a5faef2cef5f1d44897a08a4f8a634aa89d354",
+    "packages/sdk/server/src/server.ts": "8b71f7393d3f2fc4b215ac34417acc75bc3d3e744f451a9f0625e9e07df960f1",
+    "packages/sdk/server/lib/index.js": "f44738b613e766ab0e149481692a554977ec0900018abdbaaca19f9ec9871aa3",
+    "python/sdk/src/deepseek_harness/client.py": "0ed94e981b73f8f34cf1e652609792963894ca065edb89ac4f2361db33df443e",
+    "snapshots/sdk/taskboard-dispatch/session.v4.jsonl": "30af667e407885d17682e8cc3eb3e24f6abb45056dd33b2b3f5a7afe76e30921"
+  },
+  "results": {
+    "pnpm exec tsc -b packages/api/taskboard-controller/tsconfig.json": "PASS",
+    "pnpm exec tsdown --env.DSH_BUILD_FACE host --filter @deepseek-ai/dsh-api-taskboard-controller": "PASS",
+    "pnpm exec vitest run --config vitest.web.config.ts apps/web/tests/taskboard.e2e.ts": "5 PASS",
+    "pnpm exec vitest run packages/sdk/server/tests/server.spec.ts packages/sdk/client/tests/sdk-client.spec.ts packages/api/taskboard-controller/tests/taskboard.host.spec.ts": "96 PASS",
+    "python -m pytest -q python/sdk/tests/test_client.py": "30 PASS",
+    "pnpm run test:snapshot -t taskboard-dispatch": "1 PASS",
+    "pnpm run doc-sync": "37 PASS / 5 FAIL"
+  },
+  "observations": {
+    "lost_sdk_ack": "Recovered the exact inbox message ID from the bound Session; one model request.",
+    "late_receipt_after_stop": "Recorded in the original terminal Run without changing the next lease.",
+    "macos_scope": "Unverified scope retains the lease. The sequential continuation test provides an observer for its text-only fixture.",
+    "documentation_failures": [
+      "legacy snippet type errors",
+      "legacy broken relative links",
+      "legacy and PRD pairing gaps",
+      "legacy hard wraps",
+      "pre-existing commit ID in archived verification evidence"
+    ]
+  }
+}

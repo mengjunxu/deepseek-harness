@@ -1,0 +1,12 @@
+---
+schema_version: 1
+task_id: dsh-p1-board-reconnect
+state: HANDOFF_READY
+active_agent: null
+branch: codely_bridge
+updated_at: "2026-11-23T07:49:59+00:00"
+---
+
+2026-11-23T07:45:29+00:00，上项验收已释放。Codex 在 codely_bridge 单写本机测试，已有改动保留。桌面 Codex 周剩 50%，北京时间 11 月 24 日 17:34:53 重置，停止线 20%。
+
+2026-11-23T07:49:59+00:00，PASS：6 项定向 Web 检查；最终断线用例单独复验通过。关闭真实 Gateway WebSocket 并暂缓工作台 HTTP 读取，独立客户端写入并重放同一评论。重连后观察到新订阅首条消息，原页面补读旧评论并接收后续写入，三条评论各出现一次，无主页面导航。[实测与指纹](evidence/local.json)。doc-sync 37 PASS、5 FAIL，与上一阶段同为历史文档类型、旧链接、双语配对、换行及仓库引用问题。桌面 Codex 10080 分钟窗口剩余 50%，北京时间 11 月 24 日 17:34:52 重置，停止线 20%。 本阶段仅修改 Web 验收脚本、实施计划和任务记录。本地尚未提交或推送。无需更新架构、共享流程或 Memory。TBOARD-11 后续和 G2 参考机继续待验，草稿 PR 暂缓。已释放写入权。

@@ -1,0 +1,23 @@
+{
+  "when": "2026-11-23T18:16:04.034520+08:00",
+  "platform": "macOS arm64, Node 26.5.0",
+  "target": "0.1.7-rc.2, single direct CLI package",
+  "testCredential": "local placeholder, Web Host and SDK receive no DeepSeek key",
+  "endpoint": "loopback /v1/responses",
+  "liveAccountCalls": 0,
+  "result": {
+    "failedInputRetained": true,
+    "freshRetryLinked": true,
+    "modelRequests": 2,
+    "provider": "openai",
+    "model": "gpt-5.4-mini",
+    "endpoint": "/v1/responses"
+  },
+  "checkedProductPackages": 608,
+  "tarballSetSha256": "e926b588c4b942a31aa28b67e23c4136d5083d9e44d46e2f5d603f6a2d5d3d0f",
+  "checks": [
+    "source Web: two documented deployment smokes",
+    "build:official, release:pack, release:verify-packed-install --taskboard openai",
+    "two named documentation pairs, scoped lint, JS syntax, git diff --check"
+  ]
+}

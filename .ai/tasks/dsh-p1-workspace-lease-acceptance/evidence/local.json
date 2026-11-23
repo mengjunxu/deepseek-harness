@@ -1,0 +1,26 @@
+{
+  "when": "2026-11-23T09:11:41.232897+00:00",
+  "sha256": {
+    "apps/web/tests/fixtures/taskboard-smoke.mjs": "d6001739f293193fde071b2ef65605656a5e0f22d95ebe6c07e45f9b21c49fa6",
+    "apps/web/tests/taskboard.e2e.ts": "1f6bafcb421ebbe60e2904f98356ffdf2f69412b5e0c4e1968ee3ba98a8f659f",
+    "packages/api/taskboard-controller/tests/taskboard.host.spec.ts": "d94173942db2c97d1f6b2f39177d4f9a9bd7c0921e9f53182f1d25cf736a71b3",
+    "packages/api/taskboard-controller/lib/index.js": "42d5a7529a578744830fe1d68c24450dfc08dc944cc37859f99849c1f6249aea"
+  },
+  "platform": "macOS arm64, Web/SDK with controlled local provider, SQLite",
+  "web": {
+    "passed": 4,
+    "filter": "runs independent SDKs|holds the claimed lease|retains the directory and queue|answers a native SDK question"
+  },
+  "host": {
+    "passed": 4,
+    "filter": "rechecks original changes|two Hosts fill|signals only the attached client|returns at the stop deadline"
+  },
+  "observed": [
+    "Canonical nested alias stays queued without an input attempt while its checkout is occupied",
+    "Independent isolated checkout receives input while the conflicting older entry waits",
+    "Stopping the independent SDK leaves the checkout owner running",
+    "After the checkout owner finishes, the queued nested alias runs once with a receipt in its confirmed directory",
+    "Unknown permission activation sends no input",
+    "Forced stop timeout keeps directory and lease until full process scope exits"
+  ]
+}

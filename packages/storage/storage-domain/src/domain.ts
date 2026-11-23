@@ -117,6 +117,12 @@ export interface DomainTransaction<S extends DomainSpec> {
    */
   get<N extends keyof S['tables'] & string>(table: N, key: TableKeyOf<S, N>): TableValueOf<S, N> | undefined
   /**
+   * Enumerate validated records from the persisted transaction view, including earlier writes in this transaction.
+   * @param table - Declared table.
+   * @returns the keys and values in unspecified order.
+   */
+  entries<N extends keyof S['tables'] & string>(table: N): ReadonlyArray<readonly [TableKeyOf<S, N>, TableValueOf<S, N>]>
+  /**
    * Replace or remove a record atomically with the other writes.
    * @param table - Declared table.
    * @param key - Record identity.
@@ -285,6 +291,7 @@ export class DomainImpl {
       }
       const result = await this.unit.transaction(tx => operation({
         get: (table, key) => parse(table, key, tx.get(table, key)),
+        entries: table => tx.entries(table).map(([key, value]) => [key, parse(table, key, value)]),
         set: (table, key, value) => {
           const parsed = parse(table, key, value)
           tx.set(table, key, parsed)

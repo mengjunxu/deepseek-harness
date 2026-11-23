@@ -1952,6 +1952,19 @@ export const SERVICE_API: readonly ServiceApiEntry[] = [
     ],
   },
   {
+    key: 'sdkHost',
+    summary: 'The SDK client capabilities available to tools in the owned runtime.',
+    description: 'The SDK client capabilities available to tools in the owned runtime.',
+    methods: [
+      {
+        signature: 'callHostTool(agent: Agent | undefined, callId: ToolCallId, tool: string, args: object, signal: AbortSignal): Promise<unknown>',
+        description: 'Forward a tool request from an owned root Agent to the SDK client.',
+        parameters: [{ name: 'agent', description: 'Agent invoking the tool, when present.' }, { name: 'callId', description: 'registry-owned identity of this invocation.' }, { name: 'tool', description: 'host capability selected by the tool implementation.' }, { name: 'args', description: 'validated tool arguments.' }, { name: 'signal', description: 'cancellation of the invocation.' }],
+        returns: 'the SDK client\'s response for this invocation.',
+      },
+    ],
+  },
+  {
     key: 'sessionController',
     summary: 'Host service backing the generated `ctx.remote.session` namespace.',
     description: 'Host service backing the generated `ctx.remote.session` namespace.',
@@ -3124,6 +3137,18 @@ export const SERVICE_API: readonly ServiceApiEntry[] = [
         returns: 'the directory and commit to bind to the lease.',
       },
       {
+        signature: '@Remote runInput(projectId: ProjectId, taskId: TaskId, runId: TaskRunId): TaskRunInputSnapshot',
+        description: 'Read the original SDK input of a queued or historical Run without opening its Session.',
+        parameters: [{ name: 'projectId', description: 'project owning the Run.' }, { name: 'taskId', description: 'task owning the Run.' }, { name: 'runId', description: 'Run whose saved input was selected.' }],
+        returns: 'the admitted task content, feedback and explicitly selected material text.',
+      },
+      {
+        signature: '@Remote runTaskSpec(projectId: ProjectId, taskId: TaskId, runId: TaskRunId): RunTaskSpec',
+        description: 'Read the requirements, execution workspace and consent captured for one Run.',
+        parameters: [{ name: 'projectId', description: 'owning project.' }, { name: 'taskId', description: 'owning task.' }, { name: 'runId', description: 'queued or historical Run selected by the operator.' }],
+        returns: 'the versioned TaskSpec with the original SDK input and available authorization.',
+      },
+      {
         signature: '@Remote inspectPriorWorkspace(projectId: ProjectId, taskId: TaskId, priorRun: TaskRunId): Promise<WorkspaceInspection>',
         description: 'Inspect the prior Run before the operator selects its directory again.',
         parameters: [{ name: 'projectId', description: 'owning project.' }, { name: 'taskId', description: 'task whose execution is being continued.' }, { name: 'priorRun', description: 'latest inactive Run.' }],
@@ -3142,10 +3167,46 @@ export const SERVICE_API: readonly ServiceApiEntry[] = [
         returns: 'observed working directory, branch and commit.',
       },
       {
+        signature: '@Remote exportBackup(): Promise<string>',
+        description: 'Create a versioned Taskboard backup after active execution has settled.',
+        parameters: [],
+        returns: 'a JSON archive with a checksum and an explicit Session manifest.',
+      },
+      {
+        signature: '@Remote exportHandoff(projectId: ProjectId): Promise<string>',
+        description: 'Export a project for handoff outside the Taskboard.',
+        parameters: [{ name: 'projectId', description: 'project chosen by the operator.' }],
+        returns: 'a JSON document with requirements, Run summaries and review history.',
+      },
+      {
+        signature: '@Remote restoreBackup(archive: string): Promise<TaskboardRestore>',
+        description: 'Restore a verified archive into an empty Taskboard without replaying execution or requests.',
+        parameters: [{ name: 'archive', description: 'JSON backup selected by the operator.' }],
+        returns: 'restored record counts and missing or canceled execution references.',
+      },
+      {
+        signature: '@Remote({ mode: \'stream\' }) async *watchChanges(signal: AbortSignal): AsyncIterable<\'changed\'>',
+        description: 'Notify a connected Taskboard of its initial state and subsequent durable changes.',
+        parameters: [{ name: 'signal', description: 'authenticated stream lifetime.' }],
+        returns: 'coalesced invalidations without exposing stored payloads.',
+      },
+      {
         signature: '@Remote async createProject(request: ProjectCreateCommand): Promise<TaskboardProject>',
         description: 'Register a local project root selected by the operator.',
         parameters: [{ name: 'request', description: 'idempotent creation with its absolute directory and optional configuration.' }],
         returns: 'the canonical persisted project.',
+      },
+      {
+        signature: '@Remote async startRun(request: TaskStartCommand): Promise<TaskStartReceipt>',
+        description: 'Queue a confirmed task snapshot and a Host-selected SDK route, with an explicit Session continuation option.',
+        parameters: [{ name: 'request', description: 'operator command, directory selection and explicit materials.' }],
+        returns: 'the original queue receipt and Run ID on equivalent replays.',
+      },
+      {
+        signature: '@Remote cancelQueuedRun(request: TaskCommand & { runId: TaskRunId }): Promise<TaskReceipt>',
+        description: 'Cancel a Run that is still waiting for the execution slot.',
+        parameters: [{ name: 'request', description: 'versioned operator command scoped to the queued Run.' }],
+        returns: 'the original cancellation receipt on equivalent replays.',
       },
       {
         signature: '@Remote async stopRun(request: TaskStopCommand): Promise<void>',
@@ -3155,9 +3216,63 @@ export const SERVICE_API: readonly ServiceApiEntry[] = [
       },
       {
         signature: '@Remote async recheckRunStop(projectId: ProjectId, taskId: TaskId, runId: TaskRunId): Promise<void>',
-        description: 'Recheck an unconfirmed stop without sending another shutdown or force request.',
+        description: 'Recheck an unconfirmed shutdown without sending another signal.',
         parameters: [{ name: 'projectId', description: 'project owning the Run\'s task.' }, { name: 'taskId', description: 'task owning the Run.' }, { name: 'runId', description: 'Run whose exit must be observed again.' }],
         returns: 'after recording exit or keeping the lease when the Host lacks complete evidence.',
+      },
+      {
+        signature: '@Remote pendingRunInteractions(projectId: ProjectId, taskId: TaskId, runId: TaskRunId): TaskPendingInteraction[]',
+        description: 'Read the outstanding native questions and approvals for one Run.',
+        parameters: [{ name: 'projectId', description: 'project owning the Run\'s task.' }, { name: 'taskId', description: 'task owning the Run.' }, { name: 'runId', description: 'Run whose live requests the operator opened.' }],
+        returns: 'requests still accepting an operator response.',
+      },
+      {
+        signature: '@Remote answerRunInteraction(request: TaskInteractionReply): Promise<void>',
+        description: 'Submit one response to the Run\'s exact pending native request.',
+        parameters: [{ name: 'request', description: 'scoped operator response including the native request identity and kind.' }],
+        returns: 'after the Host records and forwards the response to the original SDK responder.',
+      },
+      {
+        signature: '@Remote inbox(): TaskboardInbox[]',
+        description: 'Show pending requests grouped by the attached Run.',
+        parameters: [],
+        returns: 'the Run inboxes that need an operator response.',
+      },
+      {
+        signature: '@Remote executionRoute(projectId: ProjectId): TaskboardExecutionRoute',
+        description: 'Show the selected SDK route and whether this project can dispatch.',
+        parameters: [{ name: 'projectId', description: 'project whose execution configuration the operator opened.' }],
+        returns: 'configured launcher facts. The SDK validates credentials and permissions at launch.',
+      },
+      {
+        signature: '@Remote deliveryDetail(projectId: ProjectId, taskId: TaskId, deliveryId: DeliveryId): TaskDeliveryDetail',
+        description: 'Read the sealed evidence and file inventory for one Delivery.',
+        parameters: [{ name: 'projectId', description: 'project that owns the task.' }, { name: 'taskId', description: 'task that owns the Delivery.' }, { name: 'deliveryId', description: 'immutable Delivery identity.' }],
+        returns: 'verification, coverage and revision information.',
+      },
+      {
+        signature: '@Remote exportReviewPackage(projectId: ProjectId, taskId: TaskId, deliveryId: DeliveryId): string',
+        description: 'Export validation coverage and risk for one sealed delivery without project text, paths or Session content.',
+        parameters: [{ name: 'projectId', description: 'owning project.' }, { name: 'taskId', description: 'owning task.' }, { name: 'deliveryId', description: 'sealed version selected by the operator.' }],
+        returns: 'a compact JSON review package.',
+      },
+      {
+        signature: '@Remote requestModelReview(request: ModelReviewCommand): Promise<ModelReviewAttempt>',
+        description: 'Request one coverage assessment without changing the delivery or the human decision.',
+        parameters: [{ name: 'request', description: 'operator-confirmed delivery fingerprint, route and response language.' }],
+        returns: 'the recorded attempt; replay reads its current outcome without contacting the model.',
+      },
+      {
+        signature: '@Remote deliveryDiff(projectId: ProjectId, taskId: TaskId, deliveryId: DeliveryId, path: string): Promise<DeliveryFileDiff>',
+        description: 'Read one file from the workspace while its fingerprint still matches the Delivery.',
+        parameters: [{ name: 'projectId', description: 'project that owns the task.' }, { name: 'taskId', description: 'task that owns the Delivery.' }, { name: 'deliveryId', description: 'immutable Delivery identity.' }, { name: 'path', description: 'exact workspace-relative path from its file inventory.' }],
+        returns: 'a read-only comparison, new file content or a display status.',
+      },
+      {
+        signature: '@Remote reviewDelivery(request: TaskReviewCommand): Promise<TaskReceipt>',
+        description: 'Record an operator’s acceptance or return for an exact Delivery and task version.',
+        parameters: [{ name: 'request', description: 'original delivery identity, snapshot and decision.' }],
+        returns: 'the committed decision receipt, including on equivalent replay.',
       },
       {
         signature: '@Remote listProjects(): TaskboardProject[]',
@@ -3220,10 +3335,47 @@ export const SERVICE_API: readonly ServiceApiEntry[] = [
         returns: 'the stored detail, or null if the task is outside the project or absent.',
       },
       {
+        signature: '@Remote activityPage(projectId: ProjectId, taskId: TaskId, cursor: TaskActivityCursor | null, limit: number): TaskActivityPage | null',
+        description: 'Read task activity in commit order, starting immediately after the saved cursor.',
+        parameters: [{ name: 'projectId', description: 'owning project.' }, { name: 'taskId', description: 'selected task.' }, { name: 'cursor', description: 'checkpoint from a prior page, or null to start at the beginning.' }, { name: 'limit', description: 'positive maximum number of entries to return.' }],
+        returns: 'the activity and next checkpoint, or null for an absent or out-of-project task.',
+        throws: ['When the checkpoint does not match the selected task\'s stored history.'],
+      },
+      {
         signature: '@Remote listTasks(projectId: ProjectId, includeArchived: boolean): TaskView[]',
         description: 'List task cards for one project, including archived records only when requested.',
         parameters: [{ name: 'projectId', description: 'owning project.' }, { name: 'includeArchived', description: 'whether to include archived cards.' }],
         returns: 'the project\'s task cards.',
+      },
+      {
+        signature: '@Remote listBoardCards(projectId: ProjectId, includeArchived: boolean): TaskboardCard[]',
+        description: 'List project cards with their current or latest Run’s status and event position.',
+        parameters: [{ name: 'projectId', description: 'project owning the displayed cards.' }, { name: 'includeArchived', description: 'whether archived cards are visible.' }],
+        returns: 'project cards in operator-defined order.',
+      },
+      {
+        signature: '@Remote setRelations(request: TaskCommand & { relations: TaskRelations }): Promise<TaskReceipt>',
+        description: 'Set the parent and prerequisites for a task before its next admission.',
+        parameters: [{ name: 'request', description: 'operator-selected links and expected task version.' }],
+        returns: 'the receipt for the saved relationships.',
+      },
+      {
+        signature: '@Remote projectMembers(projectId: ProjectId): Promise<ProjectMember[]>',
+        description: 'List accounts and the selected project\'s grants for the Host operator.',
+        parameters: [{ name: 'projectId', description: 'project being administered.' }],
+        returns: 'account identities and current roles.',
+      },
+      {
+        signature: '@Remote createMember(request: CreateMember): Promise<void>',
+        description: 'Provision a named account with an initial project role.',
+        parameters: [{ name: 'request', description: 'new identity, project role and credential verifier.' }],
+        returns: 'after the account and first grant commit.',
+      },
+      {
+        signature: '@Remote changeMember(request: ChangeMember): Promise<void>',
+        description: 'Change a project grant, rotate a credential or disable an account.',
+        parameters: [{ name: 'request', description: 'selected change at the observed account version.' }],
+        returns: 'after the new permissions commit.',
       },
     ],
   },
@@ -4916,6 +5068,10 @@ export const TYPE_API: readonly TypeApiEntry[] = [
     declaration: 'export interface BundleRowInfo {\n    rowId: string;\n    moduleName: string;\n    meta?: PluginLocalizedMeta;\n    entryId?: PluginEntryId;\n}',
   },
   {
+    name: 'ChangeMember',
+    declaration: 'export type ChangeMember = {\n    id: MemberId;\n    expectedVersion: number;\n} & ({\n    action: \'grant\';\n    projectId: ProjectId;\n    role: MemberRole | null;\n} | {\n    action: \'disable\';\n} | {\n    action: \'rotate\';\n    verifier: string;\n});',
+  },
+  {
     name: 'ChangeResult',
     declaration: 'export interface ChangeResult {\n    changed: boolean;\n    application: \'applied\' | \'restart-required\' | \'overridden\' | \'failed\' | \'cancelled\';\n    stage: \'install\' | \'enable\' | \'remove\';\n    target: string;\n    enabled?: boolean;\n    error?: ManagementError;\n    warnings?: string[];\n    packageResult?: PackageResult;\n    bundle?: string;\n    pendingBuilds?: string[];\n    approvedBuilds?: string[];\n    registries?: Registry[];\n    failedAt?: \'registry\' | \'spec-host\';\n}',
   },
@@ -5164,6 +5320,10 @@ export const TYPE_API: readonly TypeApiEntry[] = [
     declaration: 'export interface CreateGoalResult {\n    readonly ref: GoalRef;\n}',
   },
   {
+    name: 'CreateMember',
+    declaration: 'export interface CreateMember {\n    id: MemberId;\n    name: string;\n    verifier: string;\n    projectId: ProjectId;\n    role: MemberRole;\n}',
+  },
+  {
     name: 'CreateSessionOptions',
     declaration: 'export interface CreateSessionOptions {\n    readonly seed?: readonly SessionEvent[];\n    readonly inheritedEventCount?: SessionLogOffset;\n    readonly meta?: {\n        readonly cwd?: string;\n        readonly parentSession?: SessionId;\n        readonly createdAt?: number;\n        readonly isSeeded?: boolean;\n        readonly origin?: \'subagent\';\n        readonly delegationDepth?: number;\n        readonly agentPreset?: string;\n    };\n}',
   },
@@ -5228,6 +5388,18 @@ export const TYPE_API: readonly TypeApiEntry[] = [
     declaration: 'export type DeepSeekLlmApiJson = null | boolean | number | string | DeepSeekLlmApiJson[] | {\n    [key: string]: DeepSeekLlmApiJson;\n};',
   },
   {
+    name: 'DeliveryCodeSnapshot',
+    declaration: 'export interface DeliveryCodeSnapshot {\n    scope: \'git\' | \'declared-files\';\n    baseline: string | null;\n    head: string | null;\n    fingerprint: string;\n    files: DeliveryFile[];\n    gitDiffCheck?: \'passed\' | \'failed\' | \'not-run\' | undefined;\n    gitDiffObservation?: {\n        observedAt: string;\n        exitCode: number | null;\n    } | undefined;\n    projectScriptCheck?: ProjectScriptCheck | undefined;\n}',
+  },
+  {
+    name: 'DeliveryFile',
+    declaration: 'export interface DeliveryFile {\n    path: string;\n    status: \'added\' | \'modified\' | \'deleted\' | \'untracked\' | \'declared\';\n}',
+  },
+  {
+    name: 'DeliveryFileDiff',
+    declaration: 'export type DeliveryFileDiff = {\n    kind: \'patch\';\n    text: string;\n} | {\n    kind: \'file\';\n    text: string;\n} | {\n    kind: \'binary\' | \'oversized\' | \'symlink\';\n};',
+  },
+  {
     name: 'DeliveryId',
     declaration: 'export type DeliveryId = Branded<\'TaskboardDeliveryId\'>;',
   },
@@ -5236,8 +5408,16 @@ export const TYPE_API: readonly TypeApiEntry[] = [
     declaration: 'export interface DeliveryRetentionBounds {\n    readonly days: number;\n    readonly records: number;\n}',
   },
   {
+    name: 'DeliverySubmission',
+    declaration: 'export type DeliverySubmission = z.output<typeof deliverySubmission>;',
+  },
+  {
     name: 'DeliverySummary',
     declaration: 'export interface DeliverySummary {\n    id: DeliveryId;\n    runId: TaskRunId;\n    revision: number;\n    version: number;\n    snapshot: string;\n    summary: string;\n    stale: boolean;\n}',
+  },
+  {
+    name: 'DeliveryVerification',
+    declaration: 'export interface DeliveryVerification {\n    criterion: string;\n    status: \'passed\' | \'failed\' | \'not-run\' | \'not-applicable\';\n    evidence: string;\n}',
   },
   {
     name: 'DeveloperMessage',
@@ -5329,7 +5509,7 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   },
   {
     name: 'DomainTransaction',
-    declaration: 'export interface DomainTransaction<S extends DomainSpec> {\n    get<N extends keyof S[\'tables\'] & string>(table: N, key: TableKeyOf<S, N>): TableValueOf<S, N> | undefined;\n    set<N extends keyof S[\'tables\'] & string>(table: N, key: TableKeyOf<S, N>, value: TableValueOf<S, N> | undefined): void;\n}',
+    declaration: 'export interface DomainTransaction<S extends DomainSpec> {\n    get<N extends keyof S[\'tables\'] & string>(table: N, key: TableKeyOf<S, N>): TableValueOf<S, N> | undefined;\n    entries<N extends keyof S[\'tables\'] & string>(table: N): ReadonlyArray<readonly [\n        TableKeyOf<S, N>,\n        TableValueOf<S, N>\n    ]>;\n    set<N extends keyof S[\'tables\'] & string>(table: N, key: TableKeyOf<S, N>, value: TableValueOf<S, N> | undefined): void;\n}',
   },
   {
     name: 'DshEnvironment',
@@ -5789,7 +5969,7 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   },
   {
     name: 'KvTransaction',
-    declaration: 'export interface KvTransaction {\n    get(table: string, key: string): unknown;\n    set(table: string, key: string, value: unknown): void;\n}',
+    declaration: 'export interface KvTransaction {\n    get(table: string, key: string): unknown;\n    entries(table: string): ReadonlyArray<readonly [\n        string,\n        unknown\n    ]>;\n    set(table: string, key: string, value: unknown): void;\n}',
   },
   {
     name: 'KvUnit',
@@ -5980,6 +6160,14 @@ export const TYPE_API: readonly TypeApiEntry[] = [
     declaration: 'export type McpResourceRequest = {\n    method: \'resources/list\' | \'resources/templates/list\';\n    cursor?: string;\n} | {\n    method: \'resources/read\';\n    uri: string;\n};',
   },
   {
+    name: 'MemberId',
+    declaration: 'export type MemberId = Branded<\'TaskboardMemberId\'>;',
+  },
+  {
+    name: 'MemberRole',
+    declaration: 'export type MemberRole = \'viewer\' | \'editor\';',
+  },
+  {
     name: 'Message',
     declaration: 'export type Message = MessageRoleMap[keyof MessageRoleMap];',
   },
@@ -6106,6 +6294,18 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   {
     name: 'ModelReasoningEffort',
     declaration: 'export interface ModelReasoningEffort {\n    readonly id: string;\n    readonly name: string;\n    readonly description?: string;\n}',
+  },
+  {
+    name: 'ModelReviewAttempt',
+    declaration: 'export interface ModelReviewAttempt extends ModelReviewCommand {\n    sessionId: string;\n    requestedAt: string;\n    expiresAt: string;\n    state: \'requested\' | \'completed\' | \'failed\';\n    summary: string | null;\n}',
+  },
+  {
+    name: 'ModelReviewCommand',
+    declaration: 'export interface ModelReviewCommand {\n    commandId: CommandId;\n    projectId: ProjectId;\n    taskId: TaskId;\n    deliveryId: DeliveryId;\n    snapshot: string;\n    provider: string;\n    model: string;\n    language: \'en\' | \'zh\';\n}',
+  },
+  {
+    name: 'ModelReviewRoute',
+    declaration: 'export interface ModelReviewRoute extends TaskboardSdkRoute {\n    maxAttempts: number;\n}',
   },
   {
     name: 'ModelSelectionCapture',
@@ -6348,6 +6548,22 @@ export const TYPE_API: readonly TypeApiEntry[] = [
     declaration: 'export interface ProjectionSnapshot {\n    asOfSeq: SessionSeqCursor;\n    values: Partial<SessionProjectionMap>;\n}',
   },
   {
+    name: 'ProjectMember',
+    declaration: 'export interface ProjectMember {\n    id: MemberId;\n    name: string;\n    version: number;\n    disabled: boolean;\n    role: MemberRole | null;\n}',
+  },
+  {
+    name: 'ProjectScript',
+    declaration: 'export type ProjectScript = \'test\' | \'build\';',
+  },
+  {
+    name: 'ProjectScriptCheck',
+    declaration: 'export interface ProjectScriptCheck {\n    script: ProjectScript;\n    sourceSnapshot: string | null;\n    observation: {\n        time: string;\n        outcome: ProjectScriptOutcome;\n    } | null;\n}',
+  },
+  {
+    name: 'ProjectScriptOutcome',
+    declaration: 'export type ProjectScriptOutcome = {\n    exitCode: number;\n    reason: null;\n} | {\n    exitCode: null;\n    reason: \'unavailable\' | \'timed-out\' | \'interrupted\' | \'sandbox-denied\';\n};',
+  },
+  {
     name: 'PromptAssembly',
     declaration: 'export interface PromptAssembly {\n    sections: AssembledSection[];\n    contexts: AssembledContext[];\n    tools: ToolSchema[];\n    variables: Record<string, string | undefined>;\n}',
   },
@@ -6549,23 +6765,31 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   },
   {
     name: 'ReviewSummary',
-    declaration: 'export interface ReviewSummary {\n    commandId: CommandId;\n    deliveryId: DeliveryId;\n    revision: number;\n    deliveryVersion: number;\n    snapshot: string;\n    verdict: \'accept\' | \'return\';\n    feedback: string;\n    waivers: {\n        criterion: string;\n        reason: string;\n    }[];\n    time: string;\n}',
+    declaration: 'export interface ReviewSummary {\n    commandId: CommandId;\n    deliveryId: DeliveryId;\n    revision: number;\n    deliveryVersion: number;\n    snapshot: string;\n    verdict: \'accept\' | \'return\';\n    assessmentId?: CommandId | undefined;\n    feedback: string;\n    waivers: {\n        criterion: string;\n        reason: string;\n    }[];\n    time: string;\n}',
   },
   {
     name: 'RpcId',
     declaration: 'export type RpcId = Branded<\'rpc-id\'>;',
   },
   {
-    name: 'RunAdmission',
-    declaration: 'export type RunAdmission = z.input<typeof admission> & {\n    runId: TaskRunId;\n    previousRun: TaskRunId | null;\n    projectId: ProjectId;\n    taskId: TaskId;\n    commandId: CommandId;\n};',
-  },
-  {
     name: 'RunnerFailureRule',
     declaration: 'export interface RunnerFailureRule {\n    allowedExitCodes?: readonly number[];\n    fatalSignatures: readonly string[];\n    informationalLines?: readonly string[];\n}',
   },
   {
+    name: 'RunProcessScope',
+    declaration: 'export type RunProcessScope = z.output<typeof runProcessScope>;',
+  },
+  {
+    name: 'RunSessionEvent',
+    declaration: 'export interface RunSessionEvent {\n    seq: SessionSeq;\n    time: number;\n    type: string;\n}',
+  },
+  {
     name: 'RunStops',
-    declaration: 'export class RunStops {\n    constructor(private readonly executions: TaskExecutions, private readonly timeoutMs: number);\n    async attach(owner: RuntimeBinding, client: RuntimeStopTarget, scope: Target[\'scope\']): Promise<() => void>;\n    async stop(owner: RuntimeBinding, command: TaskStopCommand): Promise<void>;\n    recheck(owner: RuntimeBinding): Promise<void>;\n}',
+    declaration: 'export class RunStops {\n    constructor(private readonly executions: TaskExecutions, private readonly timeoutMs: number, private readonly captureDelivery?: (run: TaskRun) => Promise<DeliveryCodeSnapshot>);\n    async attach(owner: RuntimeBinding, client: RuntimeStopTarget, scope: Target[\'scope\']): Promise<() => void>;\n    async shutdownAfterAttach(owner: RuntimeBinding): Promise<boolean>;\n    async stop(owner: RuntimeBinding, command: TaskStopCommand): Promise<void>;\n    recheck(owner: RuntimeBinding): Promise<void>;\n    recoveredExit(owner: RuntimeBinding, evidence: ExitEvidence, outcome?: TurnOutcome): Promise<void>;\n    finalize(owner: RuntimeBinding, outcome: TurnOutcome): Promise<void>;\n}',
+  },
+  {
+    name: 'RunTaskSpec',
+    declaration: 'export interface RunTaskSpec {\n    projectScript?: ProjectScript | undefined;\n    format: \'dsh-task-spec\';\n    version: 1;\n    projectId: ProjectId;\n    taskId: TaskId;\n    runId: TaskRunId;\n    revision: number;\n    workspace: {\n        directory: string;\n        branch: string | null;\n        baseline: string | null;\n    };\n    route: TaskboardSdkRoute | null;\n    authorization: TaskRunAuthorization | null;\n    previousCheckpoint: TaskRunCheckpoint | null;\n    input: TaskRunInputSnapshot;\n}',
   },
   {
     name: 'RuntimeBinding',
@@ -7725,11 +7949,39 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   },
   {
     name: 'TaskActivity',
-    declaration: 'export interface TaskActivity extends TaskReceipt {\n    actor: \'operator\' | \'runtime\';\n    time: string;\n    action: \'created\' | \'edited\' | \'commented\' | \'planned\' | \'canceled\' | \'archived\' | \'reopened\' | \'reordered\' | \'run-requested\' | \'run-canceled\' | \'run-started\' | \'stop-requested\' | \'force-requested\' | \'run-ended\' | \'accepted\' | \'returned\';\n    comment?: string | undefined;\n}',
+    declaration: 'export interface TaskActivity extends TaskReceipt {\n    runId?: TaskRunId | undefined;\n    member?: {\n        id: MemberId;\n        name: string;\n    } | undefined;\n    actor: \'operator\' | \'runtime\' | \'member\';\n    time: string;\n    action: \'created\' | \'edited\' | \'commented\' | \'planned\' | \'canceled\' | \'archived\' | \'reopened\' | \'reordered\' | \'run-requested\' | \'run-canceled\' | \'run-started\' | \'run-receipt-reconciled\' | \'stop-requested\' | \'force-requested\' | \'run-ended\' | \'accepted\' | \'returned\' | \'run-progress\' | \'run-blocked\' | \'delivery-submitted\' | \'relations-updated\';\n    comment?: string | undefined;\n}',
+  },
+  {
+    name: 'TaskActivityCursor',
+    declaration: 'export interface TaskActivityCursor {\n    taskId: TaskId;\n    position: number;\n    commandId: CommandId;\n}',
+  },
+  {
+    name: 'TaskActivityPage',
+    declaration: 'export interface TaskActivityPage {\n    activity: TaskActivity[];\n    cursor: TaskActivityCursor | null;\n    hasMore: boolean;\n}',
+  },
+  {
+    name: 'TaskboardCard',
+    declaration: 'export interface TaskboardCard extends TaskView {\n    run: Pick<TaskRunSummary, \'state\' | \'control\' | \'connection\' | \'lastEvent\' | \'revision\'> | null;\n}',
+  },
+  {
+    name: 'TaskboardExecutionRoute',
+    declaration: 'export interface TaskboardExecutionRoute {\n    projectScript?: ProjectScript | undefined;\n    state: \'unconfigured\' | \'disabled\' | \'configured\';\n    provider: string | null;\n    model: string | null;\n}',
+  },
+  {
+    name: 'TaskboardInbox',
+    declaration: 'export interface TaskboardInbox {\n    projectId: ProjectId;\n    taskId: TaskId;\n    runId: TaskRunId;\n    requests: TaskPendingInteraction[];\n}',
   },
   {
     name: 'TaskboardProject',
-    declaration: 'export interface TaskboardProject {\n    id: ProjectId;\n    title: string;\n    root: string;\n    baselineBranch?: string | undefined;\n    configurationRef?: string | undefined;\n}',
+    declaration: 'export interface TaskboardProject {\n    id: ProjectId;\n    title: string;\n    root: string;\n    baselineBranch?: string | undefined;\n    checkTrackedDiff?: boolean | undefined;\n    projectScript?: ProjectScript | undefined;\n    configurationRef?: string | undefined;\n}',
+  },
+  {
+    name: 'TaskboardRestore',
+    declaration: 'export interface TaskboardRestore {\n    projects: number;\n    tasks: number;\n    missingSessions: number;\n    canceledQueuedRuns: number;\n}',
+  },
+  {
+    name: 'TaskboardSdkRoute',
+    declaration: 'export interface TaskboardSdkRoute {\n    provider: string;\n    model: string;\n}',
   },
   {
     name: 'TaskCommand',
@@ -7740,8 +7992,8 @@ export const TYPE_API: readonly TypeApiEntry[] = [
     declaration: 'export interface TaskCommentCommand extends TaskCommand {\n    text: string;\n}',
   },
   {
-    name: 'TaskDelivery',
-    declaration: 'export type TaskDelivery = z.output<typeof deliveryRecord>;',
+    name: 'TaskDeliveryDetail',
+    declaration: 'export interface TaskDeliveryDetail extends DeliverySummary {\n    validationResults: ValidationResult[];\n    modelReviewStatus: ModelReviewAttempt[\'state\'] | \'not-requested\' | null;\n    reviewRoute: ModelReviewRoute | null;\n    modelReviews: ModelReviewAttempt[];\n    changes: string[];\n    verification: DeliveryVerification[];\n    knownIssues: string[];\n    unfinished: string[];\n    code: DeliveryCodeSnapshot | null;\n}',
   },
   {
     name: 'TaskDetail',
@@ -7749,43 +8001,99 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   },
   {
     name: 'TaskExecutions',
-    declaration: 'export class TaskExecutions {\n    constructor(private readonly domain: Domain<typeof taskboardDomain>);\n    active(owner: RuntimeBinding): Promise<TaskRun>;\n    canRecheckStop(owner: RuntimeBinding): Promise<boolean>;\n    async admit(input: RunAdmission): Promise<TaskRun>;\n    async enqueue(input: RunAdmission, plan: TaskWorkspacePlan): Promise<TaskReceipt>;\n    claimNext(): Promise<TaskRun | null>;\n    cancelQueued(request: TaskCommand, runId: TaskRunId): Promise<TaskReceipt>;\n    async submitInput(owner: RuntimeBinding, prompt: (run: TaskRun) => Promise<string>): Promise<string | null>;\n    started(owner: RuntimeBinding, messageId: string): Promise<void>;\n    interaction(owner: RuntimeBinding, value: Interaction): Promise<void>;\n    requestStop(owner: RuntimeBinding, command: TaskCommand, force: boolean): Promise<{\n        receipt: TaskReceipt;\n        issued: boolean;\n    }>;\n    stopUnconfirmed(owner: RuntimeBinding, reason: StopFailure): Promise<void>;\n    exited(owner: RuntimeBinding, evidence: ExitEvidence, state: \'finished\' | \'interrupted\' | \'failed\', reason: string, output?: TaskDelivery): Promise<void>;\n    review(expectedVersion: number, decision: Omit<TaskReview, \'time\'>, observedSnapshot: string): Promise<TaskReceipt>;\n}',
+    declaration: 'export class TaskExecutions {\n    constructor(private readonly domain: Domain<typeof taskboardDomain>, private readonly maxParallelRuns = 1);\n    active(owner: RuntimeBinding): Promise<TaskRun>;\n    activeRuns(): Promise<{\n        owner: RuntimeBinding;\n        run: TaskRun;\n    }[]>;\n    bindProcessScope(owner: RuntimeBinding, evidence: RunProcessScope): Promise<void>;\n    disconnectedHost(owner: RuntimeBinding): Promise<void>;\n    inspectForTool(owner: RuntimeBinding): Promise<{\n        title: string;\n        description: string;\n        constraints?: string;\n        riskLevel?: TaskRiskLevel;\n        workflow?: TaskWorkflow;\n        acceptance: string[];\n        revision: number;\n        version: number;\n    }>;\n    recordToolUpdate(owner: RuntimeBinding, request: {\n        id: CommandId;\n        expectedVersion: number;\n        action: \'commented\' | \'run-progress\' | \'run-blocked\';\n        text: string;\n    }): Promise<TaskReceipt>;\n    submitDelivery(owner: RuntimeBinding, id: CommandId, submission: DeliverySubmission): Promise<TaskReceipt>;\n    claimProjectScript(owner: RuntimeBinding, id: CommandId, sourceSnapshot: string): Promise<{\n        script: ProjectScript;\n        directory: string;\n    } | null>;\n    recordProjectScript(owner: RuntimeBinding, id: CommandId, outcome: ProjectScriptOutcome): Promise<void>;\n    beginFinalization(owner: RuntimeBinding, outcome: TurnOutcome, observedAfterExit: boolean = false): Promise<boolean>;\n    sealDelivery(owner: RuntimeBinding /* …truncated — full shape in source */',
+  },
+  {
+    name: 'TaskInputMaterial',
+    declaration: 'export interface TaskInputMaterial {\n    reference: string;\n    text: string;\n}',
+  },
+  {
+    name: 'TaskInteractionId',
+    declaration: 'export type TaskInteractionId = Branded<\'TaskboardInteractionId\'>;',
+  },
+  {
+    name: 'TaskInteractionReply',
+    declaration: 'export type TaskInteractionReply = {\n    projectId: ProjectId;\n    taskId: TaskId;\n    runId: TaskRunId;\n    requestId: TaskInteractionId;\n} & ({\n    kind: \'approval\';\n    outcome: \'allowed-once\' | \'rejected\' | \'cancelled\';\n} | {\n    kind: \'question\';\n    result: TaskQuestionReply;\n});',
+  },
+  {
+    name: 'TaskInteractionSummary',
+    declaration: 'export interface TaskInteractionSummary {\n    requestId: TaskInteractionId;\n    kind: \'approval\' | \'question\';\n    state: \'pending\' | \'answered\' | \'withdrawn\';\n}',
   },
   {
     name: 'TaskOrderCommand',
     declaration: 'export interface TaskOrderCommand extends TaskCommand {\n    beforeTaskId: TaskId | null;\n}',
   },
   {
+    name: 'TaskPendingInteraction',
+    declaration: 'export type TaskPendingInteraction = {\n    kind: \'question\';\n    requestId: TaskInteractionId;\n    questions: TaskQuestion[];\n} | {\n    kind: \'approval\';\n    requestId: TaskInteractionId;\n    toolName: string;\n    callId?: string | undefined;\n    reason?: string | undefined;\n};',
+  },
+  {
+    name: 'TaskQuestion',
+    declaration: 'export interface TaskQuestion {\n    id: string;\n    question: string;\n    detail?: string | undefined;\n    header?: string | undefined;\n    multiSelect?: boolean | undefined;\n    options?: {\n        label: string;\n        description?: string | undefined;\n    }[] | undefined;\n    intent?: {\n        kind: \'plan-review\';\n        approve: string;\n        callId?: string | undefined;\n    } | undefined;\n}',
+  },
+  {
+    name: 'TaskQuestionReply',
+    declaration: 'export type TaskQuestionReply = {\n    cancelled: true;\n} | {\n    answers: {\n        id: string;\n        selected: string[];\n        custom?: string | undefined;\n    }[];\n};',
+  },
+  {
     name: 'TaskReceipt',
     declaration: 'export interface TaskReceipt {\n    commandId: CommandId;\n    version: number;\n    revision: number;\n}',
   },
   {
+    name: 'TaskRelations',
+    declaration: 'export interface TaskRelations {\n    parent: TaskId | null;\n    blockers: TaskId[];\n}',
+  },
+  {
     name: 'TaskRequirements',
-    declaration: 'export interface TaskRequirements {\n    title: string;\n    description: string;\n    acceptance: string[];\n    priority: \'low\' | \'normal\' | \'high\';\n    labels: string[];\n}',
+    declaration: 'export interface TaskRequirements {\n    title: string;\n    description: string;\n    constraints?: string | undefined;\n    riskLevel?: TaskRiskLevel | null | undefined;\n    workflow?: TaskWorkflow | null | undefined;\n    acceptance: string[];\n    priority: \'low\' | \'normal\' | \'high\';\n    labels: string[];\n}',
   },
   {
     name: 'TaskRequirementsCommand',
     declaration: 'export interface TaskRequirementsCommand extends TaskCommand {\n    requirements: TaskRequirements;\n}',
   },
   {
-    name: 'TaskReview',
-    declaration: 'export type TaskReview = z.output<typeof reviewRecord>;',
+    name: 'TaskReviewCommand',
+    declaration: 'export interface TaskReviewCommand extends TaskCommand, Omit<ReviewSummary, \'commandId\' | \'time\'> {\n}',
   },
   {
     name: 'TaskRevision',
     declaration: 'export interface TaskRevision extends TaskRequirements {\n    revision: number;\n}',
   },
   {
+    name: 'TaskRiskLevel',
+    declaration: 'export type TaskRiskLevel = \'low\' | \'medium\' | \'high\';',
+  },
+  {
     name: 'TaskRun',
     declaration: 'export type TaskRun = z.output<typeof claimedRun>;',
+  },
+  {
+    name: 'TaskRunAuthorization',
+    declaration: 'export interface TaskRunAuthorization {\n    commandId: CommandId;\n    authorizedAt: string;\n    taskVersion: number;\n    executor: \'dsh-sdk\';\n    routeSelection: \'operator-confirmed\' | \'deployment-default\';\n    scope: \'queue-once\' | \'when-ready-once\';\n}',
+  },
+  {
+    name: 'TaskRunCheckpoint',
+    declaration: 'export interface TaskRunCheckpoint {\n    runId: TaskRunId;\n    sessionId: SessionId;\n    revision: number;\n    receipt: string | null;\n    lastEvent: RunSessionEvent | null;\n}',
   },
   {
     name: 'TaskRunId',
     declaration: 'export type TaskRunId = Branded<\'TaskboardRunId\'>;',
   },
   {
+    name: 'TaskRunInputSnapshot',
+    declaration: 'export interface TaskRunInputSnapshot {\n    title: string;\n    description: string;\n    constraints?: string;\n    riskLevel?: TaskRiskLevel;\n    workflow?: TaskWorkflow;\n    acceptance: string[];\n    reviewFeedback: string | null;\n    materials: TaskInputMaterial[];\n}',
+  },
+  {
     name: 'TaskRunSummary',
-    declaration: 'export interface TaskRunSummary {\n    runId: TaskRunId;\n    previousRun: TaskRunId | null;\n    state: \'queued\' | \'preparing\' | \'running\' | \'finished\' | \'failed\' | \'canceled\' | \'interrupted\';\n    control: \'normal\' | \'stop_requested\' | \'finalizing\';\n    connection: \'connected\' | \'suspect\' | \'disconnected\';\n    stopFailure: StopFailure | null;\n    revision: number;\n    workspace: string;\n    branch: string | null;\n    sessionId: SessionId;\n    priorSessionId: SessionId | null;\n    mode: \'fresh\' | \'resume\';\n    materialReferences: string[];\n    inputAttemptedAt: string | null;\n    receipt: string | null;\n    endReason: string | null;\n}',
+    declaration: 'export interface TaskRunSummary {\n    authorization?: TaskRunAuthorization;\n    previousCheckpoint?: TaskRunCheckpoint;\n    route?: TaskboardSdkRoute;\n    runId: TaskRunId;\n    previousRun: TaskRunId | null;\n    state: \'queued\' | \'preparing\' | \'running\' | \'finished\' | \'failed\' | \'canceled\' | \'interrupted\';\n    control: \'normal\' | \'stop_requested\' | \'finalizing\';\n    connection: \'connected\' | \'suspect\' | \'disconnected\';\n    stopFailure: StopFailure | null;\n    launchFailure: string | null;\n    revision: number;\n    workspace: string;\n    branch: string | null;\n    sessionId: SessionId;\n    sessionNotIncluded?: true;\n    lastEvent: RunSessionEvent | null;\n    interactions: TaskInteractionSummary[];\n    priorSessionId: SessionId | null;\n    mode: \'fresh\' | \'resume\';\n    whenReady?: true | undefined;\n    materialReferences: string[];\n    inputAttemptedAt: string | null;\n    receipt: string | null;\n    endReason: string | null;\n}',
+  },
+  {
+    name: 'TaskStartCommand',
+    declaration: 'export interface TaskStartCommand extends TaskCommand {\n    confirmedRoute?: TaskboardSdkRoute | undefined;\n    confirmedScript?: ProjectScript | undefined;\n    whenReady?: true | undefined;\n    mode?: \'fresh\' | \'resume\';\n    previousRun: TaskRunId | null;\n    confirmation: WorkspaceInspection | null;\n    materials: TaskInputMaterial[];\n}',
+  },
+  {
+    name: 'TaskStartReceipt',
+    declaration: 'export interface TaskStartReceipt extends TaskReceipt {\n    runId: TaskRunId;\n}',
   },
   {
     name: 'TaskStatus',
@@ -7797,7 +8105,11 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   },
   {
     name: 'TaskView',
-    declaration: 'export interface TaskView extends TaskRequirements {\n    id: TaskId;\n    projectId: ProjectId;\n    version: number;\n    revision: number;\n    status: TaskStatus;\n    archived: boolean;\n}',
+    declaration: 'export interface TaskView extends TaskRequirements {\n    id: TaskId;\n    projectId: ProjectId;\n    version: number;\n    revision: number;\n    status: TaskStatus;\n    relations?: TaskRelations | undefined;\n    archived: boolean;\n}',
+  },
+  {
+    name: 'TaskWorkflow',
+    declaration: 'export type TaskWorkflow = {\n    template: \'task.quick.v1\';\n} | {\n    template: \'task.standard.v1\';\n    steps: string[];\n};',
   },
   {
     name: 'TaskWorkspacePlan',
@@ -8112,6 +8424,10 @@ export const TYPE_API: readonly TypeApiEntry[] = [
     declaration: 'export interface TurnEndReasonMap {\n    completed: {\n        kind: \'completed\';\n    };\n    aborted: {\n        kind: \'aborted\';\n        reason: TurnEndCancelCause;\n    };\n    blocked: {\n        kind: \'blocked\';\n    };\n    error: {\n        kind: \'error\';\n        error: LlmFailure;\n    };\n    \'max-tokens\': {\n        kind: \'max-tokens\';\n    };\n    interrupted: {\n        kind: \'interrupted\';\n    };\n    forked: {\n        kind: \'forked\';\n    };\n}',
   },
   {
+    name: 'TurnOutcome',
+    declaration: 'export type TurnOutcome = NonNullable<TaskRun[\'turnOutcome\']>;',
+  },
+  {
     name: 'TypertCodec',
     declaration: 'export type TypertCodec = {\n    readonly mode: \'strict\';\n    readonly typeSymbol: string;\n    readonly create: () => TypertSchema;\n    readonly decode?: (value: unknown) => unknown;\n    readonly encode?: (value: unknown, writeBytes: (bytes: Uint8Array, path: readonly (string | number)[]) => null) => unknown;\n} | {\n    readonly mode: \'src-json\';\n};',
   },
@@ -8222,6 +8538,10 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   {
     name: 'UserMessage',
     declaration: 'export interface UserMessage extends MessageBase {\n    readonly role: \'user\';\n}',
+  },
+  {
+    name: 'ValidationResult',
+    declaration: 'export interface ValidationResult {\n    check: \'git-diff-check\' | \'npm-test\' | \'npm-build\';\n    snapshot: string;\n    status: \'passed\' | \'failed\' | \'not-run\';\n    observedAt: string | null;\n    exitCode: number | null;\n    reason: \'outside-git\' | \'no-exit-code\' | \'unexpected-exit\' | \'unavailable\' | \'timed-out\' | \'interrupted\' | \'sandbox-denied\' | \'unconfirmed\' | \'snapshot-changed\' | null;\n}',
   },
   {
     name: 'VerifiedWebhookDelivery',

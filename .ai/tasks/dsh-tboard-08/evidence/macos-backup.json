@@ -1,0 +1,23 @@
+{
+  "verified_at": "2026-11-22T14:01:20Z",
+  "system": "macOS 15.6.1 (24G90) arm64",
+  "node": "26.5.0",
+  "sha256": {
+    "packages/api/taskboard-controller/lib/index.js": "7ea42b5f3160eb85ef52a9483051e05c47b48392f695ea384ee3f7a0479cf3e1",
+    "packages/storage/storage-domain/lib/index.js": "da5eab4103e83e768f24e733bfd8992e985746e0c7c213b7584771b7410c3476",
+    "packages/client/ui-taskboard/lib/client.js": "55ed41da1fa8519c2a40e86aacb0fae3b08ce7d5afb607fb6d18404729330b64",
+    "apps/web/tests/fixtures/taskboard-smoke.mjs": "4a17e82275e4863e32b71d48673a051c9de992e1cfedf2339dce724c1b869c24",
+    "apps/web/tests/fixtures/taskboard-browser.mjs": "559a5a03d51e1835e258d29757a28e1b1ae4d48d074be09d4039cac40b54db49"
+  },
+  "checks": {
+    "/opt/homebrew/bin/node apps/web/tests/fixtures/taskboard-smoke.mjs --backup": "PASS",
+    "storage-domain atomic-record and Taskboard Host tests": "28 PASS",
+    "named bilingual package README pairs": "6 PASS"
+  },
+  "cases": [
+    "Chromium archive download and restore upload",
+    "checksum, archive version and duplicate ID rejection leave the target empty",
+    "restored review and delivery history across a second Host boot",
+    "missing Session metadata, no input or approvals replayed"
+  ]
+}

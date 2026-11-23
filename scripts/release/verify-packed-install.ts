@@ -26,6 +26,14 @@ import { capture, isEntry } from './process.ts'
 import { packedIdentity } from './tarball.ts'
 import { verifyInstalledProductIsolation } from './installed-product-isolation.ts'
 
+const taskboardScenarios = new Map<string, string[][]>([
+  ['history', [[]]],
+  ['backup', [['--backup']]],
+  ['openai', [['--openai-deployment']]],
+  ['validation', [['--no-model-review'], ['--browser-run'], ['--script-scope']]],
+  ['review', [['--reviewed-repair']]],
+])
+
 /**
  * Environment for the installed artifact: no host Node hooks, no host DeepSeek
  * Harness home, and no ambient npm user agent that would confuse npm.
@@ -70,11 +78,19 @@ function packedDependencies(directories: readonly string[]): Map<string, { url: 
 /** Install every tarball under `--from` and drive the `--family` entry. */
 function main(): void {
   const { values } = parseArgs({
-    options: { family: { type: 'string' }, from: { type: 'string', multiple: true } },
+    options: { family: { type: 'string' }, from: { type: 'string', multiple: true }, taskboard: { type: 'string' } },
     allowPositionals: false,
   })
   if (values.family === undefined || values.from === undefined || values.from.length === 0) {
-    throw new Error('usage: verify-packed-install.ts --family <dsh|vendor> --from <packed directory> [--from ...]')
+    throw new Error('supply --family <dsh|vendor> and at least one --from <packed directory>')
+  }
+  const probe = values.taskboard
+  const scenarios = probe === undefined ? undefined : taskboardScenarios.get(probe)
+  if (probe !== undefined && (values.family !== 'dsh' || scenarios === undefined)) {
+    throw new Error(`--taskboard requires --family dsh and one of ${[...taskboardScenarios.keys()].join(', ')}`)
+  }
+  if (probe !== undefined && probe !== 'history' && process.platform !== 'darwin') {
+    throw new Error('Taskboard SDK probes require macOS')
   }
 
   const family = releaseFamily(values.family)
@@ -91,21 +107,23 @@ function main(): void {
 
   const consumerRoot = mkdtempSync(join(tmpdir(), `dsh-packed-${family.id}-`))
   try {
+    const localPackages = Object.fromEntries([...packed].map(([name, artifact]) => [name, artifact.url]))
     writeFileSync(join(consumerRoot, 'package.json'), `${JSON.stringify({
       name: `dsh-packed-install-${family.id}`,
       version: '0.0.0',
       private: true,
-      dependencies: Object.fromEntries([...packed].map(([name, entryPacked]) => [name, entryPacked.url])),
+      ...(probe === undefined ? { dependencies: localPackages } : {
+        dependencies: { [entry.packageName]: expected.url },
+        overrides: localPackages,
+      }),
     }, null, 2)}\n`)
 
     const environment = consumerEnvironment(consumerRoot)
-    console.log(`release verify-packed-install: installing ${String(packed.size)} tarball(s) into ${consumerRoot}`)
-    // Optional dependencies are omitted: the Landlock platform packages behind
-    // them need a musl toolchain and one build per architecture, and a consumer
-    // that cannot install them must still start — which is what optional means
-    // here. Their entry package is a plain dependency of dsh-sandbox-local, so
-    // its tarball is supplied through --from.
-    capture('npm', ['install', '--no-audit', '--no-fund', '--package-lock=false', '--omit=optional', '--loglevel=http'],
+    console.log(`release verify-packed-install: resolving from ${String(packed.size)} local tarball(s) in ${consumerRoot}`)
+    // The CLI version probe also covers missing optional native binaries. The Web
+    // profile uses the ordinary platform install, including native dependencies.
+    const optional = probe === undefined ? '--omit=optional' : '--include=optional'
+    capture('npm', ['install', '--no-audit', '--no-fund', '--package-lock=false', optional, '--loglevel=http'],
       { cwd: consumerRoot, env: environment })
 
     const installedEntry = join(consumerRoot, 'node_modules', entry.packageName)
@@ -117,6 +135,12 @@ function main(): void {
       throw new Error(`installed ${entry.packageName} --version reported ${JSON.stringify(version)}, expected ${expected.version}`)
     }
     console.log(`release verify-packed-install: installed ${entry.packageName} reports ${version}`)
+    if (scenarios) {
+      const fixture = join(root, 'apps/web/tests/fixtures/taskboard-smoke.mjs')
+      for (const flags of scenarios) {
+        console.log(capture(process.execPath, [fixture, '--installed-cli', bin, ...flags], { cwd: consumerRoot, env: environment }))
+      }
+    }
   } finally {
     rmSync(consumerRoot, { recursive: true, force: true })
   }

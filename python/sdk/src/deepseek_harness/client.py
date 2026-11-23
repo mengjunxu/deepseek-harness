@@ -175,9 +175,16 @@ class HarnessClient:
                 ) from error
             raise
 
-    def resume_session(self, session_id: str) -> None:
-        """Restore a persisted root session without submitting any input."""
-        self.request("session/resume", {"sessionId": session_id}, response_model=_ResumeResponse)
+    def resume_session(
+        self, session_id: str, *, expected_cwd: str | None = None, require_empty_inbox: bool = False
+    ) -> None:
+        """Restore a persisted root session with optional workspace and inbox requirements."""
+        params: JsonObject = {"sessionId": session_id}
+        if expected_cwd is not None:
+            params["expectedCwd"] = expected_cwd
+        if require_empty_inbox:
+            params["requireEmptyInbox"] = True
+        self.request("session/resume", params, response_model=_ResumeResponse)
 
     def session_prompt(
         self,

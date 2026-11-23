@@ -62,7 +62,7 @@ With these rows, the `json` backend registers itself and the `domain` data form 
 <a id="understand-the-implementation"></a>
 ## Understand the implementation
 
-The optional KV transaction runs a synchronous callback against multiple records of one unit. SQLite commits all of its changes together. The domain form owns the typed access and change events.
+The optional KV transaction runs a synchronous callback against multiple records of one unit. The transaction can enumerate persisted keys and values for a declared table. SQLite commits all of its changes together. The domain form owns the typed access and change events.
 
 <details>
 <summary>Implementation internals — click to expand</summary>

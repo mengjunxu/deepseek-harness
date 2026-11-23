@@ -778,7 +778,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "--scenario",
-        choices=("all", "sdk-default", "sdk-custom", "sdk-minimal", "sdk-minimal-in-history", "sdk-dynamic-tools", "sdk-fs-search", "sdk-spawn-node", "sdk-mcp", "sdk-snapshot", "sdk-recovery", "sdk-restart", "sdk-profile-plugin", "sdk-office", "sdk-authoring", "sdk-live", "runner", "direct"),
+        choices=("all", "sdk-default", "sdk-custom", "sdk-minimal", "sdk-minimal-in-history", "sdk-dynamic-tools", "sdk-fs-search", "sdk-spawn-node", "sdk-mcp", "sdk-snapshot", "sdk-recovery", "sdk-restart", "sdk-profile-plugin", "sdk-office", "sdk-authoring", "sdk-live", "sdk-taskboard-review", "runner", "direct"),
         default="all",
     )
     parser.add_argument("--exe", type=Path)
@@ -797,12 +797,19 @@ def main() -> None:
         parser.error("--scenario sdk-profile-plugin requires --installed-wheel")
     if args.installed_wheel:
         args.exe = assert_installed_wheel_environment()
-    if args.scenario in {"all", "sdk-custom", "sdk-minimal", "sdk-minimal-in-history", "sdk-dynamic-tools", "sdk-fs-search", "sdk-spawn-node", "sdk-snapshot", "sdk-recovery", "sdk-restart", "sdk-office", "sdk-authoring", "runner", "direct"} and args.exe is None:
+    if args.scenario in {"all", "sdk-custom", "sdk-minimal", "sdk-minimal-in-history", "sdk-dynamic-tools", "sdk-fs-search", "sdk-spawn-node", "sdk-snapshot", "sdk-recovery", "sdk-restart", "sdk-office", "sdk-authoring", "sdk-taskboard-review", "runner", "direct"} and args.exe is None:
         parser.error("--exe is required for custom, minimal, dynamic-tools, fs-search, spawn-node, snapshot, recovery, restart, office, runner, and direct scenarios")
     if args.update_snapshots and args.scenario not in {"all", "sdk-minimal", "sdk-minimal-in-history", "sdk-dynamic-tools", "sdk-snapshot", "sdk-recovery", "sdk-restart", "sdk-authoring"}:
         parser.error("--update-snapshots requires --scenario sdk-minimal, sdk-minimal-in-history, sdk-dynamic-tools, sdk-snapshot, sdk-recovery, sdk-restart, sdk-authoring, or all")
     if args.exe is not None and not args.exe.is_file():
         parser.error(f"runtime executable does not exist: {args.exe}")
+
+    if args.scenario in {"all", "sdk-taskboard-review"}:
+        assert args.exe is not None
+        smoke_taskboard_review(args.exe.resolve())
+    if args.scenario == "sdk-taskboard-review":
+        print("smoke-python-runtime: sdk-taskboard-review passed")
+        return
 
     if args.scenario in {"all", "sdk-office"}:
         assert args.exe is not None
@@ -1610,6 +1617,35 @@ def smoke_sdk_snapshot(base_url: str, executable: Path, update_snapshots: bool) 
             files, update_snapshots, ADVANCED_SNAPSHOT_DIRECTORY, ADVANCED_SNAPSHOT_FILENAMES,
             native_writer_output=True,
         )
+
+
+def smoke_taskboard_review(executable: Path) -> None:
+    """Resume the Web Host's recorded review without enqueuing a conversation turn."""
+    from deepseek_harness import DeepSeekHarness
+
+    scripts = Path(__file__).resolve().parent
+    source = scripts.parent / "snapshots/web/taskboard-coverage-review/session.v4.jsonl"
+    expected = scripts / "snapshots/python-sdk-single-exe/taskboard-review-resume/resume.expected.json"
+    header, event = (json.loads(line) for line in source.read_text(encoding="utf-8").splitlines())
+    session_id = "taskboard-review-fixture"
+    header["id"] = session_id
+    event.update(seq=0, time=1)
+    with tempfile.TemporaryDirectory(prefix="dsh-review-sdk-") as temporary:
+        root = Path(temporary).resolve()
+        sessions = root / "sessions"
+        directory = sessions / "_no-cwd" / session_id
+        directory.mkdir(parents=True)
+        log = directory / source.name
+        log.write_text(json.dumps(header) + "\n" + json.dumps(event) + "\n", encoding="utf-8")
+        patch = write_profile_patch(root, "persistence.yml", sessions, [])
+        with DeepSeekHarness(cwd=str(root), dsh_bin=str(executable), dsh_home=str(root), patches=(str(patch),)) as harness:
+            assert harness.resume_session(session_id, require_empty_inbox=True).id == session_id
+        records = read_session_logs(sessions)[session_id]
+        requests = [row for row in records if row["type"] == "taskboard/review-request"]
+        assert requests == [event]
+        projection = {"inboxEmpty": True, "reviewRequests": len(requests),
+                      "conversationTurns": sum(row["type"] == "turn/start" for row in records)}
+        assert projection == json.loads(expected.read_text(encoding="utf-8"))
 
 
 def smoke_sdk_restart_snapshot(base_url: str, executable: Path, update_snapshots: bool) -> None:

@@ -83,6 +83,12 @@ export interface KvTransaction {
    */
   get(table: string, key: string): unknown
   /**
+   * Enumerate records from the transaction's current view.
+   * @param table - Declared table.
+   * @returns the keys and decoded values, in unspecified order.
+   */
+  entries(table: string): ReadonlyArray<readonly [string, unknown]>
+  /**
    * Store one record; undefined removes the key.
    * @param table - Declared table.
    * @param key - Record identity.

@@ -1,0 +1,24 @@
+{
+  "verified_at": "2026-11-22T13:09:36Z",
+  "system": "macOS 15.6.1 (24G90) arm64",
+  "node": "22.18.0",
+  "sha256": {
+    "packages/api/taskboard-controller/src/execution.ts": "4a145b07c56d01b6c5ed036840dfdba60c583ef2925b0aa06b1691f2ee115069",
+    "packages/api/taskboard-controller/src/dispatch.ts": "894517b478e81c21c4555fe452b0db85224a2b6200db7f88c977d89bca7917df",
+    "packages/api/taskboard-controller/src/stop.ts": "576b7cd29d44598c1b3d0716099c7ddb6a09cc2ec3e01ee8b90404daf0e4f66a",
+    "packages/api/taskboard-controller/src/workspaces.ts": "1f433d4a7bb8b6d8b6c6f68dde1ffc2796c9d8458d1692080f2de1e83706ac9e",
+    "packages/api/taskboard-controller/src/execution-domain.ts": "db7993330d6ba168215a3072c5e08b8e4eae85fe18bd4050582476d5c1516712",
+    "packages/api/taskboard-controller/src/sdk-tools.ts": "69b0016d276ef49ae55eeee788b7f12e3dd79af81168a29bceb9b68c4f032faf",
+    "packages/api/taskboard-controller/src/index.ts": "06c6e85de9d6ee2be34c012546b7f134173874eb996d48bad169273438ce9b99",
+    "packages/api/taskboard-controller/lib/index.js": "038169c4397f10a1690cdeddf20e242b99a0569dba4fae9f7872755fdc0449dd",
+    "apps/web/tests/fixtures/taskboard-smoke.mjs": "fd9ec232abf877a388431d09f35ee8ededa11a9b6b7754329710621fcc1ae211",
+    "apps/web/tests/taskboard.e2e.ts": "26fc76a3ee7acf8951a85b9a210c94e2efb03bd9f745daefc2d02c6d55e2bc57",
+    "snapshots/sdk/taskboard-dispatch/tool-schemas.expected.json": "e02a8750d71faac8fa5f98745796d8fd7f4e72d01952e7a07b97bf44f6ab8e68"
+  },
+  "checks": {
+    "pnpm run test:web:built apps/web/tests/taskboard.e2e.ts": "10 PASS",
+    "pnpm exec vitest run packages/api/taskboard-controller/tests/taskboard.host.spec.ts": "23 PASS",
+    "pnpm run test:snapshot -t taskboard-dispatch": "1 PASS",
+    "focused tsc, oxlint, bilingual pairing and export JSDoc": "PASS"
+  }
+}

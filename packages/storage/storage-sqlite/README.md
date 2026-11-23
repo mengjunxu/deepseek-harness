@@ -61,7 +61,7 @@ Missing directories and database files are created owner-only (`0o700`/`0o600`);
 <a id="understand-the-implementation"></a>
 ## Understand the implementation
 
-Multi-record commands use one immediate transaction. The callback reads its own writes. Callback or commit failure rolls back the unit of work, and the transaction handle expires when the callback returns.
+Multi-record commands use one immediate transaction. The callback reads and enumerates the latest records, including its own writes. Callback or commit failure rolls back the unit of work, and the transaction handle expires when the callback returns.
 
 <details>
 <summary>Implementation internals — click to expand</summary>

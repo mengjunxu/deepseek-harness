@@ -1,0 +1,43 @@
+{
+  "when": "2026-11-23T17:41:51.784647+08:00",
+  "os": "macOS arm64",
+  "node": "26.5.0",
+  "dsh": "0.1.7-rc.2",
+  "soleDirectDependency": "@deepseek-ai/dsh",
+  "inputTarballs": 334,
+  "inputSetSha256": "7f6fb5cb288defe7800fb12fadaa026a7b0357545ae3e7dbb29408bf97009fc7",
+  "productPackagesChecked": 608,
+  "model": "local controlled endpoint",
+  "history": {
+    "webProfile": true,
+    "browserSession": true,
+    "sqliteFile": true,
+    "restoredVersion": 3,
+    "revisions": 2,
+    "activity": 3,
+    "originalReceiptReplayed": true,
+    "queueHistoryRestored": true
+  },
+  "backup": {
+    "archiveDownloaded": true,
+    "archiveUploaded": true,
+    "corruptIncompatibleAndConflictsRejected": true,
+    "reviewHistoryPreserved": true,
+    "missingSessionReported": true,
+    "queuedRunNotStarted": true,
+    "incompatibleSessionKept": true,
+    "compatibleSessionContinued": true,
+    "receiptsMatchedSession": true,
+    "secondRestorePreservedHistory": true
+  },
+  "checks": [
+    "pnpm run build:official",
+    "release:pack dsh and vendor, native entry and darwin-arm64 pack",
+    "release:verify-packed-install --family dsh --from <dsh> --from <vendor> --from <native> --taskboard history and backup",
+    "invalid probe rejected",
+    "node --check fixture",
+    "scoped run-oxlint",
+    "development translation pairing",
+    "git diff --check"
+  ]
+}

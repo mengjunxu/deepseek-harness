@@ -92,6 +92,20 @@ Typert 只在 Host tsdown 中以 `tsconfig.host.json` 为种子运行。它分�
 
 `pnpm run build` 会内联根包版本、七位源码 commit，并在 Git 报告本地变化时内联 dirty 标记；调用方提供的其他 `DSH_CLIENT_*` 值也会被继承。`pnpm run build:official` 是与 CI 和 release 产物构建等价的跨平台本地命令，并省略本地 dirty 标记。每次完整构建成功后都会写入一份被 gitignore 的记录，把精确公开值与 Vite 输出及动态 client bundle 绑定；release 打包和 built Web 测试会拒绝缺少记录或被后续局部构建改动的产物。`pnpm run dev:web` 会先执行这次完整构建（`--skip-build` 则复用现有产物树），再读取一次当前版本和 Git 状态，并在本次会话的所有 watcher stage 之间共享该环境；它不会校验完整构建记录，因为 watcher stage 会重写记录覆盖的产物。
 
+在 macOS 上安装仓库依赖后，从仓库根目录运行以下命令。history 检查在临时用户目录启动已安装的 Web 配置，编辑任务、重启 Host，并核对 SQLite 中的修订和排队 Run 回执。要验收备份，请安装 Playwright Chromium 浏览器，将末尾的 `history` 换成 `backup`。该检查使用本地模型夹具驱动 SDK，通过 Web 页面下载并恢复备份。使用 `--taskboard openai` 可通过本地 Responses 端点验证 OpenAI 部署示例及 Run 失败后的显式重试。这些检查均无需真实模型凭据。使用 `--taskboard validation` 可在安装后的 SDK 上验证 npm 测试通过、构建失败以及停止脚本后子进程仍在运行的情形。使用 `--taskboard review` 可在已安装的 Web Host 验证按需覆盖审查、人工授权修复和最终验收。
+
+```sh
+packed=$(mktemp -d)
+pnpm run build:official
+pnpm run release:pack --family dsh --out "$packed/dsh" --concurrency 4
+pnpm run release:pack --family vendor --out "$packed/vendor" --concurrency 4
+pnpm --dir native/system run build:ts
+mkdir "$packed/native"
+pnpm --dir native/system/packages/entry pack --pack-destination "$packed/native"
+pnpm --dir "native/system/packages/darwin-$(node -p 'process.arch')" pack --pack-destination "$packed/native"
+pnpm run release:verify-packed-install --family dsh --from "$packed/dsh" --from "$packed/vendor" --from "$packed/native" --taskboard history
+```
+
 静态分析和测试通过 base 的 `paths` 映射把工作区 import 解析到 `src`，且必须在干净树上通过；消费构建产物 `lib/` 的门禁显式声明该依赖。生成的 Host-for-Client Remote 声明是有意设置的例外：公共 `typecheck`、`lint` 和 `doc-typecheck` 命令会先生成这些声明，而内部 `*:contracts-ready` 脚本假定调用它的公共命令或调度器门禁已经依赖 Typert 约定生成阶段或完整构建。tsc-first 发射职责见 [ts-build-config Note](../.agents/notes/implemented/process/2026-06-17-ts-build-config.zh.md)，门禁准备约定见 [Typert Remote Agent Note](../.agents/notes/implemented/architecture/2026-08-02-typert-remote-method-calls.zh.md)。
 
 业务服务在 Host 使用 `@Remote` 或 `@RemoteScope` 声明可调用方法；Host 构建生成 Host-for-Client 类型与运行时贡献，Client 的 `api-remotes` 组合加载这些贡献并挂到 `ctx.remote` 与作用域 `agentCtx.remote` namespace。两侧的生成产物、装配关系、SRC 开发回退和 Web 构建顺序见 [API Gateway](api-gateway.zh.md)。

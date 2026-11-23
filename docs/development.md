@@ -88,6 +88,20 @@ Typert runs only during Host tsdown, seeded by `tsconfig.host.json`. It analyzes
 
 `pnpm run build` embeds the root package version, the seven-character source commit, and a dirty marker when Git reports local changes; it also inherits other caller-supplied `DSH_CLIENT_*` values. `pnpm run build:official` is the cross-platform local equivalent of the CI and release artifact build and omits the local dirty marker. Each successful complete build writes a gitignored record that binds the exact public values to the Vite output and dynamic client bundles; release packing and built Web tests reject a missing record or artifacts changed by a later partial build. `pnpm run dev:web` runs that complete build first (`--skip-build` reuses an existing artifact tree instead), then samples the current version and Git state once and shares that environment across every watcher stage for the session; it does not validate the complete-build record because the watcher stages rewrite its recorded artifacts.
 
+On macOS, run the following from the repository after installing its dependencies. The history probe starts the installed Web profile with a temporary home, edits tasks, restarts the Host and checks SQLite revisions and queued Run receipts. For the backup probe, install the Playwright Chromium browser and replace `history` with `backup`. It drives the SDK against a local model fixture, downloads the archive and restores it through the Web UI. Use `--taskboard openai` to exercise the documented OpenAI deployment with a local Responses endpoint and retry a rejected Run. These probes run without live model credentials. Use `--taskboard validation` to run the installed SDK against a passing npm test, a failing build and a stopped script with a surviving child process. Use `--taskboard review` to verify an explicit coverage review, an operator-authorized repair and final acceptance with the installed Web Host.
+
+```sh
+packed=$(mktemp -d)
+pnpm run build:official
+pnpm run release:pack --family dsh --out "$packed/dsh" --concurrency 4
+pnpm run release:pack --family vendor --out "$packed/vendor" --concurrency 4
+pnpm --dir native/system run build:ts
+mkdir "$packed/native"
+pnpm --dir native/system/packages/entry pack --pack-destination "$packed/native"
+pnpm --dir "native/system/packages/darwin-$(node -p 'process.arch')" pack --pack-destination "$packed/native"
+pnpm run release:verify-packed-install --family dsh --from "$packed/dsh" --from "$packed/vendor" --from "$packed/native" --taskboard history
+```
+
 Static analysis and tests resolve workspace imports through the base `paths` map to `src` and must pass on a clean tree; gates that consume built `lib/` output declare that dependency explicitly. Generated Host-for-Client Remote declarations are the deliberate exception: the public `typecheck`, `lint`, and `doc-typecheck` commands generate them first, while internal `*:contracts-ready` scripts assume that an invoking public command or scheduler gate already depends on the Typert contract-generation pass or the complete build. See the [ts-build-config note](../.agents/notes/implemented/process/2026-06-17-ts-build-config.md) for tsc-first emit ownership and the [Typert Remote note](../.agents/notes/implemented/architecture/2026-08-02-typert-remote-method-calls.md) for the gate-preparation contract.
 
 Business services declare callable methods on the Host with `@Remote` or `@RemoteScope`; the Host build generates Host-for-Client types and runtime contributions, and the Client's `api-remotes` composition loads those contributions under `ctx.remote` and scoped `agentCtx.remote` namespaces. See [API Gateway](api-gateway.md) for the generated artifacts on both sides, their assembly relationships, the SRC development fallback, and the Web build order.

@@ -22,6 +22,8 @@ export type NotificationFilter = (notification: HarnessNotification) => boolean
 
 /** Launch and timeout options for {@link HarnessClient}. */
 export interface HarnessClientOptions {
+  /** On macOS, launch in a one-use user launchd job with kernel process-scope observations. */
+  processScope?: 'macos-launchd'
   /** Absolute or caller-relative dsh CLI module; omitted resolves this package's same-version dependency. */
   dshBin?: string
   /** Named profile serving the SDK protocol (default `sdk`). */

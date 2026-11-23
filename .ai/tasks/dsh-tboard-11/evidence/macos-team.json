@@ -1,0 +1,69 @@
+{
+  "task": "TBOARD-11",
+  "observedAt": "2026-11-23T05:58:20+00:00",
+  "platform": "macOS 15.6.1 arm64",
+  "node": "v26.5.0",
+  "carrier": "built dsh web, authenticated operator Remote, project member HTTP, independent Chromium contexts and SQLite",
+  "modelRequests": 0,
+  "roles": {
+    "browserRoles": [
+      "operator",
+      "viewer",
+      "editor"
+    ],
+    "deniedOperatorMethods": 6,
+    "scopedProjects": 2,
+    "concurrentEditors": 2,
+    "staleEditRejected": true,
+    "restoredAccounts": 0,
+    "attributedEdits": 4,
+    "replayedComments": 0,
+    "rotatedAndRevoked": true,
+    "restarted": true,
+    "backupExcludedCredentials": true
+  },
+  "receiverOnSameMachine": {
+    "archiveSha256": "df6e7ea54de3aa12f2d99dd0e21feea6a304cdbc3e82bbd28dc905b5d64d32f5",
+    "projects": 2,
+    "historicalEditors": 2,
+    "restoredAccounts": 0,
+    "receiverViewerRead": true,
+    "receiverViewerWriteDenied": true,
+    "startedRuns": 0,
+    "platform": "darwin",
+    "arch": "arm64"
+  },
+  "physicalSecondDevice": "pending",
+  "sha256": {
+    "packages/api/taskboard-controller/lib/index.js": "f93507f9b2dcc3402b462eea577e6132309ea706823c4694cca21c854fa50b5f",
+    "packages/client/ui-taskboard/lib/client.js": "e417d4bb3f796cddafc02f90e8321690c11abeef917aa46322d2f98f01f17f20",
+    "apps/cli/lib/bin.js": "87dd715bb2f03ba14de9d4db67877d5ff37b6c036510abd8826006eaa65b0aff",
+    "apps/web/dist/taskboard-team.html": "1d8ffe1690296ba2774f05f86bfead55c15ae362465db9cfb854902d80da1161",
+    "packages/api/taskboard-controller/src/member-board.ts": "b2a19af030e3c729b4c9c2e777ed0587a46d83a8b48ada4a133bca92ec4cb94b",
+    "packages/api/taskboard-controller/src/team.ts": "29b8206122f7c4822b3f2ea676fc6feb7d0e398c76a1fdb36f29905c6ab385d3",
+    "packages/api/taskboard-controller/src/team-http.ts": "0fe14b5c942dd03eb6815fbb2c1988ccb48f9d4146f36565b6ef21ae98d76052",
+    "apps/web/src/taskboard-team.tsx": "f7013372972a43bf47ef118f1a8d6fc98f74975a1b743431e125327be8da6316",
+    "packages/client/ui-taskboard/src/client/TeamPanel.tsx": "a293d17cec92b06aaa10c668e913cc5045cdd00a210b4be09ca743f5b3b5f410",
+    "apps/web/tests/fixtures/taskboard-browser.mjs": "a36e83cfa24035bbb20d0ad5a7c48fd6dd64e19ed44f87d7062fca5205729850",
+    "apps/web/tests/fixtures/taskboard-smoke.mjs": "1bfebcbc32d20863ffc666c7536ea8e3fcdd43ed442523c47bd6174d9a39c3fc",
+    "packages/api/taskboard-controller/tests/taskboard.host.spec.ts": "824ed347537375200fc7ce6704c2efe38588a30ac39485589dd2874a3fa8cd56",
+    "apps/web/tests/taskboard.e2e.ts": "e8a26888fd42561d6ca4bfeb4d75faf42b3cabac9eaa1e8a2909e0d62dc0493b",
+    "apps/web/dist/assets/taskboardTeam-2bYFBMR5.js": "e1ba558a66b9c150090e79dec4849f36b0047cc63f687e531d592b5a2f4888b8",
+    "apps/web/dist/assets/taskboardTeam-C2SzDb-s.css": "a11faaa07b6c37d1a6a153dca8257168350a36e2bc583b5a417c684a9c7e6394"
+  },
+  "operatorBrowser": {
+    "sequentialGrants": [
+      "viewer",
+      "editor",
+      null,
+      "viewer"
+    ],
+    "replacedKeyDenied": true
+  },
+  "checks": {
+    "taskboardHostPassed": 27,
+    "taskboardWebPassed": 22,
+    "sdkDispatchSnapshotPassed": 1,
+    "githubAdapterPrerequisitePassed": 19
+  }
+}

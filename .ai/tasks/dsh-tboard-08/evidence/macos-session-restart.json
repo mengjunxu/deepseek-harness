@@ -1,0 +1,21 @@
+{
+  "verified_at": "2026-11-22T13:53:27Z",
+  "system": "macOS 15.6.1 (24G90) arm64",
+  "node": "26.5.0",
+  "sha256": {
+    "packages/api/taskboard-controller/src/session-recovery.ts": "eb61a2b0a15c8876ed070b56f9ce531f6df405b7b428a5b7fe4b929e5e300228",
+    "packages/api/taskboard-controller/src/dispatch.ts": "06c97617379fa9dc4fc17bce8936e68787a18792205ea3581c3a7ca4a201f2d7",
+    "packages/api/taskboard-controller/lib/index.js": "91a4de87e3c20c71de53c7acf0345a1721d4a59a2e9a2e71ce719364734f2c97",
+    "apps/web/tests/fixtures/taskboard-smoke.mjs": "741ca0405d8600c8afb2c6c2c7c9c4fa8911e74edf5c51744bccedf35075cef2",
+    "apps/web/tests/taskboard.e2e.ts": "2e7b4ccf0f4dfb32c4d9a107de2ccffa07ed8397297e1d0f28111e55673b6f69"
+  },
+  "checks": {
+    "pnpm run test:web:built apps/web/tests/taskboard.e2e.ts": "15 PASS",
+    "targeted tsc, tsdown, oxlint": "PASS"
+  },
+  "cases": [
+    "Host crashed before SDK reply reached Host; recovered durable original receipt without resend",
+    "resumed Session containing previous identical prompt; unaccepted new input remains unknown",
+    "SDK process scope empty before subsequent queue dispatch"
+  ]
+}

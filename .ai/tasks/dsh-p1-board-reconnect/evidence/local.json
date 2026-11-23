@@ -1,0 +1,32 @@
+{
+  "observedAt": "2026-11-23T07:49:59+00:00",
+  "platform": "macOS arm64",
+  "sha256": {
+    "apps/web/tests/fixtures/taskboard-browser.mjs": "d441225e20b75fe7493075027b713d10b97c5fa142630e8510cf8696b30ad70c",
+    "apps/web/tests/fixtures/taskboard-smoke.mjs": "42ebfb5c6465d6cc704a924de348d5a2db976fc294284b8255a52a4e29079481",
+    "apps/web/tests/taskboard.e2e.ts": "105db94aa7965e001848e16c224409ab2add91399707c166a893d8f415ec251b",
+    "packages/client/ui-taskboard/lib/client.js": "e417d4bb3f796cddafc02f90e8321690c11abeef917aa46322d2f98f01f17f20",
+    "packages/api/taskboard-controller/lib/index.js": "4c280a6eed0fbe6418fcf8a54dff208b6f583425b513cf3a7a2f476f8cc83bcd"
+  },
+  "carrier": "Chromium real WebSocket remote.mux; HTTP Taskboard reads held until reconnection; authenticated second client writes through Host",
+  "checks": {
+    "webFilter": "recovers missed Taskboard activity|limits named team members|runs an SDK task, handles native|native SDK question|scopes|opens the real Taskboard page",
+    "webPassed": 6,
+    "finalReconnectPassed": 1,
+    "operatorComments": 3,
+    "sameOfflineCommandReplays": 1,
+    "offlineCommentDisplayed": 1,
+    "mainFrameNavigations": 0,
+    "newWatchInitialItemObserved": true,
+    "docSync": {
+      "passed": 37,
+      "failed": [
+        "doc-typecheck",
+        "markdown links",
+        "translation pairing",
+        "markdown wrap",
+        "repository references"
+      ]
+    }
+  }
+}

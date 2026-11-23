@@ -1,0 +1,19 @@
+{
+  "verified_at": "2026-11-22T13:41:36Z",
+  "system": "macOS 15.6.1 (24G90) arm64",
+  "node": "26.5.0",
+  "sha256": {
+    "packages/client/ui-taskboard/src/index.ts": "d446abb216309c83b696b7518243e2fc3bb71b6739970bbadfd49ebe28ad2385",
+    "packages/client/ui-taskboard/README.md": "c0420a3531cec873c553f4aeecdbb73082b1d110ef3e787e5e912a706b369cfd",
+    "packages/api/taskboard-controller/src/index.ts": "8da28fb5777e6e648965c19d0250dfa0ff867709d1a03198f2a7dfffc807d2a0",
+    "apps/web/tests/fixtures/taskboard-browser.mjs": "a06092e37b3667814b7c9bb386cc1f9fd6735a8f027790e95ff35cd34c1a650f",
+    "apps/web/tests/taskboard.e2e.ts": "15e991d26e17622895e3425a9b172a449f8918720e4d3814010ecdd54087dd1a"
+  },
+  "checks": {
+    "pnpm run test:web:built apps/web/tests/taskboard.e2e.ts": "12 PASS",
+    "pnpm run test:gui": "9344 PASS, 1 SKIP",
+    "Chromium browser": "English light, Chinese dark/narrow, keyboard ordering, SDK question and approval, delivery Diff and human waiver"
+  },
+  "model": "Local deterministic service through shipped SDK profile",
+  "real_api_gif": "NOT_RUN: DeepSeek API key unavailable; tracked in TBOARD-09"
+}

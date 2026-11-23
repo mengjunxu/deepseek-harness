@@ -1,0 +1,13 @@
+---
+schema_version: 1
+task_id: dsh-p1-confirmed-sdk-route
+state: HANDOFF_READY
+active_agent: null
+branch: codely_bridge
+---
+
+上一项已释放，现由 Codex 单写。新任务沿用现有运行配置及幂等回执。
+
+正式 Web/SDK 及浏览器路径已验证确认的 Provider/模型被提交；不一致时任务版本、Run 列表保持原值。独立重启更换模型后，原命令重放保留旧回执；新命令确认后只绑定新模型。旧备份未记录模型时不补猜当前模型。周剩余 43%，11 月 24 日 17:34:52 重置。
+
+4 项 Web 用例通过，包括浏览器实际发送的确认路线、历史文件导出、旧备份、依赖任务幂等和 Host 重启；更换模型后的复验通过。定向 lint、类型、构建及双语配对通过，全仓文档门禁仍有 5 项失败。阶段证据仅保留工作区内容指纹。[本机验收](evidence/local.json)。无需更新 Memory 或共享规则，本阶段释放写入权。

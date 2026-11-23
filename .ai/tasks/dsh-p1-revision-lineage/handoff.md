@@ -1,0 +1,15 @@
+---
+schema_version: 1
+task_id: dsh-p1-revision-lineage
+state: HANDOFF_READY
+active_agent: null
+branch: codely_bridge
+---
+
+前项已释放写入权，本地工作区保留既有修改。下一步验证错误关联。无需更新 Memory 或共享规则。
+
+修改前的 Web 备份用例实际失败（Missing expected rejection）：校验值正确的备份能将修订后的描述绑定到首次 Run。现已补充历史和启动记录校验，下一步构建正式 Host 并复验。
+
+北京时间 16:44，Host 类型检查及构建、正式 Web 空库恢复通过；错配输入、缺失版本、错误启动回执、重复版本、当前任务验收条件漂移均被拒绝。原两次交付及人工决定分别保留第 1、2 版。继续核验验收证据与人工豁免。周余 46%，停止线 20%。
+
+正式 Web 验收 2 项、Host 4 项及 SDK 快照 1 项通过。验收条件覆盖、失败或未执行项的人工豁免、退回反馈及完成状态关联在提交与恢复时核验。类型检查、构建、定向 lint、中英配对通过；全仓 doc-sync 37 通过，5 项既有失败。见[本机证据](evidence/local.json)。无共享流程或 Memory 变更，本阶段释放写入权。周余 45%，11 月 24 日 17:34:52 重置。

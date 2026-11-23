@@ -1,0 +1,23 @@
+{
+  "verified_at": "2026-11-22T02:05:16Z",
+  "platform": "macOS arm64",
+  "node": "26.5.0",
+  "sha256": {
+    "apps/web/tests/taskboard.e2e.ts": "03dc4ab82b495fdebc0d77d270a269d4f0636361ca12c99a57bb233b80d4e4f0",
+    "apps/web/tests/fixtures/taskboard-smoke.mjs": "bba06db5cfb4f1150d82c0b4ea6c053f0daf2a7e953a80d659e10dc96cc4e3e0",
+    "packages/api/taskboard-controller/src/dispatch.ts": "e0bd298b6bbf9cdb502feec5f2c4859021a032f6c73294d7cd90487a8983f6f6",
+    "packages/api/taskboard-controller/src/index.ts": "bd06d15a33aa14c406846e2f2d4a0d7b7bddb63cb7083910318872f019c61838",
+    "packages/api/taskboard-controller/src/execution.ts": "5689f888191b15dac4601c8e5e00d68077992b797eefc4173fb3231b9d88feca",
+    "packages/api/taskboard-controller/src/stop.ts": "d0d95ee98f237f6f36e8d5b4aa62cdf6e0736b4466eb37a13dcbb2f0841caf88",
+    "packages/api/taskboard-controller/lib/index.js": "577bb1ddcc021bf0c35188152f9bf473eaab542f360261343c6f0755726e4a4a",
+    "snapshots/sdk/taskboard-dispatch/session.v4.jsonl": "30af667e407885d17682e8cc3eb3e24f6abb45056dd33b2b3f5a7afe76e30921"
+  },
+  "results": {
+    "pnpm exec tsc -b packages/api/taskboard-controller/tsconfig.json": "PASS",
+    "pnpm exec tsdown --env.DSH_BUILD_FACE host --filter @deepseek-ai/dsh-api-taskboard-controller": "PASS",
+    "pnpm exec vitest run --config vitest.web.config.ts apps/web/tests/taskboard.e2e.ts": "2 PASS",
+    "pnpm run test:snapshot -t taskboard-dispatch": "1 PASS",
+    "pnpm run verify-package-readme-model-experience": "PASS",
+    "pnpm run verify-export-jsdoc": "PASS"
+  }
+}

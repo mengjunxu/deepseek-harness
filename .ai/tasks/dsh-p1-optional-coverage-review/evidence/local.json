@@ -1,0 +1,19 @@
+{
+  "checkedAt": "2026-11-23T20:01:30+08:00",
+  "platform": "macOS arm64",
+  "weeklyRemaining": 27,
+  "provider": "OpenAI Responses-compatible loopback, gpt-5.4-mini",
+  "scenarios": [
+    "explicit request, rejection, explicit retry and completion",
+    "concurrent duplicate reads one reservation, distinct concurrent command rejected",
+    "completed duplicate replays without dispatch; route changes and exhausted budget rejected",
+    "both exact provider inputs recoverable through JSONL",
+    "operator accepts with waivers; metadata restore keeps both attempts and original decision",
+    "restore in-flight metadata, no automatic resend; explicit retry after deadline leaves task in review",
+    "TypeScript and Python SDK restore review Session with empty inbox and zero conversation turns"
+  ],
+  "hostTests": 31,
+  "sdkAndCorpusTests": 3,
+  "typecheck": "pass",
+  "docSync": "35/42 initially; configuration catalog and Session format references regenerated and independently verified. Five earlier repository documentation gates remain."
+}

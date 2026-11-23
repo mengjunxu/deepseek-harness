@@ -24,6 +24,7 @@ import {
 } from '@deepseek-ai/dsh-sdk-protocol'
 import { disposeRuntimeProcess, exitsWithin } from './dispose.ts'
 import { resolveDshLaunch, type RuntimeProcessOptions } from './launch.ts'
+import { MacosSdkScope, type MacosProcessScopeIdentity } from './macos-scope.ts'
 import type { HarnessClientOptions, HarnessNotification, NotificationFilter } from './types.ts'
 
 /** Retained stderr lines used to diagnose an unexpected runtime death. */
@@ -187,6 +188,7 @@ export class HarnessClient {
   /** Original public dsh launch and timeout options for this client. */
   readonly options: HarnessClientOptions
   private readonly runtime: RuntimeProcessOptions
+  private readonly macosScope: MacosSdkScope | undefined
   private child: ChildProcess | undefined
   private transport: JsonRpcLineTransport | undefined
   private readonly stderrTail: string[] = []
@@ -203,6 +205,10 @@ export class HarnessClient {
   constructor(options: HarnessClientOptions = {}, runtime?: RuntimeProcessOptions) {
     this.options = options
     this.runtime = runtime ?? resolveDshLaunch(options)
+    if (options.processScope === 'macos-launchd') {
+      if (process.platform !== 'darwin') throw new Error('the SDK launchd process scope requires macOS')
+      this.macosScope = new MacosSdkScope()
+    }
   }
 
   /**
@@ -212,7 +218,7 @@ export class HarnessClient {
   start(): void {
     if (this.closeTask !== undefined) throw new TransportClosedError('DeepSeek Harness runtime client is closed')
     if (this.child !== undefined) return
-    const child = spawn(this.runtime.command, this.runtime.args, {
+    const child = this.macosScope?.spawn(this.runtime) ?? spawn(this.runtime.command, this.runtime.args, {
       cwd: this.runtime.cwd,
       env: this.runtime.environment(),
       stdio: ['pipe', 'pipe', 'pipe'],
@@ -295,9 +301,10 @@ export class HarnessClient {
   /**
    * Open a persisted root Session without enqueueing input.
    * @param sessionId - existing identity in the initialized runtime's home.
+   * @param options - optional stored workspace and empty-inbox requirements.
    */
-  async resumeSession(sessionId: string): Promise<void> {
-    const params: SessionResumeParams = { sessionId }
+  async resumeSession(sessionId: string, options: Omit<SessionResumeParams, 'sessionId'> = {}): Promise<void> {
+    const params: SessionResumeParams = { ...options, sessionId }
     const result = await this.request('session/resume', { ...params })
     if (!isRecord(result) || Object.keys(result).length !== 0) throw new SdkProtocolError('session/resume returned an invalid acknowledgement')
   }
@@ -415,6 +422,24 @@ export class HarnessClient {
   }
 
   /**
+   * Observe the complete operating-system process scope of this launch.
+   * @param signal - deadline for membership observation and service cleanup.
+   * @returns empty after the bound kernel scope is quiescent, or unknown without a verified scope.
+   */
+  async waitForProcessScope(signal: AbortSignal): Promise<'empty' | 'occupied' | 'unknown'> {
+    return this.macosScope?.wait(signal) ?? 'unknown'
+  }
+
+  /**
+   * Read the verified macOS job identity for later process-exit observation.
+   * @param signal - deadline for reading the kernel boot identity.
+   * @returns the bound identity, if this client started with a verified macOS scope.
+   */
+  async macosProcessScopeIdentity(signal: AbortSignal): Promise<MacosProcessScopeIdentity | undefined> {
+    return this.macosScope?.identity(signal)
+  }
+
+  /**
    * Shut the runtime down and reap it: a best-effort protocol `shutdown`
    * bounded by `shutdownTimeoutMs`, then the shared stdin-EOF → SIGTERM →
    * SIGKILL ladder until the process actually exited. Idempotent.
@@ -439,6 +464,7 @@ export class HarnessClient {
       disposeEofGraceMs: this.runtime.disposeEofGraceMs ?? 6_000,
       disposeGraceMs: this.runtime.disposeGraceMs ?? 3_000,
     })
+    if (this.macosScope) await this.macosScope.inspect(AbortSignal.timeout(this.runtime.disposeGraceMs ?? 3_000))
     this.transport?.close()
     this.failSubscriptions(this.closedError('DeepSeek Harness runtime closed'))
   }

@@ -295,6 +295,8 @@ def test_restore_session_sends_only_resume_before_returning_handle(tmp_path: Pat
     script = tmp_path / "restore.py"
     script.write_text("""
 import json, sys
+from pathlib import Path
+workspace = Path(sys.argv[1])
 for line in sys.stdin:
     frame = json.loads(line)
     method = frame["method"]
@@ -303,7 +305,7 @@ for line in sys.stdin:
         assert frame["params"]["capabilities"] == {"userQuestions": True}
         result = {"serverInfo": {"name": "fixture"}}
     elif method == "session/resume":
-        assert frame["params"] == {"sessionId": "saved"}
+        assert frame["params"] == {"sessionId": "saved", "expectedCwd": str(workspace), "requireEmptyInbox": True}
         result = {}
     elif method == "shutdown":
         result = {}
@@ -313,8 +315,8 @@ for line in sys.stdin:
     if method == "shutdown":
         break
 """.strip())
-    with DeepSeekHarness(_launch_args=(sys.executable, str(script)), approval_requests=True, user_questions=True) as harness:
-        assert harness.resume_session("saved").id == "saved"
+    with DeepSeekHarness(_launch_args=(sys.executable, str(script), str(tmp_path)), approval_requests=True, user_questions=True) as harness:
+        assert harness.resume_session("saved", expected_cwd=str(tmp_path), require_empty_inbox=True).id == "saved"
 
 
 def test_relative_cwd_is_absolute_in_process_environment_and_wire(

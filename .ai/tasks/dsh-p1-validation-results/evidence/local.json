@@ -1,0 +1,18 @@
+{
+  "when": "2026-11-23T18:46:17+08:00",
+  "checks": {
+    "web": 2,
+    "host": 3,
+    "docs": "both README pairs",
+    "lint": "changed TypeScript and browser fixtures"
+  },
+  "verified": [
+    "passed tracked Git diff, actual exit 0 and recorded time",
+    "failed tracked Git diff, actual exit 2",
+    "non-Git directory, not run, no exit code",
+    "contradictory exit code rejected before restore",
+    "old status retained without a fabricated time or exit code",
+    "browser shows actual exit 0 and human acceptance remains separate"
+  ],
+  "scope": "local project Git check only"
+}

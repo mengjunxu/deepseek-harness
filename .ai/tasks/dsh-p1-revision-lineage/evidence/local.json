@@ -1,0 +1,43 @@
+{
+  "timestamp": "2026-11-23T08:55:49.370680+00:00",
+  "platform": "macOS arm64",
+  "sha256": {
+    "packages/api/taskboard-controller/src/backup.ts": "d0513626805b75c3e4ee5666cdeb0fa5c91962c77cd10d5269cd8a420dbeb27b",
+    "packages/api/taskboard-controller/src/execution.ts": "929f37487a757e80dc09f0af4a504fe9c3d71e758966bff028b1a336dc3539e4",
+    "packages/api/taskboard-controller/src/execution-domain.ts": "09bb6bff2f9eab50664bb2315728052ce14285669db31937dc467374ddfbaba8",
+    "apps/web/tests/fixtures/taskboard-smoke.mjs": "ff78cd6cf23757719818c4035616f7c7e4ba179433c408f31a0306549de2872b"
+  },
+  "web": {
+    "passed": 2,
+    "filter": "restores a checked backup|seals, returns and accepts"
+  },
+  "host": {
+    "passed": 4,
+    "filter": "immutable input revision|binds human acceptance|without a delivery|reviews sealed Git"
+  },
+  "snapshot": {
+    "passed": 1,
+    "filter": "taskboard-dispatch"
+  },
+  "red": [
+    "before requirement linkage checks: missing expected rejection for a different input description",
+    "before review checks: missing expected rejection for an unrelated criterion"
+  ],
+  "checks": [
+    "tsc -b packages/api/taskboard-controller/tsconfig.json",
+    "tsdown -F @deepseek-ai/dsh-api-taskboard-controller --env.DSH_BUILD_FACE host",
+    "scoped run-oxlint",
+    "controller README translation pairing",
+    "git diff --check"
+  ],
+  "docSync": {
+    "passed": 37,
+    "failed": [
+      "doc-typecheck",
+      "markdown links",
+      "translation pairing",
+      "markdown wrap",
+      "repository references"
+    ]
+  }
+}

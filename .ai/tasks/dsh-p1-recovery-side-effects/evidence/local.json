@@ -1,0 +1,23 @@
+{
+  "observedAt": "2026-11-23T18:31:25+08:00",
+  "webTests": 3,
+  "platform": "macOS arm64, shipped SDK and local model fixture",
+  "scenarios": {
+    "receiptCommitted": {
+      "fileAppends": 1,
+      "oldInputReplayed": false,
+      "queueContinued": true
+    },
+    "receiptLost": {
+      "fileAppends": 1,
+      "receiptRecovered": true,
+      "oldInputReplayed": false,
+      "queueContinued": true
+    },
+    "withheldIdenticalInput": {
+      "originalAcceptedInputs": 1,
+      "newReceipt": null
+    }
+  },
+  "syntaxLintAndDiff": "passed"
+}

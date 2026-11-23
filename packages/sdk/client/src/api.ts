@@ -113,11 +113,12 @@ export class DeepSeekHarness implements AsyncDisposable {
   /**
    * Restore a persisted root Session from this runtime's home without sending input.
    * @param id - existing Session id; missing or occupied identities reject.
+   * @param options - optional stored workspace and empty-inbox requirements.
    * @returns an owned session handle ready for the next explicit prompt.
    */
-  async resumeSession(id: string): Promise<HarnessSession> {
+  async resumeSession(id: string, options?: Parameters<HarnessClient['resumeSession']>[1]): Promise<HarnessSession> {
     await this.start()
-    await this.client.resumeSession(id)
+    await this.client.resumeSession(id, options)
     return this.session(id)
   }
 

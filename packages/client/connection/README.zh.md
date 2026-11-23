@@ -46,6 +46,8 @@ cookie 签名密钥是 `ctx.credentials` 中由 `client-connection/browser-sessi
 
 通过认证的共享 HTTP 请求在传输请求体之前经过 `connection/request` waterfall。监听器可以拒绝新请求，或等待 `next()` 直到响应完成；释放所属 fiber 会移除准入行为。Desktop 使用此扩展点，在已批准的安装期间锁住新的 API 工作，而不取消已接纳的工作。客户端断开会中止处理函数的信号；桥接器停止写入 socket，并排空剩余响应块。WebSocket 流仍由 API Gateway 负责。
 
+使用独立凭据的 Host 路由可复用 `isTrustedApiRequest` 核对请求主机与浏览器来源，用 `bridgeHttpRequest` 限制请求体大小。各路由须在返回受保护数据前认证调用者。
+
 <a id="connection-generation"></a>
 ## Connection generation
 

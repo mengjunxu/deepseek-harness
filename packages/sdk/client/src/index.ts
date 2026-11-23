@@ -18,6 +18,7 @@ export {
   TransportClosedError,
 } from './client.ts'
 export type { NotificationSubscription } from './client.ts'
+export { observeSavedMacosProcessScope, type MacosProcessScopeIdentity } from './macos-scope.ts'
 export { JsonRpcResponseError } from '@deepseek-ai/dsh-sdk-protocol'
 export type {
   ContentBlock,

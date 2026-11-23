@@ -1,0 +1,55 @@
+{
+  "checkedAt": "2026-11-23T08:11:00+00:00",
+  "platform": "macOS arm64",
+  "transport": "authenticated Web Host RPC, SQLite, isolated empty restore destination",
+  "sha256": {
+    "packages/api/taskboard-controller/src/index.ts": "affc35602d92bbddbeb4a3688bf21893584d80dec36189054869cf982eafa500",
+    "packages/api/taskboard-controller/src/types.ts": "2f77e6a4910c5679c6ebb28e5cef7468df2d2f4da2537b596648fa7d5ec3db27",
+    "packages/api/taskboard-controller/src/domain.ts": "3ba69a34b2d942c536b90a30d135e4f256c99d4d2d0bc31b519595f1ed46c4d9",
+    "packages/api/taskboard-controller/lib/index.js": "ecd986f393c5eb2f8c277ba6e2f6fee6935c90a54d833cb6c83379556b248be2",
+    "packages/api/taskboard-controller/lib/typert.remote-client.js": "334fb35642774c1f0c92c31269568447ee9c2f412db7d583111abe16a47c31b9",
+    "apps/web/tests/fixtures/taskboard-smoke.mjs": "5fb562ab9df8057a6b896f4cefbe8f49be3ceba8a8cf4dcc6d96af51788b0568",
+    "apps/web/tests/taskboard.e2e.ts": "0b927f9685f25eabee67b624df572a9363bb730732e0c19ad4d544ecf8f3128a"
+  },
+  "web": {
+    "passed": 4,
+    "command": "vitest run --config vitest.web.config.ts apps/web/tests/taskboard.e2e.ts -t 'reads successive task activity|recovers missed Taskboard activity|reopens SQLite|limits named team members'"
+  },
+  "host": {
+    "passed": 5,
+    "command": "vitest run packages/api/taskboard-controller/tests/taskboard.host.spec.ts -t 'notifies an active Taskboard stream|keeps the greatest bound Session position|commits requirements and activity|binds human acceptance|serializes membership changes'"
+  },
+  "snapshot": {
+    "passed": 1,
+    "command": "vitest run --config vitest.snapshot.config.ts -t taskboard-dispatch"
+  },
+  "cases": [
+    "Incremental pages match detail history, including interleaved append and replayed comment",
+    "Empty page retains the last checkpoint; a subsequent Run is returned once with its Run ID",
+    "A restarted Host reproduces the same historical page",
+    "Restoring the backup appends a cancellation for the queued Run, readable from the pre-restore checkpoint",
+    "Other-project reads yield null; cross-task, displaced and unknown command checkpoints are rejected",
+    "Nonpositive and fractional limits rejected"
+  ],
+  "typechecks": [
+    "Taskboard controller",
+    "client UI Taskboard"
+  ],
+  "catalogs": [
+    "remote client generated",
+    "Cordis API and inspection catalog",
+    "config catalog"
+  ],
+  "readmeAndSubsystemPairs": "PASS",
+  "docSync": {
+    "passed": 37,
+    "failed": [
+      "legacy doc typecheck",
+      "legacy Markdown links",
+      "Markdown wrapping",
+      "repository references",
+      "translation pairing"
+    ],
+    "taskReadmeAndSubsystemPairs": "PASS"
+  }
+}

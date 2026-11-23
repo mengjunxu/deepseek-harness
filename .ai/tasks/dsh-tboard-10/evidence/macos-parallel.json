@@ -1,0 +1,109 @@
+{
+  "task": "TBOARD-10",
+  "observed_at": "2026-11-23T03:35:37+00:00",
+  "platform": "macOS 15.6.1 arm64",
+  "node": "v26.5.0",
+  "model": "deterministic, local HTTP fixture; SDK, Web Host, SQLite, Git worktrees and Chromium are real",
+  "maxParallelRuns": 2,
+  "commands": [
+    "node apps/web/tests/fixtures/taskboard-smoke.mjs --parallel --evidence",
+    "node apps/web/tests/fixtures/taskboard-smoke.mjs --parallel-crash --evidence"
+  ],
+  "sha256": {
+    "packages/api/taskboard-controller/lib/index.js": "ae1b92516bdf6b87f669ab46cc4489f9b3d8cb0d6c3ae907ebb19672f7b0b029",
+    "packages/client/ui-taskboard/lib/client.js": "f357a6393a01eb5baabde4beaa4dfeeb1b4acc4480aa4cf48c16a930cee7b858",
+    "apps/cli/lib/bin.js": "87dd715bb2f03ba14de9d4db67877d5ff37b6c036510abd8826006eaa65b0aff",
+    "apps/web/tests/fixtures/taskboard-smoke.mjs": "7c2d284238df78afeed986a0d67d41d2416f91623a525188ce65004238c4720c",
+    "apps/web/tests/fixtures/taskboard-browser.mjs": "94a9f8b487391c262a453918f5635020a3bd3a969213de20a6de842b6ff5b1e6",
+    "packages/api/taskboard-controller/tests/taskboard.host.spec.ts": "b7386b146cc0ea745ebab22cb94d984963589ea89a48dddbcba5baaeb622f0cd",
+    "apps/web/tests/taskboard.e2e.ts": "ceea77d55abd2477b4bcdd002a1b75e752b613676d6177e96b680cf6ce5d54fa"
+  },
+  "workspace_prefix": "$FIXTURE is the private temporary root of each probe",
+  "schedule": {
+    "overlappingSdkRuns": 2,
+    "distinctSessions": 3,
+    "authorizedClaims": 1,
+    "isolatedStop": true,
+    "anonymousWritesDenied": true,
+    "waitedForHumanAcceptance": true,
+    "restartPreservedHistory": true,
+    "projectId": "940ea1be-681f-4818-96ea-1c8e486f8210",
+    "runs": [
+      {
+        "runId": "d892f02a-2a13-4b18-b0b3-6c235aba5827",
+        "sessionId": "d892f02a-2a13-4b18-b0b3-6c235aba5827",
+        "workspace": "$FIXTURE/project",
+        "state": "finished",
+        "control": "normal",
+        "connection": "disconnected",
+        "inputAttemptedAt": "2026-11-23T03:35:17.709Z",
+        "receipt": "481e1c69-afe9-4bfc-8d29-0e0bb6d36838",
+        "endReason": "delivery sealed after runtime exit"
+      },
+      {
+        "runId": "5141ec56-8681-453d-bd8c-fc78c076750c",
+        "sessionId": "5141ec56-8681-453d-bd8c-fc78c076750c",
+        "workspace": "$FIXTURE/worktrees/5141ec56-8681-453d-bd8c-fc78c076750c",
+        "state": "interrupted",
+        "control": "normal",
+        "connection": "disconnected",
+        "inputAttemptedAt": "2026-11-23T03:35:17.787Z",
+        "receipt": "34fa96c2-d248-4021-ad05-27b49dcac107",
+        "endReason": "operator stopped runtime"
+      },
+      {
+        "runId": "71d24501-7bd5-4a9e-a368-be23de6e355b",
+        "sessionId": "71d24501-7bd5-4a9e-a368-be23de6e355b",
+        "workspace": "$FIXTURE/worktrees/71d24501-7bd5-4a9e-a368-be23de6e355b",
+        "state": "finished",
+        "control": "normal",
+        "connection": "disconnected",
+        "inputAttemptedAt": "2026-11-23T03:35:19.556Z",
+        "receipt": "985a463f-260c-4397-8d35-a7426dff14f0",
+        "endReason": "execution ended without a delivery"
+      }
+    ]
+  },
+  "hostCrash": {
+    "recoveredActiveScopes": 2,
+    "resumedQueue": true,
+    "distinctInputs": 3,
+    "duplicateInputs": 0,
+    "projectId": "60ce2ef6-cc2a-4cb7-8622-6fb15542dad2",
+    "runs": [
+      {
+        "runId": "89205dd0-58bc-47f3-a3b9-3309ed677aca",
+        "sessionId": "89205dd0-58bc-47f3-a3b9-3309ed677aca",
+        "workspace": "$FIXTURE/worktrees/89205dd0-58bc-47f3-a3b9-3309ed677aca",
+        "state": "interrupted",
+        "control": "normal",
+        "connection": "disconnected",
+        "inputAttemptedAt": "2026-11-23T03:35:15.842Z",
+        "receipt": "29c45d19-dee8-40a5-b797-1ee378b0514c",
+        "endReason": "original Web Host exited"
+      },
+      {
+        "runId": "ea0a8437-df6c-4455-a71a-23929cdf067d",
+        "sessionId": "ea0a8437-df6c-4455-a71a-23929cdf067d",
+        "workspace": "$FIXTURE/worktrees/ea0a8437-df6c-4455-a71a-23929cdf067d",
+        "state": "interrupted",
+        "control": "normal",
+        "connection": "disconnected",
+        "inputAttemptedAt": "2026-11-23T03:35:15.967Z",
+        "receipt": "6001568c-044f-455e-9f33-48da8b0c37b2",
+        "endReason": "original Web Host exited"
+      },
+      {
+        "runId": "2367bc23-951f-42c7-8343-26f43af2c053",
+        "sessionId": "2367bc23-951f-42c7-8343-26f43af2c053",
+        "workspace": "$FIXTURE/worktrees/2367bc23-951f-42c7-8343-26f43af2c053",
+        "state": "finished",
+        "control": "normal",
+        "connection": "disconnected",
+        "inputAttemptedAt": "2026-11-23T03:35:17.652Z",
+        "receipt": "123bf4f7-8bbd-4627-9eb0-914e6d37402d",
+        "endReason": "execution ended without a delivery"
+      }
+    ]
+  }
+}

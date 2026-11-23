@@ -1,0 +1,45 @@
+{
+  "when": "2026-11-23T09:18:06.716441+00:00",
+  "sha256": {
+    "packages/api/taskboard-controller/src/index.ts": "83873bae48a53835b62ac047d9c209b95deeb3b3d05fd61f4ca9db7167167450",
+    "packages/api/taskboard-controller/src/types.ts": "d9c6c27711a32692c77e38f28cb4334bf32741c0cb65c2fab1b116933bcd1176",
+    "packages/api/taskboard-controller/src/domain.ts": "e1da4fb8b9735ab8bda582b73e8e7e5323a83f3395c9e892540d625e1239f085",
+    "packages/api/taskboard-controller/src/execution-domain.ts": "3ec05dc0465ef33dd51d8eefec3229f76fd1626da810cb8227b1bf532b616c93",
+    "packages/api/taskboard-controller/src/backup.ts": "cedd840190494360848b7cc8c36dffea9ce138f37dae161be85c70f9246e4825",
+    "packages/client/ui-taskboard/src/client/RunPanel.tsx": "e8592587c50afcbc3f1882ed453ad16fe547dfa8b4e1481acbc2fe3a1d26e8cd",
+    "apps/web/tests/fixtures/taskboard-smoke.mjs": "2faea150400e681f31bb04d5776efb3cd2ea88c97df4040c31ea63b0605b8769",
+    "apps/web/tests/fixtures/taskboard-browser.mjs": "0411f6473d1b444b44864ba1a846b90bb8ee51584fc0128e3224400b334057f2",
+    "packages/api/taskboard-controller/lib/index.js": "d7797acbbbed3377328df43543b9038c1b48a051931889ab5d70e1f7333fc91a",
+    "packages/client/ui-taskboard/lib/client.js": "9476c999465f298cba19856b91bb4da3a1f0868d435a0fc516c17bfba09b41e6"
+  },
+  "platform": "macOS arm64, local controlled provider",
+  "web": {
+    "passed": 4,
+    "filter": "reopens SQLite project|restores a checked backup|runs an SDK task|runs independent SDKs",
+    "switchTest": "reopens SQLite project repeated with an actual Host model configuration change"
+  },
+  "cases": [
+    "UI sends the provider and model actually displayed; Run history shows the same pair",
+    "Mismatches in either field leave the task version unchanged and create no Run",
+    "A new Host using a different model rejects a stale confirmation; existing commands replay their receipt even if the route is unavailable",
+    "A fresh confirmation binds the replacement model; older Runs retain their own route",
+    "Archived Runs without a recorded model do not acquire the current model on restore"
+  ],
+  "checks": [
+    "tsc controller and client",
+    "Host and browser plugin builds",
+    "scoped run-oxlint",
+    "three translation pairs",
+    "git diff --check"
+  ],
+  "docSync": {
+    "passed": 37,
+    "failed": [
+      "doc-typecheck",
+      "markdown links",
+      "translation pairing",
+      "markdown wrap",
+      "repository references"
+    ]
+  }
+}

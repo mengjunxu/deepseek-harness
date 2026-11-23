@@ -1,0 +1,43 @@
+{
+  "verified_at": "2026-11-22T14:10:09Z",
+  "system": "macOS 15.6.1 (24G90) arm64; 16 physical cores; 64 GiB",
+  "node": "26.5.0",
+  "command": "/opt/homebrew/bin/node apps/web/tests/fixtures/taskboard-smoke.mjs --performance",
+  "sha256": {
+    "apps/web/tests/fixtures/taskboard-browser.mjs": "3c45bfa3a4908abcc760326a9ac940bd887985360c974f32220b6458d2bf44c5",
+    "apps/web/tests/fixtures/taskboard-smoke.mjs": "4a7398657d1b86a2cf8ce90614853d28f50037f5dc8b4032b8aaeaa2bc006f79",
+    "packages/api/taskboard-controller/lib/index.js": "0b9037a2d8162d0c4dfc283dd972698a91333084dad6f692a8a5ebbb4dbf1741",
+    "packages/client/ui-taskboard/lib/client.js": "fc82b68f7a1b01faa5324bc3108a3bf0460913858b9931ca2cc01730455d71ad"
+  },
+  "tasks": 2000,
+  "firstScreenMs": [
+    396,
+    391,
+    392,
+    383,
+    383,
+    385,
+    398,
+    401,
+    392,
+    414,
+    401,
+    406
+  ],
+  "firstScreenP95Ms": 414,
+  "serviceToPageMs": [
+    94,
+    105,
+    100,
+    116,
+    114,
+    99,
+    96,
+    110,
+    107,
+    105,
+    106,
+    107
+  ],
+  "worstServiceToPageMs": 116
+}

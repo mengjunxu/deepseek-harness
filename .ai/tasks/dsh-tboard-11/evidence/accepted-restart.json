@@ -1,0 +1,54 @@
+{
+  "task": "TBOARD-11",
+  "observedAt": "2026-11-23T06:42:24+00:00",
+  "beforeRestart": {
+    "pid": 11770,
+    "taskStatus": "done",
+    "reviews": 1
+  },
+  "afterRestart": {
+    "pid": 19428,
+    "taskStatus": "done",
+    "reviews": 1,
+    "sameDatabase": true,
+    "samePort": 64513,
+    "identicalReview": true
+  },
+  "review": {
+    "commandId": "b4b0fbbb-3803-4bc9-9b62-b50789a7710d",
+    "deliveryId": "7864ed7f-db83-8ffa-8aa4-fdc2326439fe",
+    "revision": 1,
+    "deliveryVersion": 1,
+    "verdict": "accept",
+    "time": "2026-11-23T06:36:07.557Z",
+    "snapshot": "054b456d069bb0af77a5476e1762798ae2da3a177a21d25e08cef7c47db517b7"
+  },
+  "actor": "operator",
+  "matchingAcceptedEvents": 1,
+  "associatedCI": "https://github.com/mengjunxu/deepseek-harness/actions/runs/45124401035",
+  "restoredInSeparateHome": {
+    "taskStatus": "done",
+    "reviews": 1,
+    "historicalRuns": 1,
+    "newRuns": 0,
+    "restoredAccounts": 0
+  },
+  "archiveSha256": "9cb9d9c8a2e9e2bcfe472ee84a28a2ec5b9768a9fc988473d752b2c85a87dc58",
+  "portableBackup": {
+    "file": "accepted-backup.json",
+    "sha256": "fe71a66f690541450505463362786024aa338ed910052d89fd61a2dbb7102845",
+    "verifiedInEmptyHome": true,
+    "restoredStatus": "done",
+    "matchingReviews": 1,
+    "historicalRuns": 1
+  },
+  "githubRest": {
+    "checkedAt": "2026-11-23T06:53:51+00:00",
+    "receipt": "accepted-ci-rest-receipt.json",
+    "matchingRun": "45124401035",
+    "conclusion": "success",
+    "matchingReceiptFields": true,
+    "rejectedPreviousRun": "45124264345",
+    "reason": "different commit"
+  }
+}

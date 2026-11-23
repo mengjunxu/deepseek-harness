@@ -255,19 +255,60 @@ export interface SettingsControllerInternals {
 ## `@deepseek-ai/dsh-api-taskboard-controller`
 
 - `inject`: `subprocess` · `storageDomain` · `storageBackendServiceKey('sqlite')`
-- `source`: [`packages/api/taskboard-controller/src/index.ts:37`](../packages/api/taskboard-controller/src/index.ts)
+- `source`: [`packages/api/taskboard-controller/src/index.ts:100`](../packages/api/taskboard-controller/src/index.ts)
 
 ```ts config-catalog
-/** Host worktree directory and optional Git command limits. */
+/** Host worktree directory, Git command limits and optional Run configuration. */
 interface Config {
   /** Absolute parent for isolated Git worktrees. */
   worktreeRoot: string
   /** Milliseconds for one stop attempt including process observation. */
   stopTimeoutMs?: number
+  /** Maximum simultaneous Runs in independent workspaces. */
+  maxParallelRuns?: number
+  /** Maximum bytes buffered for one team member edit or comment. */
+  memberRequestMaxBytes?: number
   /** Maximum duration of each Git subprocess in milliseconds. */
   gitTimeoutMs?: number
   /** Maximum retained Git stdout in bytes per command. */
   gitOutputMaxBytes?: number
+  /** Optional separate, explicitly requested model review of validation coverage. */
+  review?: CoverageReviewConfig | undefined
+  /** Host-managed route and Session storage for newly queued Runs. */
+  execution?: ExecutionConfig | undefined
+}
+
+/** Deployment-selected model and per-delivery request limits. */
+export interface CoverageReviewConfig {
+  /** Provider registered on the Web Host for coverage assessments. */
+  provider: string
+  /** Model offered to the operator before dispatch. */
+  model: string
+  /** Maximum output tokens requested for one assessment. */
+  maxOutputTokens: number
+  /** Deadline in milliseconds from reservation to assessment. */
+  timeoutMs: number
+  /** Maximum explicit requests for one sealed delivery, including failed attempts. */
+  maxAttempts: number
+}
+
+interface ExecutionConfig {
+  /** Project configuration reference accepted by this Host. */
+  reference: string
+  /** Absolute parent for private SDK homes. */
+  sessionRoot: string
+  /** Provider name configured in the SDK profile. */
+  provider: string
+  /** Model configured in the SDK profile. */
+  model: string
+  /** Launch the configured SDK route after a claim. */
+  dispatch?: boolean
+  /** Limit for the SDK input acknowledgement. */
+  requestTimeoutMs?: number
+  /** Environment entries explicitly assigned to the SDK process. */
+  env?: Record<string, string>
+  /** Absolute SDK profile overlays applied before the required permission services. */
+  patches?: string[]
 }
 ```
 <!-- END GENERATED config-catalog:@deepseek-ai/dsh-api-taskboard-controller -->
@@ -458,7 +499,7 @@ export type Config = LocalConfig
 ## `@deepseek-ai/dsh-client-connection`
 
 - `inject`: `credentials`
-- `source`: [`packages/client/connection/src/index.ts:92`](../packages/client/connection/src/index.ts)
+- `source`: [`packages/client/connection/src/index.ts:94`](../packages/client/connection/src/index.ts)
 
 ```ts config-catalog
 /** Browser authentication, request limits, and connection recovery configuration. */
@@ -4483,6 +4524,7 @@ These load from a `cordis.yml` entry with no `config:` block; they declare no co
 | `@deepseek-ai/dsh-client-ui-sidebar-terminal` | — | [`packages/client/ui-sidebar-terminal/src/index.ts`](../packages/client/ui-sidebar-terminal/src/index.ts) |
 | `@deepseek-ai/dsh-client-ui-skill` | — | [`packages/client/ui-skill/src/index.ts`](../packages/client/ui-skill/src/index.ts) |
 | `@deepseek-ai/dsh-client-ui-subagent` | — | [`packages/client/ui-subagent/src/index.ts`](../packages/client/ui-subagent/src/index.ts) |
+| `@deepseek-ai/dsh-client-ui-taskboard` | — | [`packages/client/ui-taskboard/src/index.ts`](../packages/client/ui-taskboard/src/index.ts) |
 | `@deepseek-ai/dsh-client-ui-tool` | — | [`packages/client/ui-tool/src/index.ts`](../packages/client/ui-tool/src/index.ts) |
 | `@deepseek-ai/dsh-client-ui-trajectory` | — | [`packages/client/ui-trajectory/src/index.ts`](../packages/client/ui-trajectory/src/index.ts) |
 | `@deepseek-ai/dsh-client-ui-user-questions` | — | [`packages/client/ui-user-questions/src/index.ts`](../packages/client/ui-user-questions/src/index.ts) |

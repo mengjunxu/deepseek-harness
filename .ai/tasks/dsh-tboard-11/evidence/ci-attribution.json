@@ -1,0 +1,10 @@
+{
+  "checkedAt": "2026-11-23T06:36:37.314Z",
+  "deliveryId": "7864ed7f-db83-8ffa-8aa4-fdc2326439fe",
+  "source": "GitHub public workflow and job pages",
+  "acceptedCI": "https://github.com/mengjunxu/deepseek-harness/actions/runs/45124401035",
+  "rejectedCI": "https://github.com/mengjunxu/deepseek-harness/actions/runs/45124264345",
+  "sameBranch": true,
+  "bothRunsSucceeded": true,
+  "previousCommitRefused": true
+}

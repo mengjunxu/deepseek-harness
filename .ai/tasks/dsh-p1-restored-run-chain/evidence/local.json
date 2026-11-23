@@ -1,0 +1,25 @@
+{
+  "when": "2026-11-23T18:29:22+08:00",
+  "regression": "The restore accepted a second Run whose previous claimed Run was cleared",
+  "rejected": [
+    "missing prior claim",
+    "future Run as predecessor",
+    "continuation referencing a different Session",
+    "fresh Run reusing previous Session",
+    "stale latest claimed Run",
+    "different model on a continued Session"
+  ],
+  "preserved": [
+    "two rounds of archive restore",
+    "unclaimed canceled queue entry",
+    "two confirmed inputs with distinct receipts in the same Session",
+    "mixed old and new records with an absent model"
+  ],
+  "checks": {
+    "finalWeb": 4,
+    "host": 3,
+    "typecheck": "controller",
+    "lint": "scoped",
+    "documentation": "controller README pair"
+  }
+}

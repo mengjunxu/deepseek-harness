@@ -27,3 +27,7 @@ get_usage_limits 于 2026-11-18T15:35:51Z 返回 10080 分钟窗口周剩余 88%
 PASS · 以同一基线建立独立 Git 检出，执行 `git diff --cached --binary` 和 `git apply --index` 恢复待提交内容。交接相对链接、输入所需脚本、权限补丁、锁文件及最新 Windows 验证记录的源码摘要一致。两份实际 SDK 探针均通过 `node --check`。隔离检出未重建产品或安装依赖，产品行为使用 TBOARD-03 与 TBOARD-04 的实际 Windows 证据。
 
 NOT_RUN · 当前会话未连接 Mac，实际接收、Mac 构建和首发平台验收待接收方执行。本轮授权为本地提交，远端同步留待确认。Obsidian 布局、本机运行数据和凭证排除在提交外。
+
+2026-11-22T01:46:45Z，Codex 在 macOS arm64 接手并取得单写权。接收前工作区干净，远端分支与本地 HEAD 一致。Codex 10080 分钟窗口剩余 68%（`get_usage_limits`），11 月 24 日 17:34:52（上海）重置，本轮停止线 20%。
+
+2026-11-22T01:49:32Z，`get_usage_limits` 的 Codex 10080 分钟窗口剩余 68%，11 月 24 日 17:34:52（上海）重置。 PASS · 冻结安装、完整构建、固定工具停止复核、未知范围保留租约、强停观察超时、SDK 回执保存与认证 Web 冒烟。命令、平台与源码指纹见 [macOS 验证记录](../dsh-cross-device-handoff/evidence/macos-receipt.json)。交接已验收，后续工作见 [TBOARD-03](../dsh-tboard-03/handoff.md)。

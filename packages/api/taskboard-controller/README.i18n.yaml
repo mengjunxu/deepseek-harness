@@ -15,20 +15,44 @@
   en: 2fee9973f19f9401
   zh: 8f559f4277f32e6d
 /deepseek-ai-dsh-api-taskboard-controller/use-this-package:
-  en: e5599f7be6a9e0cb
-  zh: dd31310be6ef705e
+  en: bbff250eba0f1b89
+  zh: f27de53a045c1eda
+/deepseek-ai-dsh-api-taskboard-controller/use-this-package/enable-local-sdk-dispatch:
+  en: 028539942228138e
+  zh: 5345a6a87f788c2c
+/deepseek-ai-dsh-api-taskboard-controller/use-this-package/use-openai-for-taskboard-runs:
+  en: b2deaf31eff00e25
+  zh: 0649a65b793e8be7
+/deepseek-ai-dsh-api-taskboard-controller/use-this-package/upgrade-or-roll-back:
+  en: 0ca68bfe31a83f9a
+  zh: 4b1ea54f9150572e
+/deepseek-ai-dsh-api-taskboard-controller/use-this-package/request-a-validation-coverage-review:
+  en: 102dd9ca6c830429
+  zh: 70694aed30172760
+/deepseek-ai-dsh-api-taskboard-controller/use-this-package/project-and-task-commands:
+  en: 128d17f4fa1c2d67
+  zh: dcaf496a9fbede07
 /deepseek-ai-dsh-api-taskboard-controller/understand-the-implementation:
-  en: 747a0c90fe746f7f
-  zh: 945a4528edc7d1c3
+  en: 0d31a2468d92159e
+  zh: 844bf8733d37e149
 /deepseek-ai-dsh-api-taskboard-controller/model-experience:
-  en: 5ce7d70204ba041f
-  zh: c636a9f47b24b028
-/deepseek-ai-dsh-api-taskboard-controller/model-experience/kv-cache-effect:
+  en: 215e7ba838619b7b
+  zh: a311da3843709f90
+/deepseek-ai-dsh-api-taskboard-controller/model-experience/task-snapshot-input:
+  en: c5e7ec6e22c2ed87
+  zh: 1f061b831024dd00
+/deepseek-ai-dsh-api-taskboard-controller/model-experience/task-snapshot-input/what-the-model-sees:
+  en: e0135a6b16cb01cf
+  zh: 5cafd27b2e470dd6
+/deepseek-ai-dsh-api-taskboard-controller/model-experience/task-snapshot-input/token-effect:
+  en: 5d9c5a6bfe45a24b
+  zh: 06886483a4a934b0
+/deepseek-ai-dsh-api-taskboard-controller/model-experience/task-snapshot-input/kv-cache-effect:
   en: 2bf0a41c0faddc8c
   zh: d899510f00c4e705
 /deepseek-ai-dsh-api-taskboard-controller/known-limitations-and-deferred-work:
-  en: aa78d01a81597b88
-  zh: 773e3112982bd60d
+  en: 7bdba1846bd14db1
+  zh: ae2dcd35af385739
 /deepseek-ai-dsh-api-taskboard-controller/known-limitations-and-deferred-work/dev-note:
   en: 5cf494c456e2638e
   zh: f1614e7aa3f279da

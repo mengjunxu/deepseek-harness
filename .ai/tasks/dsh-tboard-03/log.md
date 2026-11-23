@@ -18,3 +18,19 @@
 - PASS · `node .ai/tasks/dsh-tboard-03/evidence/submit-input.mjs` 在 Windows 主机运行真实 SDK。SDK 接受输入后关闭 Taskboard 数据库，回执写入因数据库关闭而失败。重开后请求保持待对账，重放调用投递函数零次。夹具从绑定 Session 核对消息 ID 并补写回执。本机模型收到一次请求。[结果与版本](evidence/windows-sdk-input.json)
 - PASS · `node_modules/.bin/vitest.CMD run packages/api/taskboard-controller/tests/taskboard.host.spec.ts --testTimeout 15000` 通过 16 项。`node_modules/.bin/vitest.CMD run --config vitest.web.config.ts apps/web/tests/taskboard.e2e.ts` 通过 1 项。控制器增量类型检查、Host 构建、定向 lint、双语配对、Cordis 目录鲜度及 `git diff --check` 通过。
 - NOT_RUN · 本步未重跑全仓 `doc-sync` 或 macOS 首发平台复验。自动调度及自动对账待接入。
+
+2026-11-22T01:49:32Z，`get_usage_limits` 的 Codex 10080 分钟窗口剩余 68%，11 月 24 日 17:34:52（上海）重置。 PASS · 冻结安装、完整构建、固定工具停止复核、未知范围保留租约、强停观察超时、SDK 回执保存与认证 Web 冒烟。命令、平台与源码指纹见 [macOS 验证记录](../dsh-cross-device-handoff/evidence/macos-receipt.json)。Codex 取得 TBOARD-03 单写权。macOS 上重开数据库后补写原输入回执，重放发出零次新输入。认证 Web 冒烟通过。[macOS 验证记录](../dsh-cross-device-handoff/evidence/macos-receipt.json)。下一步接入队首认领、目录验证、SDK 初始化及输入投递。
+
+2026-11-22T01:54:16Z，`get_usage_limits` 的 Codex 10080 分钟窗口剩余 68%，11 月 24 日 17:34:52（上海）重置。认证 Web profile 已通过真实入队、并发重放、变更载荷拒绝、取消重放、重启后原回执及无配置拒绝。下一步将队首认领和 SDK 生命周期接到 Host。无需更新 Architecture、Memory 或 WORKFLOW。 PASS · `pnpm exec tsc -b packages/api/taskboard-controller/tsconfig.json`、`pnpm exec tsdown --env.DSH_BUILD_FACE host --filter @deepseek-ai/dsh-api-taskboard-controller`、Host 定向测试 16 项及认证 Web 冒烟 1 项；在本地工作区验证，未提交。
+
+2026-11-22T02:05:16Z，`get_usage_limits` 的 Codex 10080 分钟窗口剩余 67%，11 月 24 日 17:34:52（上海）重置。 已接入认证 Web 入队与可显式启用的 Host SDK 调度。macOS 上通过两项真实 Web Host 冒烟及一项 SDK 录制 Session 回放。范围不明时仍保留租约。下一步核对权限失败与回执写库失败在正式调度入口的表现，再接同目录恢复。无需更新 Architecture、Memory 或 WORKFLOW。 PASS · 控制器编译、定向构建、调度 Web 冒烟 2 项、keyless SDK 录制回放 1 项、README 模型体验及导出 JSDoc。仓库文档聚合仍存在旧链接、双语配对、换行与原有证据文件提交号问题，定向文档检查另行记录。
+
+2026-11-22T02:07:47Z，`get_usage_limits` 的 Codex 10080 分钟窗口剩余 67%，11 月 24 日 17:34:53（上海）重置。正式 Web 入口的 [故障验证](evidence/macos-dispatch-faults.json)通过。下一步接入 SDK 原目录恢复，检查持久 Session 的工作目录与未处理输入，再允许新 Run 投递。无需更新 Architecture、Memory 或 WORKFLOW。
+
+2026-11-22T02:15:39Z，`get_usage_limits` 的 Codex 10080 分钟窗口剩余 67%，11 月 24 日 17:34:52（上海）重置。原目录继续、换目录隔离和 Session 缺失均通过 [macOS Web 验收](evidence/macos-resume.json)。下一步验证 SDK 已接纳输入但 ACK 丢失时能否从绑定 Session 对账。无需更新 Architecture、Memory 或 WORKFLOW。
+
+2026-11-22T02:22:27Z，`get_usage_limits` 的 Codex 10080 分钟窗口剩余 67%，11 月 24 日 17:34:53（上海）重置。PASS · 5 项认证 Web、96 项定向 Host/SDK 单测、30 项 Python SDK、1 项 keyless 快照、代码 lint 和 6 组定向双语检查。回执写入失败、传输丢失、停止后迟到及握手期间停止均覆盖。全仓 `doc-sync` 37 项通过、5 项失败，见 [验收证据](evidence/macos-web-acceptance.json)。当前首发缺正式 macOS 全工具范围退出证明，记录 HANDOFF_READY，释放单写权。
+
+2026-11-22T12:14:37Z，Codex 核对本地 Git、未提交修改、进程及交接状态，接管本任务单写权。10080 分钟窗口剩余 67%（`get_usage_limits`），11 月 24 日 17:34:53（上海）重置。先验证 macOS 正式 SDK 启动器可用的完整进程范围，再复验租约与队列。
+
+2026-11-22T12:28:45Z，正式 macOS SDK 进程范围验收 PASS。6 项真实 Web 集成、106 项工作区约束单测、SDK 与 Taskboard 定向编译和构建、快照重放、发布清单、定向文档和 lint 通过。测试过程保留所有既有改动。当前周剩余 67%，未触及 20% 停止线。[验收](evidence/macos-launchd-scope.json)。

@@ -1,0 +1,19 @@
+{
+  "observedAt": "2026-11-23T07:45:14+00:00",
+  "platform": "macOS arm64",
+  "model": "local deterministic provider",
+  "command": "vitest run --config vitest.web.config.ts apps/web/tests/taskboard.e2e.ts -t 'reopens the confirmed Session|keeps the SDK error|keeps the lease until|retains the directory and queue|restores a checked backup|reconciles the committed Session|runs independent SDKs|reconciles two active SDK'",
+  "webCasesPassed": 8,
+  "sha256": {
+    "packages/api/taskboard-controller/src/dispatch.ts": "4e7213e350714b96b7f93dd6bffb2d5d9d42e37a35cef1151b5128d7217c0985",
+    "packages/api/taskboard-controller/lib/index.js": "4c280a6eed0fbe6418fcf8a54dff208b6f583425b513cf3a7a2f476f8cc83bcd",
+    "packages/sdk/client/lib/index.js": "bcdb8a6868e0246e2a5d40bc035c7822be976964895930a1fb60c5ee7eb60515",
+    "apps/web/tests/fixtures/taskboard-smoke.mjs": "05ada003df737b8aa44f778c0bd5e00ab8724ee623130347fb0a7ef2e51d7655",
+    "apps/web/tests/taskboard.e2e.ts": "5988296d6c025c1fd6a51fa9301eab6f212bed169387682d7297d7ddd0866bcc"
+  },
+  "dualScopeCrash": {
+    "recoveredScopes": 2,
+    "distinctInputs": 3,
+    "duplicates": 0
+  }
+}

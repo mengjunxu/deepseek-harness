@@ -1,0 +1,16 @@
+---
+schema_version: 1
+task_id: dsh-p1-business-backup
+state: HANDOFF_READY
+active_agent: null
+branch: codely_bridge
+updated_at: "2026-11-23T07:08:34+00:00"
+---
+
+2026-11-23T06:59:47+00:00，Codex 单写新任务。codely_bridge 现有 Taskboard 修改保留。TBOARD-11 已释放，余项待验，草稿 PR 暂缓。桌面 Codex 10080 分钟窗口余量 52%，上海 11 月 24 日 17:34:53 重置，20% 停止。
+
+2026-11-23T07:05:21+00:00，持久化 Session 中的两条输入与两次 Run 回执一致，主机和 SQLite 定向测试 38 项通过。扩展二次恢复检查后，原构建在已取消 Run 上多出 sessionNotIncluded，正式 Web 断言按预期失败。下一步验证修复和旧记录兼容。桌面 Codex 周余 52%，11 月 24 日 17:34:53 上海重置，停止线 20%。
+
+2026-11-23T07:07:18+00:00，PASS：修复前 Web 断言观察到额外的 sessionNotIncluded；修复后 Web 对照覆盖原 SDK 两条回执、空库二次恢复和旧归档重导出。另有 38 项 Host/存储测试、SDK 快照 1 项、类型构建、定向 lint、双语配对和冻结锁文件安装通过。[实测及指纹](evidence/macos-restore.json)。桌面 Codex 周余 51%，北京时间 11 月 24 日 17:34:52 重置，20% 停止。
+
+2026-11-23T07:08:34+00:00，P1-02 的本地业务库与 Session 引用验收完成，主计划已更新。doc-sync 为 37 PASS、5 FAIL：旧文档类型示例、旧相对链接、排版、文档双语配对（含既有主计划缺配对）、历史交接引用。控制器中英 README 配对及定向 lint 通过。桌面 Codex 10080 分钟窗口剩余 51%，北京时间 11 月 24 日 17:34:52 重置，20% 停止。 本任务修改控制器恢复逻辑、历史记录校验和类型说明，Web 测试及其本地开发依赖、双语 README、任务与主计划；其余既有工作树修改保留。本轮修改仅在本地。未提交、推送或建立 PR。无需更新架构、Memory 或通用流程。已释放写入权；其余 TBOARD-11 留作待验。

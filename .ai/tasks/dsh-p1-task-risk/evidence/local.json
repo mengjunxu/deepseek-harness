@@ -1,0 +1,47 @@
+{
+  "when": "2026-11-23T17:48:00.812332+08:00",
+  "sha256": {
+    "packages/api/taskboard-controller/src/index.ts": "bbc54e48049db7d6b721fe55a2ae68dc47a429a12b76ef5c5da1945def09ad06",
+    "packages/api/taskboard-controller/src/member-board.ts": "78be6a177d33e02397177ce73f4d86e5ced36a5581afca2ab6fc562c6571b34a",
+    "packages/api/taskboard-controller/src/types.ts": "f761ba4f0bd7602b865782366a9286a6b6d5f39abaa3454b12fd9126cc6f97ab",
+    "packages/api/taskboard-controller/src/execution.ts": "50bf8cb2498a738b798f8310372fe718cb30343e24e7971d76b9a6be37061e6c",
+    "packages/api/taskboard-controller/src/execution-domain.ts": "04a3f53efd07dc234548449742a7a32a973b2e1b89e481583f5c6820f691018a",
+    "packages/api/taskboard-controller/src/session-recovery.ts": "3eac21aee00b50aabba6c302135b2522d1e096d577355fde35ac18ad4716406e",
+    "packages/api/taskboard-controller/src/backup.ts": "7f701b2bcf615c2049012b0ab906456d223b9fbe4321b07e2ae3a77727dae4e0",
+    "packages/api/taskboard-controller/src/sdk-tools.ts": "1240ef9cb782500982eee3384bc743345d443595872a22273b2beeb338a3cac0",
+    "packages/api/taskboard-controller/src/tool-protocol.ts": "1562681ad30370ddab7e8ad9a77adf0b54b8fccdcd09d5d4a6ac6192dc8dd2fc",
+    "apps/web/src/taskboard-team.tsx": "9570064cbd7d0a2df0fd3e00c8cc960d3ab5c8452db4f6ae0e91ea85ada51dc1",
+    "apps/web/tests/fixtures/taskboard-smoke.mjs": "ab4429e1166229489da291820578e5593d5c8dea0123e21fa2b090f0168e1963",
+    "apps/web/tests/fixtures/taskboard-browser.mjs": "9dc96db1895b1ef13ceb5a554935ad346e42b1b94bbd0b3cfcc10e6df82b2e24",
+    "snapshots/sdk/taskboard-dispatch/session.v4.jsonl": "8f2c4b6c58580ebde5e59d5ad38dfd8d9c6f8a83cb77bd83882f20de41b75435",
+    "packages/client/ui-taskboard/src/client/TaskboardPage.tsx": "d81c6b79aff22f73c9023fb000d538621549ae5c4f6c1188c64430f6f32ac04f",
+    "packages/client/ui-taskboard/src/client/RunPanel.tsx": "66ffbaecfb3cf17b63803402b8838edc0a204fa37a78b33ed57e2dc37fc4a239",
+    "packages/api/taskboard-controller/lib/index.js": "a4bcd9abe5f2572ea65b3f10eea5f7a90ef16a29a6393d6af09d9776baa657a7",
+    "packages/client/ui-taskboard/lib/client.js": "5157944e16a6157d459001f19e1b8898612e27b0c33a7b575839744acad98ffb"
+  },
+  "web": {
+    "passed": 7,
+    "filter": "claims the queue|recovers a lost SDK|binds task tools|restores a checked backup|opens the real Taskboard page|limits named team|runs an SDK task"
+  },
+  "host": {
+    "passed": 3,
+    "filter": "risk-only|immutable input revision|retains constraints"
+  },
+  "snapshot": {
+    "passed": 1,
+    "filter": "taskboard-dispatch"
+  },
+  "checks": [
+    "controller, client, Web typecheck",
+    "pnpm run build",
+    "scoped lint",
+    "two README translation pairs",
+    "git diff --check"
+  ],
+  "cases": [
+    "Risk-only changes create revisions; an omitted level survives an older client edit; null clears",
+    "The launch dialog, recorded user message, task read tool and saved input use the confirmed level",
+    "Legacy runs retain no assessment; checksum-valid inconsistent risk rejected before restore",
+    "Project editor edits via scoped team browser, and operator reads persisted risk after reload"
+  ]
+}

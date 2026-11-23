@@ -1,0 +1,23 @@
+{
+  "verified_at": "2026-11-22T02:15:39Z",
+  "platform": "macOS arm64",
+  "node": "26.5.0",
+  "sha256": {
+    "packages/api/taskboard-controller/src/index.ts": "2dc999fc01d13df954298f5f454047afa933013e426aa819eb98c721b955de89",
+    "packages/api/taskboard-controller/src/dispatch.ts": "45862eb85f26514752be0b24146bedbd24d88a6323122eb4f41e93651d5c4913",
+    "packages/sdk/server/src/server.ts": "8b71f7393d3f2fc4b215ac34417acc75bc3d3e744f451a9f0625e9e07df960f1",
+    "packages/sdk/client/src/client.ts": "b24be32df8caa2dfbf6800904ffdc2923377e406c6815bac53325c7d45e8e4c6",
+    "packages/sdk/protocol/src/types.ts": "42c76e3e9e2737adc5c9238bedb3c4b76690ce6d7a77a1c93c1a525191d0779a",
+    "python/sdk/src/deepseek_harness/client.py": "0ed94e981b73f8f34cf1e652609792963894ca065edb89ac4f2361db33df443e",
+    "apps/web/tests/fixtures/taskboard-smoke.mjs": "2fd7f10dbe290f063dd88ee8b7213cd2a773ee92aea6bb89de0bcfe20fc4aa02",
+    "packages/api/taskboard-controller/lib/index.js": "444bb456a3d09699007445c51126662271c675ce0e62a7e602d085aa3c2a556a",
+    "packages/sdk/server/lib/index.js": "f44738b613e766ab0e149481692a554977ec0900018abdbaaca19f9ec9871aa3"
+  },
+  "checks": {
+    "pnpm run build:lib:host": "PASS",
+    "pnpm exec vitest run --config vitest.web.config.ts apps/web/tests/taskboard.e2e.ts": "4 PASS",
+    "pnpm exec vitest run packages/sdk/server/tests/server.spec.ts packages/sdk/client/tests/sdk-client.spec.ts packages/api/taskboard-controller/tests/taskboard.host.spec.ts": "94 PASS",
+    "python -m pytest -q python/sdk/tests/test_client.py": "30 PASS (isolated venv, PYTHONPATH=python/sdk/src)"
+  },
+  "platform_observation": "Web 用例对只返回文本的本机夹具单独提供退出范围观察。普通 Host 缺完整范围证据时保留租约。"
+}

@@ -1,0 +1,33 @@
+{
+  "verified_at": "2026-11-22T12:52:10Z",
+  "system": "macOS 15.6.1 (24G90) arm64",
+  "node": "22.18.0",
+  "inputs": {
+    "packages/api/taskboard-controller/src/dispatch.ts": "f468c7206a9db06645cdf37f04c554b3b4c80e6d2c4daf4d67abf718e82e1b68",
+    "packages/api/taskboard-controller/src/interactions.ts": "2c467bcf352f797b07f3693c1cc0388c323eddabd4dc226575f667bf2a1377e7",
+    "packages/api/taskboard-controller/src/session-recovery.ts": "eccc7069b29bb0ad2f36ac175e20b737322cdc2aafbb103d27ed2fa643fd0d7a",
+    "packages/api/taskboard-controller/src/sdk-tools.ts": "ca7f9a60b7de2acb8b56d0539da68f0797906c300b3edec83c6a4a0e50ecffb8",
+    "packages/api/taskboard-controller/src/tool-protocol.ts": "0351291f564cd6b23335d9d780c18b43cd4eed3603581d62205d53ee7dfe3236",
+    "packages/api/taskboard-controller/src/execution.ts": "c4666b9479ecb40e0440e976e54e01c47aae62de93088386446160063346818c",
+    "packages/sdk/server/src/server.ts": "22a1082492cb08bc28def8364030c8586337f431862b998dc5ec96d357f5afd1",
+    "apps/web/tests/taskboard.e2e.ts": "8b4cea5d3d9dfa781c3d45e6fb1441837e329aaa5639472c866c6fe7b0852181",
+    "apps/web/tests/fixtures/taskboard-smoke.mjs": "f2f4fbebcb39f233e000713bf71d82c4b5dcbc7a6971eb25b93013c480d1f956",
+    "snapshots/sdk/taskboard-dispatch/tool-schemas.expected.json": "e602fbb21c6d125f58922e8b6c5d9ea42004a7b9f01a7f50364fa30289784e6e",
+    "packages/api/taskboard-controller/lib/index.js": "7018d2de68ef6f7ceaaf9073ee50e2806a7633c25bc5fcbd8ab69a6c9154ad68",
+    "packages/sdk/server/lib/index.js": "f7ca675656d7fe37c11d0accedc3442ebce98c4a3a72854faef5db52b80769b4"
+  },
+  "checks": {
+    "pnpm run test:web:built apps/web/tests/taskboard.e2e.ts": "9 PASS",
+    "pnpm exec vitest run packages/api/taskboard-controller/tests/taskboard.host.spec.ts packages/sdk/server/tests/server.spec.ts packages/sdk/protocol/tests packages/sdk/client/tests/sdk-client.spec.ts": "117 PASS",
+    "pnpm run test:snapshot -t taskboard-dispatch": "1 PASS",
+    "pnpm run constraints": "PASS",
+    "pnpm run verify-application-entrypoints": "PASS",
+    "Taskboard pnpm pack SDK tool plugin and policy assets": "PASS"
+  },
+  "modelSchemaTokens": {
+    "method": "token-meter character-density estimate",
+    "before": 4571,
+    "after": 5044,
+    "delta": 473
+  }
+}

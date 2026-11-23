@@ -111,7 +111,13 @@ it('rolls back every record on a failed command and publishes the complete commi
   expect(changes.map(change => change.key)).toEqual(['a', 'b'])
   const other = await open()
   expect(Array.from(other.domain.table('counters').entries())).toEqual(Array.from(counters.entries()))
-  await domain.transaction((tx) => { tx.set('counters', 'b', undefined) })
+  await other.domain.transaction((tx) => { tx.set('counters', 'c', { used: 4 }) })
+  expect(counters.get('c')).toBeUndefined()
+  await domain.transaction((tx) => {
+    expect(tx.entries('counters')).toEqual(expect.arrayContaining([['c', { used: 4 }]]))
+    tx.set('counters', 'b', undefined)
+    expect(tx.entries('counters').map(([key]) => key)).not.toContain('b')
+  })
   expect(counters.get('b')).toBeUndefined()
 })
 

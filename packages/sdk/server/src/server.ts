@@ -9,9 +9,11 @@ import type {} from '@deepseek-ai/dsh-session-persistence'
 import type {} from '@deepseek-ai/dsh-user-approval/types'
 import { askClient } from './user-question.ts'
 import type { Context } from '@deepseek-ai/cordis'
-import { resolve } from 'node:path'
+import { randomUUID } from 'node:crypto'
+import { isAbsolute, resolve } from 'node:path'
 import { brandString } from '@deepseek-ai/dsh-brand'
 import type { Agent, AgentHandle } from '@deepseek-ai/dsh-agent'
+import type { ToolCallId } from '@deepseek-ai/dsh-llm'
 import { admitEncodedImages, type EncodedImageAttachment, type ImageAttachmentRef } from '@deepseek-ai/dsh-attachment'
 import { createUserMessage, ReasoningEffortId, type ContentBlock, type LlmRuntime } from '@deepseek-ai/dsh-llm'
 import { carrierKeyOf, type Scoped } from '@deepseek-ai/dsh-scope'
@@ -27,14 +29,39 @@ import type {
   SessionEventNotification,
   SessionPromptParams,
   SessionPromptResult,
+  SessionResumeParams,
   SdkEncodedImageBlock,
+  SdkHostToolRequest,
   SubagentFinishedNotification,
   SubagentStartedNotification,
 } from '@deepseek-ai/dsh-sdk-protocol'
 
+declare module '@deepseek-ai/cordis' {
+  interface Context {
+    /** Request access to an SDK client's own resources from a live root tool call. */
+    sdkHost: SdkHost
+  }
+}
+
+/** The SDK client capabilities available to tools in the owned runtime. */
+export interface SdkHost {
+  /**
+   * Forward a tool request from an owned root Agent to the SDK client.
+   * @param agent - Agent invoking the tool, when present.
+   * @param callId - registry-owned identity of this invocation.
+   * @param tool - host capability selected by the tool implementation.
+   * @param args - validated tool arguments.
+   * @param signal - cancellation of the invocation.
+   * @returns the SDK client's response for this invocation.
+   */
+  callHostTool(agent: Agent | undefined, callId: ToolCallId, tool: string, args: object, signal: AbortSignal): Promise<unknown>
+}
+
 interface SessionRecord {
   handle: AgentHandle
 }
+
+type ResumeOptions = Omit<SessionResumeParams, 'sessionId'>
 
 function encodedImage(block: SessionPromptParams['contentBlocks'][number]): block is SdkEncodedImageBlock {
   return block.type === 'image' && 'data' in block
@@ -76,7 +103,7 @@ function successStatus(reason: string, options: HarnessSdkJsonRpcServerOptions):
  * subscribes to session, agent, and subagent lifecycle events until shutdown;
  * reinitialization is unsupported.
  */
-export class HarnessSdkJsonRpcServer {
+export class HarnessSdkJsonRpcServer implements SdkHost {
   private cwd = process.cwd()
   private provider = 'deepseek-official'
   private model = 'deepseek-official'
@@ -101,15 +128,27 @@ export class HarnessSdkJsonRpcServer {
     this.disposers.push(ctx.on('approval/request', async (request, next) => {
       const agent = request.agent
       if (!this.approvalRequests || !this.ownsRoot(agent)) return next()
+      const requestId = randomUUID()
       const params: ApprovalRequestParams = {
-        sessionId: agent.session.id,
+        sessionId: agent.session.id, requestId,
         toolName: request.toolName,
         ...request.callId === undefined ? {} : { callId: request.callId },
         ...request.reason === undefined ? {} : { reason: request.reason },
       }
       const signal = request.signal === undefined ? this.interactionLifetime.signal
         : AbortSignal.any([request.signal, this.interactionLifetime.signal])
-      const reply = await transport.request('approval/request', params, signal)
+      signal.throwIfAborted()
+      const withdraw = () => {
+        try {
+          transport.notify('approval.cancelled', { sessionId: params.sessionId, requestId })
+        } catch (_error) {
+          // A closed transport invalidates its outstanding requests independently.
+        }
+      }
+      signal.addEventListener('abort', withdraw, { once: true })
+      const reply = await transport.request('approval/request', params, signal).finally(() => {
+        signal.removeEventListener('abort', withdraw)
+      })
       if (reply === null || typeof reply !== 'object' || !('outcome' in reply)
         || (reply.outcome !== 'allowed-once' && reply.outcome !== 'rejected' && reply.outcome !== 'cancelled')) {
         throw new TypeError('invalid approval/request outcome')
@@ -232,6 +271,12 @@ export class HarnessSdkJsonRpcServer {
     return this.sessions.get(agent.session.id)?.handle.agent === agent && this.ctx.agents.get(agent.id) === agent
   }
 
+  callHostTool(agent: Agent | undefined, callId: ToolCallId, tool: string, args: object, signal: AbortSignal): Promise<unknown> {
+    if (!agent || !this.ownsRoot(agent)) throw new Error('SDK host tool requires a live root Agent')
+    const request: SdkHostToolRequest = { sessionId: agent.session.id, callId, tool, args }
+    return this.transport.request('host/tool', request, AbortSignal.any([signal, this.interactionLifetime.signal]))
+  }
+
   private assertLiveAgent(rec: SessionRecord, sessionId: string): void {
     if (this.ctx.agents.get(rec.handle.agent.id) !== rec.handle.agent) {
       throw new Error(`session agent was disposed outside the server: ${sessionId}`)
@@ -300,8 +345,19 @@ export class HarnessSdkJsonRpcServer {
         if (this.shuttingDown) throw new Error('SDK server is shutting down')
         const id = params?.sessionId
         if (typeof id !== 'string' || id.length === 0) throw new TypeError('session/resume requires a non-empty sessionId')
+        const expectedCwd = params?.expectedCwd
+        if (expectedCwd !== undefined && (typeof expectedCwd !== 'string' || !isAbsolute(expectedCwd))) {
+          throw new TypeError('session/resume expectedCwd must be absolute')
+        }
+        const requireEmptyInbox = params?.requireEmptyInbox
+        if (requireEmptyInbox !== undefined && typeof requireEmptyInbox !== 'boolean') {
+          throw new TypeError('session/resume requireEmptyInbox must be boolean')
+        }
         if (this.sessions.has(id) || this.sessionCreations.has(id)) throw new Error(`SDK session is already open or opening: ${id}`)
-        await this.openSession(id, 'resume')
+        await this.openSession(id, 'resume', {
+          ...expectedCwd === undefined ? {} : { expectedCwd: resolve(expectedCwd) },
+          ...requireEmptyInbox === undefined ? {} : { requireEmptyInbox },
+        })
         return {}
       }
       case 'session/prompt':
@@ -322,8 +378,8 @@ export class HarnessSdkJsonRpcServer {
     return this.openSession(sessionId, 'create')
   }
 
-  private openSession(sessionId: string, mode: 'resume' | 'create'): Promise<SessionRecord> {
-    const creation = this.createSession(sessionId, mode)
+  private openSession(sessionId: string, mode: 'resume' | 'create', options?: ResumeOptions): Promise<SessionRecord> {
+    const creation = this.createSession(sessionId, mode, options)
     this.sessionCreations.set(sessionId, creation)
     void creation.then(
       () => { this.sessionCreations.delete(sessionId) },
@@ -332,7 +388,7 @@ export class HarnessSdkJsonRpcServer {
     return creation
   }
 
-  private async createSession(sessionId: string, mode: 'create' | 'resume'): Promise<SessionRecord> {
+  private async createSession(sessionId: string, mode: 'create' | 'resume', options?: ResumeOptions): Promise<SessionRecord> {
     // No preset composition: this server's compositions keep the model-facing
     // rows in the host plane, so this agent reads them from the global layer. A
     // deployment that configures a roster has to join one here first
@@ -345,8 +401,12 @@ export class HarnessSdkJsonRpcServer {
       ...this.maxTokens === undefined ? {} : { maxTokens: this.maxTokens },
     }
     // Agent resume may append recovery events before setup. Reject stored subagents before acquiring a writer.
-    if (mode === 'resume' && (await this.ctx.get('sessionPersistence')?.stat(id))?.header.origin === 'subagent') {
-      throw new Error('resume the root session instead of its subagent')
+    if (mode === 'resume') {
+      const stored = await this.ctx.get('sessionPersistence')?.stat(id)
+      if (stored?.header.origin === 'subagent') throw new Error('resume the root session instead of its subagent')
+      if (stored && options?.expectedCwd !== undefined && stored.header.cwd !== options.expectedCwd) {
+        throw new Error('stored SDK session workspace differs from the expected directory')
+      }
     }
     const handle = mode === 'create'
       ? await this.ctx.agents.create({ sessionId: id, meta: { cwd: this.cwd }, agentOptions })
@@ -355,6 +415,12 @@ export class HarnessSdkJsonRpcServer {
         agentOptions,
         setup: (_agentCtx, agent) => {
           if (agent.session.header.origin === 'subagent') throw new Error('resume the root session instead of its subagent')
+          if (options?.expectedCwd !== undefined && agent.session.header.cwd !== options.expectedCwd) {
+            throw new Error('stored SDK session workspace differs from the expected directory')
+          }
+          if (options?.requireEmptyInbox && (agent.inbox.nextTurn.length || agent.inbox.nextStep.length)) {
+            throw new Error('stored SDK session still has pending input')
+          }
         },
       })
     const rec: SessionRecord = { handle }

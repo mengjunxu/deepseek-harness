@@ -1,0 +1,53 @@
+{
+  "when": "2026-11-23T18:02:22.199359+08:00",
+  "sha256": {
+    "packages/api/taskboard-controller/src/types.ts": "e9d8d56ab51f8162d02c20a2713afd18281025017030fb39ac4826a4b9999a62",
+    "packages/api/taskboard-controller/src/workspaces.ts": "7ffd2271a9a14a39f55e2a27eab318cf9639fbc8bfe1a70ed87c3dbfbb36e5e3",
+    "packages/api/taskboard-controller/src/index.ts": "a856e591d705016dd193a575a0fd6818d725d497dba8e865d39609201834dd54",
+    "packages/api/taskboard-controller/src/domain.ts": "198a9c67fd351ecbff6813679adb7e6456e86ebd4885b83c6a69a9ff220a0fd6",
+    "packages/api/taskboard-controller/src/backup.ts": "d097a4870b281626fbffd33be3a32fdd26a9edcea811550d86e7ce3698531941",
+    "packages/api/taskboard-controller/src/execution.ts": "574ebd1ca3436a1341c5d9a004701d0fa96da9fda266d68f1f3d90ffaaa3df95",
+    "packages/api/taskboard-controller/src/execution-domain.ts": "c6a1e6f9a0f995aa3c7149fec3c49200e5db6ae659219735562db6dcf9f8710d",
+    "packages/client/ui-taskboard/src/client/DeliveryPanel.tsx": "f989bbc248987c9167b1c6e057e9ca4efee77e3d6ae8f483060b915aca8c91c5",
+    "packages/client/ui-taskboard/src/client/TaskboardPage.tsx": "1d30a60975c29066d628b6e8f18b39057c19f08be89d1bc2efade506615f230f",
+    "apps/web/tests/fixtures/taskboard-smoke.mjs": "69a620e78ff75c506efd5eec6096588afc93dcb197a19c377b614976c00eddce",
+    "apps/web/tests/fixtures/taskboard-browser.mjs": "0b09c10e0b2df7108a0bfd6851944f37837985f9eeb4adabc763ed50854c7094",
+    "packages/api/taskboard-controller/lib/index.js": "506632c6160989897625f5e72f35d9d67ac2e59e763cd7bc52da658c03686235"
+  },
+  "host": {
+    "passed": 3,
+    "nonGitReviewRepeated": 1
+  },
+  "web": {
+    "passed": 3,
+    "filter": "seals, returns|restores a checked backup|runs an SDK task"
+  },
+  "checks": [
+    "controller and UI typecheck",
+    "build and final Host bundle",
+    "scoped lint",
+    "two documentation pairs",
+    "git diff --check"
+  ],
+  "cases": [
+    "Operator enables tracked diff validation in a project form",
+    "Host runs git diff --check during capture; clean tracked changes pass; trailing whitespace fails; non-Git is not-run",
+    "Unsuccessful check needs written operator reason even with criterion waivers",
+    "Missing result or acceptance reason rejected on restore; saved human reason shown on accepted revision"
+  ],
+  "docs": {
+    "fullDocSync": {
+      "passed": 36,
+      "failed": [
+        "cordis catalog",
+        "doc-typecheck",
+        "markdown links",
+        "translation pairing",
+        "markdown wrap",
+        "repository references"
+      ]
+    },
+    "cordisCatalog": "regenerated and standalone check passed",
+    "otherFive": "unchanged pre-existing failures"
+  }
+}

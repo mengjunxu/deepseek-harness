@@ -271,11 +271,13 @@ describe('package payload constraints', () => {
     }
   })
 
-  it('publishes the Taskboard permission patch and rejects an omitted or unrelated asset', () => {
-    const dir = 'packages/api/taskboard-controller'
+  it.each([
+    ['packages/api/taskboard-controller', 'sdk-permissions.patch.yml'],
+    ['packages/sdk/client', 'macos-runtime.mjs'],
+  ])('publishes the runtime asset for %s and rejects an omitted or unrelated asset', (dir, asset) => {
     const manifest = JSON.parse(readFileSync(new URL(`../${dir}/package.json`, import.meta.url), 'utf8')) as WorkspaceManifest['manifest']
     expect(checkWorkspaceManifest({ dir, manifest })).toEqual([])
-    for (const files of [manifest.files!.filter(file => file !== 'sdk-permissions.patch.yml'), [...manifest.files!, 'unrelated.yml']]) {
+    for (const files of [manifest.files!.filter(file => file !== asset), [...manifest.files!, 'unrelated.yml']]) {
       expect(checkWorkspaceManifest({ dir, manifest: { ...manifest, files } }))
         .toEqual([expect.stringContaining('package.json files must be')])
     }

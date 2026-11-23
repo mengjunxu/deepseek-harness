@@ -1,0 +1,68 @@
+{
+  "when": "2026-11-23T09:08:50.004219+00:00",
+  "platform": "macOS arm64, shipped Web and SDK, local controlled provider",
+  "sha256": {
+    "packages/api/taskboard-controller/src/types.ts": "9bfaab7fc2f7a5b8f845f43e919c2ced710de5b4f52c86278a6d14da6e1a5c2c",
+    "packages/api/taskboard-controller/src/member-board.ts": "c415ca262b48be57099bf3f4797037557a1787224f01affb9772457419e83c7a",
+    "packages/api/taskboard-controller/src/index.ts": "95ebf11ea522bfd6defeec210d4ad0ce85514d0a4cb863295a672f90fa4e78f5",
+    "packages/api/taskboard-controller/src/execution-domain.ts": "13972102ae33f9ffe0d8ca688d75fa0a532c4a7368fdabd2f903daa5ba6acef6",
+    "packages/api/taskboard-controller/src/execution.ts": "2eb3276c5953d1722bc1dbc387f8da52dcc8be56d36b9c7a2cbbf4afd26bb5ae",
+    "packages/api/taskboard-controller/src/backup.ts": "9546e1de60af477043fb126a318aa0f34d91e05d3a062cb08c6a21e19b97a457",
+    "packages/api/taskboard-controller/src/tool-protocol.ts": "02440a01ed6e2b0956ffcac85a3a90b917df174ef58413187c79e0e174fdc9a3",
+    "packages/api/taskboard-controller/src/sdk-tools.ts": "087e6c0ffb246265af2f2b120eef2f67b793166c0f840f4a7e8756405f97d9e9",
+    "packages/api/taskboard-controller/src/session-recovery.ts": "921b57b62f312ff5b8196c7f7a48b5571c50eaf028516ba001bd24c4d9f10555",
+    "packages/client/ui-taskboard/src/client/TaskboardPage.tsx": "64422ee8ea6daf609a3136bc4388874f54819e7de2189729117bd53aad74175d",
+    "apps/web/src/taskboard-team.tsx": "f4a4bb45c9c01ed6c4d689ea460a2c4dcd0ebe202f96acc032b44007709ceaf8",
+    "apps/web/tests/fixtures/taskboard-smoke.mjs": "c66246e9554578b5f1c22d4b037f83a56d251debbca52e527228d7b3c7766e67",
+    "apps/web/tests/fixtures/taskboard-browser.mjs": "00051938c364d402e80f75aec98ad6d2be74ae784226e2c3089b8c8d7ea950ff",
+    "snapshots/sdk/taskboard-dispatch/session.v4.jsonl": "ef67edf1b62411bae866e5e3dca66aabcb0bedd0b15d4d8f7cb7307543a35bc4",
+    "packages/api/taskboard-controller/tests/taskboard.host.spec.ts": "d94173942db2c97d1f6b2f39177d4f9a9bd7c0921e9f53182f1d25cf736a71b3",
+    "packages/api/taskboard-controller/lib/index.js": "42d5a7529a578744830fe1d68c24450dfc08dc944cc37859f99849c1f6249aea",
+    "packages/client/ui-taskboard/lib/client.js": "c2ca618fe144290506ba65f33135460c6283f473d391226950b177d86cd22fcd",
+    "packages/api/remotes/lib/client.js": "529618512a8df0651e3bf95dedf57c659edb3bd0348e06496f0648fc0766d372"
+  },
+  "web": {
+    "passed": 6,
+    "filter": "claims the queue|recovers a lost SDK|binds task tools|restores a checked backup|opens the real Taskboard page|limits named team"
+  },
+  "host": {
+    "passed": 3,
+    "filter": "immutable input revision|retains constraints|binds human acceptance"
+  },
+  "snapshot": {
+    "passed": 1,
+    "filter": "taskboard-dispatch"
+  },
+  "typechecks": [
+    "Taskboard controller",
+    "Taskboard UI",
+    "Web frontend"
+  ],
+  "builds": [
+    "Taskboard Host",
+    "Taskboard UI client",
+    "API remotes client",
+    "Web frontend"
+  ],
+  "docSync": {
+    "passed": 37,
+    "failed": [
+      "doc-typecheck",
+      "markdown links",
+      "translation pairing",
+      "markdown wrap",
+      "repository references"
+    ]
+  },
+  "checks": [
+    "scoped run-oxlint",
+    "3 named README/subsystem translation pairs",
+    "Cordis catalogs",
+    "git diff --check"
+  ],
+  "sdkFixtureMessageHeuristicTokens": {
+    "withoutConstraints": 44,
+    "withConstraints": 55
+  },
+  "providerSchemaAndSystemPrompt": "unchanged in keyless replay"
+}

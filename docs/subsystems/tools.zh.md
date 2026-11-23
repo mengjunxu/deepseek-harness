@@ -501,6 +501,29 @@ type ObjectJsonSchema = JsonSchemaNode & { type: 'object' }
 
 Generated from source by `scripts/gen-cordis-catalog.ts` (verified fresh by `pnpm run verify-cordis-catalog` in doc-sync; regenerate with `pnpm run gen-cordis-catalog`) — the language sides differ only in locale-specific paired document paths. Signature blocks use a `ts cordis-catalog` fence and keep the original source JSDoc; dispatch modes are defined in the [primer](../cordis-primer.zh.md#dispatch-modes), and the framework-inherited `ctx` API lives in [cordis-api/inherited.md](../cordis-api/inherited.md).
 
+<a id="ctxsdkhost--sdkhost"></a>
+
+### `ctx.sdkHost` — `SdkHost`
+
+The SDK client capabilities available to tools in the owned runtime.
+
+```ts cordis-catalog
+/**
+ * Forward a tool request from an owned root Agent to the SDK client.
+ * @param agent - Agent invoking the tool, when present.
+ * @param callId - registry-owned identity of this invocation.
+ * @param tool - host capability selected by the tool implementation.
+ * @param args - validated tool arguments.
+ * @param signal - cancellation of the invocation.
+ * @returns the SDK client's response for this invocation.
+ */
+callHostTool(agent: Agent | undefined, callId: ToolCallId, tool: string, args: object, signal: AbortSignal): Promise<unknown>
+```
+
+Types: [Agent](core.zh.md)
+
+Source: [`packages/sdk/server/src/server.ts`](../../packages/sdk/server/src/server.ts)
+
 <a id="ctxtools--toolruntime"></a>
 
 ### `ctx.tools` — `ToolRuntime`

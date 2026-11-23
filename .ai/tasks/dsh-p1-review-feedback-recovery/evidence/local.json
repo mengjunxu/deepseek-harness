@@ -1,0 +1,13 @@
+{
+  "checkedAt": "2026-11-23T19:20:55+08:00",
+  "before": "restore accepted a modified retry instruction",
+  "after": [
+    "retry feedback must equal the preceding human decision",
+    "review command fingerprint covers edited text and waivers",
+    "operator attribution and unique decision required",
+    "original backup and second restore retain decisions"
+  ],
+  "webScenarios": 4,
+  "finalBackupRerun": 1,
+  "externalModelRequests": 0
+}

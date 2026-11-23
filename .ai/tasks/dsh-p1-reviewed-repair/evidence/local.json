@@ -1,0 +1,69 @@
+{
+  "checkedAt": "2026-11-23T20:09:41+08:00",
+  "scope": "P1-11 / FR-EX-09/10, human-authorized repair",
+  "platform": "macOS arm64",
+  "git": {
+    "branch": "codely_bridge",
+    "headAtHandoff": "2831497f5378f3aa8948f88609b813e570cb2979",
+    "testedCommit": null,
+    "published": false
+  },
+  "sourceSha256": {
+    "packages/api/taskboard-controller/src/backup.ts": "a8f688dd55467f63f577c582154e6b68240652b0ea77267cdf00e0733038a5da",
+    "packages/api/taskboard-controller/src/execution.ts": "09024ca2cc9105974d912d2423b572ccdf5920c12c3fa051ec4ce3805fe6e81d",
+    "packages/api/taskboard-controller/src/execution-domain.ts": "0bb9312a9544475b17c19f374b3be919d900a17ad570ded95d4a853cafe22067",
+    "packages/api/taskboard-controller/src/types.ts": "c22d0d0a3ead9f3916ed8e4f74a504b6ccbe5901cb82190d0e9bd89944063edf",
+    "packages/client/ui-taskboard/src/client/DeliveryPanel.tsx": "9e4433286d0f16bb816b4a57fa82ef48512b18532b479bf93999dfa27c920cad",
+    "packages/client/ui-taskboard/src/client/locales.ts": "5f420a0f0026bb52ec70697bdc000fe3b96df5158191434c6f5eeeb6b8f162bc",
+    "apps/web/tests/fixtures/taskboard-browser.mjs": "3c24b8a329fc81e3da37c7fdc203c932cf605d095e4869c681c2666ff417b938",
+    "apps/web/tests/fixtures/taskboard-smoke.mjs": "31440414ce207d196bfa15de136511119b2e9c70a33884abd559b6d1686ae80a",
+    "apps/web/tests/taskboard.e2e.ts": "83fc65998ba059d14f3fd198ba1bed68a06f2dd123544ff328f30e177e664fed",
+    "scripts/release/verify-packed-install.ts": "5f48a97e94d5afb6d6bd4b45c74bc9d170b9125337441778f94b6760f0f087cd"
+  },
+  "sourceProbe": {
+    "returned": true,
+    "explicitRepairRuns": 1,
+    "buildExitCode": 0,
+    "operatorAccepted": true
+  },
+  "installedProbe": {
+    "returned": true,
+    "explicitRepairRuns": 1,
+    "buildExitCode": 0,
+    "operatorAccepted": true
+  },
+  "installation": {
+    "version": "0.1.7-rc.2",
+    "onlyDirectDependency": "@deepseek-ai/dsh",
+    "localTarballs": 334,
+    "tarballSha256": {
+      "deepseek-ai-dsh-0.1.7-rc.2.tgz": "6bf933587d93435077708a0fc525b175c3f720775bd1a5f3f819a27d3321d81b",
+      "deepseek-ai-dsh-api-taskboard-controller-0.1.7-rc.2.tgz": "dec3d586a52efb0a6fe2c2c8457fe980aa6c405f73efa84572c1a06daae30709",
+      "deepseek-ai-dsh-client-ui-taskboard-0.1.7-rc.2.tgz": "e0791af00a56d21cbf579c0096102b7ed2e3d2741adf38ea6059123132d809be"
+    }
+  },
+  "observations": {
+    "beforeRepairBuildExit": 17,
+    "afterRepairBuildExit": 0,
+    "runCountAfterHumanReturn": 1,
+    "additionalExplicitRepairRuns": 1,
+    "humanDecisions": [
+      "return",
+      "accept"
+    ],
+    "restoredDecisionLink": true,
+    "invalidAssessmentReferenceRejected": true,
+    "provider": "loopback OpenAI Responses-compatible endpoint",
+    "realModelRequest": false
+  },
+  "verifiedCommands": [
+    "node apps/web/tests/fixtures/taskboard-smoke.mjs --reviewed-repair",
+    "pnpm run build:official",
+    "pnpm run release:pack --family dsh --out <temp>/dsh --concurrency 4",
+    "pnpm run release:verify-packed-install --family dsh --from <dsh> --from <vendor> --from <native> --taskboard review",
+    "pnpm run verify-cordis-catalog",
+    "pnpm run verify-persistence-catalog",
+    "pnpm run verify-persistence-changes",
+    "git diff --check"
+  ]
+}

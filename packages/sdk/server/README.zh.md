@@ -47,9 +47,13 @@ Stdout 只承载 JSON-RPC 帧，客户端可以逐字节解析；诊断信息应
 
 `initialize` 是运行时就绪边界：服务器由 Loader 组合挂载时，会等待当前插件树完成所有加载任务后再响应，因此首次提示词能够看到 MCP 初始工具发现等异步同级能力。握手返回协议稳定标识 `deepseek-harness-sdk-runtime`。服务器会通过所选适配器校验提供方／模型路由与可选的非空 `reasoningEffort`，再保存这些值；省略时不会保存推理强度，因此模型保留自身默认值。可选的正整数 `maxTokens` 会成为每个 SDK 创建的 agent 及其进程内后代的请求输出上限，省略时则应用所选适配器或提供方路由的默认值。JSON-RPC 请求可能并发分派，因此在一次 `initialize` 成功完成之前，`session/prompt` 会拒绝；客户端必须等待握手完成后再发送提示词。已接受的提示词会把一条带标识的用户消息排入队列，并立即返回 `{ messageId }`；服务器随后把每个持久事实作为 `session.event`、把整个 agent 生命周期的每次状态转换作为 `session.status` 流式发出。它不会把某条助手消息或 `turn/end` 归属于某个提示词，同一会话上的独立请求可以继续排入更多工作。持久化根目录与 persona 来自外围组合。
 
-初始化后，`session/resume` 从当前持久化存储打开指定根 Session。原写入者须先退出。恢复保留原历史和目录，随后由调用方显式发送下一条输入。
+初始化后，`session/resume` 从当前持久化存储打开指定根 Session。原写入者须先退出。恢复保留原历史和目录，随后由调用方显式发送下一条输入。传入 `expectedCwd` 时必须匹配保存的工作目录。`requireEmptyInbox: true` 会在 Agent 启用前拒绝含有待处理轮次或步骤输入的 Session。
 
 客户端可启用 `initialize.approvalRequests`、`initialize.capabilities.userQuestions`。服务端仅转发其持有的存活根 Agent 的相应请求。审批仍使用原有策略与审计，只有 `allowed-once` 放行本次操作。问题答案按请求内的问题 ID 校验。请求撤销、连接丢失或服务器关闭后，迟到答复失效。
+
+服务端为每个审批请求分配 `requestId`。撤下请求时，`approval.cancelled` 携带相同的请求和 Session ID。原生 `approval/decided` Session 事件记录策略结果。
+
+SDK runtime 提供 `ctx.sdkHost.callHostTool`，供受信任的工具插件调用 SDK 客户端能力。它校验调用者为 SDK 持有的存活根 Agent。调用撤销或 SDK 关闭时，请求也随之取消。客户端负责校验其资源的访问权限。
 
 ### 关闭与退出
 

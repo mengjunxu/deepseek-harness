@@ -1,0 +1,31 @@
+{
+  "observedAt": "2026-11-23T07:42:36+00:00",
+  "platform": "macOS arm64",
+  "model": "local deterministic provider",
+  "sha256": {
+    "apps/web/tests/fixtures/taskboard-smoke.mjs": "05ada003df737b8aa44f778c0bd5e00ab8724ee623130347fb0a7ef2e51d7655",
+    "apps/web/tests/taskboard.e2e.ts": "5988296d6c025c1fd6a51fa9301eab6f212bed169387682d7297d7ddd0866bcc",
+    "packages/api/taskboard-controller/lib/index.js": "4c280a6eed0fbe6418fcf8a54dff208b6f583425b513cf3a7a2f476f8cc83bcd",
+    "packages/sdk/client/lib/index.js": "bcdb8a6868e0246e2a5d40bc035c7822be976964895930a1fb60c5ee7eb60515"
+  },
+  "web": {
+    "passed": 7,
+    "filter": "reopens SQLite|claims the queue|recovers a lost SDK|reconciles the original scope|recovers the original input|does not confuse old identical|holds the claimed lease"
+  },
+  "hostAndStorage": {
+    "passed": 38,
+    "firstRun": "37 passed; Git diff fixture hit its 5 s runner timeout while Web tests ran",
+    "unchangedRerun": "38 passed"
+  },
+  "crashAssertions": {
+    "originalAdmissionReplayed": true,
+    "queuedAdmissionReplayedConcurrently": true,
+    "changedPayloadRejected": true,
+    "staleNewCommandRejected": true,
+    "startsPerTask": [
+      1,
+      1
+    ],
+    "modelRequestsAfterBothRuns": 2
+  }
+}

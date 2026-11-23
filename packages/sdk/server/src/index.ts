@@ -60,6 +60,7 @@ export function apply(ctx: Context, config: JsonRpcConfig): void {
   const server = new HarnessSdkJsonRpcServer(ctx, transport, {
     maxTokensAsSuccess: resolvedConfig.maxTokensAsSuccess,
   })
+  ctx.provide('sdkHost', { callHostTool: server.callHostTool.bind(server) })
 
   // Share one exit task so racing shutdown requests cannot dispose the root or
   // exit the process more than once.
