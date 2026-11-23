@@ -12,6 +12,7 @@ const tree = hash(JSON.stringify(['/fixture', 'topic', head, '']) + '\0\0')
 const snapshot = hash(JSON.stringify(['/fixture', baseline, tree]))
 const repo = { full_name: 'owner/project' }
 const pr = { number: 1, draft: true, base: { repo }, head: { repo, sha: head, ref: 'topic' }, html_url: 'https://github.com/owner/project/pull/1' }
+const target = { repository: repo.full_name, sourceBranch: 'topic', pr }
 const run = { repository: repo, head_repository: repo, head_sha: head, head_branch: 'topic', event: 'pull_request',
   pull_requests: [{ number: 1 }], status: 'completed', conclusion: 'success' }
 const handoff = { format: 'dsh-taskboard-handoff', version: 1, project: { id: 'p' }, tasks: [{ task: { projectId: 'p', id: 't', status: 'in_review' } }],
@@ -20,7 +21,7 @@ const handoff = { format: 'dsh-taskboard-handoff', version: 1, project: { id: 'p
 
 test('successful or failed CI preserves the pending human decision', () => {
   for (const conclusion of ['success', 'failure']) {
-    const receipt = deliveryReceipt(handoff, 'd', pr, { ...run, conclusion })
+    const receipt = deliveryReceipt(handoff, 'd', target, { ...run, conclusion })
     assert.equal(receipt.ci.conclusion, conclusion)
     assert.equal(receipt.taskStatus, 'in_review')
     assert.deepEqual(receipt.humanReviews, [])
@@ -30,17 +31,26 @@ test('successful or failed CI preserves the pending human decision', () => {
 test('a dirty snapshot, new PR head or unrelated workflow cannot attest the delivery', () => {
   const dirty = structuredClone(handoff)
   dirty.deliveries[0].snapshot = dirty.deliveries[0].code.fingerprint = hash('dirty')
-  assert.throws(() => deliveryReceipt(dirty, 'd', pr, run), /uncommitted/)
-  assert.throws(() => deliveryReceipt(handoff, 'd', { ...pr, head: { ...pr.head, sha: baseline } }, run), /PR head/)
+  assert.throws(() => deliveryReceipt(dirty, 'd', target, run), /uncommitted/)
+  assert.throws(() => deliveryReceipt(handoff, 'd', { ...target, pr: { ...pr, head: { ...pr.head, sha: baseline } } }, run), /PR head/)
   for (const patch of [{ head_sha: baseline }, { head_repository: { full_name: 'other/project' } }, { head_branch: 'elsewhere' },
     { pull_requests: [] }, { status: 'queued', conclusion: null }]) {
-    assert.throws(() => deliveryReceipt(handoff, 'd', pr, { ...run, ...patch }), /CI/)
+    assert.throws(() => deliveryReceipt(handoff, 'd', target, { ...run, ...patch }), /CI/)
   }
 })
 
 test('only a human decision for this snapshot and delivery version is reported', () => {
   const review = { projectId: 'p', taskId: 't', deliveryId: 'd', deliveryVersion: 1, revision: 1, snapshot, verdict: 'return', time: 'recorded' }
   const receipt = deliveryReceipt({ ...handoff, reviews: [review, { ...review, deliveryVersion: 2 }, { ...review, snapshot: 'different' }] },
-    'd', pr, { ...run, event: 'push', pull_requests: [] })
+    'd', target, { ...run, event: 'push', pull_requests: [] })
   assert.deepEqual(receipt.humanReviews, [{ verdict: 'return', time: 'recorded' }])
+})
+
+test('a branch push can supply CI while the PR is deferred', () => {
+  const branch = { repository: repo.full_name, sourceBranch: 'topic' }
+  const receipt = deliveryReceipt(handoff, 'd', branch, { ...run, event: 'push' })
+  assert.equal(receipt.pullRequest, null)
+  assert.equal(receipt.commit, head)
+  assert.deepEqual(receipt.humanReviews, [])
+  assert.throws(() => deliveryReceipt(handoff, 'd', branch, run), /CI event/)
 })

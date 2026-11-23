@@ -31,7 +31,7 @@ Use `stopRun` with the selected Run ID and current task version. A graceful requ
 
 Host adapters construct the exclusive client with `createTaskRuntime`. It launches the `sdk` profile in the confirmed directory and loads the Taskboard permission patch after the selected Host patches. The SDK handshake requires the native approval, permission preset, sandbox policy and sandbox provider services.
 
-For a v1 project handoff containing a sealed Git delivery, use the repository command below to produce a JSON receipt. Select the delivery UUID, the same-repository pull request and a completed GitHub Actions run. The receipt records the exact commit, workflow conclusion and human decisions for that delivery version. A dirty delivery or a changed PR head requires a new delivery. The command only reads the export and GitHub metadata.
+For a v1 project handoff containing a sealed Git delivery, use the repository command below to produce a JSON receipt. Select the delivery UUID, the same-repository pull request and a completed GitHub Actions run. The receipt records the exact commit, workflow conclusion and human decisions for that delivery version. A dirty delivery or a changed PR head requires a new delivery. Use `--branch BRANCH` in place of `--pr NUMBER` for push-triggered CI before a PR exists. The command only reads the export and GitHub metadata.
 
 ```sh
 node scripts/taskboard/delivery-ci.mjs --handoff handoff.json --delivery "$DELIVERY_ID" --repo "$REPO" --pr "$PR_NUMBER" --run "$RUN_ID"

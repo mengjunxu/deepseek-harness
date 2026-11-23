@@ -10,11 +10,11 @@ const digest = value => createHash('sha256').update(value).digest('hex')
  * Bind one Host-sealed, clean Git delivery to the PR head and a completed workflow run.
  * @param handoff - operator-exported Taskboard project handoff.
  * @param deliveryId - selected delivery UUID.
- * @param pr - GitHub REST pull request.
+ * @param target - repository and source branch, with the GitHub pull request when selected.
  * @param run - GitHub REST workflow run.
  * @returns evidence and the independent human decision recorded for this delivery version.
  */
-export function deliveryReceipt(handoff, deliveryId, pr, run) {
+export function deliveryReceipt(handoff, deliveryId, target, run) {
   if (handoff.format !== 'dsh-taskboard-handoff' || handoff.version !== 1) throw Error('Unsupported Taskboard handoff')
   const delivery = handoff.deliveries.find(item => item.id === deliveryId)
   const execution = handoff.runs.find(item => item.runId === delivery?.runId)
@@ -30,11 +30,12 @@ export function deliveryReceipt(handoff, deliveryId, pr, run) {
   const cleanTree = digest(JSON.stringify([directory, branch, code.head, '']) + '\0\0')
   const snapshot = digest(JSON.stringify([directory, code.baseline, cleanTree]))
   if (snapshot !== delivery.snapshot || snapshot !== code.fingerprint) throw Error('Delivery includes uncommitted work or its snapshot differs')
-  const repository = pr.base.repo.full_name
-  if (pr.head.repo.full_name !== repository || pr.head.sha !== code.head) throw Error('Same-repository PR head differs from the delivery')
+  const { repository, sourceBranch, pr } = target
+  if (pr && (pr.base.repo.full_name !== repository || pr.head.repo.full_name !== repository ||
+      pr.head.ref !== sourceBranch || pr.head.sha !== code.head)) throw Error('Same-repository PR head differs from the delivery')
   if (run.repository.full_name !== repository || run.head_repository?.full_name !== repository ||
-      run.head_sha !== code.head || run.head_branch !== pr.head.ref) throw Error('CI repository, branch or commit differs from the PR')
-  if (run.event !== 'push' && !(run.event === 'pull_request' && run.pull_requests.some(p => p.number === pr.number))) {
+      run.head_sha !== code.head || run.head_branch !== sourceBranch) throw Error('CI repository, branch or commit differs from the delivery target')
+  if (run.event !== 'push' && !(pr && run.event === 'pull_request' && run.pull_requests.some(p => p.number === pr.number))) {
     throw Error('CI event is unrelated to this PR')
   }
   if (run.status !== 'completed' || !run.conclusion) throw Error('CI has no final result yet')
@@ -43,7 +44,7 @@ export function deliveryReceipt(handoff, deliveryId, pr, run) {
     review.snapshot === snapshot)
   return {
     projectId: delivery.projectId, taskId: task.id, deliveryId, runId: execution.runId, revision: delivery.revision, version: delivery.version,
-    snapshot, commit: code.head, pullRequest: pr.html_url, draft: pr.draft,
+    snapshot, commit: code.head, repository, sourceBranch, pullRequest: pr?.html_url ?? null, draft: pr?.draft ?? null,
     ci: { url: run.html_url, workflow: run.name, attempt: run.run_attempt, conclusion: run.conclusion, event: run.event },
     taskStatus: task.status, humanReviews: reviews.map(({ verdict, time }) => ({ verdict, time })),
   }
@@ -51,10 +52,10 @@ export function deliveryReceipt(handoff, deliveryId, pr, run) {
 
 async function main() {
   const { values } = parseArgs({ options: Object.fromEntries(
-    ['handoff', 'delivery', 'repo', 'pr', 'run'].map(name => [name, { type: 'string' }])) })
+    ['handoff', 'delivery', 'repo', 'pr', 'branch', 'run'].map(name => [name, { type: 'string' }])) })
   if (!values.handoff || !values.delivery || !/^[\w-]+\/[\w-][\w.-]*$/.test(values.repo ?? '') ||
-      !/^\d+$/.test(values.pr ?? '') || !/^\d+$/.test(values.run ?? '')) {
-    throw Error('Usage: node scripts/taskboard/delivery-ci.mjs --handoff FILE --delivery ID --repo OWNER/NAME --pr NUMBER --run RUN_ID')
+      (Boolean(values.pr) === Boolean(values.branch)) || (values.pr && !/^\d+$/.test(values.pr)) || !/^\d+$/.test(values.run ?? '')) {
+    throw Error('Usage: node scripts/taskboard/delivery-ci.mjs --handoff FILE --delivery ID --repo OWNER/NAME (--pr NUMBER | --branch BRANCH) --run RUN_ID')
   }
   const read = async path => {
     const response = await fetch('https://api.github.com/repos/' + values.repo + '/' + path, {
@@ -64,8 +65,8 @@ async function main() {
     if (!response.ok) throw Error('GitHub returned HTTP ' + String(response.status) + ' for ' + path)
     return response.json()
   }
-  const [file, pr, run] = await Promise.all([readFile(values.handoff, 'utf8'), read('pulls/' + values.pr), read('actions/runs/' + values.run)])
-  console.log(JSON.stringify(deliveryReceipt(JSON.parse(file), values.delivery, pr, run), null, 2))
+  const [file, pr, run] = await Promise.all([readFile(values.handoff, 'utf8'), values.pr ? read('pulls/' + values.pr) : null, read('actions/runs/' + values.run)])
+  console.log(JSON.stringify(deliveryReceipt(JSON.parse(file), values.delivery, { repository: values.repo, sourceBranch: pr?.head.ref ?? values.branch, pr }, run), null, 2))
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
