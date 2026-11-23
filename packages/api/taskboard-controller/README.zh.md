@@ -31,6 +31,12 @@ Web Host 通过已认证的 `taskboard` Remote 命名空间提供项目绑定、
 
 Host Adapter 通过 `createTaskRuntime` 创建独占客户端。它在确认的工作目录启动 `sdk` profile，并在 Host 选定的补丁之后加载工作台权限补丁。SDK 握手要求原生审批、权限预设、沙箱策略及沙箱后端服务均已激活。
 
+项目交接文件包含已封存的 Git 交付时，可用以下仓库命令生成 JSON 回执。选择交付 UUID、同仓库的拉取请求及已结束的 GitHub Actions 运行。回执列出准确提交、CI 结论和该交付版本的人工决定。交付含未提交修改或 PR 头提交已变更时，需要新的交付。命令只读本地导出及 GitHub 元数据。
+
+```sh
+node scripts/taskboard/delivery-ci.mjs --handoff handoff.json --delivery "$DELIVERY_ID" --repo "$REPO" --pr "$PR_NUMBER" --run "$RUN_ID"
+```
+
 <a id="understand-the-implementation"></a>
 ## 实现说明
 

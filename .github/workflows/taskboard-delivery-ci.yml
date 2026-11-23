@@ -1,0 +1,27 @@
+name: Taskboard delivery evidence
+on:
+  push:
+    paths:
+      - 'scripts/taskboard/delivery-ci*.mjs'
+      - '.github/workflows/taskboard-delivery-ci.yml'
+  pull_request:
+    paths:
+      - 'scripts/taskboard/delivery-ci*.mjs'
+      - '.github/workflows/taskboard-delivery-ci.yml'
+permissions:
+  contents: read
+jobs:
+  receipt:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - name: Verify receipts at the delivery commit
+        env:
+          DELIVERY_HEAD: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          test "$(git rev-parse HEAD)" = "$DELIVERY_HEAD"
+          node --test scripts/taskboard/delivery-ci.test.mjs
