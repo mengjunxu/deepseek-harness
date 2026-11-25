@@ -11,7 +11,7 @@ export const name = 'taskboard-sdk-tools'
 export const inject = ['tools', 'sdkHost']
 
 async function runProjectScript(
-  ctx: Context, exec: ToolExecution, script: ProjectScript, directory: string,
+  ctx: Context, exec: Pick<ToolExecution, 'agent' | 'signal'>, script: ProjectScript, directory: string,
 ): Promise<ProjectScriptOutcome> {
   const shell = ctx.get('shell')
   const policies = ctx.get('sandboxPolicy')
@@ -19,8 +19,10 @@ async function runProjectScript(
   const standing = policies.resolve({ session: exec.agent.session })
   if (standing.workspaceRoot !== directory) return { exitCode: null, reason: 'unavailable' }
   const mode = standing.mode === 'read-only' ? 'read-only' : 'workspace-write'
+  const { manager, name } = typeof script === 'string' ? { manager: 'npm', name: script } : script
+  const command = manager === 'pnpm' ? `pnpm --config.verify-deps-before-run=false --dir . run ${name}` : `npm --prefix . run ${name}`
   try {
-    const handle = await shell.execute(shell.resolve({ command: `npm --prefix . run ${script}`, workdir: directory, signal: exec.signal,
+    const handle = await shell.execute(shell.resolve({ command, workdir: directory, signal: exec.signal,
       onExpiry: 'kill', sandboxPolicy: { ...standing, mode } }))
     const result = await handle.result()
     if (result.timedOut) return { exitCode: null, reason: 'timed-out' }
@@ -32,6 +34,24 @@ async function runProjectScript(
     if (!(error instanceof Error)) throw error
     return { exitCode: null, reason: exec.signal.aborted ? 'interrupted' : 'unavailable' }
   }
+}
+
+/** Submit structured evidence and run the script reserved by its owning Host.
+ * @param ctx - SDK context with the Host transport and project shell.
+ * @param host - SDK transport for requests to the owning controller.
+ * @param exec - active Session, delivery correlation ID and cancellation signal.
+ * @param request - validated delivery fields and current task version.
+ * @returns the task version after saving the draft.
+ */
+export async function submitTaskDelivery(ctx: Context, host: Context['sdkHost'], exec: Pick<ToolExecution, 'agent' | 'callId' | 'signal'>,
+  request: ReturnType<typeof taskDeliveryToolArgs.parse>): Promise<{ version: number }> {
+  const result = await host.callHostTool(exec.agent, exec.callId, 'taskboard/submit-delivery', request, exec.signal)
+  const { version, check } = submissionReceipt.parse(result)
+  if (check) {
+    const outcome = await runProjectScript(ctx, exec, check.script, check.directory)
+    await host.callHostTool(exec.agent, exec.callId, 'taskboard/script-result', outcome, exec.signal)
+  }
+  return { version }
 }
 
 /** Register the current task's read, activity and delivery tools.
@@ -47,9 +67,10 @@ export function apply(ctx: Context): void {
         title: { type: 'string', required: true }, description: { type: 'string', required: true },
         constraints: { type: 'string' }, riskLevel: { type: 'string', enum: ['low', 'medium', 'high'] },
         workflow: { type: 'object', additionalProperties: false, properties: {
-          template: { type: 'string', required: true, enum: ['task.quick.v1', 'task.standard.v1'] },
+          template: { type: 'string', required: true, enum: ['task.quick.v1', 'task.standard.v1', 'task.milestone.v1'] },
           steps: { type: 'array', items: { type: 'string' } },
         } },
+        milestone: { type: 'number', description: 'One-based stage authorized for this Run in workflow.steps.' },
         acceptance: { type: 'array', required: true, items: { type: 'string' } },
         revision: { type: 'number', required: true }, version: { type: 'number', required: true },
       } },
@@ -57,8 +78,8 @@ export function apply(ctx: Context): void {
     },
     async execute(args, exec) {
       const result = await ctx.sdkHost.callHostTool(exec.agent, exec.callId, 'taskboard/read', taskReadArgs.parse(args), exec.signal)
-      const { constraints, riskLevel, workflow, ...requirements } = taskReadResult.parse(result)
-      return { ...requirements, ...(constraints !== undefined && { constraints }),
+      const { constraints, riskLevel, workflow, milestone, ...requirements } = taskReadResult.parse(result)
+      return { ...requirements, ...(milestone !== undefined && { milestone }), ...(constraints !== undefined && { constraints }),
         ...(riskLevel !== undefined && { riskLevel }), ...(workflow !== undefined && { workflow }) }
     },
     presentCall: () => ({ card: 'generic', title: 'Read current task', kind: 'read' }),
@@ -108,14 +129,7 @@ export function apply(ctx: Context): void {
       render: (_args, result) => [{ type: 'text', text: JSON.stringify(result) }],
     },
     async execute(args, exec) {
-      const request = taskDeliveryToolArgs.parse(args)
-      const result = await ctx.sdkHost.callHostTool(exec.agent, exec.callId, 'taskboard/submit-delivery', request, exec.signal)
-      const { version, check } = submissionReceipt.parse(result)
-      if (check) {
-        const outcome = await runProjectScript(ctx, exec, check.script, check.directory)
-        await ctx.sdkHost.callHostTool(exec.agent, exec.callId, 'taskboard/script-result', outcome, exec.signal)
-      }
-      return { version }
+      return submitTaskDelivery(ctx, ctx.sdkHost, exec, taskDeliveryToolArgs.parse(args))
     },
     presentCall: args => ({ card: 'generic', title: 'Submit delivery for review', kind: 'other', rawInput: args.summary }),
   }))

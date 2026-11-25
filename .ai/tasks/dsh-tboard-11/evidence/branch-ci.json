@@ -2,7 +2,6 @@
   "task": "TBOARD-11",
   "observedAt": "2026-11-23T06:31:49+00:00",
   "branch": "codex/tboard-11-delivery-ci",
-  "gitCommitUrl": "https://github.com/mengjunxu/deepseek-harness/commit/f71df3979081151fd464e33190378c2f494ac940",
   "deliveryId": "7864ed7f-db83-8ffa-8aa4-fdc2326439fe",
   "taskId": "91bb0cb9-9a1c-47f8-a5f8-4627ebded031",
   "runId": "02138f6d-ecbe-4280-b78b-c338cca0ace1",
@@ -12,7 +11,11 @@
     "workflow": "Taskboard delivery evidence",
     "attempt": 1,
     "conclusion": "success",
-    "event": "push"
+    "event": "push",
+    "commitEvidence": {
+      "url": "https://api.github.com/repos/mengjunxu/deepseek-harness/actions/runs/45124401035/attempts/1",
+      "field": "head_sha"
+    }
   },
   "job": "https://github.com/mengjunxu/deepseek-harness/actions/runs/45124401035/job/137525332000",
   "verifiedStep": "Verify receipts at the delivery commit",
@@ -27,5 +30,6 @@
     "remoteHeadMatched": true,
     "bothPrePushTypechecksPassed": true,
     "sdkInput": "local deterministic provider; production Web, SDK and SQLite paths"
-  }
+  },
+  "gitTree": "1988496aaaef5ef0da70342718f91492810a50fe"
 }

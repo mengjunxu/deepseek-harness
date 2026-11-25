@@ -23,6 +23,9 @@
 /deepseek-ai-dsh-api-taskboard-controller/use-this-package/use-openai-for-taskboard-runs:
   en: b2deaf31eff00e25
   zh: 0649a65b793e8be7
+/deepseek-ai-dsh-api-taskboard-controller/use-this-package/select-a-native-executor:
+  en: 368b0e4f2065d858
+  zh: 83aef023600b5b7c
 /deepseek-ai-dsh-api-taskboard-controller/use-this-package/upgrade-or-roll-back:
   en: 0ca68bfe31a83f9a
   zh: 4b1ea54f9150572e
@@ -30,8 +33,8 @@
   en: 102dd9ca6c830429
   zh: 70694aed30172760
 /deepseek-ai-dsh-api-taskboard-controller/use-this-package/project-and-task-commands:
-  en: 128d17f4fa1c2d67
-  zh: dcaf496a9fbede07
+  en: 2dbd701ea9bd9d45
+  zh: ac6bddd8d1556559
 /deepseek-ai-dsh-api-taskboard-controller/understand-the-implementation:
   en: 0d31a2468d92159e
   zh: 844bf8733d37e149

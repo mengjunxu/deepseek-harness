@@ -16,13 +16,17 @@ export const activityActor = z.enum(['operator', 'runtime', 'member'])
 /** Supported operator assessments of task risk. */
 export const riskLevel = z.enum(['low', 'medium', 'high'])
 
-/** npm scripts an operator may authorize at project registration and Run admission. */
-export const projectScript = z.enum(['test', 'build'])
+/** Package-manager script approved at registration and confirmed for each Run. */
+export const projectScript = z.union([
+  z.enum(['test', 'build']),
+  z.strictObject({ manager: z.enum(['npm', 'pnpm']), name: z.string().regex(/^[a-zA-Z0-9][a-zA-Z0-9:._-]*$/u) }),
+])
 
 /** Operator-selected execution template with optional planning for standard tasks. */
 export const workflow = z.discriminatedUnion('template', [
   z.strictObject({ template: z.literal('task.quick.v1') }),
   z.strictObject({ template: z.literal('task.standard.v1'), steps: z.array(text) }),
+  z.strictObject({ template: z.literal('task.milestone.v1'), steps: z.array(text).min(1) }),
 ])
 /** Editable fields shared by the operator and project editors. */
 export const requirements = z.strictObject({

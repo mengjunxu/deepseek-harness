@@ -1,435 +1,437 @@
-# DSH v2 — Codex / Codely 通用开发执行计划
+# DSH v2 — Codex and Codely implementation plan <a id="dsh-v2--codex--codely-通用开发执行计划"></a>
 
-> 更新：2026-11-23｜状态：实施与验收进行中，完整产品尚未验收。
+English | [中文](DSH_IMPLEMENTATION_PLAN.zh.md)
+
+> Updated November 23, 2026. Implementation and acceptance are in progress. Full product acceptance is pending.
 >
-> **需求来源仅限 `docs/myPlan/` 的两份当前 Markdown PRD**：[主 PRD vNext.4](../myPlan/DSH_PRD_vNext_4_2026-10-27.md)与[Taskboard PRD v0.1](../myPlan/DeepSeek_Harness_Taskboard_PRD_v0.1.md)。本文件负责拆解实施、跟踪进度和关联证据，不补充第三套产品要求，也不沿 PRD 中的旧链接重新引入历史计划。
+> **Requirements come exclusively from the two current Markdown PRDs in `docs/myPlan/`**: [main PRD vNext.4](../myPlan/DSH_PRD_vNext_4_2026-10-27.md) and [Taskboard PRD v0.1](../myPlan/DeepSeek_Harness_Taskboard_PRD_v0.1.md). This plan breaks down implementation, tracks progress and links evidence. Historical plans linked by either PRD add no requirements.
 >
-> 目标与约束以两份 PRD 正文为准；主产品决定以主 PRD D-01–D-10 为准，工作台详细行为以专题 FR01–FR14、AC01–AC20、NFR01–NFR09 为准。原 Word 文档是专题原稿索引，不用于扩大当前 Markdown 需求。
+> The two PRDs define goals and constraints. Main PRD D-01–D-10 govern product decisions. Taskboard FR01–FR14, AC01–AC20 and NFR01–NFR09 govern detailed workbench behavior. The original Word document locates the source draft and does not extend current Markdown requirements.
 >
-> [当前进度](#12-有效-checklist-与任务证据)｜[可体验范围](#14-p1-当前实现范围)｜[Web 前置验证](#15-当前第一优先web-chatgpt-provider-可行性验证)｜[Taskboard 实施](#16-taskboard-增量实施计划)。P/CG/QR/VN4/TBOARD 编号保留用于追踪，不能依据编号或底层组件存在推断功能完成。
+> [Progress](#12-有效-checklist-与任务证据) · [Available features](#14-p1-当前实现范围) · [Web feasibility](#15-当前第一优先web-chatgpt-provider-可行性验证) · [Taskboard implementation](#16-taskboard-增量实施计划). P/CG/QR/VN4/TBOARD identifiers track work. Neither an identifier nor an existing underlying component establishes completion.
 
-## 0. 给执行 Agent 的第一条指令（必须遵循）
+## 0. Required first step for implementing agents <a id="0-给执行-agent-的第一条指令必须遵循"></a>
 
-先读取两份 myPlan PRD 及本计划当前任务的需求映射，再按 [WORKFLOW](../../.ai/WORKFLOW.md) 核对 Task、真实 Git 状态和单一写入权。仓库架构、代码和既有测试用于判断实现方式及完成证据，不能替代 PRD 决定产品范围。旧业务示例、历史提案和已移除文档不构成实施前置。
+Read both myPlan PRDs and the requirement mapping for the current task. Follow [WORKFLOW](../../.ai/WORKFLOW.md) to verify Task, actual Git state and sole write ownership. Use repository architecture, code and tests to assess implementation and completion evidence. The PRDs determine product scope. Historical business examples, proposals and removed documents impose no prerequisites.
 
-每步保存可恢复记录，并读取 Codex 的七天周额度；剩余小于或等于 10% 时停止新增开发、测试和后台任务，仅完成安全停止与 `HANDOFF_READY`，释放写入权。动态额度仅写当前 Task，不写本计划或长期 Memory。
+Save recoverable records at each step and read the seven-day Codex quota. At or below 10% remaining, stop starting development, tests and background work, complete safe shutdown, mark `HANDOFF_READY` and release write ownership. Record live quota only in the current Task.
 
-## 1. 不可妥协的产品目标与范围
+## 1. Required product goals and scope <a id="1-不可妥协的产品目标与范围"></a>
 
-### 1.1 必须实现的体验
+### 1.1 Required experience <a id="11-必须实现的体验"></a>
 
-- 普通聊天不创建 Task，不启动 Executor，不额外调用 Planner 或 Reviewer；简单工程任务采用最小 TaskSpec、原生执行器循环和确定性验证。
-- ChatGPT Web 与 SIWC 是平级 Provider；Provider、Executor、Workflow 独立选择，已提交 Turn 和已有 Run 保留绑定。
-- Codex/Codely 默认作为 `external-agent` 保留原生 Agent Loop；已有 `native-model/subscription` 是另一种集成模式。
-- Task、Run、Delivery 与人工 Review 分开；仅用户接受指定有效 Delivery 才能使任务完成。
-- 额度来源、未知计数、额外付费与切换行为透明；跨来源、跨模型、额外付费均须明确用户操作。
+- Ordinary chat creates no Task, starts no Executor and makes no additional Planner or Reviewer call. Simple engineering work uses a minimal TaskSpec, native executor loop and deterministic verification.
+- ChatGPT Web and SIWC are peer providers. Select Provider, Executor and Workflow independently. Submitted Turns and existing Runs retain their bindings.
+- By default Codex and Codely run their native agent loops as `external-agent`. The existing `native-model/subscription` integration is a separate mode.
+- Track Task, Run, Delivery and human Review separately. Only user acceptance of the specified valid Delivery completes a task.
+- Show quota source, unknown counts, additional charges and switches. Changing source or model and incurring additional charges each require explicit user action.
 
-来源：主 PRD 第 0–5、8–9 节及 D-01–D-10；专题 PRD 第 2–8 节。
+Sources include main PRD sections 0–5 and 8–9 and decisions D-01–D-10, and Taskboard PRD sections 2–8.
 
-### 1.2 明确不做或推迟
+### 1.2 Exclusions and deferred scope <a id="12-明确不做或推迟"></a>
 
-不强制独立 Plan 或模型 Review，不重建 Codex/Codely 内部 Planner，不声称读取官方 ChatGPT Memory。反向 MCP/Native Tool 是可选辅助工具链。团队、跨机器、复杂自动领取和完整编辑器按专题 G3/G4 及主 PRD M3/M4 的实际范围实施，不成为工作台 MVP 的额外前置。
+Separate plans and model review are optional. Do not rebuild native Codex/Codely planners or claim access to official ChatGPT Memory. Reverse MCP/native tools are optional. Teams, cross-machine work, complex automatic claiming and a full editor follow Taskboard G3/G4 and main PRD M3/M4. They are outside the Taskboard MVP prerequisites.
 
-### 1.3 已知边界（实施时重新验证）
+### 1.3 Limits to recheck during implementation <a id="13-已知边界实施时重新验证"></a>
 
-Web 受控 PoC 不等于生产准入；OAuth 登录不等于普通 ChatGPT 额度。SDK 控制 Harness 不等于已启动 Codex/Codely 原生执行器。Session 恢复、原生 Executor resume、环境恢复分别验证；不能用新会话冒充恢复，也不能用 SDK idle 或最终文本冒充人工验收。
+A controlled Web proof of concept does not authorize production. OAuth sign-in does not establish ordinary ChatGPT quota. SDK control of Harness alone does not launch a native executor. Verify Session recovery, native executor resume and environment restoration separately. A new session cannot stand in for recovery, and SDK idle or final text cannot stand in for human acceptance.
 
-## 2. 推荐架构：Local-First Modular Monolith
+## 2. Recommended architecture — local-first modular monolith <a id="2-推荐架构local-first-modular-monolith"></a>
 
-2026-11-16 用户确认首版工作台位于现有 DSH Web 内，复用 Web Host 与认证。任务服务持有业务库，每个 Run 经官方 TypeScript SDK 启动独占 runtime。部署与归属见[入口决策](../../.ai/tasks/dsh-tboard-00/decision.md)。
+On November 16, 2026, the user chose the existing DSH Web app, host and authentication for the first workbench. The task service owns its business database and each Run starts a dedicated runtime through the official TypeScript SDK. See the [deployment and ownership decision](../../.ai/tasks/dsh-tboard-00/decision.md).
 
-### 2.1 已有技术栈与存储归属
+### 2.1 Existing stack and storage ownership <a id="21-已有技术栈与存储归属"></a>
 
-| 职责 | PRD 要求 | 实施评估范围 |
+| Owner | PRD requirements | Implementation scope |
 |---|---|---|
-| 产品任务服务 | 业务状态、版本、启动意图、Delivery、人工验收、目录/runtime 租约 | G0 明确一个状态拥有者；数据库与迁移方案在 TBOARD-02 落实 |
-| Harness | Session、模型与工具事实、原有权限语义 | Session 日志继续是执行事实权威，任务库只保存引用与业务记录 |
-| Harness Adapter | 创建/恢复 Session、提交输入、问题/审批、目标 runtime 停止 | 使用已核验的公开 TypeScript SDK 和受支持 dsh profile |
-| Executor | Codex/Codely 原生循环、进度、结果及支持的取消/恢复 | 按驱动能力逐项验证，不能以模型 Provider 代替 Executor |
-| UI | 聊天、选择器、任务看板、待处理、交付验收 | 现有 DSH Web 页面复用 Host 与认证 |
+| Product task service | Business state, versions, launch intent, Delivery, human acceptance, directory/runtime leases | Establish a single state owner in G0. Implement database and migrations in TBOARD-02. |
+| Harness | Session, model and tool facts, original permission semantics | Session logs own execution facts. The task database stores references and business records. |
+| Harness Adapter | Create/restore Session, submit input, handle questions/approvals and stop the target runtime | Use the verified public TypeScript SDK and supported dsh profiles. |
+| Executor | Native Codex/Codely loops, progress, results and supported cancellation/recovery | Verify each driver capability. A model provider cannot substitute for an executor. |
+| UI | Chat, selectors, board, pending items and acceptance | Reuse the existing DSH Web host and authentication. |
 
-### 2.2 目录复用
+### 2.2 Reuse of existing modules <a id="22-目录复用"></a>
 
-先查 SDK、Session、storage、workspace、sandbox、interaction、subprocess/jobs、workflow、deliverables 和现有 Client 扩展接口。目录中存在某个实现只说明它可被评估，不决定新任务模型、状态机或审核流程。`.ai/tasks/` 仅保存人工开发记录，不是产品 Task Store。
+Inspect SDK, Session, storage, workspace, sandbox, interaction, subprocess/jobs, workflow, deliverables and existing client extension APIs first. Existing code is a candidate for evaluation. It does not determine the new task model, state machine or review process. `.ai/tasks/` stores developer records only.
 
-### 2.3 进程/边界
+### 2.3 Processes and ownership <a id="23-进程边界"></a>
 
-默认串行执行，每个活动 Run 独占 runtime，并关联真实 Session、持久 dshHome 和规范化工作目录。关闭 UI 不停止执行；停止只作用于目标 runtime，确认退出前保留所有权。不得让两个控制路径同时接管同一 Session，不自动删除工作成果。
+Execute serially by default. Each active Run owns a dedicated runtime linked to a real Session, persistent dshHome and normalized working directory. Closing the UI leaves execution running. Stop targets only the specified runtime. Retain ownership until exit is confirmed. Never let two control paths take over a Session simultaneously or automatically delete work.
 
-## 3. 目标语义（实施前映射现有类型，不作为第二套已发布 Schema）
+## 3. Target semantics to map to existing types before implementation <a id="3-目标语义实施前映射现有类型不作为第二套已发布-schema"></a>
 
-### 3.1 TaskSpec v1：最小可执行目标
+### 3.1 TaskSpec v1 — minimum executable objective <a id="31-taskspec-v1最小可执行目标"></a>
 
-正式工程任务保存目标、约束、输入工件、工作空间、Executor、验收条件、风险、Workflow 版本及授权。任务版本与 Run 的输入快照不可原地覆盖；普通聊天没有这些执行对象。具体字段以主 PRD FR-EX-04 与专题 FR02/03、第 11 节为准，本计划不发布额外 JSON Schema 或执行器默认值。
+Persist objective, constraints, input artifacts, workspace, executor, acceptance criteria, risk, workflow version and authorization for formal tasks. Preserve task versions and Run input snapshots. Ordinary chat creates none of these execution objects. Main FR-EX-04 and Taskboard FR02/03 and section 11 specify the fields. This plan publishes no additional JSON Schema or executor defaults.
 
-| 对象 | 实施必须保留的信息 |
+| Object | Required information |
 |---|---|
-| Project / Task | 目录与基线、运行配置引用；标题、目标/描述、验收标准、优先级、标签、状态、版本 |
-| Run / SessionRef | 前序 Run、冻结输入、真实 Session、runtime、dshHome、兼容版本、目录租约、结束原因 |
-| Delivery | Task/Run/需求版本、交付版本、代码快照、逐条验证、已知问题与未完成项 |
-| 人工 Review | 指定 Delivery 与代码指纹、接受/退回、操作者、理由及时间 |
-| Event / Interaction / Lease | 来源身份与游标、真实请求身份及撤销、执行和目录所有权及对账结果 |
+| Project / Task | Directory, baseline, runtime configuration reference, title, objective/description, acceptance criteria, priority, labels, state and version |
+| Run / SessionRef | Previous Run, frozen input, real Session, runtime, dshHome, compatible versions, directory lease and end reason |
+| Delivery | Task, Run, requirement version, delivery version, code snapshot, per-criterion verification, known issues and unfinished items |
+| Human Review | Specified Delivery and code fingerprint, accept/return decision, actor, reason and time |
+| Event / Interaction / Lease | Source identity and cursor, real request identity and withdrawal, execution and directory ownership and reconciliation outcome |
 
-### 3.2 状态模型与转移
+### 3.2 States and transitions <a id="32-状态模型与转移"></a>
 
-Task 业务状态使用专题第 7 节的 `backlog / todo / in_progress / in_review / blocked / done / canceled`。Run 使用第 8 节的 `queued / preparing / running / finished / failed / canceled / interrupted`；控制状态和连接状态另存。等待回答、等待审批不直接等同业务阻塞。
+Use Taskboard section 7 Task states `backlog / todo / in_progress / in_review / blocked / done / canceled` and section 8 Run states `queued / preparing / running / finished / failed / canceled / interrupted`. Store control state and connection state separately. Waiting for an answer or approval need not block the business task.
 
-开始执行须原子校验期望版本、任务/Session/目录所有权及幂等键。有效 Delivery、Run 已结束、无未决问题/审批且快照可定位，才可进入待验收；只有人工接受可到 done。停止 Run、取消 Task、退回 Delivery 是不同操作。重试/继续建立新 Run，保留旧记录。
+At start, atomically check expected version, task/Session/directory ownership and idempotency key. Enter review only with a valid Delivery, ended Run, no pending questions or approvals and an identifiable snapshot. Only human acceptance sets done. Stopping a Run, canceling a Task and returning a Delivery are distinct. Retry and continuation create new Runs and retain history.
 
-### 3.3 ExecutorAdapter v1（语言无关语义）
+### 3.3 ExecutorAdapter v1 — language-independent behavior <a id="33-executoradapter-v1语言无关语义"></a>
 
-Adapter 明确声明启动、进度、输出、权限回调、取消、结果、resume 等能力的已验证/不支持/未知状态。工程执行使用 `external-agent`；请求 Codex 模型不构成执行 Codex 原生任务的证据。恢复不自动重放副作用；不支持时返回可解释结果，不伪造成功。
+Declare each driver capability verified, unsupported or unknown, including launch, progress, output, permission callbacks, cancel, result and resume. Use `external-agent` for engineering work. A model request alone does not establish native execution. Recovery must not automatically replay side effects. Explain unsupported operations without claiming success.
 
-### 3.4 Verification & Review 契约
+### 3.4 Verification and review <a id="34-verification--review-契约"></a>
 
-确定性检查保存实际命令、工作目录、退出码、证据与未覆盖风险；没有执行就不记录通过。模型 Review 按 `none / on-risk / required-by-user` 和 Workflow 触发；没有请求时记录 skipped。模型 accept、Run 成功、检查通过均不替代人工接受 Delivery。失败/未执行的验证可如实交给用户审查，豁免必须由人说明理由。
+For deterministic checks record the actual command, directory, exit code, evidence and uncovered risks. Never pass an unexecuted check. Trigger model review by workflow and `none / on-risk / required-by-user`. Record skipped when unrequested. A model accept, successful Run or passed checks cannot substitute for human acceptance of a Delivery. Disclose failed or unexecuted checks for review. A human must explain any waiver.
 
-### 3.5 Conversation / Event 合约
+### 3.5 Conversations and events <a id="35-conversation--event-合约"></a>
 
-DSH Session 保存模型和工具事实；产品 Event 保存来源身份、自有游标及脱敏载荷引用。输入接纳回执、活动结束、runtime 退出和交付验收分别判断。重复/乱序事件不重复入账，不回退已确认终态；输入接纳未知先对账，不盲目重发。来源：主 PRD FR-RL、FR-MEM，专题 FR04/06/08/13。
+DSH Sessions store model and tool facts. Product Events retain source identity, a product cursor and a redacted payload reference. Judge input acceptance, activity end, runtime exit and delivery acceptance separately. Deduplicate events, preserve terminal states on late arrivals and reconcile unknown input acceptance before resending. See main FR-RL and FR-MEM and Taskboard FR04/06/08/13.
 
-### 3.6 最小 Memory 语义
+### 3.6 Minimum memory behavior <a id="36-最小-memory-语义"></a>
 
-Memory/Checkpoint 与 Task、Run、Workspace 按引用关联；ContextBuilder 选择必要的历史、任务、文件与快照，记录实际模型可见输入。切换 Provider 重新编译上下文；导入/Fork 不声称恢复官方网页会话。跨项目授权隔离，不复制登录 Cookie 或凭据。
+Link Memory and Checkpoint to Task, Run and Workspace by reference. ContextBuilder selects relevant history, tasks, files and snapshots and records actual model-visible input. Rebuild context on provider switch. Import and fork do not restore official web sessions. Isolate authorization by project and do not copy sign-in cookies or credentials.
 
-## 4. 里程碑、依赖与具体开发任务
+## 4. Milestones, dependencies and development tasks <a id="4-里程碑依赖与具体开发任务"></a>
 
-M0–M4 与 G0–G4 分别来自主 PRD 第 10 节和专题第 15 节。P/CG/VN4 编号仅保留为实施追踪；范围与验收由当前 PRD 决定。
+Main PRD section 10 defines M0–M4. Taskboard section 15 defines G0–G4. P/CG/VN4 IDs track implementation. Current PRDs own scope and acceptance.
 
-### P0 — Repository Baseline & Integration Spikes（实施第一关）
+### P0 — Repository baseline and integration feasibility <a id="p0--repository-baseline--integration-spikes实施第一关"></a>
 
-P0-01..06 仅表示已有代码审计、Mock 与 Provider/Executor 可行性验证的历史基线。其证据见第 12–13 节，不替代 Taskboard 的 G0，也不批准旧任务领域实现成为产品要求。
+P0-01..06 identify historical code audits, mocks and provider/executor feasibility work. Sections 12–13 hold evidence. These do not replace Taskboard G0 or adopt old task-domain implementations as product requirements.
 
-### P1 — V0：单机最小闭环（Web 前置验证后推进）
+### P1 — V0 single-machine workflow after Web feasibility <a id="p1--v0单机最小闭环web-前置验证后推进"></a>
 
-| ID | 当前交付目标 | 依赖与验收来源 |
+| ID | Delivery objective | Dependencies and acceptance sources |
 |---|---|---|
-| P1-01 | TaskSpec/需求版本、Task/Run/Delivery/人工 Review 及验证类型、JSON 校验与错误语义 | TBOARD-00；FR-EX-04；专题 FR02/03/10/12、第 11 节 |
-| P1-02 | 任务业务记录与 Session 引用持久化、事务、迁移/备份 | P1-01、TBOARD-01；专题 NFR03/07/09 |
-| P1-03 | 期望版本、合法状态转移、幂等启动与先落启动意图 | P1-02；专题 FR05、第 7–8 节、AC02/13/17 |
-| P1-04 | 任务与验收命令、actor/作用域校验、事件游标与 UI 断连 | P1-02；专题 FR04/06/13、第 11 节 |
-| P1-05 | SIWC 与已有 Provider 的真实聊天、状态、凭据与生命周期 | FR-CP、FR-SIWC；UAT-01/02/07 |
-| P1-06 | Chat/Task 上下文、输入快照、Session/Run 与 Checkpoint 引用 | FR-MEM；专题 FR03/08 |
-| P1-07 | Codex/Codely 独立选择及统一 Run 的能力/事件/取消适配 | FR-EX-01..06；TBOARD-01 |
-| P1-08 | 默认串行队列、runtime/Session 所有权及重启对账 | P1-02/03；专题 FR05/07/08、AC11–18 |
-| P1-09 | 权限、工作目录/worktree、别名和父子目录锁、停止隔离 | FR-SEC；专题 FR01/07/09/13、AC12/15/18/19 |
-| P1-10 | ValidationResult、逐条验收证据、代码快照及只读 Diff | FR-EX-07；专题 FR10/11、AC05–08 |
-| P1-11 | 可选模型 Review、有限修复；独立的人工接受/退回/豁免 | FR-EX-08..10；专题 FR12/14 |
-| P1-12 | 聊天与独立选择器、任务/运行详情、待处理、交付验收 | FR-CP/EX/TASK；TBOARD-07 |
-| P1-13 | 已验证配置的完整演示、发布、备份/恢复和升级指南 | TBOARD-09；全部 P0 功能及 AC01–AC20 |
+| P1-01 | Types for TaskSpec/requirement versions, Task/Run/Delivery/human Review and verification, with JSON validation and error semantics | TBOARD-00, FR-EX-04, Taskboard FR02/03/10/12 and section 11 |
+| P1-02 | Persist task records and Session references, transactions, migrations and backup | P1-01, TBOARD-01, Taskboard NFR03/07/09 |
+| P1-03 | Expected versions, legal transitions, idempotent starts and durable launch intent | P1-02, Taskboard FR05, sections 7–8 and AC02/13/17 |
+| P1-04 | Task and acceptance commands, actor and scope checks, event cursors and UI disconnect | P1-02, Taskboard FR04/06/13 and section 11 |
+| P1-05 | Real SIWC and existing provider chat, status, credentials and lifecycle | FR-CP, FR-SIWC, UAT-01/02/07 |
+| P1-06 | Chat/task context, input snapshots, Session/Run and Checkpoint references | FR-MEM, Taskboard FR03/08 |
+| P1-07 | Independent Codex/Codely selection and common Run capability, event and cancel adapter | FR-EX-01..06, TBOARD-01 |
+| P1-08 | Default serial queue, runtime/Session ownership and restart reconciliation | P1-02/03, Taskboard FR05/07/08, AC11–18 |
+| P1-09 | Permissions, directories/worktrees, alias and nested-directory locks, stop isolation | FR-SEC, Taskboard FR01/07/09/13, AC12/15/18/19 |
+| P1-10 | ValidationResult, per-criterion evidence, code snapshot and read-only diff | FR-EX-07, Taskboard FR10/11, AC05–08 |
+| P1-11 | Optional model review, bounded repair and separate human acceptance, return and waiver | FR-EX-08..10, Taskboard FR12/14 |
+| P1-12 | Chat and independent selectors, task/run details, pending interactions and acceptance | FR-CP/EX/TASK, TBOARD-07 |
+| P1-13 | Complete demo on a verified configuration, release, backup/restore and upgrade guidance | TBOARD-09, all P0 features and AC01–AC20 |
 
-M1 的退出证据是正式 Provider + 原生 Executor + 确定性验证的任务闭环；Taskboard MVP 还须通过 G0–G2、全部 AC01–AC20 与真实编码验收链。Mock 演示单列。
+M1 requires an end-to-end task through a supported provider, native executor and deterministic verification. The Taskboard MVP additionally requires G0–G2, AC01–AC20 and a real coding acceptance workflow. Track mock demos separately.
 
-### P2 — V1：共享记忆、恢复与 Agent 无缝替换
+### P2 — V1 shared memory, recovery and agent handoff <a id="p2--v1共享记忆恢复与-agent-无缝替换"></a>
 
-P2-01 Scoped Memory；P2-02 按预算 ContextBuilder；P2-03 工件/验证/交付引用；P2-04 Task/Run 重启与未知状态对账；P2-05 新 Run 的 Executor 接力；P2-06 任务级调用/修复预算；P2-07 可选 PlanRevision 与版本化 Workflow。来源为 FR-MEM、FR-EX-06/08/09、FR-Q 及专题恢复要求；工作台 G2 必需项不推迟到后续扩展。
+P2-01 scoped memory, P2-02 budgeted ContextBuilder, P2-03 artifact/verification/delivery references, P2-04 Task/Run restart and unknown-state reconciliation, P2-05 executor handoff in a new Run, P2-06 task-scoped call and repair budgets, P2-07 optional PlanRevision and versioned workflows. Sources are FR-MEM, FR-EX-06/08/09, FR-Q and Taskboard recovery requirements. Keep required G2 work in the MVP.
 
-### P3 — V2：多 PC Worker 与远程执行
+### P3 — V2 multi-PC workers and remote execution <a id="p3--v2多-pc-worker-与远程执行"></a>
 
-P3-01..06 分别跟踪节点身份/能力、授权通道、claim/lease/fencing、代码/工件同步、远程取消/恢复、独立节点验收。跨设备不复制敏感凭据，当前是后续目标，不作为单机 MVP 的额外前置。
+P3-01..06 track node identity/capabilities, authorized channels, claim/lease/fencing, code and artifact synchronization, remote cancellation/recovery and independent node acceptance, respectively. Do not copy sensitive credentials across devices. This work is beyond the single-machine MVP.
 
-### P4 — 后续扩展（不阻塞 V2）
+### P4 — Extensions beyond V2 <a id="p4--后续扩展不阻塞-v2"></a>
 
-主 PRD M4 的可选 Gateway/Scope Broker/工具桥，与专题 G3/G4 的有限并行、依赖、受控领取、团队、PR/CI 分别拆项；Agent 动态 Workflow、复杂调度与完整编辑器不回填首期范围。
+Track optional main PRD M4 gateway, Scope Broker and tool bridge separately from Taskboard G3/G4 limited parallelism, dependencies, controlled claiming, teams and PR/CI. Agent-generated workflows, complex scheduling and a full editor stay outside the first release.
 
-## 5. 开发协作：Codex 与 Codely 一致执行规范
+## 5. Shared development workflow for Codex and Codely <a id="5-开发协作codex-与-codely-一致执行规范"></a>
 
-Task 领取、单一写入者、检查点、Git 安全和周额度停止线以 [.ai/WORKFLOW.md](../../.ai/WORKFLOW.md) 为准。每个实施 Task 写明对应 FR/AC/UAT、范围、实际验证和下一步。`.ai` 的开发记录不充当产品业务数据库；产品 Workflow 不写成开发协作规则。
+Follow [.ai/WORKFLOW.md](../../.ai/WORKFLOW.md) for claiming tasks, sole write ownership, checkpoints, Git safety and weekly quota stopping rules. Record applicable FR/AC/UAT, scope, actual validation and next step in every implementation Task. Keep developer records in `.ai` separate from product business data. Product workflows do not define developer coordination rules.
 
-## 6. 测试计划 / 故障注入矩阵
+## 6. Test plan and failure injection matrix <a id="6-测试计划--故障注入矩阵"></a>
 
-主产品验收使用[主 PRD 第 11 节](../myPlan/DSH_PRD_vNext_4_2026-10-27.md#11-关键验收用例uat)的 UAT-01–16；工作台使用专题 AC01–AC20 与 G0 接入矩阵。以下 T 编号是本计划的检查类别，不再引用旧计划的测试定义。
+Main product acceptance uses UAT-01–16 in [main PRD section 11](../myPlan/DSH_PRD_vNext_4_2026-10-27.md#11-关键验收用例uat). Taskboard uses AC01–AC20 and the G0 integration matrix. The following T identifiers denote check categories in this plan.
 
-| 检查类别 | 必须覆盖的证据 |
+| Category | Required evidence |
 |---|---|
-| T01 数据校验 | 非法/缺失输入、版本、作用域及无 AC 启动被拒绝 |
-| T02 幂等 | 双击、请求重放、启动后写库失败不额外执行 |
-| T03 生命周期 | 关闭 UI 不中断；只停止目标 runtime |
-| T04 恢复 | 崩溃/重启、旧 runtime 未退出、未知输入不重发 |
-| T05 事件 | 原始来源、去重、乱序、断流与终态不回退 |
-| T06 权限 | 允许/拒绝/取消/撤销、迟到答复、配置失败、路径别名 |
-| T07 Provider | 能力不匹配、额度、鉴权、断流与明确切换 |
-| T08 验证 | 失败、未执行、不适用不伪造通过；代码快照含选定未跟踪文件 |
-| T09 验收 | 人工接受/退回/豁免、过期交付、Agent 越权拒绝 |
-| T10 Memory | Workspace 隔离、引用完整、导入不恢复审批/进程 |
-| T11 Executor | 独立选择、原生循环、按实际能力取消/恢复 |
-| T12 后续 Worker | 仅对应后续跨设备范围的过期所有者/双写保护 |
+| T01 Data validation | Reject invalid or missing inputs, versions and scopes and launch without an acceptance criterion. |
+| T02 Idempotency | Double-clicks, replay and database write failure after launch cause no additional execution. |
+| T03 Lifecycle | Closing the UI preserves execution. Stop targets only the specified runtime. |
+| T04 Recovery | Crashes, restarts, an old runtime still running and no resend of unknown input. |
+| T05 Events | Original source, deduplication, reordering, broken streams and preservation of terminal states. |
+| T06 Permissions | Allow, deny, cancel, revoke, late responses, configuration failure and path aliases. |
+| T07 Provider | Capability mismatch, quotas, authentication, stream loss and explicit switching. |
+| T08 Verification | Distinguish failed, not run and inapplicable from passed. Include selected untracked files in the code snapshot. |
+| T09 Acceptance | Human acceptance, return and waiver, stale delivery and denial of unauthorized agent actions. |
+| T10 Memory | Workspace isolation, complete references, and import without approval or process recovery. |
+| T11 Executor | Independent selection, native loop and cancellation/recovery according to verified capability. |
+| T12 Future workers | Stale-owner and concurrent-write protection in future cross-device scope only. |
 
-## 7. 安全、可靠性和回滚要求
+## 7. Security, reliability and rollback <a id="7-安全可靠性和回滚要求"></a>
 
-执行与验收写入必须校验 actor、任务、runId、期望版本与幂等键；服务端绑定 Agent 可写范围。默认本地回环服务；凭据不写任务、日志、Memory 或导出包。磁盘/持久化失败时拒绝新的执行与验收，不能返回未落盘成功。
+Execution and acceptance writes validate actor, task, runId, expected version and idempotency key. The server binds agent write scope. Default to loopback. Keep credentials out of tasks, logs, Memory and exports. Reject new execution and acceptance commands on disk or persistence failure. Acknowledge success only after persistence.
 
-备份带版本、清单与校验信息；在无活动执行的新数据库/实例中恢复。损坏、不兼容、ID 冲突不得覆盖合并；导入不启动进程、不重放输入或审批。停止、结束或验收不自动删除目录；不兼容升级保留数据并给出恢复路径。
+Backups include version, manifest and integrity checks. Restore into a new database or instance without active execution. Reject corrupt, incompatible or colliding imports without overwrite or merge. Import starts no process and replays no input or approval. Stop, termination and acceptance preserve directories. On incompatible upgrades preserve data and provide a recovery path.
 
-## 8. 各阶段提交与验收模板
+## 8. Stage submission and acceptance template <a id="8-各阶段提交与验收模板"></a>
 
-每项证据记录需求编号、被测源码指纹、版本/系统/profile/脱敏配置、Task/Run/Session/runtime 身份、工作目录、操作与原始结果、退出确认、持久化结果及已知限制。测试结果区分 PASS、FAIL、NOT_RUN 与不支持；静态审阅、Mock、真实产品进程和真实 Provider 分层记录。
+For each item record requirement ID, tested source fingerprint, versions, OS, profile, redacted configuration, Task/Run/Session/runtime identities, directory, actions, raw results, exit confirmation, persistence outcome and limitations. Distinguish PASS, FAIL, NOT_RUN and unsupported. Record static review, mock, real product process and real provider evidence separately.
 
-### 全项目 Definition of Done
+### Project definition of done <a id="全项目-definition-of-done"></a>
 
-当前 PRD 的范围已实现，确定性检查与记录回放通过，关键数据/权限/恢复路径有失败证据，用户可复现操作，Taskboard 人工验收链完整。历史单测或底层 SDK 可用不能替代端到端验收；G1 演示不等于 G2 发布。
+Implement current PRD scope, pass deterministic checks and recorded replays, retain failure evidence for critical data, permission and recovery paths, provide reproducible user steps and complete human Taskboard acceptance. Existing unit tests or SDK functionality cannot substitute for end-to-end acceptance. G2 release requires more than a G1 demo.
 
-## 9. 变更规则
+## 9. Change control <a id="9-变更规则"></a>
 
-需求变更先更新两份 myPlan PRD，再映射本计划的任务与验收。代码实现、历史计划、旧业务示例和参考仓库不自行产生需求。证据与已完成代码保留；被撤销的范围不继续开发，也不沿旧检查点自动恢复。已有编号的状态调整须以当前目标是否有实现/验收为依据。
+Update both myPlan PRDs for requirement changes, then map the changes to tasks and acceptance here. Code, historical plans, old business examples and reference repositories do not create requirements. Retain evidence and completed code. Stop work on withdrawn scope without automatic resumption from an old checkpoint. Derive task status from implementation and acceptance of its current objective.
 
-## 10. ChatGPT 接入增量阶段与现状审计
+## 10. ChatGPT integration stages and current status <a id="10-chatgpt-接入增量阶段与现状审计"></a>
 
-### 10.1 当前实现、目标与缺口
+### 10.1 Verified implementation and gaps <a id="101-当前实现目标与缺口"></a>
 
-| 能力 | 已验证范围 | 尚缺产品验收 |
+| Capability | Verified scope | Outstanding product acceptance |
 |---|---|---|
-| Provider 元数据/意图/精确能力 | QR-01/02；已知/未知/不支持及配置职责 | Web/SIWC 平级完整 UI 与账户生命周期 |
-| 逐 Turn 选择/能力拒绝 | QR-03 的真实 Web 组合、受控模型与 SDK 回放 | 全部明确回退流程、真实模型 GUI 验收 |
-| 本地预算/付费授权 | QR-04 的原子请求名额、Session cap、预设/当次确认 | 官方余额、token/金额及 Task 预算、状态展示 |
-| 用量与来源/口径 | QR-05/06 的原生记录、准备失败、尝试引用、弹窗 | 完整政策/Task/Run/外部执行器账本 |
-| Taskboard | 本地 macOS 的 G0、工作台任务与交付、重启恢复、真实编码及人工验收已有实测 | G2 的 8 核 16 GB Mac 性能复测待验。逐项记录见[工作台清单](#1210-taskboard-增量-checklist) |
+| Provider metadata, intent and precise capabilities | QR-01/02, known/unknown/unsupported and configuration ownership | Complete peer Web/SIWC UI and account lifecycle |
+| Per-Turn selection and capability rejection | QR-03 real Web composition, controlled model and SDK replay | All explicit fallback flows and real-model GUI acceptance |
+| Local budgets and payment authorization | QR-04 atomic request slots, Session cap, preset or per-use confirmation | Official balances, token/currency and Task budgets, and status display |
+| Usage, source and accounting basis | QR-05/06 native records, preparation failures, attempt references and dialog | Full policy, Task, Run and external executor ledger |
+| Taskboard | Local macOS G0, tasks and deliveries, restart recovery, real coding and human acceptance tested | Pending G2 performance retest on an 8-core, 16 GB Mac. See the [Taskboard checklist](#1210-taskboard-增量-checklist). |
 
-### 10.2 Provider、执行模式与额度
+### 10.2 Providers, execution modes and quotas <a id="102-provider执行模式与额度"></a>
 
-保留 `work_codex_shared / chatgpt_web_unofficial / api_metered / third_party / local / experimental_unverified / unknown` 的明确来源，普通 `chatgpt_regular` 不作为 DSH 主动模型 Provider。提供方余额、适配器返回计数、本地估计与本地预算分别展示。Executor 模式与认证方式不绑定费用来源。
+Retain explicit sources `work_codex_shared / chatgpt_web_unofficial / api_metered / third_party / local / experimental_unverified / unknown`. Ordinary `chatgpt_regular` is outside DSH's active model providers. Display provider balances, adapter counts, local estimates and local budgets separately. Executor mode and authentication method do not determine the charging source.
 
-### 10.3 阶段依赖与任务归属
+### 10.3 Stage dependencies and ownership <a id="103-阶段依赖与任务归属"></a>
 
-已通过的受控 Web 前置 PoC → M0 的独立选择/任务契约与 G0 决策/接入验证 → M1/G1 的执行、验证、交付及人工验收 → G2 恢复与发布。Web M2 产品化独立准入，不能以真实 PoC 当生产通过。CG 编号仅作 Provider/额度/任务/可靠性/工具桥工作分组；不从旧增量计划补需求。
+The controlled Web proof of concept passed. Follow with M0 independent selection and task contracts and G0 integration decisions and checks, then M1/G1 execution, verification, delivery and human acceptance, then G2 recovery and release. M2 production Web admission remains independent. CG IDs group provider, quota, task, reliability and tool-bridge work. Old incremental plans add no requirements.
 
-### 10.4 CG1 的明确任务与验收
+### 10.4 CG1 tasks and acceptance <a id="104-cg1-的明确任务与验收"></a>
 
-| ID | 对应当前要求 | 验收重点 |
+| ID | Requirements | Acceptance focus |
 |---|---|---|
-| QR-01 | FR-CP-02/03/05/06、FR-Q-01 | 来源与能力三态，未知余额不伪造 |
-| QR-02 | FR-EX-01..03、D-05/D-07 | Provider/Executor/认证/费用职责独立 |
-| QR-03 | FR-CP-04/05、FR-Q-02 | 捕获实际路线、能力拒绝、下一 Turn 生效、明确回退 |
-| QR-04 | FR-Q-02/03、FR-SIWC-03 | 本地预算、保留执行额度、额外付费明确同意 |
-| QR-05 | FR-Q-01、FR-RL-01 | 请求/实际路线/口径/政策/Task/Run 关联 |
-| QR-06 | FR-CP-06、FR-Q-01/02 | 费用、未知值、预算、同意和回退 UI |
+| QR-01 | FR-CP-02/03/05/06, FR-Q-01 | Three-state source and capability information, with unknown balances identified. |
+| QR-02 | FR-EX-01..03, D-05/D-07 | Independent provider, executor, authentication and billing responsibilities. |
+| QR-03 | FR-CP-04/05, FR-Q-02 | Capture actual route, reject capability mismatches, switch next Turn and confirm fallback. |
+| QR-04 | FR-Q-02/03, FR-SIWC-03 | Local budgets, reserved execution quota and explicit consent to additional charges. |
+| QR-05 | FR-Q-01, FR-RL-01 | Associate requests, actual routes, accounting basis, policy, Task and Run. |
+| QR-06 | FR-CP-06, FR-Q-01/02 | UI for cost, unknowns, budgets, consent and fallback. |
 
-### 10.5 数据归属与 Decision Log
+### 10.5 Data ownership and decision log <a id="105-数据归属与-decision-log"></a>
 
-Task 数据库拥有业务状态、需求版本、Run、Delivery 与人工 Review；Harness Session 日志拥有模型/工具事实。两者以真实引用关联，不复制第二份执行权威。TBOARD-00 已确认由 Web Host 中的任务服务单写业务库；不能预设某个旧业务模型及其强制 Plan/Review 是产品基础。开发记录和 Git 不作为实时任务队列。
+The Task database owns business state, requirement versions, Runs, Deliveries and human Reviews. Harness Session logs own model and tool facts. Actual references connect the stores without duplicating execution authority. TBOARD-00 confirmed the Web Host task service as sole writer to the business database. Historical business models and mandatory planning/review do not define this product. Developer records and Git are outside the live task queue.
 
-## 11. vNext.4 增量实施路线（P0 合并结果）
+## 11. vNext.4 incremental implementation roadmap after P0 consolidation <a id="11-vnext4-增量实施路线p0-合并结果"></a>
 
-本节只映射主 PRD D-01–D-10、FR 模块、M0–M4 与专题需求；VN4 编号沿用，验收编号直接引用当前 PRD。
+This section maps main PRD D-01–D-10, FR modules and M0–M4 plus Taskboard requirements. Retain VN4 identifiers and use acceptance identifiers from the current PRDs.
 
-| myPlan 需求范围 | 实施任务 | 验收来源 |
+| myPlan requirement scope | Implementation tasks | Acceptance source |
 |---|---|---|
-| FR-CP-01–06 | VN4-01/02、QR-01/03/06 | 主 PRD UAT-02/07/08/15 |
-| FR-SIWC-01–04 | P1-05、QR-01/04 | 主 PRD UAT-01/07/08 |
-| FR-WEB-01–05 | WB-01、VN4-06；可选入口归 VN4-10 | 主 PRD UAT-02/07/08、D-09 |
-| FR-EX-01–10 | P1-01/07/10/11/12、VN4-02..05、TBOARD-06 | 主 PRD UAT-03–06/13/15；专题交付验收 |
-| FR-TB-01–05 | VN4-10、P3-07/08 | 主 PRD UAT-12/13；M4 |
-| FR-MEM-01–05 | P1-02/06、P2-01..05、VN4-08/11 | 主 PRD UAT-08/09/14 |
-| FR-Q-01–03 | QR-01..06、P2-06 | 主 PRD UAT-10 |
-| FR-RL-01–03 | VN4-07、P1-03/08、TBOARD-03/05/08 | 主 PRD UAT-11/16；专题 AC02/13/14/17 |
-| FR-SEC-01–03 | VN4-09、P1-09、TBOARD-04/05 | 主 PRD UAT-07/12；专题 AC09/10/12/15/18/19 |
-| FR-TASK-01–07、专题 FR01–FR14 | TBOARD-00..09、P1-01..04/08..13 | 专题 AC01–AC20、NFR01–NFR09、G0–G2 |
+| FR-CP-01–06 | VN4-01/02, QR-01/03/06 | Main UAT-02/07/08/15 |
+| FR-SIWC-01–04 | P1-05, QR-01/04 | Main UAT-01/07/08 |
+| FR-WEB-01–05 | WB-01, VN4-06, optional entry in VN4-10 | Main UAT-02/07/08, D-09 |
+| FR-EX-01–10 | P1-01/07/10/11/12, VN4-02..05, TBOARD-06 | Main UAT-03–06/13/15 and Taskboard delivery acceptance |
+| FR-TB-01–05 | VN4-10, P3-07/08 | Main UAT-12/13 and M4 |
+| FR-MEM-01–05 | P1-02/06, P2-01..05, VN4-08/11 | Main UAT-08/09/14 |
+| FR-Q-01–03 | QR-01..06, P2-06 | Main UAT-10 |
+| FR-RL-01–03 | VN4-07, P1-03/08, TBOARD-03/05/08 | Main UAT-11/16, Taskboard AC02/13/14/17 |
+| FR-SEC-01–03 | VN4-09, P1-09, TBOARD-04/05 | Main UAT-07/12, Taskboard AC09/10/12/15/18/19 |
+| FR-TASK-01–07, Taskboard FR01–FR14 | TBOARD-00..09, P1-01..04/08..13 | Taskboard AC01–AC20, NFR01–NFR09, G0–G2 |
 
-| ID | 当前目标 | 主要任务/验收来源 |
+| ID | Current objective | Tasks and acceptance sources |
 |---|---|---|
-| VN4-00 | 需求与实现分开、当前两份 PRD 的任务映射 | 文档核对，不表示产品验收 |
-| VN4-01 | Web/SIWC 平级 Provider 与能力/费用元数据 | QR-01..03；FR-CP/SIWC/WEB |
-| VN4-02 | Provider/Executor/Workflow 独立选择并固定到 Turn/Run | P1-07/12；FR-CP-04、FR-EX-01/02；UAT-02/09/15 |
-| VN4-03 | TaskSpec、需求版本与可选 Plan | P1-01..03、TBOARD-02；FR-EX-04、专题 FR02/03 |
-| VN4-04 | 自适应模板、用户 Override、可选模型 Review | P1-11、P2-07；主 PRD 3.1/3.2、D-03/04/08 |
-| VN4-05 | 正式 Provider + Codex/Codely 原生执行闭环 | P1-05/07/10；UAT-01/03/04/13/15 |
-| VN4-06 | 受控 Web 前置验证与独立的产品化 | WB-01；FR-WEB-01..04、D-09；UAT-07/08 |
-| VN4-07 | 尝试/提交回执、终态、工具完成屏障、预算 | QR-04/05；FR-RL、FR-Q；AC02/13/14/17 |
-| VN4-08 | Task/Run/Memory/Checkpoint 与恢复/导入 | P1-02/06、P2-01..05；FR-MEM；AC11/16/20 |
-| VN4-09 | 受保护凭据、权限/审批、目录隔离、脱敏 | P1-09、TBOARD-04/05；FR-SEC；AC09/10/12/15/18/19 |
-| VN4-10 | 可选入站 Gateway / Scope Broker / 工具桥 | P3-07/08；FR-TB；M4 |
-| VN4-11 | 后续 Worker、跨设备、诊断和升级可靠性 | P3-01..06；FR-MEM-05、M3；专题 G4 |
+| VN4-00 | Separate requirements from implementation and map tasks to the two current PRDs | Document verification only, no product acceptance |
+| VN4-01 | Peer Web/SIWC providers with capability and cost metadata | QR-01..03, FR-CP/SIWC/WEB |
+| VN4-02 | Select Provider/Executor/Workflow independently and pin to Turn/Run | P1-07/12, FR-CP-04, FR-EX-01/02, UAT-02/09/15 |
+| VN4-03 | TaskSpec, requirement versions and optional Plan | P1-01..03, TBOARD-02, FR-EX-04, Taskboard FR02/03 |
+| VN4-04 | Adaptive templates, user override and optional model review | P1-11, P2-07, main PRD 3.1/3.2, D-03/04/08 |
+| VN4-05 | End-to-end supported provider and native Codex/Codely execution | P1-05/07/10, UAT-01/03/04/13/15 |
+| VN4-06 | Controlled prerequisite Web validation and independent production integration | WB-01, FR-WEB-01..04, D-09, UAT-07/08 |
+| VN4-07 | Attempts, submission receipts, terminal states, tool completion and budgets | QR-04/05, FR-RL, FR-Q, AC02/13/14/17 |
+| VN4-08 | Task/Run/Memory/Checkpoint, recovery and import | P1-02/06, P2-01..05, FR-MEM, AC11/16/20 |
+| VN4-09 | Protected credentials, permissions and approvals, directory isolation and redaction | P1-09, TBOARD-04/05, FR-SEC, AC09/10/12/15/18/19 |
+| VN4-10 | Optional inbound gateway, Scope Broker and tool bridge | P3-07/08, FR-TB, M4 |
+| VN4-11 | Future workers, cross-device use, diagnostics and reliable upgrades | P3-01..06, FR-MEM-05, M3, Taskboard G4 |
 
-### 11.1 旧需求处理与决策冲突
+### 11.1 Historical requirements and decision conflicts <a id="111-旧需求处理与决策冲突"></a>
 
-旧计划的固定 Planner/Reviewer 流水线、指定业务任务状态机、重新建 Core、统一 ACP 前置及固定 Codex/Codely 分工均不作为当前要求。主 PRD D-01–D-10 与专题正文是判定依据。TBOARD-00 的入口决定已记录在第 16.1 节。
+The old fixed Planner/Reviewer pipeline, prescribed business state machine, core rebuild, universal ACP prerequisite and fixed division of Codex/Codely work are outside current requirements. Use main D-01–D-10 and the Taskboard PRD. Section 16.1 records the TBOARD-00 entry decision.
 
-## 12. 有效 Checklist 与任务证据
+## 12. Current checklist and task evidence <a id="12-有效-checklist-与任务证据"></a>
 
-DONE 表示该行明确范围已有证据，PARTIAL 表示已验证一部分当前目标，TODO 表示目标尚无对应实施验收。底层基础与产品任务分别记录，不能用旧业务库、通用 jobs 或 Session 存在证明工作台能力已实现。未勾选的 UAT/AC 不因本次文档调整自动通过。
+DONE indicates evidence for the stated row scope. PARTIAL indicates validation of part of its current objective. TODO indicates no matching implementation acceptance yet. Track underlying infrastructure and product tasks separately. An older business database, generic jobs or existing Sessions do not establish Taskboard functionality. Document edits do not pass unchecked UAT or AC cases.
 
-### 12.1 P0：基线与可行性验证（Gate 0）
+### 12.1 P0 baseline and feasibility (Gate 0) <a id="121-p0基线与可行性验证gate-0"></a>
 
-| ID | 状态 | 已有验证及边界 |
+| ID | Status | Validation and limits |
 |---|---|---|
-| P0-01 | DONE | 历史代码/环境基线审计；不是 Taskboard 完成证据 |
-| P0-02 | DONE | Mock 错误与传输恢复基础；不代表真实账户全路径 |
-| P0-03 | DONE | 用户已免测 API Key 路线；NOT_RUN 不改写为 PASS，SIWC 产品验收仍 PARTIAL |
-| P0-04 | DONE | Codely 原生进程/本地受控模型及适配器探测；统一 Run 未验收 |
-| P0-05 | DONE | 固定 Codex 产品/适配器的受控模型、权限、取消与清理；原生 resume 不作承诺 |
-| P0-06 | DONE | 历史可行性基线整理；当前架构与数据拥有者仍按 myPlan/G0 决定 |
+| P0-01 | DONE | Historical code and environment baseline audit. Taskboard completion requires separate evidence. |
+| P0-02 | DONE | Mock errors and transport recovery foundations. Full real-account paths remain unverified. |
+| P0-03 | DONE | The user waived the API-key route. Its result remains NOT_RUN. SIWC product acceptance remains PARTIAL. |
+| P0-04 | DONE | Native Codely process, local controlled model and adapter probes. Unified Run acceptance pending. |
+| P0-05 | DONE | Controlled model, permissions, cancellation and cleanup on the pinned Codex product and adapter. No claim of native resume. |
+| P0-06 | DONE | Historical feasibility baseline consolidated. Current architecture and ownership follow myPlan/G0. |
 
-已有验证记录见[基线](../../.ai/tasks/dsh-p0-baseline/handoff.md)、[执行器探测](../../.ai/tasks/dsh-p0-executor-probes/handoff.md)和[SIWC 探测](../../.ai/tasks/dsh-p0-siwc/handoff.md)。这些记录是证据索引，不是当前需求来源。
+See the [baseline](../../.ai/tasks/dsh-p0-baseline/handoff.md), [executor probes](../../.ai/tasks/dsh-p0-executor-probes/handoff.md) and [SIWC probe](../../.ai/tasks/dsh-p0-siwc/handoff.md) for evidence. Current requirements come from the PRDs.
 
-### 12.2 P1 / V0：单机 MVP 闭环（最高优先）
+### 12.2 P1 / V0 single-machine MVP workflow (highest priority) <a id="122-p1--v0单机-mvp-闭环最高优先"></a>
 
-| ID | 状态 | 已验证部分或剩余范围 |
+| ID | Status | Verified and outstanding work |
 |---|---|---|
-| P1-01 | PARTIAL | Web/SQLite 已验证 Run 输入、交付与人工决定关联到各自的需求版本，恢复后仍可追溯。[本机验收](../../.ai/tasks/dsh-p1-revision-lineage/handoff.md)。[执行约束](../../.ai/tasks/dsh-p1-task-constraints/handoff.md)已进入需求历史、SDK 输入与任务读取工具。[SDK 路线确认](../../.ai/tasks/dsh-p1-confirmed-sdk-route/handoff.md)已覆盖配置切换与旧命令重放；[SDK 补丁内容核验](../../.ai/tasks/dsh-p1-sdk-patch-identity/handoff.md)覆盖入队后原路径替换及旧 Session 续接。[风险等级](../../.ai/tasks/dsh-p1-task-risk/handoff.md)已关联到需求修订与确认输入；[SDK 启动授权](../../.ai/tasks/dsh-p1-run-authorization/handoff.md)区分操作者确认的路线和部署默认。[快速与常规工作流](../../.ai/tasks/dsh-p1-versioned-workflow/handoff.md)已绑定需求修订和 SDK 输入；[按 Run 读取的 TaskSpec](../../.ai/tasks/dsh-p1-run-task-spec/handoff.md)已包含工作区基线、材料与启动授权；原生执行器授权待贯通 |
-| P1-02 | DONE | 本地 Web/SQLite：任务与活动原子写入；[恢复与兼容升级](../../.ai/tasks/dsh-tboard-08/handoff.md)及[业务备份二次恢复](../../.ai/tasks/dsh-p1-business-backup/handoff.md)已验收。两次 Run 的回执对应原 Session 中两条输入，恢复后交付与人工决定保留，排队时取消的 Run 保留原状态。[恢复历史核对](../../.ai/tasks/dsh-p1-restored-run-chain/handoff.md)覆盖启动先后、Session 与回执关联；[退回意见恢复](../../.ai/tasks/dsh-p1-review-feedback-recovery/handoff.md)核对人工原命令与下一次 Run 输入 |
-| P1-03 | DONE | macOS Web/SQLite 与正式 SDK 已验证期望版本、合法状态转移、启动意图先落库、幂等重放及崩溃对账。原 Run 与排队 Run 各保留一条启动记录，输入不确定时不重发。[UAT-16 文件追加验收](../../.ai/tasks/dsh-p1-recovery-side-effects/handoff.md)验证重启和命令重放后仅写入一次。[本机验收](../../.ai/tasks/dsh-p1-start-reconciliation/evidence/local.json) |
-| P1-04 | DONE | 认证工作台的任务与人工验收命令、角色和项目作用域已有实测。[浏览器断线补读](../../.ai/tasks/dsh-p1-board-reconnect/handoff.md)保留当前任务，重放的评论只显示一次。[任务活动游标](../../.ai/tasks/dsh-p1-activity-cursor/handoff.md)支持按提交顺序分页，Host 重启及备份恢复后可从已读位置继续 |
-| P1-05 | PARTIAL | SIWC Loader/配置/持久化/取消与生产适配器回放已有证据；真实账号长回复/生命周期待补 |
-| P1-06 | PARTIAL | 工作台 Run 按次保存需求、约束、退回反馈与选入文件。SDK、回执恢复与[历史输入查看](../../.ai/tasks/dsh-p1-run-input-history/handoff.md)共用同一输入投影。[续接位置核验](../../.ai/tasks/dsh-p1-restored-session-position/handoff.md)拒绝回执或已观察事件与原记录不符的 Session 副本；[前序恢复位置](../../.ai/tasks/dsh-p1-run-checkpoint-reference/handoff.md)已进入受理事务、启动窗口、历史输入及项目交接。通用 Chat/Task ContextBuilder 与 ContextEpoch 待贯通 |
-| P1-07 | PARTIAL | 原生 Codex/Codely 接入基础已验证；独立选择 UI、统一 Run 与完整生命周期未验收 |
-| P1-08 | DONE | 首发 macOS Web/SDK 的默认串行队列、Session 续接、租约释放与 Host 重启对账已验收。强停超时保留目录，双执行范围退出后等待队列继续。[本机验收](../../.ai/tasks/dsh-p1-queue-recovery/evidence/local.json) |
-| P1-09 | DONE | macOS 首发工作台通过 AC12/15/18/19。子目录别名与原工作树串行，独立工作树可继续；权限激活失败不发送输入，强停超时保留目录，目标进程范围退出后才放行。[目录租约与停止隔离验收](../../.ai/tasks/dsh-p1-workspace-lease-acceptance/handoff.md) |
-| P1-10 | PARTIAL | [工作台交付](../../.ai/tasks/dsh-tboard-06/handoff.md)已有逐条验收证据、代码快照与只读 Diff；[按项目启用的 Git 检查](../../.ai/tasks/dsh-p1-delivery-git-check/handoff.md)已有 Host 结果、人工豁免与恢复验收；[ValidationResult](../../.ai/tasks/dsh-p1-validation-results/handoff.md)关联交付指纹、真实退出码和未执行原因。[npm 项目构建与测试](../../.ai/tasks/dsh-p1-project-script-validation/handoff.md)已在正式 SDK 和安装包验证，涵盖失败原因、人工接受与子进程退出；下一步是项目自定义 npm / pnpm 检查脚本，当前暂停、尚未开工 |
-| P1-11 | PARTIAL | 人工接受、退回和豁免已按具体交付保存，[交付页可复核历史决定](../../.ai/tasks/dsh-p1-human-review-history/handoff.md)。[无模型审查的成功交付](../../.ai/tasks/dsh-p1-model-review-status/handoff.md)已验收。[按交付下载的审查摘要](../../.ai/tasks/dsh-p1-review-package/handoff.md)提供去除项目文本的覆盖证据；[主动模型审查](../../.ai/tasks/dsh-p1-optional-coverage-review/handoff.md)已验证脱敏模型输入、显式重试、次数上限与恢复；[人工授权修复与再次验收](../../.ai/tasks/dsh-p1-reviewed-repair/handoff.md)已在独立安装的 Web Host 验证，原构建由退出 17 变为 0；审查模型使用 OpenAI 兼容环回端点，线上模型效果未验 |
-| P1-12 | PARTIAL | 聊天、模型选择及用量确认已有证据。[工作台](../../.ai/tasks/dsh-tboard-07/handoff.md)的任务、Run、待处理请求、交付审查及人工验收可用；[快速与常规工作流选择](../../.ai/tasks/dsh-p1-versioned-workflow/handoff.md)覆盖操作者与团队编辑；通用 Executor 选择和里程碑工作流待实施 |
-| P1-13 | PARTIAL | macOS arm64 [安装包验收](../../.ai/tasks/dsh-p1-packed-workbench/handoff.md)已验证全新 npm 安装、Web/SQLite 重启、SDK 交付与浏览器二次恢复。[两个实际构建的升级/回滚演练](../../.ai/tasks/dsh-p1-upgrade-rehearsal/handoff.md)保留原始修订与活动。[真实 OpenAI 编码链](../../.ai/tasks/dsh-tboard-09/acceptance.md)已有独立证据。[OpenAI 安装包配置](../../.ai/tasks/dsh-p1-openai-deployment/handoff.md)通过本地协议重试验收。[安装包恢复复核](../../.ai/tasks/dsh-p1-package-recovery-acceptance/handoff.md)覆盖新恢复位置、交付检查和 27 项工作台 Web 回归。G2 参考机性能待复测 |
+| P1-01 | PARTIAL | Web/SQLite links Run input, delivery and human decisions to their respective requirement versions after recovery. [Local acceptance](../../.ai/tasks/dsh-p1-revision-lineage/handoff.md). [Execution constraints](../../.ai/tasks/dsh-p1-task-constraints/handoff.md) are present in requirement history, SDK input and the task-read tool. [SDK route confirmation](../../.ai/tasks/dsh-p1-confirmed-sdk-route/handoff.md) covers configuration changes and old command replay. [SDK patch content checks](../../.ai/tasks/dsh-p1-sdk-patch-identity/handoff.md) cover replacement at the original path after queueing and continuation of old Sessions. [Risk level](../../.ai/tasks/dsh-p1-task-risk/handoff.md) is tied to the revision and confirmed input. [SDK launch authorization](../../.ai/tasks/dsh-p1-run-authorization/handoff.md) distinguishes an operator-confirmed route from deployment defaults. [Quick and standard workflows](../../.ai/tasks/dsh-p1-versioned-workflow/handoff.md) bind to the revision and SDK input. The [per-Run TaskSpec](../../.ai/tasks/dsh-p1-run-task-spec/handoff.md) includes workspace baseline, materials and launch authorization. [Native executor authorization](../../.ai/tasks/dsh-p1-native-executor-selection/handoff.md) links operator command and Run and is checked on backup restoration. |
+| P1-02 | DONE | Local Web/SQLite commits tasks and activity atomically. [Recovery and compatible upgrades](../../.ai/tasks/dsh-tboard-08/handoff.md) and [a second business backup restore](../../.ai/tasks/dsh-p1-business-backup/handoff.md) passed. Two Run receipts match two original Session inputs. Restored deliveries and human decisions persist. A Run canceled in the queue retains that state. [Recovery history checks](../../.ai/tasks/dsh-p1-restored-run-chain/handoff.md) cover start order and Session/receipt links. [Returned-feedback recovery](../../.ai/tasks/dsh-p1-review-feedback-recovery/handoff.md) matches the original human command to the next Run input. |
+| P1-03 | DONE | macOS Web/SQLite and the official SDK verified expected versions, legal transitions, durable intent before launch, idempotent replay and crash reconciliation. Original and queued Runs retain one start record each. Unknown inputs are never resent. [UAT-16 file append](../../.ai/tasks/dsh-p1-recovery-side-effects/handoff.md) verified one write after restart and command replay. [Local acceptance](../../.ai/tasks/dsh-p1-start-reconciliation/evidence/local.json). |
+| P1-04 | DONE | Authenticated workbench task and human acceptance commands, roles and project scopes were tested. [Browser reconnect catch-up](../../.ai/tasks/dsh-p1-board-reconnect/handoff.md) preserves the current task and displays a replayed comment once. The [task activity cursor](../../.ai/tasks/dsh-p1-activity-cursor/handoff.md) pages by commit order and resumes from the last read position after host restart or backup restore. |
+| P1-05 | PARTIAL | Evidence covers SIWC loader, configuration, persistence, cancellation and production adapter replay. Real-account long responses and lifecycle acceptance remain pending. |
+| P1-06 | PARTIAL | Each Taskboard Run retains requirements, constraints, return feedback and selected files. SDK, receipt recovery and [historical input view](../../.ai/tasks/dsh-p1-run-input-history/handoff.md) share one input projection. [Continuation position validation](../../.ai/tasks/dsh-p1-restored-session-position/handoff.md) rejects Session copies whose receipts or observed events differ from the original. The [previous recovery position](../../.ai/tasks/dsh-p1-run-checkpoint-reference/handoff.md) is included in the acceptance transaction, launch window, historical input and project handoff. General Chat/Task ContextBuilder and ContextEpoch integration remain pending. |
+| P1-07 | PARTIAL | [Per-Run Codex/Codely selection](../../.ai/tasks/dsh-p1-native-executor-selection/handoff.md) passed browser and official SDK verification. Native adapters use leased directories. The queue resumes after stopping an active Run. Missing adapters and invalid deliveries produce failure records. [Native file changes and permissions](../../.ai/tasks/dsh-p1-native-file-evidence/handoff.md) checked actual isolated worktree writes, denial receipts and the Git diff on the human acceptance page. [Native tool activity in Run history](../../.ai/tasks/dsh-p1-native-run-activity/handoff.md) displays protocol-reported tool and permission counts and restores from backups. [Cross-process continuation probes](../../.ai/tasks/dsh-p1-native-resume-probe/handoff.md) recovered the first exchange through a persistent Codex thread and a Codely-specific ACP extension. Taskboard currently enables new sessions only. Per-Run persistent-session authorization, native history checks and dispatch of continued work remain pending. |
+| P1-08 | DONE | The initial macOS Web/SDK serial queue, Session continuation, lease release and host restart reconciliation passed. Force-stop timeout retains the directory. The waiting queue resumes after both execution scopes exit. [Local acceptance](../../.ai/tasks/dsh-p1-queue-recovery/evidence/local.json). |
+| P1-09 | DONE | The initial macOS workbench passed AC12/15/18/19. Nested aliases serialize with the original worktree while an independent worktree can proceed. Permission activation failure sends no input, force-stop timeout retains the directory and only confirmed target process-scope exit permits further work. [Directory lease and stop isolation](../../.ai/tasks/dsh-p1-workspace-lease-acceptance/handoff.md). |
+| P1-10 | DONE | [Workbench delivery](../../.ai/tasks/dsh-tboard-06/handoff.md) includes evidence per criterion, code snapshot and read-only diff. [Project-enabled Git checks](../../.ai/tasks/dsh-p1-delivery-git-check/handoff.md) cover host results, human waivers and recovery. [ValidationResult](../../.ai/tasks/dsh-p1-validation-results/handoff.md) links the delivery fingerprint, actual exit code and reason for an unexecuted check. [npm project build and test](../../.ai/tasks/dsh-p1-project-script-validation/handoff.md) passed on the official SDK and packaged install, including failure reasons, human acceptance and child exit. [Custom npm/pnpm check scripts](../../.ai/tasks/dsh-p1-custom-project-scripts/handoff.md) verified exit codes, human acceptance and backup restore in both source-built and independently installed macOS Web/SDK. |
+| P1-11 | PARTIAL | Human acceptance, return and waiver persist per delivery. [Past decisions are inspectable on the delivery page](../../.ai/tasks/dsh-p1-human-review-history/handoff.md). [Successful delivery without model review](../../.ai/tasks/dsh-p1-model-review-status/handoff.md) passed. The [downloadable per-delivery review summary](../../.ai/tasks/dsh-p1-review-package/handoff.md) contains coverage evidence with project text removed. [Requested model review](../../.ai/tasks/dsh-p1-optional-coverage-review/handoff.md) verified redacted input, explicit retry, attempt limits and recovery. [Human-authorized repair and renewed acceptance](../../.ai/tasks/dsh-p1-reviewed-repair/handoff.md) passed on a separately installed Web Host, with build exit changing from 17 to 0. The review model used an OpenAI-compatible loopback endpoint. Live model quality remains unverified. |
+| P1-12 | PARTIAL | Evidence covers chat, model selection and usage confirmation. The [workbench](../../.ai/tasks/dsh-tboard-07/handoff.md) supports task and Run details, pending requests, delivery review and human acceptance. [Quick/standard workflow selection](../../.ai/tasks/dsh-p1-versioned-workflow/handoff.md) covers operator and team edits. [Milestone plans](../../.ai/tasks/dsh-p1-milestone-workflow/handoff.md) verified stage-by-stage authorization, return and final acceptance. [Per-Run native executor selection](../../.ai/tasks/dsh-p1-native-executor-selection/handoff.md) covers launch confirmation, delivery pending acceptance and authorization record recovery. |
+| P1-13 | PARTIAL | macOS arm64 [packaged acceptance](../../.ai/tasks/dsh-p1-packed-workbench/handoff.md) verified fresh npm installation, Web/SQLite restart, SDK delivery and a second restore from the browser. [Upgrade/rollback across two actual builds](../../.ai/tasks/dsh-p1-upgrade-rehearsal/handoff.md) retained original revisions and activity. The [real OpenAI coding workflow](../../.ai/tasks/dsh-tboard-09/acceptance.md) has independent evidence. [Packaged OpenAI configuration](../../.ai/tasks/dsh-p1-openai-deployment/handoff.md) passed a local protocol retry check. [Packaged restore verification](../../.ai/tasks/dsh-p1-package-recovery-acceptance/handoff.md) covers the new recovery position, delivery checks and 27 workbench Web regressions. G2 reference-machine performance retest remains pending. |
 
-### 12.3 P2 / V1：记忆、上下文优化、替换执行器
+### 12.3 P2 / V1 memory, context optimization and executor replacement <a id="123-p2--v1记忆上下文优化替换执行器"></a>
 
-P2-01 TODO；P2-02 PARTIAL（已有 Session/context 基础）；P2-03 TODO；P2-04 TODO；P2-05 PARTIAL（适配器基础，不含任务接力验收）；P2-06 TODO；P2-07 TODO。工作台必需的恢复/备份仍在 G2 实现，后续项的编号不用于推迟 MVP 要求。
+P2-01 TODO, P2-02 PARTIAL (Session/context foundations exist), P2-03 TODO, P2-04 TODO, P2-05 PARTIAL (adapter foundation, task handoff acceptance pending), P2-06 TODO, P2-07 TODO. Required Taskboard backup and recovery stay in G2. Later identifiers cannot postpone MVP requirements.
 
-### 12.4 P3 / V2：多 PC Worker 与远程执行
+### 12.4 P3 / V2 multi-PC workers and remote execution <a id="124-p3--v2多-pc-worker-与远程执行"></a>
 
-P3-01..06 均 TODO；未形成独立节点、权限、过期所有者及恢复的产品证据。P3-07/08 的可选工具桥见 QR 清单，不能由现有 MCP 客户端推定完成。
+P3-01..06 are TODO. Product evidence for independent nodes, permissions, expired ownership and recovery is pending. See the QR checklist for the P3-07/08 optional tool bridge. An existing MCP client does not establish completion.
 
-### 12.5 P4：后续待办（不阻塞）
+### 12.5 P4 follow-up work <a id="125-p4后续待办不阻塞"></a>
 
-专题 G3 的有限并行、依赖及受控领取已有本机验收。G4 已验证团队角色、交付记录及人工决定；草稿 PR 暂缓，跨设备及远程节点待验。各项证据见[工作台清单](#1210-taskboard-增量-checklist)。主 PRD 后续的动态 Workflow、复杂调度和编辑器仍待实施。
+Taskboard G3 limited concurrency, dependencies and controlled claiming passed locally. G4 verified team roles, delivery records and human decisions. The draft PR is deferred. Cross-device and remote-node checks are pending. See the [workbench checklist](#1210-taskboard-增量-checklist). Dynamic workflows, complex scheduling and an editor from the main PRD remain pending.
 
-### 12.6 贯穿全程的验收案例
+### 12.6 Cross-stage acceptance cases <a id="126-贯穿全程的验收案例"></a>
 
-[UAT-06](../../.ai/tasks/dsh-p1-model-review-status/handoff.md) 已在首发 macOS Web/SDK 路径验证。项目检查通过、未请求模型审查时，操作者能看到验证结果并独立决定是否接受。其余 UAT 按[主 PRD](../myPlan/DSH_PRD_vNext_4_2026-10-27.md#11-关键验收用例uat)逐项验收。工作台 AC01–AC20 和 NFR 项目的实测范围见[验收矩阵](../../.ai/tasks/dsh-tboard-09/acceptance.md)。
+[UAT-06](../../.ai/tasks/dsh-p1-model-review-status/handoff.md) passed on the launch macOS Web/SDK path. With project checks passing and no model review requested, the operator can see the results and decide independently whether to accept. Verify remaining UAT cases against the [main PRD](../myPlan/DSH_PRD_vNext_4_2026-10-27.md#11-关键验收用例uat). The [acceptance matrix](../../.ai/tasks/dsh-tboard-09/acceptance.md) lists measured Taskboard AC01–AC20 and NFR coverage.
 
-### 12.7 任务证据台账（执行时逐行补充）
+### 12.7 Task evidence ledger <a id="127-任务证据台账执行时逐行补充"></a>
 
-Provider/额度/用量的具体证据集中在第 12.8 节，Taskboard 集中在第 12.10 节，P0 的范围在第 13 节。每项新增证据保存固定源码指纹和真实操作结果；分支名不作为固定被测版本。当前修改尚未提交/推送，实际 Git 状态须在接手时重新检查。
+Section 12.8 holds provider/quota/usage evidence, section 12.10 covers Taskboard and section 13 defines P0 scope. Record a fixed source fingerprint and actual operations for each new result. A branch name cannot identify a fixed tested version. The current changes have not been committed or pushed. Recheck actual Git state at handoff.
 
-### 12.8 ChatGPT 增量计划清单
+### 12.8 ChatGPT integration checklist <a id="128-chatgpt-增量计划清单"></a>
 
-任务说明、模块归属、阶段依赖与验收以本文件第 10–11 节为准。以下只是同一批任务的状态入口，不创建另一套实施计划。
+Sections 10–11 define tasks, module ownership, dependencies and acceptance. This checklist records the status of those same tasks.
 
-- [x] **CG-00 [DONE]** 新旧计划审计合并、Gap Matrix、Decision Log、实现证据与 Memory 同步；本轮仅文档。三组命名双语配对、局部链接/换行/文件结尾、全仓引用、22 文档标准测试通过；最终 test:docs 为 18/2，doc-sync 为 33/9（引用随后单独修复通过），剩余限制见 [检查点](../../.ai/tasks/dsh-chatgpt-plan-update/handoff.md)。此为历史 CG0 记录；当前 P1/CG1 已获授权，进度以下列 QR 状态为准。
-- [x] **QR-01 [DONE]** LlmProviderInfo.policy、usageSource/能力三态/unknown 余额、实验准入、SIWC 共享来源、pi-ai 政策配置和显式意图/能力要求输入已有解析与验收证据。见[元数据任务](../../.ai/tasks/dsh-p1-provider-policy/handoff.md)、[配置任务](../../.ai/tasks/dsh-p1-provider-config/handoff.md)和[意图任务](../../.ai/tasks/dsh-p1-intent-routing/handoff.md)；不将 VN4-01/02 或 CG1 Gate 标完成。
-- [x] **QR-02 [DONE]** Auth / Provider / Executor / 费用声明独立配置已核对：Loader 回归覆盖凭据/政策独立更新、已存 OAuth 账户替换与删除、显式 Key 优先及缺失时不回退；Codex 实例模型/环境/权限隔离和 Codely 无模型轮次的 Loader 执行有证据。Codex 两模式有实现，Codely external-agent 为本地示例、native-model 仍 unknown；旧插件名未定位为独立包，未删除插件。见[首轮证据](../../.ai/tasks/dsh-p1-auth-route-separation/handoff.md)与[OAuth/执行配置验收](../../.ai/tasks/dsh-p1-oauth-route-composition/handoff.md)。完成范围为配置职责与模式审计；真实账户/生命周期、统一 Run/UI 仍归 P1-05/07、VN4-02。
-- [ ] **QR-03 [PARTIAL]** opt-in chat/plan/review/execute 显式 Provider/model 路由、逐 Turn 捕获、要求能力 unknown/unsupported 拒绝、失败不隐式跨路线已有证据；显式 vision 要求已按精确模型 inputModalities 校验，拒绝未知/仅文本模型且有记录回放，见[模型视觉准入](../../.ai/tasks/dsh-p1-exact-model-vision/handoff.md)；tools 要求已增加精确模型 toolSupport 三态声明与 pi-ai 配置/热更新验收，见[模型工具支持](../../.ai/tasks/dsh-p1-model-tool-support/handoff.md)；streaming 要求已按精确模型 streamingSupport 三态声明校验，见[模型流式支持](../../.ai/tasks/dsh-p1-model-streaming-support/handoff.md)；`selection: entry` 已接入现有入口选择拥有者，验证逐 Turn 固定、下一轮生效与提示一致，见[入口模型路由](../../.ai/tasks/dsh-p1-entry-model-routing/handoff.md)；真实 Web 组合的无密钥浏览器测试已验证选择器、实际请求、工具步骤、下一轮切换，以及限流/额度/断流失败后用户手动改选恢复，见[浏览器验收](../../.ai/tasks/dsh-p1-entry-routing-web-acceptance/handoff.md)；原生严格 JSON Schema 请求、精确模型 structuredOutputSupport、完成输出校验与 headless/双 SDK 记录回放已有证据，见[原生结构化输出](../../.ai/tasks/dsh-p1-native-structured-output/handoff.md)；resume 已区分 Provider 原生持久续接、DSH 历史重放/Session 恢复与外部执行器续接，pi-ai 拒绝无法兑现的 supported 声明，见[恢复语义与准入](../../.ai/tasks/dsh-p1-resume-semantics/handoff.md)；原生执行器恢复实现、真实模型 GUI/GIF、显式回退与完整 Gate 待补；QR-02 配置职责验收已完成。
-- [ ] **QR-04 [PARTIAL]** 可选 paid-route-policy 已对声明为 api_metered 的精确 Provider/model 要求预设同意，见[付费路线验收](../../.ai/tasks/dsh-p1-paid-route-consent/handoff.md)；可选 [request-budget-policy](../../packages/guard/request-budget-policy/README.zh.md) 已通过 SQLite 原子回执跨 Host 保护本地请求名额，为明确 execute 意图保留名额，支持 reserve/commit/cancel/settle 幂等转换、已知未分发取消返还及崩溃保守保留占用；真实 Loader/Settings、两个构建版 dsh Host、重启及记录回放证据见[预算验收](../../.ai/tasks/dsh-p1-local-request-budget/handoff.md)。可选 `maxRequestsPerSession` 已在同一原子回执中按精确 Session ID 限制本地次数，覆盖所有意图与辅助请求、缺失身份拒绝、取消返还和重启保留占用，见[会话预算验收](../../.ai/tasks/dsh-p1-session-request-budget/handoff.md)。可选 `onMissingGrant: ask` 已复用既有审批面板，为每次 API 按量付费原生请求单独确认；授权先于预算预留，发送前复查许可，拒绝/取消不占本地名额，见[当次确认验收](../../.ai/tasks/dsh-p1-paid-route-interactive/handoff.md)。这些是每个预算内的本地次数限制，不代表官方余额；官方共享余额查询、token/金额预算、任务上限、预算状态展示与 credits 保护仍未实现；依赖 QR-03。
-- [ ] **QR-05 [PARTIAL]** 可选 `token-meter/request-records` 已将本地活动 Session 的原生分发结算路线、捕获的 usageSource、终态和适配器返回计数写入既有 Session 日志，并提供有界来源/次数投影；记录用 Session ID + 已提交 seq 标识，不复制提示词、响应正文或凭据，重复样本只取最后一份，重试分发各自记录。真实 headless、TypeScript/Python SDK 与负向对照见[记账验收](../../.ai/tasks/dsh-p1-usage-records/handoff.md)。适配器计数本身可能是估算，不代表官方计费或余额；原生准备拥有者在分发前观察到的失败已有独立 `preparationFailures` 审计，不增加结算次数；真实组合、双 SDK、保留 V3 输入与负向对照见[准备失败验收](../../.ai/tasks/dsh-p1-preparation-records/handoff.md)。循环请求已通过所属 Session、已提交 `step/start` 序号与步骤内尝试序号关联记账，覆盖重试、并发辅助调用隔离与构建版 Host 恢复；旧记录不推断归属，见[请求关联验收](../../.ai/tasks/dsh-p1-request-attempt-link/handoff.md)。可选计数口径已贯通 `TokenUsage`、结算记录、缓存、SDK 与 Turn 详情，区分提供方报告/估算/未知及混合；DeepSeek 直连只在原始输入/输出计数均被观察到时声明报告，pi-ai/SIWC 不推断；见[口径与负向对照](../../.ai/tasks/dsh-p1-usage-measurement/handoff.md)。官方账单核验、完整政策决定、其他外层拒绝、崩溃未结算、Task/Run 关联及外部执行器记账仍待补；依赖 QR-01/04。
-- [ ] **QR-06 [PARTIAL]** 本轮用量弹窗已按日志中的显式尝试引用显示提供方/模型与费用来源；缺失、重复或不匹配的来源显示“未知”，切换当前模型不回填历史。可选 [request-accounting overlay](../../apps/cli/config/examples/request-accounting.yml) 已有受控原生模型的真实 Web 组合验收、V3/V4 Session 回放、明暗主题及 420px 窗口/关闭行为验证，见[用量来源验收](../../.ai/tasks/dsh-p1-turn-usage-source/handoff.md)。API 按量付费原生请求的 opt-in 当次确认也已通过既有审批面板验证，见[审批与 SQLite 组合验收](../../.ai/tasks/dsh-p1-paid-route-interactive/handoff.md)。这是无密钥受控模型证据；官方余额、预算状态展示、完整回退 UI 和真实账号/GIF 仍待补；依赖 QR-03/04/05。
-- [ ] **P3-07 [TODO]** 按 FR-TB-01/04 提供授权范围内的 MCP Gateway 能力，包括 `task.create/status/result/cancel`、`workspace.inspect`、`artifact.read`，记录审批、撤销和审计。
-- [ ] **P3-08 [TODO]** 按 FR-TB-02/03/05 验证可选工具回环及 Tool Host 能力。长任务快速返回 Task ID，调用方据此查询状态。依赖 P3-07 与工作区授权。
-- [x] **WB-01 [DONE]** Browser-only 真实收发与 DSH Adapter 最小接入验证完成：参考 DEV 唯一标记真实往返、客户端取消与本地清理有既序证据；2026-11-02 经受限准入的独立 worker 与桥接 Adapter 完成一次真实 DSH 请求，唯一标记精确回显、Responses completed、真实 usage（estimated 口径）、路由/无本地工具/thread-Turn 关联/attribution 与 worker 清理均有 Session 级证据；三次提交前失败有真实失败路径证据且未消耗模型用量。取消证据止步适配器层（SDK 无 wire-level cancel，文档明确）；生产默认门禁保持有效，未放开任何生产准入。证据：[dsh-web-real-request.json](../../.ai/tasks/dsh-web-provider-poc/evidence/dsh-web-real-request.json) 与[任务记录](../../.ai/tasks/dsh-web-provider-poc/handoff.md)。
+- [x] **CG-00 [DONE]** Consolidated old and new plan audits, gap matrix, decision log, implementation evidence and Memory in a documentation-only step. Three named bilingual pairs, scoped links/wrapping/file endings, repository references and 22 documentation-standard tests passed. Historical totals were 18 passed/2 failed for test:docs and 33/9 for doc-sync, with references subsequently fixed and checked separately. See the [checkpoint](../../.ai/tasks/dsh-chatgpt-plan-update/handoff.md) for limitations. P1/CG1 subsequently received authorization. The QR rows below record current status.
+- [x] **QR-01 [DONE]** Evidence covers parsing and acceptance of LlmProviderInfo.policy, usageSource, three-state capabilities, unknown balances, experimental admission, SIWC shared usage source, pi-ai policy configuration and explicit intent/capability requirements. See [metadata](../../.ai/tasks/dsh-p1-provider-policy/handoff.md), [configuration](../../.ai/tasks/dsh-p1-provider-config/handoff.md) and [intent](../../.ai/tasks/dsh-p1-intent-routing/handoff.md). VN4-01/02 and CG1 acceptance remain separate.
+- [x] **QR-02 [DONE]** Verified independent Auth, Provider, Executor and cost declarations. Loader regressions cover independent credential/policy updates, stored OAuth account replacement and deletion, explicit key precedence and rejection when missing. Evidence covers isolation of model, environment and permissions between Codex instances, and Codely loader execution without a model turn. Both Codex modes exist. Codely external-agent is a local example and native-model remains unknown. Old plugin names were not found as independent packages and no plugin was removed. See [initial evidence](../../.ai/tasks/dsh-p1-auth-route-separation/handoff.md) and [OAuth/execution configuration acceptance](../../.ai/tasks/dsh-p1-oauth-route-composition/handoff.md). Scope is configuration ownership and mode audit. Real accounts and lifecycle and unified Run/UI belong to P1-05/07 and VN4-02.
+- [ ] **QR-03 [PARTIAL]** Opt-in chat/plan/review/execute routes capture explicit providers and models per Turn, reject unknown/unsupported required capabilities and do not silently switch routes on failure. [Vision admission](../../.ai/tasks/dsh-p1-exact-model-vision/handoff.md) checks exact-model inputModalities and includes replay of rejection for unknown and text-only models. [Tool support](../../.ai/tasks/dsh-p1-model-tool-support/handoff.md) adds a three-state toolSupport declaration and pi-ai configuration/hot-update acceptance. [Streaming](../../.ai/tasks/dsh-p1-model-streaming-support/handoff.md) checks the exact model's three-state streamingSupport. [Entry model routing](../../.ai/tasks/dsh-p1-entry-model-routing/handoff.md) connects `selection: entry` to the existing entry selector and verifies Turn pinning, next-turn switching and consistent messaging. [Keyless browser acceptance](../../.ai/tasks/dsh-p1-entry-routing-web-acceptance/handoff.md) in the real Web composition checks selector, actual request, tool step, next-turn switch and user-selected recovery after rate limit, quota or stream failure. [Native structured output](../../.ai/tasks/dsh-p1-native-structured-output/handoff.md) covers strict JSON Schema, exact-model structuredOutputSupport, completion validation and headless/both-SDK replays. [Resume semantics](../../.ai/tasks/dsh-p1-resume-semantics/handoff.md) distinguish provider-native persistence, DSH history replay/Session restoration and external executor continuation. pi-ai rejects unsupported claims. Native executor recovery implementation, real-model GUI/GIF, explicit fallback and full acceptance remain pending. QR-02 configuration responsibilities passed.
+- [ ] **QR-04 [PARTIAL]** Optional paid-route-policy requires advance consent for a specific Provider/model declared api_metered. See [paid-route acceptance](../../.ai/tasks/dsh-p1-paid-route-consent/handoff.md). Optional [request-budget-policy](../../packages/guard/request-budget-policy/README.md) uses atomic SQLite receipts to protect local request slots across hosts and reserve slots for explicit execution intent. Reserve/commit/cancel/settle transitions are idempotent. Confirmed undispatched cancellation refunds the slot. A crash conservatively retains it. [Budget acceptance](../../.ai/tasks/dsh-p1-local-request-budget/handoff.md) covers real Loader/Settings, two built dsh Hosts, restart and replay. Optional `maxRequestsPerSession` uses the same atomic receipt to cap local calls per exact Session ID, including auxiliary calls and all intents, reject missing identity, refund canceled calls and retain occupancy after restart. See [Session budgets](../../.ai/tasks/dsh-p1-session-request-budget/handoff.md). Optional `onMissingGrant: ask` uses the existing approval panel for each metered native API request. Authorization precedes reservation, permission is rechecked before sending, and denial or cancellation consumes no local slot. See [per-use consent](../../.ai/tasks/dsh-p1-paid-route-interactive/handoff.md). These caps count local requests per budget. Official shared balance lookup, token/currency budgets, task caps, budget display and credit protection remain pending. Depends on QR-03.
+- [ ] **QR-05 [PARTIAL]** Optional `token-meter/request-records` logs settled native dispatch route, captured usageSource, terminal state and adapter counts in the active local Session log, with a bounded source/count projection. Session ID and committed sequence identify records. Prompts, response bodies and credentials are excluded. Only the last duplicate sample counts, and retry dispatches have separate records. [Accounting acceptance](../../.ai/tasks/dsh-p1-usage-records/handoff.md) covers real headless, both SDKs and negative controls. Adapter counts may be estimates and do not establish official billing or balances. Pre-dispatch failures observed by the native preparation owner have a separate `preparationFailures` audit and do not count as settlements. See [preparation failure acceptance](../../.ai/tasks/dsh-p1-preparation-records/handoff.md) for real composition, both SDKs, retained V3 input and negative controls. Loop requests are attributed by owning Session, committed `step/start` sequence and within-step attempt number, including retries, isolated concurrent auxiliary calls and restored built hosts. Legacy ownership is never inferred. See [request attribution](../../.ai/tasks/dsh-p1-request-attempt-link/handoff.md). Optional accounting basis propagates through `TokenUsage`, settlement records, cache, SDK and Turn details with provider-reported, estimated, unknown and mixed cases. Direct DeepSeek calls claim reported counts only when both raw input and output counts were observed. pi-ai/SIWC do not infer them. See [accounting basis and negative controls](../../.ai/tasks/dsh-p1-usage-measurement/handoff.md). Official billing verification, full policy decisions, other outer-layer rejections, unsettled crashes, Task/Run association and external executor accounting remain pending. Depends on QR-01/04.
+- [ ] **QR-06 [PARTIAL]** The Turn usage dialog shows provider/model and cost source using the logged explicit attempt reference. Missing, duplicate or mismatched sources show unknown. Changing the current model does not backfill history. The optional [request-accounting overlay](../../apps/cli/config/examples/request-accounting.yml) passed real Web composition with a controlled native model, V3/V4 Session replay, light/dark themes and 420px window/close behavior. See [usage source evidence](../../.ai/tasks/dsh-p1-turn-usage-source/handoff.md). The existing approval panel also verified opt-in per-use confirmation of native metered requests. See [approval and SQLite integration](../../.ai/tasks/dsh-p1-paid-route-interactive/handoff.md). This is keyless controlled-model evidence. Official balances, budget status, full fallback UI and real-account/GIF acceptance remain pending. Depends on QR-03/04/05.
+- [ ] **P3-07 [TODO]** Under FR-TB-01/04 expose scoped MCP Gateway capabilities including `task.create/status/result/cancel`, `workspace.inspect` and `artifact.read`, with approval, revocation and audit.
+- [ ] **P3-08 [TODO]** Under FR-TB-02/03/05 verify optional tool round trips and Tool Host capabilities. Long jobs promptly return a Task ID for later status queries. Depends on P3-07 and workspace authorization.
+- [x] **WB-01 [DONE]** Real Browser-only exchange and minimum DSH adapter integration passed. Ordered reference DEV evidence covers a real unique-marker round trip, client cancellation and local cleanup. On November 2, 2026 a separately admitted restricted worker and bridge adapter completed one real DSH request. Session evidence covers exact marker echo, Responses completed, actual usage on an estimated basis, routing, no local tools, thread/Turn linkage, attribution and worker cleanup. Three actual pre-submission failures consumed no model usage. Cancellation evidence stops at the adapter because the SDK has no wire-level cancel. Default production controls stayed active, with no production admission. See [dsh-web-real-request.json](../../.ai/tasks/dsh-web-provider-poc/evidence/dsh-web-real-request.json) and the [task record](../../.ai/tasks/dsh-web-provider-poc/handoff.md).
 
-完整路由/额度产品验收仍待实施：默认选择、能力不匹配、未知余额、限额、不可用、断流、明确回退及额外付费阻断，分别按 FR-CP、FR-Q、FR-RL 验收。QR-01/02 的 DONE 仅指已有元数据与配置职责，不关闭 VN4-01/02 或 Taskboard。
+Full routing and quota acceptance remains pending for default selection, capability mismatch, unknown balances, limits, unavailability, stream interruption, explicit fallback and blocking extra charges under FR-CP, FR-Q and FR-RL. QR-01/02 completion covers metadata and configuration only. VN4-01/02 and Taskboard are tracked separately.
 
-### 12.9 vNext.4 增量 Checklist
+### 12.9 vNext.4 incremental checklist <a id="129-vnext4-增量-checklist"></a>
 
-| ID | 状态 | 完成边界 |
+| ID | Status | Scope |
 |---|---|---|
-| VN4-00 | DONE | 当前两份 PRD 的实施映射与证据分类；文档完成不是产品完成 |
-| VN4-01 | PARTIAL | 元数据、路由和受控 Web 验证；平级 Provider 完整 UI 待补 |
-| VN4-02 | TODO | Provider/Executor/Workflow 的独立产品选择与 Run 绑定 |
-| VN4-03 | PARTIAL | [工作台 TaskSpec v1](../../.ai/tasks/dsh-p1-run-task-spec/handoff.md)已关联需求修订、工作区、材料与 SDK 授权；常规任务可保留有序人工步骤。通用原生执行器和独立 Plan 待贯通 |
-| VN4-04 | PARTIAL | [工作台模板选择](../../.ai/tasks/dsh-p1-versioned-workflow/handoff.md)已有快速与常规两种版本；[按需模型 Review](../../.ai/tasks/dsh-p1-optional-coverage-review/handoff.md)已在交付页验收；自适应路由与里程碑待贯通 |
-| VN4-05 | PARTIAL | 正式 Provider/原生执行器基础；完整产品闭环待补 |
-| VN4-06 | DONE | 仅受控 Web PoC；M2 及生产准入未完成 |
-| VN4-07 | PARTIAL | 原生尝试引用/预算/失败基础；统一 Run/回执/屏障待补 |
-| VN4-08 | PARTIAL | Session 导入/恢复基础；任务/Memory/Checkpoint 关联待补 |
-| VN4-09 | PARTIAL | 既有凭据/审批/沙箱基础；完整任务隔离及存储验收待补 |
-| VN4-10 | TODO | 可选入站工具桥，活动 Native Tool Host 能力未确认 |
-| VN4-11 | TODO | 跨设备 Worker 与恢复 |
+| VN4-00 | DONE | Implementation mapping and evidence classifications for both current PRDs. Documentation completed, product acceptance separate. |
+| VN4-01 | PARTIAL | Metadata, routing and controlled Web validation. Complete peer provider UI pending. |
+| VN4-02 | TODO | Independent product-level Provider/Executor/Workflow selection and Run binding. |
+| VN4-03 | PARTIAL | [Workbench TaskSpec v1](../../.ai/tasks/dsh-p1-run-task-spec/handoff.md) links revisions, workspace, materials and SDK authorization. Standard tasks can retain ordered human steps. General native executor and separate plan integration remain pending. |
+| VN4-04 | PARTIAL | [Workbench template selection](../../.ai/tasks/dsh-p1-versioned-workflow/handoff.md) offers versioned quick and standard workflows. [Optional model review](../../.ai/tasks/dsh-p1-optional-coverage-review/handoff.md) passed delivery-page acceptance. [Milestone workflow](../../.ai/tasks/dsh-p1-milestone-workflow/handoff.md) integrates the official SDK. Adaptive routing remains pending. |
+| VN4-05 | PARTIAL | Supported provider and native executor foundations exist. Complete product workflow pending. |
+| VN4-06 | DONE | Controlled Web proof of concept only. M2 and production admission remain open. |
+| VN4-07 | PARTIAL | Native attempt references, budgets and failure foundations. Unified Runs, receipts and completion barriers pending. |
+| VN4-08 | PARTIAL | Session import and recovery foundations. Task/Memory/Checkpoint relationships pending. |
+| VN4-09 | PARTIAL | Credential, approval and sandbox foundations. Full task isolation and storage acceptance pending. |
+| VN4-10 | TODO | Optional inbound tool bridge. Active Native Tool Host capability unconfirmed. |
+| VN4-11 | TODO | Cross-device workers and recovery. |
 
-### 12.10 Taskboard 增量 Checklist
+### 12.10 Taskboard incremental checklist <a id="1210-taskboard-增量-checklist"></a>
 
-下表分别记录产品决策、接入验证和功能实施的进度。
+The following rows track product decisions, integration validation and feature implementation separately.
 
-| ID | 状态 | 当前交付重点 |
+| ID | Status | Current delivery focus |
 |---|---|---|
-| TBOARD-00 | DONE | [首版入口与归属决策](../../.ai/tasks/dsh-tboard-00/decision.md)已确认；SDK 组合验收归 TBOARD-01 |
-| TBOARD-01 | DONE | 专题 §10 八项 G0 用例在本分支通过；换目录时新建 Session，新旧 Run 保留引用，材料显式选择。已冻结 macOS 本地接入组合。[矩阵和实测范围](../../.ai/tasks/dsh-tboard-01/matrix.md) |
-| TBOARD-02 | DONE | [任务业务库验收](../../.ai/tasks/dsh-tboard-02/handoff.md)：现有 Web 认证、项目与任务、需求与 Run 快照、交付与人工 Review、请求与租约、版本冲突、排序、归档、重启和重放。调度、真实代码复核和 UI 由后续步骤接入 |
-| TBOARD-03 | DONE | 认证 Web 已验收串行调度、输入回执、取消与恢复。macOS 正式 SDK 路径等待完整 launchd 范围退出后释放租约并继续队列。[实机证据](../../.ai/tasks/dsh-tboard-03/evidence/macos-launchd-scope.json) |
-| TBOARD-04 | DONE | 已验证工作树基线、原目录二次确认、[定向停止可核实的工具进程](../../.ai/tasks/dsh-tboard-04/evidence/controlled-stop.json)、[强停未确认保留租约](../../.ai/tasks/dsh-tboard-04/evidence/stop.json)及[无效审批配置阻断输入](../../.ai/tasks/dsh-tboard-04/evidence/permission.json)。[首发沿用 macOS G0 组合](../../.ai/tasks/dsh-tboard-04/platform.md)。[首发 macOS 复验](../../.ai/tasks/dsh-cross-device-handoff/evidence/macos-receipt.json)覆盖固定工具退出、范围未知及观察超时。 |
-| TBOARD-05 | DONE | [事件、交互及任务工具验收](../../.ai/tasks/dsh-tboard-05/handoff.md) |
-| TBOARD-06 | DONE | [交付快照、只读 Diff 及人工验收](../../.ai/tasks/dsh-tboard-06/handoff.md) |
-| TBOARD-07 | DONE | [看板、详情、待处理、设置与异常状态](../../.ai/tasks/dsh-tboard-07/plan.md) |
-| TBOARD-08 | DONE | [重启对账、导出/备份恢复及升级](../../.ai/tasks/dsh-tboard-08/plan.md) |
-| TBOARD-09 | BLOCKED | [真实编码验收已通过，参考机性能待复测](../../.ai/tasks/dsh-tboard-09/plan.md) |
-| TBOARD-10 | DONE | 有限并行、父子任务、前置验收和单次自动领取已通过 macOS Web/SDK 验证；[并发、定向停止与崩溃恢复证据](../../.ai/tasks/dsh-tboard-10/evidence/macos-parallel.json) |
-| TBOARD-11 | IN_PROGRESS | 本地团队账号、项目权限、双人编辑冲突和恢复后重新授权通过；[实际提交与 push CI](../../.ai/tasks/dsh-tboard-11/evidence/branch-ci.json)已关联，[人工接受并通过重启复核](../../.ai/tasks/dsh-tboard-11/evidence/accepted-restart.json)。草稿 PR 暂缓，远程节点及跨设备恢复留作待验；[检查点](../../.ai/tasks/dsh-tboard-11/handoff.md) |
+| TBOARD-00 | DONE | [Initial entry and ownership decision](../../.ai/tasks/dsh-tboard-00/decision.md) confirmed. SDK combination acceptance belongs to TBOARD-01. |
+| TBOARD-01 | DONE | All eight G0 cases in Taskboard section 10 passed on this branch. Directory changes create a new Session. Old and new Runs retain references. Users select inherited material explicitly. The local macOS combination is pinned. [Matrix and tested scope](../../.ai/tasks/dsh-tboard-01/matrix.md). |
+| TBOARD-02 | DONE | [Task database acceptance](../../.ai/tasks/dsh-tboard-02/handoff.md) covers existing Web authentication, projects and tasks, requirements and Run snapshots, delivery and human Review, requests and leases, version conflicts, order, archive, restart and replay. Scheduling, real code inspection and UI integrate in subsequent steps. |
+| TBOARD-03 | DONE | Authenticated Web passed serial dispatch, input receipt, cancellation and recovery. The official macOS SDK path waits for the full launchd scope to exit before releasing the lease and continuing the queue. [Device evidence](../../.ai/tasks/dsh-tboard-03/evidence/macos-launchd-scope.json). |
+| TBOARD-04 | DONE | Verified worktree base, reconfirmation for original directories, [targeted stopping of identifiable tool processes](../../.ai/tasks/dsh-tboard-04/evidence/controlled-stop.json), [retained leases after unconfirmed force-stop](../../.ai/tasks/dsh-tboard-04/evidence/stop.json) and [blocked input on invalid approval configuration](../../.ai/tasks/dsh-tboard-04/evidence/permission.json). [Launch uses the macOS G0 combination](../../.ai/tasks/dsh-tboard-04/platform.md). [Launch-platform retest](../../.ai/tasks/dsh-cross-device-handoff/evidence/macos-receipt.json) covers a fixed tool exiting, unknown scope and observation timeout. |
+| TBOARD-05 | DONE | [Events, interactions and task tools](../../.ai/tasks/dsh-tboard-05/handoff.md). |
+| TBOARD-06 | DONE | [Delivery snapshots, read-only diff and human acceptance](../../.ai/tasks/dsh-tboard-06/handoff.md). |
+| TBOARD-07 | DONE | [Board, details, pending items, settings and exceptions](../../.ai/tasks/dsh-tboard-07/plan.md). |
+| TBOARD-08 | DONE | [Restart reconciliation, export/backup restore and upgrade](../../.ai/tasks/dsh-tboard-08/plan.md). |
+| TBOARD-09 | BLOCKED | [Real coding acceptance passed. Reference-machine performance retest pending](../../.ai/tasks/dsh-tboard-09/plan.md). |
+| TBOARD-10 | DONE | Limited concurrency, parent/child tasks, prerequisite acceptance and one-time automated claiming passed macOS Web/SDK verification. [Concurrency, targeted stop and crash recovery evidence](../../.ai/tasks/dsh-tboard-10/evidence/macos-parallel.json). |
+| TBOARD-11 | IN_PROGRESS | Local team accounts, project permissions, two-user edit conflicts and reauthorization after recovery passed. [Actual commit and push CI](../../.ai/tasks/dsh-tboard-11/evidence/branch-ci.json) are linked, and [human acceptance survived restart](../../.ai/tasks/dsh-tboard-11/evidence/accepted-restart.json). Draft PR deferred. Remote nodes and cross-device recovery pending. [Checkpoint](../../.ai/tasks/dsh-tboard-11/handoff.md). |
 
-## 13. P0 执行器能力与实施基线（2026-10-30）
+## 13. P0 executor capabilities and implementation baseline (October 30, 2026) <a id="13-p0-执行器能力与实施基线2026-10-30"></a>
 
-### 13.1 实际版本、协议与能力
+### 13.1 Actual versions, protocols and capabilities <a id="131-实际版本协议与能力"></a>
 
-[执行器探测记录](../../.ai/tasks/dsh-p0-executor-probes/handoff.md)保存当时固定 Codex 产品、Codely 原生进程、受控本地模型、权限、错误、取消和退出证据。其结论限于当时版本和测试配置；原生流能力与 DSH 的最终结果投影分别记录。未实测的 resume、云服务和活动工具 Host 保持未知/不支持。
+The [executor probe record](../../.ai/tasks/dsh-p0-executor-probes/handoff.md) identifies the pinned Codex product, native Codely process, controlled local model and evidence for permissions, errors, cancellation and exit. Conclusions apply to the tested versions and configurations. Track native streaming separately from the final result DSH projects. Untested resume, cloud services and active tool hosts remain unknown or unsupported.
 
-### 13.2 P0 定稿的实施选择
+### 13.2 P0 implementation decisions <a id="132-p0-定稿的实施选择"></a>
 
-后续实现保持 Provider 与 Executor 独立、采用受支持启动路径、保留原有权限语义及 Session 事实。产品入口、业务状态和任务数据以当前 myPlan/G0 决策为准；不沿历史基线继续构建未被当前 PRD 要求的任务流程。P0 探测不是当前版本矩阵，也不是 Taskboard G0 的替代。
+Keep providers and executors independent, use supported launch paths, retain original permission semantics and Session facts. Current myPlan/G0 decisions govern entry, business state and task data. Do not continue historical task workflows outside current PRD scope. The P0 probe neither supplies a current version matrix nor replaces Taskboard G0.
 
-## 14. P1 当前实现范围
+## 14. Current P1 implementation scope <a id="14-p1-当前实现范围"></a>
 
-当前可在相应配置下验证逐 Turn 原生模型选择、精确能力拒绝、本地请求预算/Session cap、API 预设或当次确认、原生结算/准备失败记录，以及用量弹窗的路线/费用来源/计数口径。操作、受控模型性质和未验证范围见[Provider 使用指南](../user/guide/providers.md)与第 12.8 节 Task 证据。
+With the corresponding configuration, users can verify per-Turn native model selection, exact capability rejection, local request budgets and Session caps, preset or per-use API confirmation, native settlements and preparation failures, and routes, cost sources and accounting basis in the usage dialog. See the [provider guide](../user/guide/providers.md) and section 12.8 task evidence for steps, controlled models and limits.
 
-macOS 本地 Web 工作台可以创建和修订任务，查看每次 Run 的输入、交付 Diff 与检查结果，并由操作者接受或退回。SQLite 记录支持停机升级、兼容版本回滚和元数据备份恢复。[工作台验收记录](#1210-taskboard-增量-checklist)。SIWC 完整生命周期、Web 生产准入、官方余额、Task 预算、完整回退及 Provider/Executor/Workflow 独立选择仍待验收。
+The local macOS Web workbench creates and revises tasks, displays each Run's input, delivery diff and checks, and lets the operator accept or return delivery. SQLite supports offline upgrades, compatible rollback and metadata backup restoration. See [workbench acceptance](#1210-taskboard-增量-checklist). Full SIWC lifecycle, Web production admission, official balances, Task budgets, complete fallback and independent Provider/Executor/Workflow product selection remain pending.
 
-## 15. 当前第一优先：Web ChatGPT Provider 可行性验证
+## 15. First validation priority — Web ChatGPT provider feasibility <a id="15-当前第一优先web-chatgpt-provider-可行性验证"></a>
 
-主 PRD FR-WEB-02/D-09 的前置验证已形成受控 PoC 证据，WB-01/VN4-06 的 DONE 仅指该范围。参考网页最小往返、DSH 请求/Session 接入与生产准入分别判断；生产路线继续 gated，不把参考实现、手动网页操作或 Mock 当成生产验证。
+The prerequisite under FR-WEB-02/D-09 has controlled proof-of-concept evidence. WB-01/VN4-06 completion is limited to that scope. Assess minimal reference-web round trip, DSH request/Session integration and production admission separately. Production remains gated. Reference code, manual browser use and mocks do not establish production verification.
 
-[现有 PoC 证据](../../.ai/tasks/dsh-web-provider-poc/evidence/dsh-web-real-request.json)及[检查点](../../.ai/tasks/dsh-web-provider-poc/handoff.md)记录受限 worker 的真实唯一标记往返、终态、无本地工具、请求关联及清理。取消证据不承诺服务器停止生成或额度返还。后续 M2 仍需平级 UI、状态/诊断、登录/断流/限额/提交不确定等生命周期与独立生产准入；不作为 Taskboard G0 已通过的证据。
+[Proof-of-concept evidence](../../.ai/tasks/dsh-web-provider-poc/evidence/dsh-web-real-request.json) and the [checkpoint](../../.ai/tasks/dsh-web-provider-poc/handoff.md) record the restricted worker's real unique-marker round trip, terminal state, absence of local tools, request association and cleanup. Cancellation evidence does not promise server-side termination or quota refund. M2 still needs peer UI, state and diagnostics, lifecycle checks for sign-in, disconnection, limits and uncertain submission, and separate production admission. This evidence does not pass Taskboard G0.
 
-## 16. Taskboard 增量实施计划
+## 16. Taskboard incremental implementation plan <a id="16-taskboard-增量实施计划"></a>
 
-本节承接[主 PRD 第 9.3–9.4 节](../myPlan/DSH_PRD_vNext_4_2026-10-27.md#93-任务工作台-mvp)及[Taskboard PRD v0.1](../myPlan/DeepSeek_Harness_Taskboard_PRD_v0.1.md)。详细产品行为由专题 PRD 拥有，本节只定义仓库实施归属、依赖、验收与未决事项；状态统一放在[第 12.10 节](#1210-taskboard-增量-checklist)。需求来源仅为上述两份 myPlan PRD；实现候选不构成额外产品要求。
+This section implements [main PRD sections 9.3–9.4](../myPlan/DSH_PRD_vNext_4_2026-10-27.md#93-任务工作台-mvp) and the [Taskboard PRD v0.1](../myPlan/DeepSeek_Harness_Taskboard_PRD_v0.1.md). The Taskboard PRD owns detailed behavior. This section assigns repository work, dependencies, acceptance and open issues. See [section 12.10](#1210-taskboard-增量-checklist) for status. The two myPlan PRDs are the only requirement sources. Implementation candidates add no requirements.
 
-### 16.1 入口与数据决策
+### 16.1 Entry and data decisions <a id="161-入口与数据决策"></a>
 
-TBOARD-00 先处理下列差异；G0 决策、技术验证和功能完成分别记录。架构差异按既有 Agent Notes 流程提出，未确认前保持现有正式决策和已发布数据；无需新增平行 ADR 目录。
+TBOARD-00 addresses the following differences first. Record G0 decisions, technical validation and feature completion separately. Propose architectural changes through existing Agent Notes. Keep formal decisions and released data intact until confirmation. Use the existing ADR structure.
 
-| 议题 | Taskboard 提案与本仓库处理 |
+| Topic | Taskboard proposal and repository decision |
 |---|---|
-| 产品入口 | 现有 DSH Web 内的工作台页面，复用 Host 与认证。任务服务随 Host 运行，关闭浏览器不终止执行。 |
-| Task 与 Session | 任务服务拥有业务库和人工验收记录，每个 Run 引用其 SDK runtime 持有的 Session。Harness Session 日志拥有模型和工具事实。 |
-| SDK 与 Executor | TypeScript SDK Adapter 负责 Harness Session 控制；Codex/Codely 仍是独立 Executor，SDK 接入通过不等于外部 Agent 已接通。复用受支持的 dsh profile，不增加 package bin 或 argv 逃生路径 |
-| 状态与 Review | 专题 Task/Run 状态映射到第 3 节目标语义；人工 Review 与模型 ReviewDecision 分开。仅用户接受当前有效 Delivery 可完成任务；保持旧数据回放和版本迁移要求 |
-| 工具与费用 | MVP 的任务级工具桥不是 FR-TB 可选入站 MCP Gateway；只提供当前作用域的读取、进度、评论、交付和阻塞。专题后续预算范围不降低 QR 费用授权要求 |
-| 发布组合 | G0 冻结首发系统、Harness/SDK/runtime 版本、profile/模型配置、权限能力和备份目录；仅对实测组合宣称支持。工期在 G0 后估算，不承诺发布日期 |
+| Product entry | Workbench page in DSH Web with existing host and authentication. The task service runs with the host. Closing the browser leaves execution running. |
+| Task and Session | The task service owns the business database and human acceptance records. Each Run references the Session owned by its SDK runtime. Harness Session logs own model and tool facts. |
+| SDK and Executor | The TypeScript SDK Adapter controls the Harness Session. Codex and Codely remain independent executors, requiring separate external agent validation. Use supported dsh profiles without package bins or argv escape paths. |
+| State and Review | Map Taskboard Task/Run states to section 3. Distinguish human Review from model ReviewDecision. Only user acceptance of the current valid Delivery completes the task. Preserve old data replay and version migration requirements. |
+| Tools and costs | The MVP task-scoped tool bridge provides only scoped read, progress, comment, delivery and blocker operations. The optional inbound FR-TB MCP Gateway is separate. Later Taskboard budgeting must preserve QR charge authorization. |
+| Release combination | G0 freezes launch OS, Harness/SDK/runtime versions, profile/model configuration, permission capabilities and backup directory. Claim support only for tested combinations. Estimate duration after G0 without promising a release date. |
 
-### 16.2 阶段与现有路线映射
+### 16.2 Mapping stages to the roadmap <a id="162-阶段与现有路线映射"></a>
 
-专题 P0 是 G0–G2 的完整 MVP；G1 可演示不等于可发布。G3/G4 对应扩展范围，需单独确定实施范围；跨机器能力继续归主 Plan 的 V2，不提前变为 MVP 前提。
+Taskboard P0 is the full G0–G2 MVP. Release requires more than a G1 demo. Scope G3/G4 extensions separately. Cross-machine work remains in the main plan's V2 and is outside MVP prerequisites.
 
-| Taskboard 阶段 | 主 Plan 复用范围 | 退出标准 |
+| Taskboard stage | Main plan work reused | Exit criteria |
 |---|---|---|
-| G0 接入验证 | P0-06、P1-07/09、VN4-02/09；TBOARD-00/01 | 入口及状态拥有者决策明确；专题第 10 节的全部真实接入用例通过，冻结版本/系统/配置矩阵 |
-| G1 任务闭环 | P1-01..04/07..12、P2-03 的工作台子项；TBOARD-02..07 | AC01–AC10 通过，人工接受/退回可完成一个任务；启动幂等与目录锁先于任何真实执行，不推迟到 G2 才实施 |
-| G2 恢复与发布 | P1-13、P2-04 的工作台子项；TBOARD-08/09 | AC11–AC20 及全部 P0 要求通过；完成真实编码、失败重试、交付、退回、再验收全过程 |
-| G3 能力扩展 | P2-07 与 Taskboard 扩展；TBOARD-10 | 并行、依赖和自动领取有新增权限与并发回归 |
-| G4 团队协作 | P3-01..06、未来 PR/CI 集成；TBOARD-11 | 身份/角色、协作编辑、远程节点及跨设备恢复独立验收 |
+| G0 Integration validation | P0-06, P1-07/09, VN4-02/09, TBOARD-00/01 | Decide entry and state owner. Pass all real integration cases in Taskboard section 10 and freeze version/OS/configuration matrix. |
+| G1 Task lifecycle | Taskboard portions of P1-01..04/07..12 and P2-03, TBOARD-02..07 | Pass AC01–AC10, including delivery through human acceptance/return. Implement idempotent start and directory locks before any real execution. |
+| G2 Recovery and release | Taskboard portions of P1-13 and P2-04, TBOARD-08/09 | Pass AC11–AC20 and all P0 requirements. Complete real coding, retry after failure, delivery, return and renewed acceptance. |
+| G3 Extensions | P2-07 and Taskboard extensions, TBOARD-10 | New permission and concurrency regressions cover parallelism, dependencies and automatic claiming. |
+| G4 Team collaboration | P3-01..06, future PR/CI integration, TBOARD-11 | Independently verify identity/roles, collaborative editing, remote nodes and cross-device recovery. |
 
-### 16.3 可领取任务与验收映射
+### 16.3 Claimable tasks and acceptance mapping <a id="163-可领取任务与验收映射"></a>
 
-TBOARD 编号细化现有 P1/P2 任务的工作台缺口，不重复建立通用 Session、Task API 或 Executor。FR/AC/NFR 编号均指专题 PRD；T/UAT 继续使用原编号。下表依赖是工作台内部最小实施顺序，须结合第 11 节的通用能力依赖领取。Web 工作台、重启对账及备份恢复已验收。TBOARD-09 已通过真实 OpenAI 编码闭环，G2 仍待参考硬件性能复测。
+TBOARD identifiers identify Taskboard gaps within P1/P2 without duplicating general Session, Task API or Executor work. FR/AC/NFR are Taskboard PRD identifiers. T/UAT retain their numbering. Combine the minimum Taskboard dependencies below with general capability dependencies in section 11. The Web workbench, restart reconciliation and backup restore passed. TBOARD-09 passed real OpenAI coding. G2 awaits reference-hardware performance retesting.
 
-| ID / 阶段 | 复用任务与拥有者候选 | 依赖 | 最小交付与验收映射 |
+| ID and stage | Related tasks and candidate owners | Dependencies | Minimum delivery and acceptance |
 |---|---|---|---|
-| TBOARD-00 / G0 | 主 PRD 9.4/D-10；SDK、runtime、Session、storage | 本节需求与当前源码审计 | 第 16.1 节决策、兼容矩阵计划及缺口；落实 FR01、NFR09；入口采用现有 Web |
-| TBOARD-01 / G0 | P1-07/09；sdk/client、server、protocol、interaction、subprocess | TBOARD-00 | 真实 Session 创建、同任务连续两次执行、关闭后恢复；审批允许/拒绝/取消、用户问题、双实例停止隔离、目录追踪和服务中断无重复执行；专题第 10 节全部通过 |
-| TBOARD-02 / G1 | P1-01..03；任务数据库、版本记录、Session 引用 | TBOARD-00/01 | Project/Task/Run/Delivery/HumanReview/Interaction/Lease 映射、任务版本和输入快照、状态命令期望版本/事务/幂等、历史与归档；FR02–FR04、FR14；AC01、AC03、AC05 |
-| TBOARD-03 / G1 | P1-04/07/08；jobs/workflow、SDK Adapter | TBOARD-02/04 | 手动启动与默认串行队列、先落启动意图、独占 runtime、Session/Run 关联、输入接纳回执、重试/继续新建 Run；FR05、FR08；AC02、AC04、AC11、AC17 |
-| TBOARD-04 / G1 | P1-09；workspace、sandbox、subprocess | TBOARD-02 | 规范化目录及别名/父子目录锁、基线/worktree 验证、显式原目录串行；停止请求、目标进程树退出证据、超时保留锁；FR01、FR07、FR09；AC12、AC15、AC18、AC19 |
-| TBOARD-05 / G1 | P1-04/06/09；Session events、interaction、authorization | TBOARD-03 | 原始事件/稳定身份或自有游标、历史与通知去重、真实进度；问题/审批分别路由及撤销/迟到响应拒绝；服务端绑定任务级工具权限；FR04、FR06、FR13；AC09、AC10、AC14 |
-| TBOARD-06 / G1 | P1-10/11、P2-03；deliverables、Artifact/验证、storage | TBOARD-03/05 | Delivery 必填证据、需求版本与代码指纹、只读 Diff、过期拒绝；人工接受/退回/豁免与历史 Review；Agent 无完成权限；FR10–FR12、FR14；AC05、AC06、AC07、AC08 |
-| TBOARD-07 / G1 | P1-12、VN4-02；现有 Web Client/Host | TBOARD-02..06 | 项目导航、看板/列表、搜索/筛选/拖拽、详情中的需求/执行/变更/验收、待我处理与设置；FR01–FR14；AC01–AC10 的 UI E2E、异常态回放和演示 |
-| TBOARD-08 / G2 | P1-02/08/13、P2-04；Session/storage、subprocess | TBOARD-03..06 | 重启对账、输入未知状态不重发、旧 runtime 确认退出后恢复；版本化导出/备份、冲突拒绝和兼容升级；NFR03–NFR09；AC11、AC13、AC14、AC16、AC17、AC18、AC20 |
-| TBOARD-09 / G2 | P1-13；发布配置、测试与文档 | TBOARD-07/08 | 全部 AC01–AC20、NFR01–NFR09、真实工程闭环、版本矩阵与恢复指南；不得以 Mock 代替 G0 或真实发布验收 |
-| TBOARD-10 / G3 | P2-07；Client Slots、任务服务、调度 | 扩展范围已确认，用户同意 G2 的 NFR02 参考机复测后置 | 有限并行、父子任务/阻塞依赖、受控自动领取；新增并发/权限回归，入口不争抢同一 Session |
-| TBOARD-11 / G4 | P3-01..06；identity、authorization、远程协调 | TBOARD-09 及团队/远程范围确认 | 团队账号/角色、协作编辑、PR/CI 与远程节点分别拆项；权限与跨设备恢复独立验收 |
+| TBOARD-00 / G0 | Main PRD 9.4/D-10, SDK, runtime, Session, storage | Requirements here and current source audit | Section 16.1 decisions, compatibility matrix plan and gaps, FR01 and NFR09. Use existing Web entry. |
+| TBOARD-01 / G0 | P1-07/09, sdk/client, server, protocol, interaction, subprocess | TBOARD-00 | Real Session creation, two successive executions on one task, restore after shutdown, approval allow/deny/cancel, user questions, two-instance stop isolation, directory tracking and no duplicate execution after service interruption. Pass every Taskboard section 10 case. |
+| TBOARD-02 / G1 | P1-01..03, task database, version records, Session references | TBOARD-00/01 | Project/Task/Run/Delivery/HumanReview/Interaction/Lease mapping, task versions and input snapshots, expected version/transaction/idempotency for state commands, history and archive. FR02–FR04, FR14, AC01, AC03, AC05. |
+| TBOARD-03 / G1 | P1-04/07/08, jobs/workflow, SDK Adapter | TBOARD-02/04 | Manual start and default serial queue, persist launch intent first, dedicated runtime, Session/Run links, input acceptance receipts, new Run on retry/continue. FR05, FR08, AC02, AC04, AC11, AC17. |
+| TBOARD-04 / G1 | P1-09, workspace, sandbox, subprocess | TBOARD-02 | Normalize directories and lock aliases/nested directories, verify base/worktree, explicitly confirm serial use of original directory, request stop, verify target tree exit and retain lock on timeout. FR01, FR07, FR09, AC12, AC15, AC18, AC19. |
+| TBOARD-05 / G1 | P1-04/06/09, Session events, interaction, authorization | TBOARD-03 | Raw events with stable identity or owned cursor, deduplicate history and notifications, show real progress, route questions and approvals separately, reject withdrawn and late responses, bind task tool permissions on the server. FR04, FR06, FR13, AC09, AC10, AC14. |
+| TBOARD-06 / G1 | P1-10/11, P2-03, deliverables, artifacts/verification, storage | TBOARD-03/05 | Required Delivery evidence, requirement version, code fingerprint, read-only diff and stale rejection. Human acceptance, return, waiver and historical Review. Agents cannot complete tasks. FR10–FR12, FR14, AC05–AC08. |
+| TBOARD-07 / G1 | P1-12, VN4-02, existing Web Client/Host | TBOARD-02..06 | Project navigation, board/list, search/filter/drag, requirements/execution/changes/review details, pending items and settings. FR01–FR14, UI E2E for AC01–AC10, failure-state replay and demo. |
+| TBOARD-08 / G2 | P1-02/08/13, P2-04, Session/storage, subprocess | TBOARD-03..06 | Restart reconciliation, no resend of uncertain inputs, restore only after old runtime exits, versioned exports/backups, conflict rejection and compatible upgrade. NFR03–NFR09, AC11, AC13, AC14, AC16, AC17, AC18, AC20. |
+| TBOARD-09 / G2 | P1-13, release configuration, tests and docs | TBOARD-07/08 | AC01–AC20, NFR01–NFR09, real engineering workflow, version matrix and recovery guide. Mocks cannot satisfy G0 or release acceptance. |
+| TBOARD-10 / G3 | P2-07, Client Slots, task service and scheduling | Extension scope confirmed. User approved deferring G2 NFR02 reference-machine retest. | Limited parallelism, parent/child tasks, blocking dependencies and controlled automatic claiming. Add concurrency/permission regressions and prevent competing owners of the same Session. |
+| TBOARD-11 / G4 | P3-01..06, identity, authorization and remote coordination | TBOARD-09 and confirmed team/remote scope | Track team accounts/roles, collaborative editing, PR/CI and remote nodes separately. Independently verify permissions and cross-device recovery. |
 
-依赖顺序为 TBOARD-00 → 01 → 02 → 04 → 03 → 05 → 06；07 在 02–06 就绪后验收，08 在 03–06 就绪后加固，09 汇总 07/08 的发布证据。01 的停止隔离验证使用受控双实例，不代表 MVP 已允许两个业务任务并行。TBOARD-08 只承接工作台必需的本地恢复，P2-04 的更广恢复范围仍按原计划推进。
+Implement TBOARD-00 → 01 → 02 → 04 → 03 → 05 → 06. Accept 07 when 02–06 are ready. Harden 08 when 03–06 are ready. Use 09 to consolidate release evidence from 07/08. The two controlled instances in 01 test stop isolation without authorizing parallel business tasks in the MVP. TBOARD-08 covers required local Taskboard recovery. P2-04 retains its broader recovery scope.
 
-TBOARD-04 的 [macOS 停止、进程范围观察与租约复验](../../.ai/tasks/dsh-cross-device-handoff/evidence/macos-receipt.json)已通过。
+TBOARD-04 passed the [macOS stop, process-scope observation and lease retest](../../.ai/tasks/dsh-cross-device-handoff/evidence/macos-receipt.json).
 
-### 16.4 验证、证据与完成条件
+### 16.4 Validation, evidence and completion criteria <a id="164-验证证据与完成条件"></a>
 
-单元/集成测试覆盖业务状态、版本冲突、幂等、Delivery 过期、人工权限、事务与恢复；SDK/进程测试覆盖真实请求身份、取消/退出、工作目录及启动后写库失败。UI E2E 验证用户可见的待处理、停止中、断连、失败、过期交付和验收拒绝；产品文案使用 locale 字典，非平凡模型/用户输出补 keyless 记录回放，事件或 loop 改动同步 TypeScript/Python SDK expected outputs。具体测试由实现所属包拥有，不新建脱离真实 profile 的演示替代验收。
+Unit and integration tests cover business states, version conflicts, idempotency, stale Delivery, human permissions, transactions and recovery. SDK/process tests cover real request identity, cancel/exit, working directory and failed writes after launch. UI E2E covers visible pending, stopping, disconnected, failed, stale-delivery and rejected-acceptance states. Use locale dictionaries for product copy. Add keyless recorded replay for nontrivial model/user output, and update both TypeScript and Python SDK expected outputs for event or loop changes. Tests belong with their implementation. Use real profiles for acceptance.
 
-每个 AC 保存对应版本、脱敏配置、Task/Run/Session/runtime 身份、工作目录、关键事件、进程退出证据、最终持久化记录及实际命令；审批测试同时检查真实副作用，验收测试同时检查 Delivery/HumanReview 指纹。Mock、静态源码审阅和真实路径分开记录；NOT_RUN、失败和不支持均不得写为 PASS。
+For each AC record version, redacted configuration, Task/Run/Session/runtime identities, working directory, key events, process exit evidence, final persisted record and actual commands. Permission tests check real side effects. Acceptance tests verify Delivery/HumanReview fingerprints. Report mocks, static review and real paths separately. Never report NOT_RUN, failure or unsupported as PASS.
 
-发布须满足专题 PRD 第 14 节门槛：非预期重复执行、验收丢失、审批扩大及误停其他任务均为 0，done 的人工 Review 完整率为 100%。NFR02 在 8 核/16 GB/SSD、本地连接、2000 任务的参考环境测量首屏 P95 ≤ 2 秒、状态到达服务后 1 秒内反映到 UI；这些是验收目标，不是当前测量值。每项 TBOARD 完成后更新第 12.10 节及对应 Task Checkpoint，G2 之前不宣称 Taskboard MVP 已发布。
+Taskboard PRD section 14 requires zero unintended duplicate executions, lost acceptances, expanded approvals and accidental stops of other tasks. Human Reviews must be complete for 100% of done tasks. Measure NFR02 with 2,000 tasks, local connection and an 8-core/16 GB/SSD reference machine. Targets are first screen P95 ≤ 2 seconds and UI update within 1 second of service receipt. These are targets pending measurement. Update section 12.10 and the respective task checkpoint after each TBOARD item. Release requires G2.

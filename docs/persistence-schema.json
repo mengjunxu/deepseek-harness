@@ -47407,8 +47407,8 @@
       ],
       "sources": [
         "packages/api/session-controller/src/types.ts:398",
-        "packages/api/taskboard-controller/src/types.ts:10",
-        "packages/api/taskboard-controller/src/types.ts:77",
+        "packages/api/taskboard-controller/src/types.ts:11",
+        "packages/api/taskboard-controller/src/types.ts:78",
         "packages/attachment/attachment/src/brand.ts:6",
         "packages/compaction/compaction/src/brand.ts:4",
         "packages/core/session/src/types.ts:20",

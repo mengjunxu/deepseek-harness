@@ -1,0 +1,8 @@
+# Require the native driver before the SDK accepts a Session.
+- id: sdk-jsonrpc-server
+  inject: [sdkAppStartup, loader, approval, permissionPresets, sandboxPolicy, sandbox, sessionPersistence, taskboardNativeExecutor]
+- insert:
+    - id: taskboard-native-executor
+      name: ./lib/types/sdk-native.js
+      config:
+        executor: !!js process.env.DSH_TASKBOARD_NATIVE_EXECUTOR

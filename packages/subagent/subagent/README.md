@@ -25,6 +25,10 @@ Use `dsh-subagent` to delegate work to named child agents, collect their results
 <a id="use-this-package"></a>
 ## Use this package
 
+A caller that must keep work in the parent Session’s directory can check `provider.usesParentCwd === true` before starting the child.
+
+Supply `onNativeActivity` to observe payload-free tool and permission categories from native providers that support it.
+
 This package is the contract every delegation setup shares. You enable it by mounting the service together with one or more provider backends and the model-facing delegation tool; from then on, an agent can delegate work and the service routes each request to the named provider.
 
 ### Enabling delegation

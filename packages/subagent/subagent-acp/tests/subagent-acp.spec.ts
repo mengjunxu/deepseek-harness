@@ -461,6 +461,7 @@ describe('cwd resolution', () => {
     const workdir = realpathSync(mkdtempSync(join(tmpdir(), 'acp-parent-cwd-')))
     try {
       const ctx = await setup({ MOCK_ECHO_CWD: '1' })
+      expect(ctx.subagents.getProvider('acp')?.usesParentCwd).toBe(true)
       const parent = { id: 'parent', session: { header: { cwd: workdir } } } as unknown as Agent
       const run = await ctx.subagents.start('acp', { prompt: [{ type: 'text' as const, text: 'p' }], parent, signal: new AbortController().signal })
       const result = await run.result
@@ -509,6 +510,7 @@ describe('cwd resolution', () => {
         permission: 'reject',
         env: { MOCK_ECHO_CWD: '1' },
       })
+      expect(ctx.subagents.getProvider('acp')?.usesParentCwd).toBe(false)
       const parent = { id: 'parent', session: { header: { cwd: parentDir } } } as unknown as Agent
       const run = await ctx.subagents.start('acp', { prompt: [{ type: 'text' as const, text: 'p' }], parent, signal: new AbortController().signal })
       const result = await run.result
@@ -1160,6 +1162,21 @@ describe('dsh-subagent-acp', () => {
     expect(result.stopReason).toBe('aborted')
     expect(result.diagnostic).toBe(expectedPermission('reject', 'execute', 'denied'))
     await run.dispose()
+  })
+
+  it.each([false, true])('associates tool and permission observations with the active ACP session (foreign=%s)', async (foreign) => {
+    const ctx = await setup({ MOCK_PERMISSION: '1', MOCK_TOOL_ACTIVITY: '1', ...(foreign && { MOCK_TOOL_SESSION: 'another-session' }) }, 'allow')
+    const observe = vi.fn()
+    try {
+      const run = await ctx.subagents.start('acp', { ...request(), onNativeActivity: observe })
+      try {
+        expect((await run.result).stopReason).toBe(foreign ? 'aborted' : 'completed')
+        expect(observe.mock.calls.flat()).toEqual(foreign ? [] : [
+          'command', 'completed', 'fileChange', 'completed', 'fileChange', 'completed', 'fileChange', 'completed',
+          'read', 'completed', 'otherTool', 'completed', 'allowed',
+        ])
+      } finally { await run.dispose() }
+    } finally { await ctx.fiber.dispose() }
   })
 
   it('auto-approves a permission prompt under the allow policy', async () => {

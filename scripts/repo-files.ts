@@ -21,6 +21,27 @@ export interface ReferenceViolation {
   ref: string
 }
 
+// The original plans listed in docs/legacy/README.md are retained as historical inputs.
+const archivedPlanningSnapshots = new Set([
+  'docs/legacy/Generic_Agent_Harness_Architecture_Execute_Plan_v4.md',
+  'docs/legacy/Generic_Agent_Harness_v5_1_CN_Technical_Design_and_Codex_Implementation_Plan.md',
+  'docs/legacy/Generic_Agent_Harness_v5_ACP_Architecture_Execute_Plan.md',
+  'docs/legacy/MGSD_Distributed_Agent_Harness_Architecture_and_Execution_Plan.md',
+  'docs/legacy/MGSD_Distributed_Agent_Harness_Architecture_and_Execution_Plan_v2.md',
+  'docs/legacy/myPlan/AGENTS.original.md',
+  'docs/legacy/myPlan/DSH_Implementation_Plan_vNext_4_2026-10-27.md',
+  'docs/legacy/workflows/DSH_CHECKLIST.md',
+  'docs/legacy/workflows/DSH：Codex 与 Codely 无缝切换工作流（V0–V2）.md',
+])
+
+/**
+ * @param path Repository-relative path in native or slash form.
+ * @returns Whether the file is one of the original single-language planning snapshots.
+ */
+export function isArchivedPlanningSnapshot(path: string): boolean {
+  return archivedPlanningSnapshots.has(path.replaceAll('\\', '/'))
+}
+
 /** Whether a repository path is frozen Agent Note history, not evolving source prose. */
 export function isArchivedAgentNotePath(path: string): boolean {
   return path.replaceAll('\\', '/').startsWith('.agents/notes/archived/')

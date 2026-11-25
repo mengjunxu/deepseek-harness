@@ -14,7 +14,7 @@ This directory retains superseded plans, checklist snapshots, implementation sum
 
 ## Current documents
 
-The only active planning documents are `docs/workflows/DSH_IMPLEMENTATION_PLAN.md` and `docs/myPlan/DSH_PRD_vNext_4_2026-10-27.md`. Plan sections 11–12 own the current roadmap, live Checklist and task evidence. The separate Checklist has been merged into that plan; its archived copy is a snapshot. Formal decisions and developer task records retain their existing owners outside this directory.
+The [implementation plan](../workflows/DSH_IMPLEMENTATION_PLAN.md) tracks the roadmap, checklist and acceptance evidence. Its requirements come from the [main PRD](../myPlan/DSH_PRD_vNext_4_2026-10-27.md) and the [Taskboard PRD](../myPlan/DeepSeek_Harness_Taskboard_PRD_v0.1.md). The archived checklist records its state at consolidation.
 
 ## Archive groups
 
@@ -28,4 +28,4 @@ The only active planning documents are `docs/workflows/DSH_IMPLEMENTATION_PLAN.m
 
 ## Maintenance
 
-Files retain historical content; relative links are adjusted for relocation. Bilingual triplets move together. This directory is unrelated to the frozen Agent Note archive and does not change formal decision status. The relocation Task records source/destination paths and file digests under `.ai/tasks/dsh-plan-legacy/moves.json`. Old command text in task logs describes commands actually run at the time; use the relocation map to find moved evidence. Existing documentation-check failures remain recorded rather than exempted.
+Files retain historical content; relative links are adjusted for relocation. Bilingual triplets move together. This directory is unrelated to the frozen Agent Note archive and does not change formal decision status. The relocation Task records source/destination paths and file digests under `.ai/tasks/dsh-plan-legacy/moves.json`. Old command text in task logs describes commands actually run at the time; use the relocation map to find moved evidence. The nine original planning snapshots listed above retain their original language, line breaks and example code. The Markdown link check still covers them.

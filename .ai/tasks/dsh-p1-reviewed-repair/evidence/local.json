@@ -4,9 +4,11 @@
   "platform": "macOS arm64",
   "git": {
     "branch": "codely_bridge",
-    "headAtHandoff": "2831497f5378f3aa8948f88609b813e570cb2979",
     "testedCommit": null,
-    "published": false
+    "published": false,
+    "baseTreeAtHandoff": "31b1451cc08a3a5164786798cf1555e28235b9a8",
+    "baseCommitSubject": "feat(taskboard): persist queued runs and SDK input receipts",
+    "baseCommittedAt": "2026-11-22T09:37:53+08:00"
   },
   "sourceSha256": {
     "packages/api/taskboard-controller/src/backup.ts": "a8f688dd55467f63f577c582154e6b68240652b0ea77267cdf00e0733038a5da",

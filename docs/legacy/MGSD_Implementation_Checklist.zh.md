@@ -34,8 +34,7 @@ description: "对照 Generic Agent Harness v4 记录实施状态、四模式可�
 2. 本清单，以及 v4 计划第 0–2 节、Phase 0S、Phase 0–8、第 10–11 节发布检查和第 14 节原型迁移指导。
 3. [L1 实现总结](MGSD_L1_Local_DSH_Implementation_Summary.zh.md)，了解职责、执行流程、验收及限制；[本地 Codely 使用说明](../user/guide/codely-local.zh.md)，了解配置、行为及已记录结果。
 4. [L2 实现总结](MGSD_L2_Local_DSH_Implementation_Summary.zh.md)，了解持久化流程、审批、恢复、验收及 L3 交接。
-5. [执行器实验报告](../MGSD_Codely_Executor_Validation_Report.zh.md)，了解实际观察到的退出码、提示词传输、自动保存及沙箱限制。
-6. 开始实现前阅读[架构](../architecture.zh.md)、[测试策略](../testing.zh.md)和[防御模式](../defensive-patterns.zh.md)。
+5. 开始实现前阅读[架构](../architecture.zh.md)、[测试策略](../testing.zh.md)和[防御模式](../defensive-patterns.zh.md)。
 
 保留现有 `.codely-cli/settings.json` 改动，以及当前执行器、测试、使用说明和 checklist 的编辑。只检查与任务有关的文件，不要整体加入本地设置或编辑器数据。不要 reset、clean、自动提交或自动推送当前仓库。
 

@@ -1,0 +1,81 @@
+{
+  "checkedAt": "2026-11-24T15:40:21+08:00",
+  "platform": "macOS arm64",
+  "testedCommit": null,
+  "branch": "codely_bridge",
+  "modelEndpoint": "loopback fixture",
+  "sourceSha256": {
+    "packages/api/taskboard-controller/src/milestones.ts": "3266b8fbcf5300c7f8efca92e5593a073a513944ae6b9b9dad7f07bd42a82fed",
+    "packages/api/taskboard-controller/src/types.ts": "4462ed06d2973696f6dfaead41753f6644665f6d032ad29b30d9296afcc8bb66",
+    "packages/api/taskboard-controller/src/member-board.ts": "63759edd96de7e4b8e9e366d5e94f48d5ac3eebaf760b82702071711ab195c1e",
+    "packages/api/taskboard-controller/src/execution-domain.ts": "7696ec35fd1f994901ce7f6ab923f7d0ec2f885efffdf8bac57cafc6c8a37d5a",
+    "packages/api/taskboard-controller/src/execution.ts": "21c0f71940998e752b1fd98865e921aa036080ae0c91fabb0d1cd0601c56b159",
+    "packages/api/taskboard-controller/src/index.ts": "5cfa3cbd6c62aabe614b49c81dc5e4f7efd5f65db1dd0c2bb2dac2df21c2eb3c",
+    "packages/api/taskboard-controller/src/session-recovery.ts": "2681e07760ef207b7bcd748c0188146b8df475899240ed52d1bae28494ec22c5",
+    "packages/api/taskboard-controller/src/tool-protocol.ts": "4888127d8eb48466e4f73db45498d73920c9bbe331455be6560d0949668b2e9e",
+    "packages/api/taskboard-controller/src/sdk-tools.ts": "eeb1b5291e9e27590db72f635a74c3ae2df3b1423fbb50b0d1146c726349b603",
+    "packages/api/taskboard-controller/src/backup.ts": "1e3ab4e4a1b1f013f9170189709b4a65f8f1c0673fa19f0eb12b9133f2fa5364",
+    "packages/client/ui-taskboard/src/client/TaskboardPage.tsx": "90311c17630207f0360a1095d43c9ebc8a59105a12a63b1f64806440f5794fe2",
+    "packages/client/ui-taskboard/src/client/WorkflowDetails.tsx": "659b6da382d8d9557599b75392a1ccb0139945da570212eb83411e0652c601f8",
+    "packages/client/ui-taskboard/src/client/DeliveryPanel.tsx": "5d0d04ea6e30f42b9c3c3d7045a35634dcf1fd56ae7206a014dba5ab624fc805",
+    "packages/client/ui-taskboard/src/client/RunPanel.tsx": "f45337d67806c1b22256717ef21cedc988c95870139874eeece72f5013a8ec64",
+    "packages/client/ui-taskboard/src/client/locales.ts": "078224421e2cca2c06192670174be685b35d29281b82ed7d35921b81792c1e84",
+    "apps/web/src/taskboard-team.tsx": "3979daedd7a514d3513a5586420ca3fcf35281fc36d5dbe3c27869146c5ec840",
+    "apps/web/tests/fixtures/taskboard-browser.mjs": "2a3b8dadaaf2d99b9bbdf81bac8bf61cb3b96026076b3134eb6d5cbc84bb304a",
+    "apps/web/tests/fixtures/taskboard-smoke.mjs": "595055310bd3dec147916b91acbb52fdb35afb2b5c9486773ec60fc99b6e823f",
+    "snapshots/sdk/taskboard-milestone/session.v4.jsonl": "6ced7834f9c49c38a982d07c4b9b0c7693b1126921f333cf2209e0972705e834"
+  },
+  "hostTests": 35,
+  "webCases": [
+    "milestone flow",
+    "team editing and roles",
+    "original dispatch",
+    "milestone lost receipt recovery"
+  ],
+  "keylessSdkSnapshots": [
+    "taskboard-dispatch",
+    "taskboard-milestone"
+  ],
+  "snapshotCorpusChecks": 3,
+  "installed": {
+    "version": "0.1.7-rc.2",
+    "onlyDirectDependency": "@deepseek-ai/dsh",
+    "totalLocalTarballs": 334,
+    "freshDshTarballs": 323,
+    "result": {
+      "stages": [
+        1,
+        1,
+        2
+      ],
+      "decisions": [
+        "return",
+        "accept",
+        "accept"
+      ],
+      "restored": true
+    },
+    "tarballSha256": {
+      "deepseek-ai-dsh-0.1.7-rc.2.tgz": "6bf933587d93435077708a0fc525b175c3f720775bd1a5f3f819a27d3321d81b",
+      "deepseek-ai-dsh-api-taskboard-controller-0.1.7-rc.2.tgz": "3d74bfb15850d5545b49bf15fc538614a05ebeb43a9688e5fc9abeb3eb2f06ff",
+      "deepseek-ai-dsh-client-ui-taskboard-0.1.7-rc.2.tgz": "0118a20ba2f697af681e26b990d90719c72cb413e92308f6caf1581ce8c8bdc3",
+      "deepseek-ai-dsh-web-0.1.7-rc.2.tgz": "e117d7c0dbc2824b82b3005477a4a73f667421a374ae4f5f35ab2c32162b7faa"
+    }
+  },
+  "commands": [
+    "pnpm run build:official",
+    "pnpm run release:pack --family dsh --out <dsh> --concurrency 4",
+    "pnpm run release:verify-packed-install --family dsh --from <dsh> --from <vendor> --from <native> --taskboard milestones",
+    "pnpm run test:snapshot -t \"taskboard-milestone|taskboard-dispatch\""
+  ],
+  "docSync": {
+    "passed": 37,
+    "failed": [
+      "doc-typecheck",
+      "markdown links",
+      "translation pairing",
+      "markdown wrap",
+      "repository references"
+    ]
+  }
+}

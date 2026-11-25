@@ -40,6 +40,11 @@ interface SubagentCapabilities {
 工具层根据模型输入和自身配置构建此请求；服务在 `start` 之前针对指定提供方进行校验。必填的 `parent` 提供会话 cwd、谱系与委派深度。可选的 Agent 提供方、模型、推理强度与 token 覆盖、output schema、depth、工具过滤器和 persona 需要对应的能力 flag 匹配。进程内后端会把 `agentOptions` 合并到父 Agent 选项之上，将 filter 和 persona 的作用域限定在子 agent 创建阶段，并通过强制 capture 工具实现所支持的 object-rooted schema。DSH SDK 后端会把四个 Agent 路由字段合并到实例默认值之上，并在子运行时初始化期间校验；ACP、Codex 与 Claude Code 会在启动传输前拒绝 `agentOptions`。
 
 ```ts type-equiv
+/** Payload-free observations reported by a native one-shot provider. */
+type NativeActivityKind = 'command' | 'fileChange' | 'read' | 'otherTool' | 'completed' | 'failed' | 'declined' | 'allowed' | 'denied' | 'cancelled'
+```
+
+```ts type-equiv
 /**
  * What a caller asks for when starting a ONE-SHOT subagent. The tool layer
  * builds this from the model's `{ description, prompt }` plus its own config;
@@ -48,6 +53,8 @@ interface SubagentCapabilities {
  * {@link SubagentProvider.start}.
  */
 interface SubagentStartRequest {
+  /** Synchronous observer for tool reports and permission replies associated with this native run. */
+  readonly onNativeActivity?: (kind: NativeActivityKind) => void
   /** Optional short display label persisted with a session-backed child. */
   readonly label?: string
   /** Content delivered as the child's user message. */
@@ -416,6 +423,8 @@ interface SubagentProvider {
    * It says nothing about tool registration, injected services, or authority inheritance.
    */
   readonly inheritsParentContext: boolean
+  /** True when this provider starts the child in the parent Session’s cwd without a deployment override. */
+  readonly usesParentCwd?: boolean
   /**
    * Optional static provider-owned provider/model route for one-shot Agent
    * options. Consumers merge tool/model overrides over these values before

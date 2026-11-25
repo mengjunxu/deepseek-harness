@@ -25,6 +25,8 @@ Use this package to delegate a task to an ACP-compatible agent running in a fres
 <a id="use-this-package"></a>
 ## Use this package
 
+The provider reports `usesParentCwd` when `cwd` is omitted. Callers that lease the parent directory can check this before spawning the ACP process.
+
 Mount this provider when a composition needs a fully isolated, out-of-process child that speaks the Agent Client Protocol. The common path is explicit: mount the seam, mount this provider, and give it a command that starts an ACP agent.
 
 ### When to choose it
@@ -64,6 +66,8 @@ A DeepSeek Harness child uses the product launcher and an explicit absolute `DSH
 ### What you get
 
 A successful run returns the child's final streamed assistant text as the result output. The child's session, model, and tools come from the child process itself — the parent supplies only the task and the working directory. The stop reason maps `end_turn` to `completed`, `max_tokens` to `max-tokens`, `refusal` to `refusal`, `cancelled` to `aborted`, and every other value to `error`. A failed published run preserves partial assistant text in `output` and returns safe structured detail separately in `diagnostic`.
+
+A one-shot caller can supply `onNativeActivity` to count tool calls, terminal status reports and permission replies for the active ACP session. Tool arguments, output, paths and option titles stay outside this observer.
 
 ### Failure and recovery
 

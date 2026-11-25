@@ -49,6 +49,7 @@ export const stopCommand = command.extend({ runId: id.transform(brandString<Task
 export const queuedRunCommand = command.extend({ runId: id.transform(brandString<TaskRunId>) })
 /** Run request with operator-confirmed directory and input selection. */
 export const startCommand = command.extend({
+  nativeExecutor: z.enum(['codex', 'codely']).optional(),
   confirmedScript: projectScript.optional(),
   confirmedRoute: z.strictObject({ provider: text, model: text }).optional(),
   whenReady: z.literal(true).optional(),

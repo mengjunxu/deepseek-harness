@@ -154,6 +154,8 @@ class AcpProvider implements SubagentProvider {
   // Context contract: an out-of-process ACP child starts fresh — no parent conversation crosses the process boundary.
   readonly inheritsParentContext = false
 
+  get usesParentCwd(): boolean { return this.config.cwd === undefined }
+
   constructor(readonly name: string, private readonly ctx: Context, private readonly config: ResolvedConfig) {}
 
   start(request: ResolvedSubagentStartRequest) {

@@ -25,6 +25,8 @@ kind: "package-bundle"
 <a id="use-this-package"></a>
 ## 使用本包
 
+Provider 声明 `usesParentCwd: true`，app-server 线程使用委派 Session 的工作目录。
+
 当委派应以父级工作区中的真实 Codex 会话运行时，挂载本提供方。常用路径是显式的：把 Bundle 安装进 Profile，可选地配置提供方行，并通过委派工具行把它暴露给模型。
 
 ### 安装 Bundle
@@ -78,6 +80,8 @@ dsh --profile <name>
 `one-shot` 策略会让省略 `run_in_background` 或传入 `false` 的调用继续在前台等待，而显式传入 `true` 会返回由父 agent 拥有的 Job id，供 `job_output` 或 `job_kill` 使用；base host（基础宿主）与完整 preset 已提供通用作业注册表和控制工具。
 
 ### 你会得到什么
+
+可选的 `onNativeActivity` 回调接收匹配线程和轮次的工具与审批类别。Codex 在内部处理的拒绝可能不会向适配器发出审批事件。
 
 前台调用会把选定的最终 Codex 答案交给模型；运行失败时则返回带停止原因与可选安全诊断的错误。后台调用先返回 Job id；随后通用作业控制面会送达完成通知，并通过 `job_output` 公开同一最终答案或失败状态。Codex 的过程说明、推理、工具活动、原始 stderr 与工作区差异绝不会进入父级会话。
 

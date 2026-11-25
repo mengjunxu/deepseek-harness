@@ -1,157 +1,166 @@
-# DSH 产品需求文档（PRD）vNext.4
+# DSH product requirements (PRD) vNext.4 <a id="dsh-产品需求文档prdvnext4"></a>
 
-> **文档版本**：vNext.4 / 2026-10-27；任务工作台增补：2026-11-11
-> **文档性质**：产品目标与验收基线（不是对现有代码完成情况的声明）
-> **适用范围**：独立、跨项目、跨设备的通用 Agent Harness（DSH）
-> **关联文档**：[当前实施 Plan](../workflows/DSH_IMPLEMENTATION_PLAN.md)、[任务工作台 PRD v0.1（待评审）](DeepSeek_Harness_Taskboard_PRD_v0.1.md)
-> **编号速查**：[任务、阶段与验收编号](#任务阶段与验收编号)；[功能需求模块前缀](#功能需求模块前缀)。
-> **实施与进度**：[唯一实施 Plan](../workflows/DSH_IMPLEMENTATION_PLAN.md)；[总进度与证据](../workflows/DSH_IMPLEMENTATION_PLAN.md#12-有效-checklist-与任务证据)；[Taskboard 任务映射](../workflows/DSH_IMPLEMENTATION_PLAN.md#16-taskboard-增量实施计划)；[Taskboard 进度](../workflows/DSH_IMPLEMENTATION_PLAN.md#1210-taskboard-增量-checklist)。PRD 定义需求，Plan Checklist 记录实现与验收状态，文档合并不代表功能完成。
-> **替代关系**：纠正 vNext.2/vNext.3 中“ChatGPT Web + Reverse Codex 是唯一核心主链路”的定位；保留此前 V0–V2 和有价值的可靠性、安全性方案。
-> **决定性约束**：**ChatGPT Web 与 SIWC 是 DSH UI 中平级、可选择的 Chat Provider；Planner/独立 LLM Reviewer 均不强制；Codex 与 Codely 是独立可选的工程执行 Agent。**
+English | [中文](DSH_PRD_vNext_4_2026-10-27.zh.md)
+
+> **Version** vNext.4, October 27, 2026. Taskboard addendum dated November 11, 2026.
+>
+> **Status** Product objectives and acceptance baseline. Implementation status is tracked separately.
+>
+> **Scope** DSH, a standalone general-purpose agent harness for use across projects and devices.
+>
+> **Related documents** [Current implementation plan](../workflows/DSH_IMPLEMENTATION_PLAN.md) and [Taskboard PRD v0.1, awaiting review](DeepSeek_Harness_Taskboard_PRD_v0.1.md).
+>
+> **Identifier index** [Task, stage and acceptance identifiers](#任务阶段与验收编号) and [functional requirement prefixes](#功能需求模块前缀).
+>
+> **Implementation and progress** [Implementation plan](../workflows/DSH_IMPLEMENTATION_PLAN.md), [overall progress and evidence](../workflows/DSH_IMPLEMENTATION_PLAN.md#12-有效-checklist-与任务证据), [Taskboard task mapping](../workflows/DSH_IMPLEMENTATION_PLAN.md#16-taskboard-增量实施计划) and [Taskboard progress](../workflows/DSH_IMPLEMENTATION_PLAN.md#1210-taskboard-增量-checklist). This PRD defines requirements. The plan checklist records implementation and acceptance separately from document consolidation.
+>
+> **Earlier versions** vNext.4 revises the vNext.2/vNext.3 assumption that ChatGPT Web with Reverse Codex was the sole primary route. It retains V0–V2 and the applicable reliability and security proposals.
+>
+> **Design constraints** **ChatGPT Web and SIWC are peer chat providers the user can select in the DSH UI. A planner and a separate LLM reviewer are optional. Codex and Codely are independently selectable agents for engineering work.**
 
 
-## 编号与缩写速查
+## Identifier and abbreviation index <a id="编号与缩写速查"></a>
 
-### 任务、阶段与验收编号
+### Task, stage and acceptance identifiers <a id="任务阶段与验收编号"></a>
 
-本表汇总本 PRD、[实施 Plan](../workflows/DSH_IMPLEMENTATION_PLAN.md)和[Taskboard 专题 PRD](DeepSeek_Harness_Taskboard_PRD_v0.1.md)的编号。需求编号用于关联目标，任务编号用于跟踪实施，验收编号用于关联证据；编号本身不表示功能已完成。QR 按 Plan 中 Quota-aware Router 的上下文解释；CG、WB 未规定固定英文全称，以下使用其对应章节的职责名称。
+These identifiers appear in this PRD, the [implementation plan](../workflows/DSH_IMPLEMENTATION_PLAN.md) and the [Taskboard PRD](DeepSeek_Harness_Taskboard_PRD_v0.1.md). Requirements identify objectives, task IDs track implementation, and acceptance IDs point to evidence. An ID alone does not establish completion. QR refers to the plan's quota-aware router. CG and WB have no prescribed English expansions and are described by function below.
 
-| 前缀 | 含义 | 用途与示例 |
+| Prefix | Meaning | Use and examples |
 |---|---|---|
-| QR | 额度感知路由任务，按上下文对应 Quota-aware Router | Provider、路由、预算与用量；如 QR-03 路由、QR-04 预算保护 |
-| CG | ChatGPT 接入增量计划编号 | CG0–CG5 表示增量阶段；CG-00 是计划审计合并任务 |
-| VN4 | vNext.4 版本的增量实施任务 | 如 VN4-02 是 Provider／Executor／Workflow 独立选择 |
-| WB | Web Provider 验证任务 | WB-01 是浏览器 ChatGPT 与 DSH 接入的可行性验证 |
-| TBOARD | Taskboard，任务工作台 | 如 TBOARD-07 是看板、详情与待处理交互 |
-| FR | Functional Requirement，功能需求 | 产品必须具备的功能；如 FR-CP-01 |
-| NFR | Non-functional Requirement，非功能需求 | 性能、可靠性、安全与兼容性；如专题 NFR02 交互性能 |
-| UAT | User Acceptance Test，用户验收测试 | 从用户操作角度验证功能；如 UAT-03 简单任务交给 Codex |
-| AC | Acceptance Criteria，验收标准／用例 | Taskboard 的 AC01–AC20；具体场景见专题 PRD |
-| T | Test，测试案例 | 如 T01 数据校验；具体范围以所在测试表为准 |
-| M | Milestone，产品里程碑 | M0 产品基线、M1 正式闭环、M2 Web 产品化等 |
-| V | Version，历史研发阶段／版本 | V0 单机闭环、V1 记忆与接力、V2 多 PC 协作 |
-| P | Priority 或 Phase，按所在文档和位置区分 | PRD 需求后的（P0）表示优先级；Plan 的 P1-05 是阶段内任务编号 |
-| G | 主 PRD 中为 Goal；Taskboard 中为阶段关卡 | 主 PRD 的 G1–G7 是产品目标；Taskboard 的 G0–G4 是接入、闭环、恢复、扩展、协作阶段 |
-| NG | Non-goal，非目标 | 明确当前不做什么；如 NG4 不承诺读取 ChatGPT 官方 Memory |
-| S | Scenario，使用场景 | 主 PRD 中 S1 为普通聊天、S2 为简单开发等 |
-| D | Decision，设计决策 | D-01–D-10 是本版产品设计基线 |
-| ADR | Architecture Decision Record，架构决策记录 | 保存架构选择、理由和约束；本仓库由 Agent Notes 承担 |
+| QR | Quota-aware routing task | Providers, routing, budgets and usage, including QR-03 routing and QR-04 budget protection |
+| CG | Incremental ChatGPT integration plan | CG0–CG5 are stages. CG-00 consolidates the plan audit. |
+| VN4 | Incremental vNext.4 implementation task | VN4-02 covers independent provider, executor and workflow selection. |
+| WB | Web provider validation | WB-01 tests the feasibility of integrating browser-based ChatGPT with DSH. |
+| TBOARD | Taskboard | TBOARD-07 covers the board, task details and interactions awaiting attention. |
+| FR | Functional requirement | A required capability such as FR-CP-01 |
+| NFR | Nonfunctional requirement | Performance, reliability, security and compatibility, including Taskboard interaction performance in NFR02 |
+| UAT | User acceptance test | User actions that verify behavior, such as delegating a simple task to Codex in UAT-03 |
+| AC | Acceptance criterion or case | Taskboard AC01–AC20. The Taskboard PRD defines the scenarios. |
+| T | Test case | T01 covers data validation. Each test table defines its scope. |
+| M | Product milestone | M0 product baseline, M1 end-to-end task workflow, M2 production Web integration |
+| V | Historical development stage or version | V0 single-machine workflow, V1 memory and handoff, V2 multi-PC collaboration |
+| P | Priority or phase, depending on document and location | P0 after a PRD requirement denotes priority. P1-05 in the plan identifies a task within a phase. |
+| G | Goal in the main PRD, stage gate in Taskboard | G1–G7 are product goals here. Taskboard G0–G4 cover integration, the task lifecycle, recovery, extensions and collaboration. |
+| NG | Non-goal | NG4 excludes any promise to read official ChatGPT Memory. |
+| S | Usage scenario | S1 covers ordinary chat and S2 simple development. |
+| D | Design decision | D-01–D-10 form this product design baseline. |
+| ADR | Architecture decision record | Records architectural choices, reasons and constraints. Agent Notes serve this role in this repository. |
 
-同名编号必须保留所属文档：主 PRD 的 P0 优先级不等于 Plan 的 P0 阶段，也不等于 Taskboard 自身的 P0 范围；主 PRD 的 G1 产品目标不等于 Taskboard 的 G1 任务闭环。M0–M4、历史 V0–V2、CG0–CG5 和 Taskboard G0–G4 分别描述不同划分，关联关系以实施 Plan 的映射为准。
+Qualify reused identifiers with their document. P0 in this PRD is a priority, P0 in the plan a phase, and Taskboard P0 a scope. G1 here is a goal and Taskboard G1 is the task lifecycle. M0–M4, historical V0–V2, CG0–CG5 and Taskboard G0–G4 divide work differently. The implementation plan maps them to one another.
 
-### 功能需求模块前缀
+### Functional requirement prefixes <a id="功能需求模块前缀"></a>
 
-FR 后的第二段标识需求所属模块；例如 FR-CP-01 表示 Chat Provider 模块的第 01 条功能需求。
+The second segment of an FR identifier names its module. FR-CP-01 is the first requirement in the Chat Provider module.
 
-| 需求前缀 | 模块含义 |
+| Prefix | Module |
 |---|---|
-| FR-CP | Chat Provider：模型接入途径、菜单、账户与模型选择 |
-| FR-SIWC | Sign in with ChatGPT：官方 ChatGPT 授权接入 |
-| FR-WEB | Web Provider：浏览器 ChatGPT 接入 |
-| FR-EX | Executor：Codex／Codely 工程执行器 |
-| FR-TB | Tool Bridge：MCP／Tunnel／工具桥接 |
-| FR-MEM | Memory：记忆、会话与上下文管理 |
-| FR-Q | Quota：额度、预算与费用透明 |
-| FR-RL | Reliability：可靠性、终态、恢复与防重复执行 |
-| FR-SEC | Security：凭据、授权、隔离与安全 |
-| FR-TASK | Taskboard 任务管理：需求版本、运行、交付和人工验收 |
+| FR-CP | Chat Provider — model access routes, menus, account and model selection |
+| FR-SIWC | Sign in with ChatGPT — official ChatGPT authorization |
+| FR-WEB | Web Provider — browser-based ChatGPT access |
+| FR-EX | Executor — Codex and Codely engineering executors |
+| FR-TB | Tool Bridge — MCP, tunnels and tool integration |
+| FR-MEM | Memory — memory, sessions and context management |
+| FR-Q | Quota — quotas, budgets and cost transparency |
+| FR-RL | Reliability — terminal states, recovery and duplicate execution prevention |
+| FR-SEC | Security — credentials, authorization, isolation and security |
+| FR-TASK | Taskboard task management — requirement versions, runs, deliveries and human acceptance |
 
-FR-TB 指工具桥；TBOARD 和 FR-TASK 指任务工作台。专题 PRD 的 FR01–FR14 使用其自己的编号，不是主 PRD 中某个 FR 模块的简写。
+FR-TB denotes the tool bridge. TBOARD and FR-TASK refer to Taskboard. The separate Taskboard PRD assigns FR01–FR14 in its own numbering system.
 
 ---
 
-**当前验证优先级（2026-10-31 用户决定）：Web ChatGPT Provider 是第一优先验证方案，以 [codex-chatgpt-web](https://github.com/miuuyy/codex-chatgpt-web) 为首要技术参考。先验证真实 Browser-only 最小往返和 DSH Adapter 可行性，再推进剩余账户/额度/Executor 产品化。参考、Mock/Manual、真实 PoC 和生产准入分别记录；详细顺序与验收见[实施 Plan 第 15 节](../workflows/DSH_IMPLEMENTATION_PLAN.md#15-当前第一优先web-chatgpt-provider-可行性验证)。**
+**Validation priority (user decision, October 31, 2026). Validate the Web ChatGPT provider first, using [codex-chatgpt-web](https://github.com/miuuyy/codex-chatgpt-web) as the primary technical reference. Verify a minimal real browser-only round trip and DSH adapter feasibility before the remaining account, quota and executor product work. Record reference research, mock or manual checks, real proofs of concept and production admission separately. See [section 15 of the implementation plan](../workflows/DSH_IMPLEMENTATION_PLAN.md#15-当前第一优先web-chatgpt-provider-可行性验证) for ordering and acceptance.**
 
-## 0. 一页产品定义
+## 0. Product definition <a id="0-一页产品定义"></a>
 
-**一句话**：DSH 是用户进行 AI 协作的主界面和统一控制平面。用户选择 ChatGPT 的接入方式（ChatGPT Web、SIWC 或其他 Provider）来聊天、理解需求、按需规划/审查；当确实需要工程实现时，DSH 创建可持久化的 TaskSpec，并调度 Codex 或 Codely 保留自身 Agent Loop 完成执行。
+**Overview** DSH is the primary interface and shared control plane for working with AI. The user selects an access route such as ChatGPT Web, SIWC or another provider for conversation, requirements analysis and optional planning or review. When engineering work is needed, DSH persists a TaskSpec and dispatches Codex or Codely to execute it using its own agent loop.
 
-**不应误读为**：
-- 每条消息都必须创建 Task、生成 Plan、执行 Code、再做一次模型 Review。
-- ChatGPT Web 是 Codex 的附属功能，或只能配合 Codex 使用。
-- DSH 等于 Codex 的替代前端，或只能复用 Codex 原生工具完成工作。
-- 通过 ChatGPT 账号登录，就能自动使用普通 ChatGPT 聊天额度。
-- 非官方 Web Bridge 一定可以长期、合规、无风险地自动收发 ChatGPT 消息。
+**Limits of this definition**
+- A message need not create a Task, generate a Plan, execute code and trigger model review.
+- ChatGPT Web can run independently of Codex.
+- DSH has its own interface and can use tools beyond native Codex tools.
+- Signing in with a ChatGPT account does not automatically grant access to ordinary ChatGPT chat usage.
+- Long-term availability, permission to automate and risk-free operation of an unofficial Web Bridge are not guaranteed.
 
-### 0.1 权责划分
+### 0.1 Responsibilities <a id="01-权责划分"></a>
 
-| 角色 | 唯一权责/主要职责 | 不承担的职责 |
+| Role | Primary responsibility | Outside its responsibility |
 |---|---|---|
-| DSH UI | 对话、工作空间、Provider/Executor 选择、任务状态、审批、结果展示 | 不是官方 ChatGPT 网页的替身 |
-| Chat Provider | 根据 DSH 提供的上下文进行聊天、任务理解、**按需**规划、**按需**语义验收 | 不直接掌管跨机器任务/授权/源代码权威状态 |
-| DSH Orchestrator | 判断是否任务化，选择 Workflow，Task/Plan/Run/Checkpoint 持久化、调度和权限 | 不强制引入独立 Planner 回合 |
-| Codex/Codely Executor | 使用自身 Agent Loop 执行代码修改、构建、测试、查错、局部自规划 | 不负责 DSH 的全局 Session/Memory/Task 权威记录 |
-| DSH Verification | 确定性构建/测试/检查、产物与执行收据 | 不等同于“每次都调用 ChatGPT 审查” |
-| Optional Tool Bridge | ChatGPT 通过受控 MCP 访问 DSH 工具/可证明存在的原生工具能力 | 不代替整个 Codex/Codely Executor |
+| DSH UI | Conversations, workspaces, provider and executor selection, task status, approvals and results | Replacing the official ChatGPT website |
+| Chat Provider | Conversation and task interpretation using DSH context, with **optional** planning and **optional** semantic assessment | Authoritative cross-machine task, authorization or source-code state |
+| DSH Orchestrator | Deciding when to create a task, choosing workflows, persisting tasks, plans, runs and checkpoints, scheduling and permissions | Requiring a separate planner turn |
+| Codex/Codely Executor | Editing code, building, testing, diagnosing faults and planning implementation locally with its own agent loop | Authoritative DSH-wide Session, Memory and Task records |
+| DSH Verification | Deterministic builds, tests, checks, artifacts and execution receipts | Calling ChatGPT to review every result |
+| Optional Tool Bridge | Controlled MCP access from ChatGPT to DSH tools and verified native capabilities | Replacing the full Codex or Codely executor |
 
-### 0.2 成功标志
+### 0.2 Success criteria <a id="02-成功标志"></a>
 
-1. 使用者只操作 DSH 主 UI，就能完成日常聊天和一项从需求到实现再到验收的工程任务。
-2. **Chat Provider** 与 **Executor** 可以分别切换，互不强绑定；切换后历史和 Task 连续。
-3. 普通聊天没有 Task/Plan/Executor/Reviewer 的额外模型调用。
-4. 简单工程任务可通过 **最小 TaskSpec → Codex/Codely 原生 Agent Loop → 确定性验证** 完成，不强制生成独立 Plan。
-5. 复杂工程任务可按需输出 PlanRevision、阶段依赖、Checkpoint 和独立 ReviewPackage。
-6. 各 Provider 的**额度来源、接入合法性/可用性、工具能力**清晰可见；系统不会暗中跨额度源切换。
-
----
-
-## 1. 背景与核心问题
-
-此前 DSH 已确认：自有 UI 为主要入口；DSH 管 Session/Memory/Task/Workflow/Checkpoint；Codex 和 Codely 可平行执行并共享工程协作记忆；应尽量减少重复推理。新调查带来两种互补能力：
-
-- **SIWC + Responses API**：官方订阅授权模型调用方式。当前 OpenAI 文档明确说明：合格的模型请求计入 **ChatGPT Work/Codex 共享使用量**，不是普通 ChatGPT 聊天的独立使用量。
-- **codex-chatgpt-web**：社区提供非官方浏览器模型桥接、Responses/SSE 映射、Session/Turn 绑定以及 ChatGPT → MCP Tunnel → Codex 工具回环。其工作机制可供 DSH 参考，但非官方自动化的条款与稳定性风险须独立管理。
-
-过去 vNext.2/vNext.3 将“Web → Reverse Codex”写成唯一主路径，偏离了产品定位。本版重构为**平级模型 Provider + 独立 Executor + 自适应 Workflow**。
-
-### 1.1 产品目标（Goals）
-
-- G1：提供 DSH 原生 Chat UI 和可切换 Chat Provider：`ChatGPT Web`、`SIWC`，并可扩展 `OpenAI API/Local/Other`。
-- G2：ChatGPT 是聊天与任务理解的基础，可按需产生 Plan、按需 Review，而非固定 Planner 流水线。
-- G3：选择 `Codex` 或 `Codely` 作为工程执行器，各自保持自身 Agent Loop；未来支持更多 Executor。
-- G4：DSH 统一持有 Session、Messages、Memory、TaskSpec、PlanRevision、ExecutionRun、Checkpoint、Artifacts、Approval 和审计日志。
-- G5：切换 Provider 或 Executor 不丢失 DSH 权威任务状态，明确切换点与正在运行的任务归属。
-- G6：明确不同额度及授权风险；Web Bridge 可见但处于实验性门禁，不影响受支持路径。
-- G7：留出 ChatToHarness 式 ChatGPT 官方 MCP 入口和 `codex-chatgpt-web` 反向工具机制作为**可选扩展**。
-
-### 1.2 非目标（Non-goals）
-
-- NG1：不以“ChatGPT Web 自动化一定合规且可生产”为产品前提；不设计绕过登录/风控/频控的能力。
-- NG2：不要求每次聊天都能操作 Shell、不自动生成或提交 PR。
-- NG3：不强制重建 Codex 或 Codely 内部 Planner，也不要求重实现它们的全部原生工具。
-- NG4：不宣称可同步读取 ChatGPT 官方 Memory、历史对话或原生 Thread。
-- NG5：不以 GitHub 作为运行时任务队列；GitHub 仅用于代码/知识同步和可选工件。
-- NG6：本次 PRD 不要求替换仓库现有 V0–V2 实现、不要求立即上线自动 Web Bridge。
+1. From the main DSH UI alone, a user can chat and take an engineering task from requirements through implementation and acceptance.
+2. The user can switch the **Chat Provider** and **Executor** independently while preserving history and task continuity.
+3. Ordinary chat incurs no extra Task, Plan, Executor or Reviewer model calls.
+4. A simple engineering task can use a **minimal TaskSpec, a native Codex/Codely agent loop and deterministic verification**. A separate Plan is optional.
+5. Complex engineering tasks can produce PlanRevisions, stage dependencies, Checkpoints and separate ReviewPackages as needed.
+6. Users can see each provider's **quota source, access permissions, availability and tool capabilities**. The system never silently switches quota sources.
 
 ---
 
-## 2. 目标用户和关键场景
+## 1. Background and problem <a id="1-背景与核心问题"></a>
 
-### 2.1 用户角色
+DSH previously established its own UI as the main entry point and assigned Session, Memory, Task, Workflow and Checkpoint ownership to DSH. Codex and Codely can execute in parallel and share engineering collaboration memory. DSH should minimize duplicate reasoning. Subsequent investigation identified two complementary capabilities.
 
-- **开发者/工程负责人**：通过一个 DSH UI 从聊天切换到工程执行，在 Codex 和 Codely 间选择执行能力。
-- **多设备使用者**：在家/公司/远程机器之间调度 Worker，继续查看既有任务结果。
-- **高级用户/维护者**：配置账号/Provider、配额保护、工具审批、Workflow 模板与诊断。
+- **SIWC and the Responses API** provide official subscription-authorized model access. The cited OpenAI documentation assigns eligible model requests to **shared ChatGPT Work/Codex usage**, distinct from ordinary ChatGPT chat usage.
+- **codex-chatgpt-web** is a community project with an unofficial browser model bridge, Responses/SSE mapping, Session/Turn bindings and a ChatGPT → MCP Tunnel → Codex tool round trip. DSH can study the mechanism. Unofficial automation requires its own terms and reliability assessment.
 
-### 2.2 核心使用场景
+Versions vNext.2 and vNext.3 made Web → Reverse Codex the only primary route. This version uses **peer model providers, independent executors and adaptive workflows**.
 
-**S1 — 普通聊天：** 用户问“解释 Responses API 的对话状态机制”。DSH 将消息交给所选 Chat Provider，直接流式展示回复；不创建正式 TaskSpec、不调用 Codex/Codely、不单独请求 Planner 或 Reviewer。
+### 1.1 Product goals <a id="11-产品目标goals"></a>
 
-**S2 — 简单开发：** 用户问“修复 README 中失效的配置示例”。DSH 识别为可执行工程任务，ChatGPT 可输出**最小 TaskSpec**（目标、仓库、约束、验收），无需单独 Plan；用户选择 Codex 或 Codely 执行；DSH 跑确定性检查并回报结果。
+- G1. Provide a native DSH chat UI with selectable providers `ChatGPT Web` and `SIWC`, extensible to `OpenAI API/Local/Other`.
+- G2. Use ChatGPT for conversation and task interpretation, with planning and review on demand.
+- G3. Allow selection of `Codex` or `Codely` for engineering work. Each retains its own agent loop. Allow additional executors later.
+- G4. DSH owns Session, Messages, Memory, TaskSpec, PlanRevision, ExecutionRun, Checkpoint, Artifacts, Approval and audit logs.
+- G5. Preserve authoritative DSH task state when the provider or executor changes. Identify when the change takes effect and who owns active tasks.
+- G6. Explain quota and authorization risks. Keep Web Bridge visible behind experimental admission controls while supported routes remain available.
+- G7. Allow a ChatToHarness-style official ChatGPT MCP entry point and the reverse tool mechanism from `codex-chatgpt-web` as **optional extensions**.
 
-**S3 — 复杂需求：** 用户问“新增多 Provider 与额度隔离”。DSH 选择多阶段 Workflow（可用户 Override），必要时让 ChatGPT 形成高级 Plan 和验收标准，再按里程碑派发一个或多个 Codex/Codely ExecutionRun；必要时 ChatGPT 对 ReviewPackage 作语义验收。
+### 1.2 Non-goals <a id="12-非目标non-goals"></a>
 
-**S4 — 在聊天中切换 ChatGPT Web / SIWC：** UI 可修改 Provider，但不改变任务及 Workflow 含义；切换后的下一条消息使用 DSH ContextBuilder 重新构建上下文。进行中的 Turn 不被偷偷迁移。
-
-**S5 — Codex ↔ Codely 执行切换：** 未开始任务可自由选择；执行中的切换需显式取消/结束当前 Run 或通过 Checkpoint 创建新 Run；不重复执行未知提交状态的副作用操作。
-
-**S6 — ChatGPT 需要读取工程信息（可选）：** 在受权限限制的 Tool Bridge 下，ChatGPT 可读取必要文件/工作区摘要；如需要完整工程开发，仍由 DSH 调度外部 Codex/Codely 执行器，不让 Tool Bridge 偷偷取代 Executor。
-
-**S7 — Web 不可用/未许可：** Web 选项仍可见，但显示实验/未授权/不可用原因，无法自动发送；提供用户主动选择 SIWC、其他合法 Provider，或官方 ChatGPT 手动+MCP 入口。不自动变更额度来源。
+- NG1. Production feasibility and permission to automate ChatGPT Web are open questions. Bypassing sign-in, risk controls and rate limits is outside scope.
+- NG2. Shell access on every chat and automatic PR generation or submission are outside scope.
+- NG3. Rebuilding the internal Codex or Codely planner and reimplementing every native tool are optional.
+- NG4. DSH claims no synchronized read access to official ChatGPT Memory, conversation history or native threads.
+- NG5. GitHub is used for code and knowledge synchronization and optional artifacts. It is outside the runtime task queue.
+- NG6. This PRD requires neither replacement of the existing V0–V2 implementation nor immediate rollout of an automated Web Bridge.
 
 ---
 
-## 3. 产品主流程：Conversation-Driven、Task-Centric、Executor-Autonomous
+## 2. Users and scenarios <a id="2-目标用户和关键场景"></a>
+
+### 2.1 User roles <a id="21-用户角色"></a>
+
+- **Developer or engineering lead** — Moves from conversation to engineering execution in one DSH UI and chooses Codex or Codely.
+- **Multi-device user** — Schedules workers on home, office or remote machines and continues inspecting existing results.
+- **Advanced user or maintainer** — Configures accounts, providers, quota protection, tool approvals, workflow templates and diagnostics.
+
+### 2.2 Core scenarios <a id="22-核心使用场景"></a>
+
+**S1 — Ordinary chat.** The user asks, “Explain how the Responses API maintains conversation state.” DSH sends the message to the selected Chat Provider and streams its reply. It creates no formal TaskSpec and makes no Codex, Codely, separate Planner or Reviewer call.
+
+**S2 — Simple development.** The user asks, “Fix the broken configuration example in the README.” DSH recognizes an engineering task. ChatGPT can produce a **minimal TaskSpec** with objective, repository, constraints and acceptance criteria. The user selects Codex or Codely, and DSH runs deterministic checks and reports results. No separate Plan is required.
+
+**S3 — Complex requirements.** The user asks, “Add multiple providers with isolated quotas.” DSH selects a multi-stage workflow the user can override. If necessary, ChatGPT prepares a high-level plan and acceptance criteria. DSH dispatches one or more Codex/Codely ExecutionRuns by milestone. ChatGPT can assess a ReviewPackage when needed.
+
+**S4 — Switch between ChatGPT Web and SIWC during chat.** The UI can change provider without changing task or workflow semantics. For the next message, DSH ContextBuilder rebuilds context. A turn in progress retains its binding.
+
+**S5 — Switch between Codex and Codely.** The user can freely select the executor before a task starts. During execution, the user must explicitly cancel or end the current Run, or start a new Run from a Checkpoint. DSH must not repeat an operation with side effects when its submission status is unknown.
+
+**S6 — ChatGPT needs engineering information (optional).** Through a permission-controlled Tool Bridge, ChatGPT can read necessary files or workspace summaries. DSH continues to dispatch full engineering work to external Codex/Codely executors.
+
+**S7 — Web is unavailable or unauthorized.** Keep Web visible, explain its experimental, unauthorized or unavailable status and disable automatic sending. Let the user choose SIWC, another permitted provider, or the official manual ChatGPT and MCP entry. Preserve the quota source until the user changes it.
+
+---
+
+## 3. Main workflow — conversation, tasks and autonomous executors <a id="3-产品主流程conversation-driventask-centricexecutor-autonomous"></a>
 
 ```
 用户消息 → DSH Chat Runtime → 用户当前所选 Chat Provider
@@ -177,288 +186,288 @@ FR-TB 指工具桥；TBOARD 和 FR-TASK 指任务工作台。专题 PRD 的 FR01
                               按需 ChatGPT Review → UI
 ```
 
-### 3.1 必须遵守的 Workflow 规则
+### 3.1 Workflow rules <a id="31-必须遵守的-workflow-规则"></a>
 
-- **普通聊天**：不创建正式 ExecutionTask，不需要 Plan。
-- **进入执行链路**：必须有可持久化的 TaskSpec（可极简），以保护任务身份、范围、验收和恢复能力。
-- **显式 Plan**：只有复杂性/风险/用户要求/Workflow 策略满足条件时才出现；Codex/Codely 在其 Agent Loop 内可以自己规划具体实现。
-- **模型 Reviewer**：不是强制节点；确定性验证始终运行适用的检查项。高风险、跨模块、用户指定时再让模型 Review。
-- **Workflow**：早期使用有版本的模板 + DSH Router 选择，用户可以 Override；Agent 自动态生成 Workflow 列为后续 TODO，不作为首期硬依赖。
-- **模型与执行器**：同一 Workflow 模板不因 Web 或 SIWC 不同而强制走不同阶段。
+- **Ordinary chat** creates no formal ExecutionTask and requires no Plan.
+- **Engineering execution** requires a durable TaskSpec, however small, to preserve task identity, scope, acceptance criteria and recovery.
+- **Explicit planning** is conditional on complexity, risk, user request or workflow policy. Codex and Codely can plan implementation inside their own agent loops.
+- **Model review** is optional. Deterministic verification always runs applicable checks. Invoke model review for high risk, cross-module work or an explicit user request.
+- **Workflows** initially use versioned templates chosen by the DSH Router, with user override. Agent-generated workflows are deferred.
+- **Models and executors** use the same workflow stages for a given template regardless of the Web or SIWC provider.
 
-### 3.2 Workflow 模板（首期）
+### 3.2 Initial workflow templates <a id="32-workflow-模板首期"></a>
 
-| 模板 ID | 场景 | TaskSpec | 独立 Plan | Executor | 模型 Review |
+| Template ID | Scenario | TaskSpec | Separate Plan | Executor | Model review |
 |---|---|---|---|---|---|
-| `chat.direct.v1` | 对话/解释 | 否 | 否 | 否 | 否 |
-| `task.quick.v1` | 小范围修复、简单修改 | 是（最小） | 否 | 是 | 默认否 |
-| `task.standard.v1` | 常规开发 | 是 | 可选 | 是 | 按风险 |
-| `task.milestone.v1` | 多阶段/多仓库 | 是 | 是 | 是，可多次 | 通常按阶段/最终 |
-| `task.inspect.v1` | 工程调研与诊断 | 视是否派工 | 默认否 | 可选 | 按需 |
+| `chat.direct.v1` | Chat or explanation | No | No | No | No |
+| `task.quick.v1` | Small fix or simple change | Yes, minimal | No | Yes | Off by default |
+| `task.standard.v1` | Routine development | Yes | Optional | Yes | Risk-based |
+| `task.milestone.v1` | Multiple stages or repositories | Yes | Yes | Yes, possibly several runs | Usually by stage or at completion |
+| `task.inspect.v1` | Engineering investigation and diagnosis | If work is dispatched | Off by default | Optional | As needed |
 
-**注意**：模板可扩展，不等于每个请求必须在后台执行一个“分类模型调用”；允许使用已有对话 Turn 的结构化结果和确定性规则路由。
-
----
-
-## 4. Chat Provider 体验与功能需求
-
-### 4.1 Provider 菜单与设置
-
-**FR-CP-01（P0）**：DSH UI 至少呈现 `ChatGPT Web` 和 `SIWC` 两个**同一级别的 Provider 条目**；不把 Web 放入“Codex 子菜单”，也不把 SIWC 强制设为所有用户的唯一选择。
-
-**FR-CP-02（P0）**：每个 Provider 具备独立状态：`未配置 / 需要登录 / 可用 / 能力受限 / 实验性未授权 / 暂时不可用`；状态与实际可调用性一致。
-
-**FR-CP-03（P0）**：独立保存 `providerId`、`account/workspace`、`modelId`、`effort`、`usageSource`、`toolCapabilities` 和可观测性/授权状态。
-
-**FR-CP-04（P0）**：允许用户在会话中选择下一个 Turn 的 Provider。界面显示“下一条消息生效”；已有消息不被重写、已提交 Turn 不迁移。
-
-**FR-CP-05（P1）**：模型选择只展示对应账户/接入方式已验证可用的能力；不可隐式回退到同名但不同 Provider 或不同 Effort 的模型。
-
-**FR-CP-06（P1）**：配置页清楚显示额度类别、使用限制与是否为官方接口；额度不可核验时标记 `未知/本地估计`。
-
-### 4.2 SIWC（官方）
-
-**FR-SIWC-01（P0）**：支持受官方流程授权的账户/工作区登录、模型目录、Token 刷新及断开连接；凭据加密保护。
-
-**FR-SIWC-02（P0）**：SIWC 请求符合官方当期规范：`store:false`、`stream:true`、必要的输入历史显式发送，成功终态为 `response.completed`；不得以流式连接关闭当作成功。
-
-**FR-SIWC-03（P0）**：明确提示 SIWC 消耗 ChatGPT **Work/Codex 共享额度**；支持用户侧的 DSH 预算策略和官方 App limits 的引导。
-
-**FR-SIWC-04（P1）**：Hosted tools 等能力仅按官方 SIWC 当前文档支持的范围启用；本地工具调用依赖 DSH 自己的执行能力/受支持 function 工具接口。
-
-### 4.3 ChatGPT Web（平级，但受准入门禁）
-
-**FR-WEB-01（P0）**：作为独立 Provider 插件具备设置、模型信息、诊断、能力声明和单独启停；其不可用**不能影响** SIWC、任务存储或 Executor。
-
-**FR-WEB-02（当前第一优先验证）**：以 `codex-chatgpt-web` 的 Browser-only 为首要参考，先验证真实网页单轮收发、模型选择、完成判定及 DSH Adapter 接入；复核 Browser Session Lease、Context Envelope、回复投影、提交收据和失败/取消。Full Harness/MCP/反向 Codex 工具不作为最小验证前置。真实自动收发需先通过使用授权、服务条款和安全审查；没有许可时仅实现 Mock/Manual/架构实验，不执行未授权自动化。
-
-**FR-WEB-03（P1/研究）**：网页会话与 DSH Session/Turn 建立映射，但 DSH 是唯一权威历史；不能把 Web 的历史和 Memory 假设成可被 DSH 完整读取。
-
-**FR-WEB-04（P1/研究）**：非官方网页额度只显示项目侧确认的提交次数/估计，不声称知道 OpenAI 官方剩余消息数或刷新时间。
-
-**FR-WEB-05（P2/可选）**：支持手动 ChatGPT 对话入口 + 官方 MCP/Tunnel 工具调用方式。此模式由用户在官方页面主动提交，**不冒充 DSH 主 UI 的自动 Web Provider 能力**。
+**Routing** Templates are extensible. DSH can route using structured results from an existing conversation turn and deterministic rules without a background classification call for every request.
 
 ---
 
-## 5. Executor、Task 与 Review 产品需求
+## 4. Chat provider experience and requirements <a id="4-chat-provider-体验与功能需求"></a>
 
-**FR-EX-01（P0）**：用户可独立选择默认工程 Executor：Codex、Codely；不与 Provider 选择捆绑。四种基本组合 `Web×Codex / Web×Codely / SIWC×Codex / SIWC×Codely` 在契约和 UI 层均成立（Web 实际调用须满足门禁）。
+### 4.1 Provider menu and settings <a id="41-provider-菜单与设置"></a>
 
-**FR-EX-02（P0）**：`external-agent` 为工程执行默认模式，保留 Codex/Codely 各自 Agent Loop；不得用“请求 Codex 模型”冒充“启动 Codex 原生执行器”。
+**FR-CP-01 (P0)** The DSH UI must show at least `ChatGPT Web` and `SIWC` as **peer provider entries**. Web must appear outside the Codex submenu, and users must have a choice beyond SIWC.
 
-**FR-EX-03（P1）**：保持历史 `native-model/subscription` 模式为独立可选集成方向（如果已经实现先兼容），不能与 `external-agent` 合并，亦不保证 OAuth 路径拥有普通 Chat 配额。
+**FR-CP-02 (P0)** Each provider reports its own actual availability using the states `unconfigured / sign-in required / available / limited capabilities / experimental and unauthorized / temporarily unavailable`.
 
-**FR-EX-04（P0）**：正式任务生成 TaskSpec；记录工作空间、目标、约束、输入工件、执行器、验收条件、风险等级、Workflow 版本及用户授权。
+**FR-CP-03 (P0)** Store `providerId`, `account/workspace`, `modelId`, `effort`, `usageSource`, `toolCapabilities`, observability and authorization status independently.
 
-**FR-EX-05（P0）**：支持 ExecutionRun 状态与进度、标准输出摘要、Diff/测试结果、取消和结构化失败。恢复仅在执行器实际支持时显示。
+**FR-CP-04 (P0)** Users can select the provider for the next Turn within a conversation. Indicate that the change takes effect on the next message. Preserve existing messages and keep submitted Turns on their original provider.
 
-**FR-EX-06（P1）**：执行中切换 Executor 不覆盖旧 Run；必须使用新 Run 并显式关联旧 Run 的 Checkpoint/Artifacts，保证审计可追溯。
+**FR-CP-05 (P1)** Offer only models and capabilities verified for the account and access route. Never silently substitute a model with the same name from another provider or a different effort level.
 
-**FR-EX-07（P0）**：任务完成前执行可用的确定性检查（按项目配置），并出具 ValidationResult。
+**FR-CP-06 (P1)** Settings show the quota category, usage restrictions and whether the interface is official. Label unverifiable quota as `unknown / locally estimated`.
 
-**FR-EX-08（P1）**：可选 ChatGPT Review 仅消费压缩、脱敏的 ReviewPackage，按 Workflow 或用户意愿启动。无独立 Review 时也显示验证结果和未覆盖风险。
+### 4.2 SIWC (official) <a id="42-siwc官方"></a>
 
-**FR-EX-09（P1）**：ChatGPT Reviewer 可以要求修正，但不能绕过 DSH 自动无限递归调度执行；设置明确上限/人工停止门槛。
+**FR-SIWC-01 (P0)** Support authorized account and workspace sign-in through the official flow, a model catalog, token refresh and disconnect. Encrypt credentials.
 
-**FR-EX-10（Taskboard MVP）**：任务工作台中的完成状态由用户接受指定 Delivery 产生；运行成功、验证通过或模型 Review 的 accept 均不能替代人工验收。模型 Review 继续按需执行，权限审批与交付验收分别记录。
+**FR-SIWC-02 (P0)** Implement the applicable official SIWC request rules, including `store:false`, `stream:true` and sending required input history explicitly. Only `response.completed` indicates success. A closed stream is insufficient.
 
----
+**FR-SIWC-03 (P0)** Identify SIWC usage as **shared ChatGPT Work/Codex quota**. Support user-defined DSH budget policies and direct users to the official App limits.
 
-## 6. 可选的反向工具与官方 MCP 入口
+**FR-SIWC-04 (P1)** Enable hosted tools and similar features only within the scope of current official SIWC documentation. Local tools require DSH execution support or a supported function-tool interface.
 
-**FR-TB-01（P2）**：DSH MCP Gateway 暴露有限、明确授权的能力：`task.create/status/result/cancel`、`workspace.inspect`、`artifact.read` 等；遵循当期账号/工作区可用的 MCP 权限。
+### 4.3 ChatGPT Web (peer provider with admission controls) <a id="43-chatgpt-web平级但受准入门禁"></a>
 
-**FR-TB-02（P2）**：参考 `codex-chatgpt-web` 的 Full Harness：在 ChatGPT 的同一模型回复中，通过 Connector/Tunnel → Gateway → Scope Broker → Tool Host 返回工具结果，**该能力是可选辅助工具链，不是执行工程任务的唯一或默认方式**。
+**FR-WEB-01 (P0)** Provide an independent provider plugin with settings, model information, diagnostics, declared capabilities and independent enable/disable controls. Its unavailability **must leave SIWC, task storage and the executor operational**.
 
-**FR-TB-03（P2）**：Tool Host 可是 DSH 自己的有限工具；若要复用“活动 Codex Turn 原生工具”，必须先证明存在实际可绑定的 Codex Native Tool Host。不能用一条 CLI Shell 命令假装有原生 Codex Turn。
+**FR-WEB-02 (first validation priority)** Use the Browser-only route in `codex-chatgpt-web` as the primary reference. Verify a real single-turn exchange, model selection, completion detection and DSH adapter integration. Check browser session leases, the context envelope, response projection, submission receipts, failure and cancellation. The minimum check does not require Full Harness, MCP or reverse Codex tools. Real automated exchanges require prior authorization, terms review and security review. Until permission exists, use only mock, manual or architectural experiments.
 
-**FR-TB-04（P2）**：工具权限至少绑定 `caller/session/turn/task/workspace/allowedTools/expiry`；审批、撤销、只读模式与审计必备。
+**FR-WEB-03 (P1/research)** Map the web conversation to a DSH Session and Turn. DSH owns the authoritative history. Do not assume it can read all web history or Memory.
 
-**FR-TB-05（P2）**：长任务不阻塞在单个 Tunnel 请求中；快速返回 Task ID，由后续工具调用查询状态。ChatToHarness 的持久任务模型可作参考。
+**FR-WEB-04 (P1/research)** For unofficial web usage, show only locally confirmed submissions or estimates. Do not claim to know OpenAI’s official remaining message count or reset time.
 
----
-
-## 7. 会话、记忆、上下文和切换
-
-**FR-MEM-01（P0）**：DSH 自有 Conversation Store 是会话权威，消息均记录 Provider/Model/Workflow/Turn ID，Memory 不依赖 ChatGPT 网页历史。
-
-**FR-MEM-02（P1）**：统一 ContextBuilder，根据上下文预算选择聊天历史、任务状态、Memory 快照、文件摘要、Checkpoint；切换 Provider 时重新编译上下文。
-
-**FR-MEM-03（P1）**：ContextEpoch + Checkpoint 记录压缩版本、数据来源和恢复点。压缩不应抹除 TaskSpec、决策和未完成的审批。
-
-**FR-MEM-04（P1）**：支持 Conversation Import/Fork 为 DSH 层的导入/分叉，而非声称恢复 ChatGPT 官方会话。
-
-**FR-MEM-05（P2）**：多设备 Worker 可以继续执行已落盘任务；敏感登录凭据/网页 Cookie 不跨机器复制，具体 Provider 会话仍按设备授权边界管理。
+**FR-WEB-05 (P2/optional)** Allow a manual ChatGPT entry with official MCP/tunnel tool calls. The user submits on the official page. **Identify this separately from automated Web Provider access in the DSH UI.**
 
 ---
 
-## 8. 额度、失败、隐私与安全
+## 5. Executor, task and review requirements <a id="5-executortask-与-review-产品需求"></a>
 
-### 8.1 额度来源与透明度
+**FR-EX-01 (P0)** Let users select Codex or Codely as the default engineering executor independently of the provider. Both the interface and UI support `Web×Codex / Web×Codely / SIWC×Codex / SIWC×Codely`. Actual Web calls require admission.
 
-| UsageSource | 语义 | UI 表述要求 |
+**FR-EX-02 (P0)** Default to `external-agent` for engineering execution and retain the native Codex/Codely agent loop. Calling a Codex model does not start the native Codex executor.
+
+**FR-EX-03 (P1)** Retain historical `native-model/subscription` as a separate optional integration, with compatibility for existing implementations. Keep it distinct from `external-agent`. OAuth does not guarantee ordinary chat quota.
+
+**FR-EX-04 (P0)** Generate a TaskSpec for a formal task. Record workspace, objective, constraints, input artifacts, executor, acceptance criteria, risk, workflow version and user authorization.
+
+**FR-EX-05 (P0)** Expose ExecutionRun status and progress, a stdout summary, diff and test results, cancellation and structured failures. Offer recovery only when the executor supports it.
+
+**FR-EX-06 (P1)** To switch executor during execution, create a new Run, preserve the previous Run and explicitly link its Checkpoint and Artifacts for audit.
+
+**FR-EX-07 (P0)** Run applicable deterministic checks from project configuration and produce a ValidationResult before task completion.
+
+**FR-EX-08 (P1)** Optional ChatGPT review reads only a compact, redacted ReviewPackage and starts according to workflow policy or user choice. Show verification results and uncovered risks even when there is no separate review.
+
+**FR-EX-09 (P1)** A ChatGPT reviewer can request a correction. DSH must enforce an explicit limit or human stop condition on repair dispatch to prevent unbounded recursion.
+
+**FR-EX-10 (Taskboard MVP)** Taskboard completes a task when a user accepts the specified Delivery. Run success, successful checks and model acceptance do not substitute for human acceptance. Model review remains optional. Record permission approvals and delivery acceptance separately.
+
+---
+
+## 6. Optional reverse tools and the official MCP entry point <a id="6-可选的反向工具与官方-mcp-入口"></a>
+
+**FR-TB-01 (P2)** The DSH MCP Gateway exposes a limited set of explicitly authorized capabilities such as `task.create/status/result/cancel`, `workspace.inspect` and `artifact.read`, subject to the account or workspace's current MCP permissions.
+
+**FR-TB-02 (P2)** The `codex-chatgpt-web` Full Harness is a reference for returning tool results within the same ChatGPT response through Connector/Tunnel → Gateway → Scope Broker → Tool Host. **This optional tool route supplements engineering execution.**
+
+**FR-TB-03 (P2)** DSH can provide a limited Tool Host of its own. Reusing native tools from an active Codex Turn requires verifying a bindable Codex Native Tool Host. A shell command alone does not establish a native Codex Turn.
+
+**FR-TB-04 (P2)** Bind tool permissions to at least `caller/session/turn/task/workspace/allowedTools/expiry`. Require approval, revocation, read-only mode and auditing.
+
+**FR-TB-05 (P2)** Return a Task ID promptly for long-running work and allow subsequent tool calls to query status. Avoid holding a single tunnel request open. The ChatToHarness persistent task model is a reference.
+
+---
+
+## 7. Conversations, memory, context and switching <a id="7-会话记忆上下文和切换"></a>
+
+**FR-MEM-01 (P0)** The DSH Conversation Store holds authoritative conversations. Each message records its Provider, Model, Workflow and Turn ID. Memory is independent of ChatGPT web history.
+
+**FR-MEM-02 (P1)** A shared ContextBuilder selects chat history, task state, memory snapshots, file summaries and checkpoints within the context budget. Recompile context when switching provider.
+
+**FR-MEM-03 (P1)** ContextEpoch and Checkpoint record the compaction version, data sources and recovery point. Preserve TaskSpec, decisions and outstanding approvals during compaction.
+
+**FR-MEM-04 (P1)** Conversation import and fork operate at the DSH layer. They do not restore official ChatGPT sessions.
+
+**FR-MEM-05 (P2)** Workers on other devices can continue persisted tasks. Keep sensitive credentials and web cookies on the originating machine and authorize provider sessions per device.
+
+---
+
+## 8. Quotas, failures, privacy and security <a id="8-额度失败隐私与安全"></a>
+
+### 8.1 Quota sources and transparency <a id="81-额度来源与透明度"></a>
+
+| UsageSource | Meaning | UI requirement |
 |---|---|---|
-| `work_codex_shared` | SIWC 等订阅授权请求 | Work/Codex 共享；可能影响 Codex 可用额度 |
-| `chatgpt_web_unofficial` | 实验性 ChatGPT Web 路径 | 非官方；额度按产品实际计量，本地计数不是官方余额 |
-| `openai_api_billed` | 官方 API | 按量计费，需预算/授权 |
-| `other_authorized` / `local` | 其他合法模型、本地推理 | 按实际规则显示 |
+| `work_codex_shared` | Subscription-authorized requests such as SIWC | Shared Work/Codex usage that may reduce quota available for Codex |
+| `chatgpt_web_unofficial` | Experimental ChatGPT Web route | Unofficial. Quota follows actual product metering. Local counts do not establish an official balance. |
+| `openai_api_billed` | Official API | Metered, subject to budget and authorization |
+| `other_authorized` / `local` | Other permitted models or local inference | Display the applicable usage rules |
 
-**FR-Q-01（P0）**：所有 Turn 留下 `requestedProvider`、`actualProvider`、`usageSource` 与已知/未知的估计；用户能回看。
+**FR-Q-01 (P0)** For every Turn, retain `requestedProvider`, `actualProvider`, `usageSource` and any usage estimate or indication that it is unknown. Users can inspect the record later.
 
-**FR-Q-02（P0）**：达到预算限制时阻止进一步调用并显示可选路径。跨额度源、跨模型、额外付费均需要明确用户操作；不得静默降级。
+**FR-Q-02 (P0)** At the budget limit, block further calls and show available options. Changing quota source, changing model and incurring additional charges all require explicit user action. Never silently fall back.
 
-**FR-Q-03（P1）**：提供“保留 Codex 工程执行额度”策略；不承诺准确读取所有第三方服务端余额，未验证指标标识 `unknown`。
+**FR-Q-03 (P1)** Offer a policy to reserve quota for Codex engineering execution. Do not promise exact third-party balances. Label unverified metrics `unknown`.
 
-### 8.2 可靠性和安全
+### 8.2 Reliability and security <a id="82-可靠性和安全"></a>
 
-**FR-RL-01（P0）**：每个 TurnAttempt 有独立 ID、请求状态、事件序列与幂等策略；提交结果未知时不自动重放有副作用请求。
+**FR-RL-01 (P0)** Each TurnAttempt has its own ID, request status, event sequence and idempotency policy. Never automatically replay a request with side effects if its submission outcome is unknown.
 
-**FR-RL-02（P1）**：流式连接中断、模型 `failed/incomplete`、工具待完成、用户取消和真正 `completed` 是不同终态或状态；不能把 UI 不再变化当成完成。
+**FR-RL-02 (P1)** Distinguish stream interruption, model `failed/incomplete`, outstanding tools, user cancellation and actual `completed`. A stationary UI is insufficient evidence of completion.
 
-**FR-RL-03（P1）**：工具完成屏障确认当前回合所有已接受工具调用均终结，再将 Turn/Run 标为成功。
+**FR-RL-03 (P1)** Before marking a Turn or Run successful, confirm all tool calls accepted in the current turn have terminated.
 
-**FR-SEC-01（P0）**：凭据用 OS Keychain/受保护存储；禁止写入 Memory、Git、命令行参数、普通日志和导出工件。
+**FR-SEC-01 (P0)** Keep credentials in the OS keychain or protected storage. Exclude them from Memory, Git, command-line arguments, ordinary logs and exported artifacts.
 
-**FR-SEC-02（P0）**：不同 Project/Workspace 的工具授权互相隔离；危险文件写入、Git Push、删除、Shell 和外网写入按政策审批。
+**FR-SEC-02 (P0)** Isolate tool authorizations by project and workspace. Apply policy approvals for hazardous file writes, pushes, deletion, shell use and writes to external services.
 
-**FR-SEC-03（P0）**：Web 自动化的未获授权/条款风险以明确门禁处理；禁止隐藏自动化、绕风控、批量多账号配额聚合、抓取未授权内部 API。
+**FR-SEC-03 (P0)** Require explicit admission for Web automation to address authorization and terms risks. Prohibit concealed automation, evasion of risk controls, multi-account quota pooling and access to unauthorized internal APIs.
 
 ---
 
-## 9. UI 信息架构与关键交互
+## 9. UI information architecture and interactions <a id="9-ui-信息架构与关键交互"></a>
 
-任务看板、任务详情、执行与恢复、交付及人工验收的详细设计见[任务工作台 PRD v0.1](DeepSeek_Harness_Taskboard_PRD_v0.1.md)（待评审）。
+The [Taskboard PRD v0.1](DeepSeek_Harness_Taskboard_PRD_v0.1.md), awaiting review, details the board, task details, execution, recovery, delivery and human acceptance.
 
-### 9.1 DSH Chat UI 最小信息架构
+### 9.1 Minimum DSH chat UI <a id="91-dsh-chat-ui-最小信息架构"></a>
 
-1. 顶部：Workspace / Session 选择。
-2. Chat Provider：`ChatGPT Web`、`SIWC`，并可扩展其他 Provider；显示连接状态、模型和额度标签。
-3. 执行设置：默认 Executor（Codex/Codely）、执行模式（外部 Agent / 既有原生模型集成）。
-4. Workflow：`Auto`（按需任务化）、`Quick`、`Standard`、`Milestone`、`Chat only`；用户可以 Override。
-5. 对话区：消息、工具事件、可选 Plan、任务卡、执行阶段和状态。
-6. 任务区：项目导航、任务看板/列表和详情；关联 Task、ExecutionRun、Checkpoint、Delivery、Artifacts、人工验收及审计；详细范围见第 9.3 节。
-7. 设置区：账号、配额、工具权限、Worker、诊断、实验功能门禁。
+1. Header with Workspace and Session selectors.
+2. Chat Provider selector for `ChatGPT Web`, `SIWC` and future providers, with connection status, model and quota labels.
+3. Execution settings with default Executor (Codex/Codely) and execution mode (external agent or existing native-model integration).
+4. Workflow selector with `Auto` (create tasks as needed), `Quick`, `Standard`, `Milestone` and `Chat only`. Users can override the selection.
+5. Conversation area for messages, tool events, optional plans, task cards, execution stages and status.
+6. Task area with project navigation, board/list and details linked to Task, ExecutionRun, Checkpoint, Delivery, Artifacts, human acceptance and audit. See section 9.3.
+7. Settings for accounts, quotas, tool permissions, workers, diagnostics and experimental feature admission.
 
-### 9.2 交互要求
+### 9.2 Interaction requirements <a id="92-交互要求"></a>
 
-- 选择 Web Provider ≠ 自动授权浏览器操作；没有授权时显示不可用原因和明确的替代选择。
-- 更换 Provider 必须明确“**下一个 Turn 生效**”。对继续执行中的旧 Run 不能假装它改换了模型。
-- “执行任务”与“单纯聊天”在界面语义上区分，但默认 `Auto` 不要求用户每次先选择一个阶段。
-- 当生成 Plan 时以可编辑/可确认的版本对象显示；简单任务不出现空 Plan 页面。
-- Review 若未执行，状态显示“未请求模型审查”，不能显示“ChatGPT 已验收”。
-- 任何自动付费切换、危险工具操作和跨工作空间写入都要明确授权。
+- Selecting Web Provider does not authorize browser control. Explain the reason and alternatives when authorization is absent.
+- A provider change **takes effect on the next Turn**. Keep the recorded model of an ongoing Run accurate.
+- Distinguish task execution from ordinary chat in the UI. Default `Auto` routing avoids asking users to choose a stage for every message.
+- Present a generated Plan as an editable, confirmable version. Omit empty Plan pages for simple tasks.
+- When model review was never requested, display that status. Never claim ChatGPT accepted the work.
+- Require explicit authorization for automatic switches that incur charges, dangerous tool operations and cross-workspace writes.
 
 
-### 9.3 任务工作台 MVP
+### 9.3 Taskboard MVP <a id="93-任务工作台-mvp"></a>
 
-本节采用[Taskboard PRD v0.1](DeepSeek_Harness_Taskboard_PRD_v0.1.md)的产品要求；原始输入为[Word 文档](DeepSeek_Harness_Taskboard_PRD_v0.1.docx)。FR01–FR14、AC01–AC20、NFR01–NFR09 与 G0–G4 的详细定义保留在该专题 PRD；下表仅归纳主产品要求。专题文档中的 P0/P1/P2 表示工作台自身的 MVP/扩展优先级，不等同于本 PRD 或主 Plan 的同名阶段。
+This section adopts the [Taskboard PRD v0.1](DeepSeek_Harness_Taskboard_PRD_v0.1.md), based on the [original Word document](DeepSeek_Harness_Taskboard_PRD_v0.1.docx). The Taskboard PRD defines FR01–FR14, AC01–AC20, NFR01–NFR09 and G0–G4 in detail. The table summarizes main product requirements. Taskboard P0/P1/P2 denote its own MVP and extension priorities, independently of the main PRD or plan stages.
 
-首版面向本地单操作者，手动开始、停止、重试和恢复，默认仅一个活动任务。用户从项目导航进入看板或列表，再打开需求、执行、变更和验收详情；卡片显示真实状态、最近事件和待处理数量。任务可由手动创建或已确认的聊天需求产生；普通聊天仍不强制任务化。
+The first version serves one local operator, with manual start, stop, retry and recovery and one active task by default. Users navigate from a project to the board or list and open requirement, execution, change and acceptance details. Cards show actual status, latest event and pending count. Users can create a task manually or from confirmed chat requirements. Ordinary chat can remain a conversation.
 
-| 主需求 | MVP 产品要求 | 详细需求与验收 |
+| Main requirement | MVP requirement | Detailed requirements and acceptance |
 |---|---|---|
-| FR-TASK-01 | 项目目录与接入检查；任务字段、排序、搜索、筛选和受状态规则约束的拖拽；启动前有目标和至少一条验收标准 | FR01–FR02；AC01、AC15、AC19 |
-| FR-TASK-02 | 需求修改产生版本；Run 固定输入快照；评论、历史执行和更正可追溯，重试不覆盖旧记录 | FR03–FR04；AC03–AC04 |
-| FR-TASK-03 | 启动幂等；同一任务、Session 和工作目录只有一个活动所有者；每次 Run 独占 runtime，停止须确认其退出；重试和继续均创建新 Run；更换工作目录时新建 Session、保留原记录，材料由用户显式选择继承 | FR05、FR07–FR09；AC02、AC11–AC13、AC15、AC17–AC18 |
-| FR-TASK-04 | 真实事件驱动进度；待回答、待审批与连接状态分别展示；去重、乱序及重启对账不回退终态，未知输入接纳结果不盲目重发 | FR06、FR08、FR13；AC09–AC10、AC13–AC14 |
-| FR-TASK-05 | Delivery 绑定需求版本、Run、代码快照和逐条验证证据；提供只读 Diff；验收前核对需求、HEAD、未提交修改及纳入交付的未跟踪文件，需求过期或代码变化阻止接受旧交付 | FR10–FR12；AC05–AC08 |
-| FR-TASK-06 | 仅用户可接受、退回或记录验证豁免；无活动 Run、未决问题/审批且交付有效才可验收；完成后显式重开或新建关联任务，历史 Review 保留 | FR12–FR14；AC05–AC10 |
-| FR-TASK-07 | 版本化导出、备份和恢复；保留 Task/Run/Delivery/Review 关联；导入不启动执行或重放审批，停止不自动删除成果 | NFR03–NFR09；AC16、AC20 |
+| FR-TASK-01 | Project directory and integration checks, task fields, sorting, search, filters and state-constrained dragging. Require an objective and at least one acceptance criterion before launch. | FR01–FR02, AC01, AC15, AC19 |
+| FR-TASK-02 | Version requirement changes and pin each Run's input. Preserve comments, prior executions and corrections. Retry keeps earlier records. | FR03–FR04, AC03–AC04 |
+| FR-TASK-03 | Start idempotently. Each task, Session and working directory has one active owner. Give each Run its own runtime and confirm exit on stop. Retry and continuation create new Runs. A directory change creates a new Session, keeps the old records and lets the user explicitly select material to carry over. | FR05, FR07–FR09, AC02, AC11–AC13, AC15, AC17–AC18 |
+| FR-TASK-04 | Drive progress from real events. Distinguish questions, approvals and connection status. Deduplication, out-of-order events and restart reconciliation must preserve terminal states. Never blindly resend inputs with unknown acceptance. | FR06, FR08, FR13, AC09–AC10, AC13–AC14 |
+| FR-TASK-05 | Bind each Delivery to a requirement version, Run, code snapshot and verification evidence per criterion. Provide a read-only diff. Before acceptance recheck requirements, HEAD, uncommitted changes and included untracked files. Reject stale deliveries after requirement or code changes. | FR10–FR12, AC05–AC08 |
+| FR-TASK-06 | Only users may accept, return or waive verification. Acceptance requires a valid delivery with no active Run or unresolved question or approval. After completion, explicitly reopen or create a linked task and preserve past Reviews. | FR12–FR14, AC05–AC10 |
+| FR-TASK-07 | Version exports, backups and restores. Preserve Task/Run/Delivery/Review relationships. Import starts no execution and replays no approvals. Stopping does not delete work. | NFR03–NFR09, AC16, AC20 |
 
-Task 的业务状态为 `backlog / todo / in_progress / in_review / blocked / done / canceled`，Run 的执行状态独立记录；详细转移条件由专题 PRD 第 7–8 节拥有。`idle`、最终文本或退出码 0 不等于交付完成。停止 Run 默认使任务阻塞，取消 Task 表示放弃目标，退回 Delivery 则使任务回到待办。只有用户接受当前有效 Delivery 才进入 `done`。
+Task states are `backlog / todo / in_progress / in_review / blocked / done / canceled`. Run execution state is independent. Sections 7–8 of the Taskboard PRD define transitions. An `idle` state, final text or zero exit code cannot establish delivery completion. Stopping a Run blocks the task by default, canceling a Task abandons its objective and returning a Delivery moves it to the to-do queue. Only human acceptance of the current valid Delivery sets `done`.
 
-### 9.4 接入方案与实施前决策
+### 9.4 Integration and implementation decisions <a id="94-接入方案与实施前决策"></a>
 
-2026-11-16 用户确认首版工作台位于现有 DSH Web 内，复用 Web Host 与认证。任务服务持有业务库，每个 Run 经官方 TypeScript SDK 启动独占 runtime。 Harness Session 日志继续拥有模型与工具事实，业务库以引用关联。
+On November 16, 2026, the user confirmed that the initial Taskboard belongs in the existing DSH Web app with its Web Host and authentication. The task service owns the business database. Each Run starts a dedicated runtime through the official TypeScript SDK. Harness Session logs own model and tool facts, which the business database references.
 
-G0 须验证并冻结 Harness/SDK/runtime/操作系统组合、Session 创建与恢复、问题和审批语义、目标 runtime 停止隔离及目录归属；SDK 驱动 Harness 的方式不等于已接入 Codex/Codely 原生执行器。Provider/Executor 独立选择和既有费用/权限规则继续适用；启动沿用受支持的 dsh profile。任务级工具只允许受服务端绑定作用域的读取、进度、评论、阻塞和交付，不授予 Agent 人工完成或豁免权限。
+G0 verifies and freezes the Harness/SDK/runtime/OS combination, Session creation and recovery, question and approval semantics, targeted runtime stop isolation and directory ownership. Driving Harness through the SDK does not establish native Codex/Codely integration. Independent provider and executor selection and existing cost and permission rules still apply. Start through a supported dsh profile. Task tools are limited to server-scoped reads, progress, comments, blocking and delivery. Agents have no human acceptance or waiver authority.
 
-有限并行、依赖关系和受控自动领取属于 G3；团队账号、PR/CI 和跨设备能力按 G4 与主 Plan 现有任务映射。Taskboard 的成本预算扩展不降低主产品已经要求的额度透明和付费授权。界面性能及可靠性数字仍是待验证目标，完整指标以专题 PRD 第 12–14 节为准。
+Limited parallelism, dependencies and controlled automatic claiming belong to G3. Team accounts, PR/CI and cross-device capabilities map to G4 and existing main plan tasks. Taskboard cost controls must preserve product-wide quota transparency and authorization for charges. UI performance and reliability figures remain targets pending verification. The Taskboard PRD sections 12–14 specify all metrics.
 
 ---
 
-## 10. 优先级与版本分配
+## 10. Priorities and milestones <a id="10-优先级与版本分配"></a>
 
-| 版本 | 必须达到的产品能力 | 关键约束 |
+| Milestone | Required product capability | Constraints |
 |---|---|---|
-| **M0 前置：Web Provider 可行性（第一优先）** | Browser-only 真实最小往返、DSH 请求/Session 适配及失败证据 | 不依赖完整 UI/Task/Executor/预算；Mock/Manual 不计真实通过，保留独立准入 |
-| **M0：产品基线与契约** | UI/Provider/Executor/Workflow 的独立选择；TaskSpec + 可选 Plan；清晰额度提示 | 不改动已有代码前先审计 |
-| **M1：正式基础闭环** | SIWC / 已有合法 Provider 聊天 + Codex/Codely 执行 + 确定性验证 | 不强制 Planner/LLM Review |
-| **M2：Web 平级 Provider 产品化** | 基于前置验证完善独立插件、平级 UI、状态/诊断及可靠性；生产真实访问单独准入 | M2 不用于推迟第一优先验证，也不以 PoC 替代产品验收 |
-| **M3：可靠性与多端** | ContextEpoch、Checkpoint、QuotaPolicy、Executor 切换、Worker | 状态可恢复且不乱执行 |
-| **M4：可选 Tool Bridge** | MCP Gateway、Scoped Broker、ChatGPT 反向工具能力、长任务 | Tool Bridge 与 Executor 区分 |
-| **Taskboard MVP（G0–G2）** | 接入验证、看板/详情、版本化执行与交付、人工验收、恢复及备份 | 对应主 Plan 第 16 节；G2 通过才可发布，不以 G1 演示替代可靠性验收；首版入口复用现有 DSH Web |
-| **后续 TODO** | Agent 动态生成 Workflow、更多 Agent/Provider、复杂跨设备调度策略 | 不回填首期强制需求 |
+| **Before M0 — Web provider feasibility (first priority)** | Real minimal Browser-only round trip, DSH request and Session adaptation, and failure evidence | Independent of complete UI, Task, Executor or budgeting. Mock/manual runs do not establish real success. Production admission remains separate. |
+| **M0 — Product baseline and contracts** | Independent UI, Provider, Executor and Workflow selection, TaskSpec with optional Plan and clear quota information | Audit before modifying existing code. |
+| **M1 — Basic end-to-end workflow** | Chat through SIWC or an existing permitted provider, execute with Codex/Codely and verify deterministically | Planner and LLM review remain optional. |
+| **M2 — Web as a production peer provider** | Build on feasibility evidence for an independent plugin, peer UI entry, status, diagnostics and reliability. Admit real production access separately. | Run priority validation before M2. A proof of concept does not satisfy product acceptance. |
+| **M3 — Reliability and multiple devices** | ContextEpoch, Checkpoint, QuotaPolicy, executor switching and workers | Recover state without unintended execution. |
+| **M4 — Optional Tool Bridge** | MCP Gateway, Scoped Broker, reverse tools for ChatGPT and long-running tasks | Keep Tool Bridge and Executor distinct. |
+| **Taskboard MVP (G0–G2)** | Integration checks, board and details, versioned execution and delivery, human acceptance, recovery and backup | Section 16 of the main plan. Release requires G2 reliability acceptance beyond the G1 demo. Reuse DSH Web for the initial UI. |
+| **Later work** | Agent-generated workflows, additional agents and providers and complex cross-device scheduling policies | Outside first-release requirements. |
 
-> Web 前置验证先于剩余里程碑工作；其完成或明确不可行结论由实际证据判断。M0–M4 是产品能力里程碑，不直接替换历史 V0–V2 研发阶段编号；开发 Plan 要依据仓库实际完成情况做增量映射。
+> Web feasibility comes before remaining milestone work. Evidence determines completion or a finding of infeasibility. M0–M4 are product milestones. The development plan maps them incrementally to repository progress and preserves historical V0–V2 development stage IDs.
 
 ---
 
-## 11. 关键验收用例（UAT）
+## 11. Key user acceptance tests (UAT) <a id="11-关键验收用例uat"></a>
 
-| ID | 场景 | 通过标准 |
+| ID | Scenario | Pass criteria |
 |---|---|---|
-| UAT-01 | 用户选择 SIWC 进行普通聊天 | 流式回答成功；无 Task/Executor/单独 Plan/Review 请求 |
-| UAT-02 | Chat Provider 菜单 | Web 和 SIWC 处于同一级；Web 可显示门禁状态但不隐藏为 Codex 功能 |
-| UAT-03 | 简单任务交给 Codex | 有最小 TaskSpec；**没有强制 Plan**；Codex 原生循环执行；验证结果可见 |
-| UAT-04 | 简单任务交给 Codely | 与 UAT-03 相同；Chat Provider 无需改变 |
-| UAT-05 | 复杂任务 | 可生成有版本 Plan；多个 Run/Checkpoint；按风险执行 Review |
-| UAT-06 | 无需 Review 的成功任务 | 验证成功；明确显示“未请求模型 Review”，不伪造验收 |
-| UAT-07 | Web 未获得准入 | Web 选项可见且不可自动提交；SIWC、Executor 不受影响 |
-| UAT-08 | Provider 从 SIWC 切到 Web/Mock 再切回 | 切换只影响后续 Turn；DSH 历史、Task 不丢 |
-| UAT-09 | Codex 运行中切换 Codely | 没有覆盖旧 Run；显式 Checkpoint/新 Run，杜绝重复写入 |
-| UAT-10 | 工作额度达到上限 | 不自动切换到额外付费 API 或其他额度源 |
-| UAT-11 | 流式请求中断 | 未把 `response.failed`/网络断开标成功；提供可判断的恢复操作 |
-| UAT-12 | 反向工具权限不足 | 无法访问非授权路径；失败记录审计，不继续写入 |
-| UAT-13 | Tool Bridge 不存在 | 外部 Agent 执行链仍可独立运行 |
-| UAT-14 | 重启并继续任务 | 从 DSH Checkpoint/状态继续，不依赖 Web 历史完整存在 |
-| UAT-15 | 组合契约测试 | Web/Mock、SIWC × Codex、Codely 四种组合在 Provider/Executor 层互不耦合 |
-| UAT-16 | 含副作用操作超时/重连 | 提交状态不确定时不会自动重复执行同一写操作 |
+| UAT-01 | Ordinary chat with SIWC | The answer streams successfully without a Task, Executor, separate Plan or Review request. |
+| UAT-02 | Chat Provider menu | Web and SIWC are peers. Web can show admission status and remains visible independently of Codex. |
+| UAT-03 | Delegate a simple task to Codex | A minimal TaskSpec, **no mandatory Plan**, a native Codex loop and visible verification results. |
+| UAT-04 | Delegate a simple task to Codely | Same criteria as UAT-03. The Chat Provider can stay the same. |
+| UAT-05 | Complex task | Supports versioned plans, multiple Runs and Checkpoints and risk-based review. |
+| UAT-06 | Successful task requiring no review | Verification passes and the UI states that model review was never requested. It records no fictitious acceptance. |
+| UAT-07 | Web lacks admission | Web is visible with automatic submission disabled. SIWC and Executor remain operational. |
+| UAT-08 | Switch from SIWC to Web/Mock and back | Only later Turns change provider. DSH history and tasks persist. |
+| UAT-09 | Switch to Codely during a Codex run | Preserve the old Run, use an explicit Checkpoint and new Run, and prevent duplicate writes. |
+| UAT-10 | Work quota reaches its limit | No automatic switch to a paid API or another quota source. |
+| UAT-11 | Streaming request is interrupted | Neither `response.failed` nor disconnection indicates success. Offer an identifiable recovery action. |
+| UAT-12 | Insufficient reverse-tool permissions | Deny unauthorized paths, audit failure and stop further writes. |
+| UAT-13 | Tool Bridge absent | External agent execution still works independently. |
+| UAT-14 | Restart and continue | Resume from DSH Checkpoint and state even with incomplete Web history. |
+| UAT-15 | Combination contract test | Web/Mock and SIWC each work with Codex and Codely independently at the provider and executor layers. |
+| UAT-16 | Timeout or reconnection after an operation with side effects | Do not repeat the write automatically when submission status is uncertain. |
 
-Taskboard 增补验收沿用[专题 PRD 第 13–14 节](DeepSeek_Harness_Taskboard_PRD_v0.1.md#13-功能验收用例)的 AC01–AC20，不重编号为 UAT；[实施 Plan 第 16 节](../workflows/DSH_IMPLEMENTATION_PLAN.md#16-taskboard-增量实施计划)逐项分配实现与验证责任。发布前必须通过 G0 接入验证、全部 20 项用例及一次真实编码任务的启动、失败重试、交付、退回和再验收。模型验收可选不等于人工验收可省略。
-
----
-
-## 12. 开放问题与须由仓库/账户确认的事实
-
-1. DSH 当前代码有哪些 Provider、Executor、Workflow、TaskStore、MCP/Tunnel？**须 P0 仓库审计，不凭历史文档臆断。**
-2. 当前 SIWC 是否已获得对应账户/应用授权？支持哪些模型及工具？使用官方模型目录实时确认。
-3. Web 自动化能否获得所需的明确使用许可？**未确认前不得激活真实自动收发。**
-4. DSH 的现有 Codex 集成是否暴露“活动原生 Turn 工具注册表”？若没有，应使用 DSH 工具或外部执行 Agent，而非伪造 Native Host。
-5. Codely 实际提供哪些 CLI/ACP/API、恢复、授权和 Sandbox 能力？按安装版本核对。
-6. 各工作流模板和现有 ADR 的确切编号、文件路径与已实现情况，需 P0 从仓库获取。
+Taskboard uses AC01–AC20 from [sections 13–14 of the Taskboard PRD](DeepSeek_Harness_Taskboard_PRD_v0.1.md#13-功能验收用例). These keep their own numbering. [Implementation plan section 16](../workflows/DSH_IMPLEMENTATION_PLAN.md#16-taskboard-增量实施计划) assigns implementation and verification. Release requires G0 integration validation, all 20 cases and a real coding task that starts, fails, retries, delivers, is returned and passes acceptance again. Human acceptance remains mandatory even when model assessment is optional.
 
 ---
 
-## 13. 参考资料与术语
+## 12. Open questions for repository and account verification <a id="12-开放问题与须由仓库账户确认的事实"></a>
 
-- [SIWC — OpenAI 官方概览](https://developers.openai.com/siwc/token-sharing-open-source)
+1. Which providers, executors, workflows, TaskStore and MCP/tunnel capabilities exist in DSH? **Audit the repository in P0. Historical documents alone are insufficient.**
+2. Is SIWC authorized for the account and app? Which models and tools are available? Check the live official model catalog.
+3. Can the required explicit permission for Web automation be obtained? **Keep real automatic sending and receiving disabled until confirmed.**
+4. Does the existing DSH Codex integration expose an active native Turn tool registry? If absent, use DSH tools or an external execution agent. Do not fabricate a native host.
+5. Which CLI, ACP and API interfaces and recovery, authorization and sandbox capabilities does Codely offer? Verify against the installed version.
+6. Obtain exact workflow template and ADR identifiers, paths and implementation status from the repository in P0.
+
+---
+
+## 13. References and terminology <a id="13-参考资料与术语"></a>
+
+- [SIWC — Official OpenAI overview](https://developers.openai.com/siwc/token-sharing-open-source)
 - [SIWC — Models and Inference](https://developers.openai.com/siwc/token-sharing-open-source/models-and-inference)
 - [SIWC — Preview Limitations](https://developers.openai.com/siwc/token-sharing-open-source/preview-limitations)
-- [SIWC — 使用额度官方帮助](https://help.openai.com/en/articles/20001542-using-your-chatgpt-plan-in-other-apps-and-sites)
+- [SIWC — Official usage limits help](https://help.openai.com/en/articles/20001542-using-your-chatgpt-plan-in-other-apps-and-sites)
 - [codex-chatgpt-web — GitHub](https://github.com/miuuyy/codex-chatgpt-web)
 - [codex-chatgpt-web — Architecture](https://github.com/miuuyy/codex-chatgpt-web/blob/main/docs/architecture.md)
 - [codex-chatgpt-web — Security Model](https://github.com/miuuyy/codex-chatgpt-web/blob/main/docs/security-model.md)
 - [ChatToHarness — GitHub](https://github.com/DJ-Huang/ChatToHarness)
 - [OpenAI Terms of Use](https://openai.com/policies/terms-of-use/)
 
-**术语**：`Chat Provider` = 模型接入途径；`Executor` = 保留或接入执行能力的 Agent；`TaskSpec` = 持久化任务契约；`PlanRevision` = 可选显式规划；`ReviewPackage` = 紧凑验收输入；`Tool Bridge` = 有权限边界的辅助工具调用通路；`Native Tool Host` ≠ `External Agent`。
+**Terminology** `Chat Provider` is a model access route. An `Executor` is an agent providing or integrating execution capability. A `TaskSpec` is a durable task contract. A `PlanRevision` is an optional explicit plan. A `ReviewPackage` is compact assessment input. A `Tool Bridge` is an auxiliary tool-call route with scoped permissions. A `Native Tool Host` and an `External Agent` serve different roles.
 
 ---
 
-## 14. 产品决策记录（本版必须覆盖旧版的描述）
+## 14. Product decisions that supersede earlier descriptions <a id="14-产品决策记录本版必须覆盖旧版的描述"></a>
 
-| 决策 | 结论 |
+| Decision | Resolution |
 |---|---|
-| D-01 | DSH 原生 UI 为主要入口 |
-| D-02 | ChatGPT Web 与 SIWC 在 UI/Provider Router 中平级、可切换；Web 自动功能有独立准入门禁 |
-| D-03 | ChatGPT 负责聊天、按需规划、按需审查；**没有强制 Planner 阶段** |
-| D-04 | 进入工程执行才产生 TaskSpec；显式 Plan 和模型 Review 均按需 |
-| D-05 | Codex/Codely 是独立可选 Executor；工程执行优先保留各自原生 Agent Loop |
-| D-06 | 反向 MCP/Native Tool 借鉴为可选辅助能力，不绑定默认 Workflow 或 Codex 唯一执行器 |
-| D-07 | DSH 自行管理 Session/Memory/Task/Run/Checkpoint；额度来源、切换和权限透明 |
-| D-08 | 采用模板化自适应 Workflow + 用户 Override；Agent 动态 Workflow 属未来 TODO |
-| D-09 | Web ChatGPT Provider 的真实可行性是当前第一优先验证项；以 codex-chatgpt-web 为参考，Browser-only 不依赖 Full Harness/Executor，Mock 与真实结论分开 |
-| D-10 | Taskboard MVP 采用任务/执行/交付分离与人工验收；首版工作台嵌入现有 DSH Web，复用 Host 和认证 |
+| D-01 | The native DSH UI is the primary entry point. |
+| D-02 | ChatGPT Web and SIWC are selectable peers in the UI and Provider Router. Automated Web access has independent admission controls. |
+| D-03 | ChatGPT handles chat, planning on demand and review on demand. **There is no mandatory Planner stage.** |
+| D-04 | Create a TaskSpec only for engineering execution. Explicit plans and model review are optional. |
+| D-05 | Codex and Codely are independently selectable executors. Prefer their native agent loops for engineering work. |
+| D-06 | Reverse MCP and native tools are optional auxiliary capabilities, independent of the default workflow and of any single executor. |
+| D-07 | DSH manages Session, Memory, Task, Run and Checkpoint. Quota sources, switching and permissions are transparent. |
+| D-08 | Use adaptive workflow templates with user override. Defer agent-generated workflows. |
+| D-09 | Real Web ChatGPT provider feasibility is the first validation priority. Use codex-chatgpt-web as the reference. Browser-only is independent of Full Harness and Executor. Record mock and real conclusions separately. |
+| D-10 | The Taskboard MVP separates tasks, execution and delivery, with human acceptance. Embed the first version in DSH Web and reuse its host and authentication. |
 
-**本 PRD 是产品设计基线；任何与 vNext.2/vNext.3 相反的流程图和优先级描述，应以本版 D-01～D-10 为准。**
+**This PRD is the product design baseline. D-01 through D-10 take precedence over conflicting flow diagrams and priorities in vNext.2/vNext.3.**

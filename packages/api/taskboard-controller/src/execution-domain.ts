@@ -56,8 +56,10 @@ export const admission = z.strictObject({
   materials: z.array(selectedMaterial),
   projectScript: projectScript.optional(), sdkPatchDigest: digest.optional(), whenReady: z.literal(true).optional(),
   runtimeId: z.uuid(), feedback: z.array(text),
-  authorization: z.strictObject({ executor: z.literal('dsh-sdk'), routeSelection: z.enum(['operator-confirmed', 'deployment-default']) }).optional(),
-})
+  authorization: z.strictObject({ executor: z.enum(['dsh-sdk', 'codex', 'codely']), routeSelection: z.enum(['operator-confirmed', 'deployment-default']) }).optional(),
+}).refine(record => !record.authorization || record.authorization.executor === 'dsh-sdk'
+  || (record.mode === 'fresh' && record.model !== undefined && record.sdkPatchDigest !== undefined && record.authorization.routeSelection === 'operator-confirmed'),
+{ message: 'native Run requires a confirmed route, SDK overlay digest and fresh session' })
 const binding = z.strictObject({ runId, projectId, taskId, runtimeId: z.uuid(), generation: positive })
 
 /**
@@ -67,7 +69,8 @@ const binding = z.strictObject({ runId, projectId, taskId, runtimeId: z.uuid(), 
  * @returns whether both records identify the same Session and checkout.
  */
 export function continuesSession(previous: z.output<typeof admission>, next: z.output<typeof admission>): boolean {
-  return previous.session.sessionId === next.session.sessionId && previous.session.home === next.session.home
+  return (previous.authorization?.executor ?? 'dsh-sdk') === 'dsh-sdk' && (next.authorization?.executor ?? 'dsh-sdk') === 'dsh-sdk'
+    && previous.session.sessionId === next.session.sessionId && previous.session.home === next.session.home
     && previous.session.provider === next.session.provider && previous.workspace.directory === next.session.workspace
     && previous.workspace.branch === next.workspace.branch
     && previous.configurationRef === next.configurationRef && previous.session.compatibility === next.session.compatibility
@@ -153,6 +156,11 @@ export const runProcessScope = z.strictObject({
 /** Evidence required to reconcile one active Run after its original Host exits. */
 export type RunProcessScope = z.output<typeof runProcessScope>
 
+/** Counts reported by the native SDK adapter, keyed only by protocol observation kind. */
+export const nativeActivity = z.partialRecord(z.enum([
+  'command', 'fileChange', 'read', 'otherTool', 'completed', 'failed', 'declined', 'allowed', 'denied', 'cancelled',
+]), z.int().positive())
+
 const runFields = z.strictObject({
   admission, admissionFingerprint: digest, taskRevision: positive,
   previousCheckpoint: z.strictObject({
@@ -160,13 +168,14 @@ const runFields = z.strictObject({
   }).optional(),
   workspacePlan: workspacePlanRecord.optional(),
   input: z.strictObject({ title: text, description: text, constraints: text.optional(), riskLevel: riskLevel.optional(),
-    workflow: workflow.optional(),
+    workflow: workflow.optional(), milestone: positive.optional(),
     acceptance: z.array(text).min(1), reviewFeedback: z.string().nullable() }),
   control: z.enum(['normal', 'stop_requested', 'finalizing']), connection: z.enum(['connected', 'suspect', 'disconnected']),
   createdAt: z.iso.datetime(), receipt: text.nullable(), endedAt: z.iso.datetime().nullable(),
   inputAttemptedAt: z.iso.datetime().optional(),
   inputStartSeq: z.number().int().nonnegative().optional(),
   sessionNotIncluded: z.literal(true).optional(),
+  nativeActivity: nativeActivity.optional(),
   processScope: runProcessScope.optional(),
   lastEvent: runSessionEvent.optional(),
   deliveryDraft: deliverySubmission.extend({ id: deliveryId, fingerprint: digest, scriptCheck: scriptCheck.optional() }).optional(),
@@ -181,7 +190,10 @@ const claimedRun = runFields.extend({ generation: positive, state: z.enum(['prep
 const unclaimedRun = runFields.extend({ generation: z.null(), state: z.enum(['queued', 'canceled']) })
 
 /** Persisted start snapshot and lifecycle evidence. Only claimed Runs carry a lease generation. */
-export const runRecord = z.discriminatedUnion('state', [claimedRun, unclaimedRun]).transform((run) => {
+export const runRecord = z.discriminatedUnion('state', [claimedRun, unclaimedRun]).refine((run) => {
+  const executor = run.admission.authorization?.executor
+  return !run.nativeActivity || (run.generation !== null && (executor === 'codex' || executor === 'codely'))
+}, 'invalid native activity owner').transform((run) => {
   // Older restores marked even a request canceled before it acquired a Session.
   if (run.generation === null) delete run.sessionNotIncluded
   return run
@@ -283,7 +295,7 @@ export function validationResults(delivery: Pick<TaskDelivery, 'code' | 'snapsho
     const observed = script.observation
     const reason = !observed ? 'unconfirmed' : script.sourceSnapshot !== delivery.snapshot ? 'snapshot-changed' : observed.outcome.reason
     const exitCode = reason === null ? observed?.outcome.exitCode ?? null : null
-    results.push({ check: script.script === 'test' ? 'npm-test' : 'npm-build', snapshot: delivery.snapshot,
+    results.push({ check: typeof script.script === 'string' ? `npm-${script.script}` : 'project-script', snapshot: delivery.snapshot,
       status: reason ? 'not-run' : exitCode === 0 ? 'passed' : 'failed', observedAt: observed?.time ?? null, exitCode, reason })
   }
   if (!code?.gitDiffCheck) return results

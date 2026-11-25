@@ -40,6 +40,11 @@ interface SubagentCapabilities {
 The tool layer builds this request from the model input and its own config; the service validates it against the named provider before `start`. Required `parent` supplies the session cwd, lineage, and delegation depth. Optional Agent provider, model, reasoning-effort, and token overrides, output schema, depth, tool filter, and persona require matching capability flags. In-process backends merge `agentOptions` over the parent Agent's options, scope filters and personas to child creation, and implement the supported object-rooted schema with a forced capture tool. The DSH SDK backend merges the four Agent route fields over its instance defaults and validates them in the child runtime's initialization; ACP, Codex, and Claude Code reject `agentOptions` before starting their transports.
 
 ```ts type-equiv
+/** Payload-free observations reported by a native one-shot provider. */
+type NativeActivityKind = 'command' | 'fileChange' | 'read' | 'otherTool' | 'completed' | 'failed' | 'declined' | 'allowed' | 'denied' | 'cancelled'
+```
+
+```ts type-equiv
 /**
  * What a caller asks for when starting a ONE-SHOT subagent. The tool layer
  * builds this from the model's `{ description, prompt }` plus its own config;
@@ -48,6 +53,8 @@ The tool layer builds this request from the model input and its own config; the 
  * {@link SubagentProvider.start}.
  */
 interface SubagentStartRequest {
+  /** Synchronous observer for tool reports and permission replies associated with this native run. */
+  readonly onNativeActivity?: (kind: NativeActivityKind) => void
   /** Optional short display label persisted with a session-backed child. */
   readonly label?: string
   /** Content delivered as the child's user message. */
@@ -412,6 +419,8 @@ interface SubagentProvider {
    * It says nothing about tool registration, injected services, or authority inheritance.
    */
   readonly inheritsParentContext: boolean
+  /** True when this provider starts the child in the parent Session’s cwd without a deployment override. */
+  readonly usesParentCwd?: boolean
   /**
    * Optional static provider-owned provider/model route for one-shot Agent
    * options. Consumers merge tool/model overrides over these values before

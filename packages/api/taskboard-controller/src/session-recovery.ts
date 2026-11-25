@@ -26,9 +26,9 @@ export const turnOutcome = {
  * @returns task content captured when the operator queued this Run.
  */
 export function savedTaskInput(run: SavedTaskRun): TaskRunInputSnapshot {
-  const { title, description, constraints, riskLevel, workflow, acceptance, reviewFeedback } = run.input
+  const { title, description, constraints, riskLevel, workflow, milestone, acceptance, reviewFeedback } = run.input
   return { title, description, ...(constraints && { constraints }), ...(riskLevel && { riskLevel }),
-    ...(workflow && { workflow }), acceptance, reviewFeedback, materials: run.admission.materials }
+    ...(workflow && { workflow }), ...(milestone && { milestone }), acceptance, reviewFeedback, materials: run.admission.materials }
 }
 
 /**
@@ -37,7 +37,15 @@ export function savedTaskInput(run: SavedTaskRun): TaskRunInputSnapshot {
  * @returns the exact text sent as the SDK user's message.
  */
 export function taskInput(run: SavedTaskRun): string {
-  return JSON.stringify(savedTaskInput(run))
+  const task = JSON.stringify(savedTaskInput(run))
+  if (!run.admission.authorization || run.admission.authorization.executor === 'dsh-sdk') return task
+  return [
+    task,
+    'Complete this task in the supplied workspace. Return only one JSON object for the human reviewer.',
+    'Include summary (string), changes, knownIssues, unfinished, files (arrays of strings), and verification.',
+    'Use workspace-relative evidence files outside Git, or an empty files array in Git.',
+    'For each acceptance criterion in order, include its exact criterion, status (passed, failed, not-run, or not-applicable), and evidence. Explain any check you could not run.',
+  ].join('\n')
 }
 
 /**

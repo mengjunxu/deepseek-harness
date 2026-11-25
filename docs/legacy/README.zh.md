@@ -14,7 +14,7 @@
 
 ## Current documents
 
-仅保留 `docs/workflows/DSH_IMPLEMENTATION_PLAN.md` 与 `docs/myPlan/DSH_PRD_vNext_4_2026-10-27.md` 为有效规划文档。主 Plan 第 11–12 节负责当前路线、有效 Checklist 与任务证据。独立 Checklist 已并入主 Plan，归档副本仅为快照。正式决策及开发任务记录仍由本目录外的既有位置维护。
+[实施计划](../workflows/DSH_IMPLEMENTATION_PLAN.zh.md)统一维护路线、检查清单与验收证据。需求来自[主 PRD](../myPlan/DSH_PRD_vNext_4_2026-10-27.zh.md)和 [Taskboard 专题 PRD](../myPlan/DeepSeek_Harness_Taskboard_PRD_v0.1.zh.md)。归档清单保留合并时的状态。
 
 ## Archive groups
 
@@ -28,4 +28,4 @@
 
 ## Maintenance
 
-文件保留历史内容，仅调整迁移所需的相对链接。双语三件组一起移动。本目录与冻结的 Agent Note 归档无关，不改变正式决策状态。迁移任务在 `.ai/tasks/dsh-plan-legacy/moves.json` 记录原路径、目标路径和文件摘要。任务日志中的旧命令描述当时实际执行内容，可通过迁移映射查找已移动证据。既有文档检查失败继续如实记录，不添加豁免。
+文件保留历史内容，仅调整迁移所需的相对链接。双语三件组一起移动。本目录与冻结的 Agent Note 归档无关，不改变正式决策状态。迁移任务在 `.ai/tasks/dsh-plan-legacy/moves.json` 记录原路径、目标路径和文件摘要。任务日志中的旧命令描述当时实际执行内容，可通过迁移映射查找已移动证据。上表所列的九份单语规划原稿保留原有语言、换行和示例代码，仍接受 Markdown 链接检查。

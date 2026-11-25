@@ -92,7 +92,7 @@ Typert 只在 Host tsdown 中以 `tsconfig.host.json` 为种子运行。它分�
 
 `pnpm run build` 会内联根包版本、七位源码 commit，并在 Git 报告本地变化时内联 dirty 标记；调用方提供的其他 `DSH_CLIENT_*` 值也会被继承。`pnpm run build:official` 是与 CI 和 release 产物构建等价的跨平台本地命令，并省略本地 dirty 标记。每次完整构建成功后都会写入一份被 gitignore 的记录，把精确公开值与 Vite 输出及动态 client bundle 绑定；release 打包和 built Web 测试会拒绝缺少记录或被后续局部构建改动的产物。`pnpm run dev:web` 会先执行这次完整构建（`--skip-build` 则复用现有产物树），再读取一次当前版本和 Git 状态，并在本次会话的所有 watcher stage 之间共享该环境；它不会校验完整构建记录，因为 watcher stage 会重写记录覆盖的产物。
 
-在 macOS 上安装仓库依赖后，从仓库根目录运行以下命令。history 检查在临时用户目录启动已安装的 Web 配置，编辑任务、重启 Host，并核对 SQLite 中的修订和排队 Run 回执。要验收备份，请安装 Playwright Chromium 浏览器，将末尾的 `history` 换成 `backup`。该检查使用本地模型夹具驱动 SDK，通过 Web 页面下载并恢复备份。使用 `--taskboard openai` 可通过本地 Responses 端点验证 OpenAI 部署示例及 Run 失败后的显式重试。这些检查均无需真实模型凭据。使用 `--taskboard validation` 可在安装后的 SDK 上验证 npm 测试通过、构建失败以及停止脚本后子进程仍在运行的情形。使用 `--taskboard review` 可在已安装的 Web Host 验证按需覆盖审查、人工授权修复和最终验收。
+在 macOS 上安装仓库依赖后，从仓库根目录运行以下命令。history 检查在临时用户目录启动已安装的 Web 配置，编辑任务、重启 Host，并核对 SQLite 中的修订和排队 Run 回执。要验收备份，请安装 Playwright Chromium 浏览器，将末尾的 `history` 换成 `backup`。该检查使用本地模型夹具驱动 SDK，通过 Web 页面下载并恢复备份。使用 `--taskboard openai` 可通过本地 Responses 端点验证 OpenAI 部署示例及 Run 失败后的显式重试。这些检查均无需真实模型凭据。使用 `--taskboard validation` 可在安装后的 SDK 上验证 npm 测试通过、构建失败以及停止脚本后子进程仍在运行的情形。使用 `--taskboard review` 可在已安装的 Web Host 验证按需覆盖审查、人工授权修复和最终验收。使用 `--taskboard custom-scripts` 可验证具名 npm 与 pnpm 脚本的执行授权、退出码记录及备份恢复。使用 `--taskboard milestones` 可验证分阶段交付、人工退回和接受，以及阶段之间的备份恢复。 使用 `--taskboard native-executors` 验证已打包的 Codex 原生执行器。在已安装并登录 Codely 的 macOS 主机上，可用 `--taskboard native-codely` 验证 ACP 适配器。两者均使用回环模型端点。每个检查分别在隔离 Git 工作树中发起获准和被拒绝的写入，将原生工具回执与交付文件清单、验收页展示的差异核对，并保留待人工验收状态。
 
 ```sh
 packed=$(mktemp -d)

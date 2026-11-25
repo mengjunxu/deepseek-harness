@@ -2,6 +2,7 @@
 import { createHash, randomUUID } from 'node:crypto'
 import { isAbsolute } from 'node:path'
 import { isDeepStrictEqual } from 'node:util'
+import { runCriteria } from './milestones.ts'
 import { brandString } from '@deepseek-ai/dsh-brand'
 import type { Domain, DomainTransaction } from '@deepseek-ai/dsh-storage-domain'
 import { z } from 'zod'
@@ -89,6 +90,7 @@ function validateRunHistory(task: TaskRecord, runs: ReadonlyMap<TaskRunId, Saved
       const { commandId, projectId, taskId, expectedVersion, whenReady, mode, previousRun, materials } = current
       if (!current.model || !run.workspacePlan) throw new Error('backup has incomplete Run authorization')
       const request = startCommand.parse({ commandId, projectId, taskId, expectedVersion, mode, previousRun, materials, whenReady,
+        ...(current.authorization.executor !== 'dsh-sdk' && { nativeExecutor: current.authorization.executor }),
         confirmation: run.workspacePlan.confirmation, ...(current.projectScript && { confirmedScript: current.projectScript }), ...current.authorization.routeSelection === 'operator-confirmed'
           && { confirmedRoute: { provider: current.session.provider, model: current.model } } })
       if (operatorStartFingerprint(request) !== run.admissionFingerprint) throw new Error('backup has inconsistent Run authorization')
@@ -104,9 +106,18 @@ function validateReviewHistory(tasks: readonly TaskRecord[], runs: ReadonlyMap<T
   const recorded = new Set<CommandId>()
   for (const task of tasks) {
     let previous: TaskReview | undefined
+    let stage = 1
+    let revision = 0
     for (const event of task.activity) {
+      if (event.revision !== revision || event.action === 'reopened') {
+        revision = event.revision
+        stage = 1
+      }
       if (event.action === 'run-requested' && event.runId) {
         const run = runs.get(brandString<TaskRunId>(event.runId))
+        if (run?.input.workflow?.template === 'task.milestone.v1' && (run.taskRevision !== revision || run.input.milestone !== stage)) {
+          throw new Error('backup Run milestone differs from human acceptance history')
+        }
         if (run?.input.reviewFeedback !== (previous?.verdict === 'return' ? previous.feedback : null)) {
           throw new Error('backup has inconsistent review history for Run feedback')
         }
@@ -118,7 +129,17 @@ function validateReviewHistory(tasks: readonly TaskRecord[], runs: ReadonlyMap<T
         || event.action !== (decision.verdict === 'accept' ? 'accepted' : 'returned')
         || event.fingerprint !== reviewFingerprint(decision, event.version - 1)) throw new Error('backup has inconsistent review history')
       recorded.add(event.commandId)
+      if (decision.verdict === 'accept') {
+        if (task.revisions[decision.revision - 1]?.workflow?.template === 'task.milestone.v1'
+          && (decision.revision !== revision || !event.runId || runs.get(brandString<TaskRunId>(event.runId))?.input.milestone !== stage)) {
+          throw new Error('backup has inconsistent milestone acceptance')
+        }
+        stage++
+      }
       previous = decision
+    }
+    if (task.task.workflow?.template === 'task.milestone.v1' && (task.task.status === 'done') !== (stage > task.task.workflow.steps.length)) {
+      throw new Error('backup task status differs from milestone acceptance')
     }
     if (task.lastReview !== (previous?.commandId ?? null)) throw new Error('backup has inconsistent review history')
   }
@@ -154,11 +175,11 @@ function validateRelations(snapshot: Payload): void {
     if (!revision || run.input.title !== revision.title || run.input.description !== revision.description.trim()
       || (run.input.riskLevel ?? null) !== (revision.riskLevel ?? null)
       || !isDeepStrictEqual(run.input.workflow ?? null, revision.workflow ?? null)
-      || (run.input.constraints ?? '') !== (revision.constraints ?? '') || !isDeepStrictEqual(run.input.acceptance, revision.acceptance)) {
+      || (run.input.constraints ?? '') !== (revision.constraints ?? '') || !isDeepStrictEqual(run.input.acceptance, runCriteria(revision, run.input.milestone))) {
       throw new Error('backup Run input does not match its requirements revision')
     }
     const prior = a.previousRun ? runs.get(a.previousRun) : undefined
-    if (a.projectScript !== projects.get(a.projectId)?.project.projectScript || (a.projectScript && !a.authorization)) {
+    if (!isDeepStrictEqual(a.projectScript, projects.get(a.projectId)?.project.projectScript) || (a.projectScript && !a.authorization)) {
       throw new Error('backup has inconsistent project script authorization')
     }
     if (run.workspacePlan && !matchesWorkspace(run.workspacePlan, a.workspace)) throw new Error('backup Run workspace differs from its plan')
@@ -209,7 +230,7 @@ function validateRelations(snapshot: Payload): void {
     if (!task?.deliveryIds.includes(id) || task.task.projectId !== item.projectId || run?.admission.taskId !== item.taskId
       || run.state !== 'finished' || run.taskRevision !== item.revision) throw new Error('backup has an unbound delivery')
     verifyProjectCheck(projects.get(item.projectId)?.project.checkTrackedDiff, item)
-    if (run.admission.projectScript !== item.code?.projectScriptCheck?.script) throw new Error('backup has inconsistent project script evidence')
+    if (!isDeepStrictEqual(run.admission.projectScript, item.code?.projectScriptCheck?.script)) throw new Error('backup has inconsistent project script evidence')
     verifyCriteria(run.input.acceptance, item.verification)
   }
   for (const item of reviews.values()) {
@@ -275,6 +296,7 @@ export class TaskboardBackup {
       ...(run.admission.model && { route: { provider: run.admission.session.provider, model: run.admission.model } }),
       revision: run.taskRevision, state: run.state, workspace: run.admission.workspace, receipt: run.receipt,
       createdAt: run.createdAt, endedAt: run.endedAt, endReason: run.endReason,
+      ...(run.nativeActivity && { nativeActivity: run.nativeActivity }),
       lastEvent: run.lastEvent, selectedMaterials: run.admission.materials,
     }))
     const deliveries = data.deliveries.filter(item => item.projectId === projectId)

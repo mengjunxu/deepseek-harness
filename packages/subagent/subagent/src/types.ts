@@ -135,6 +135,9 @@ export interface SubagentCapabilities {
   readonly persona: boolean
 }
 
+/** Payload-free observations reported by a native one-shot provider. */
+export type NativeActivityKind = 'command' | 'fileChange' | 'read' | 'otherTool' | 'completed' | 'failed' | 'declined' | 'allowed' | 'denied' | 'cancelled'
+
 /**
  * What a caller asks for when starting a ONE-SHOT subagent. The tool layer
  * builds this from the model's `{ description, prompt }` plus its own config;
@@ -143,6 +146,8 @@ export interface SubagentCapabilities {
  * {@link SubagentProvider.start}.
  */
 export interface SubagentStartRequest {
+  /** Synchronous observer for tool reports and permission replies associated with this native run. */
+  readonly onNativeActivity?: (kind: NativeActivityKind) => void
   /** Optional short display label persisted with a session-backed child. */
   readonly label?: string
   /** Content delivered as the child's user message. */
@@ -352,6 +357,8 @@ export interface SubagentProvider {
    * It says nothing about tool registration, injected services, or authority inheritance.
    */
   readonly inheritsParentContext: boolean
+  /** True when this provider starts the child in the parent Session’s cwd without a deployment override. */
+  readonly usesParentCwd?: boolean
   /**
    * Optional static provider-owned provider/model route for one-shot Agent
    * options. Consumers merge tool/model overrides over these values before

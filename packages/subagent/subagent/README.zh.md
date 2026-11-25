@@ -25,6 +25,10 @@ kind: "package-reference"
 <a id="use-this-package"></a>
 ## 使用本包
 
+调用方若要求子进程使用父 Session 的工作目录，可在启动前核对 `provider.usesParentCwd === true`。
+
+传入 `onNativeActivity` 可从支持此回调的原生提供方接收工具和权限类别。
+
 本包是每个委派组合都共享的约定。你通过把服务与一个或多个提供方后端以及面向模型的委派工具一起挂载来启用它；此后 agent 即可委派工作，服务会把每个请求路由到具名提供方。
 
 ### 启用委派

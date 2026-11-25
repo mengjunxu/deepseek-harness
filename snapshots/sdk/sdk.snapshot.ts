@@ -61,6 +61,7 @@ import {
   type RunResult,
   type SdkPromptContentBlock,
 } from '@deepseek-ai/dsh-sdk-client'
+import { projectDir } from '../../packages/session/session-persistence-jsonl/src/format.ts'
 import { SESSION_FORMAT_VERSION } from '@deepseek-ai/dsh-session'
 
 const corpusRoot = fileURLToPath(new URL('../', import.meta.url))
@@ -802,28 +803,33 @@ async function verifyHeaders(
   }
 }
 
-async function restoreCoverageReview(scenario: CorpusScenario): Promise<void> {
+async function restoreTaskboardSession(scenario: CorpusScenario): Promise<void> {
   const directory = await mkdtemp(join(tmpdir(), 'dsh-review-sdk-'))
-  const sessionId = 'taskboard-review-fixture'
+  const sessionId = scenario.name
   const sessions = join(directory, 'sessions')
-  const owner = join(sessions, '_no-cwd', sessionId)
   const patch = join(directory, 'persistence.yml')
-  const fixture = join(scenario.dir, scenario.manifest.session!.source)
-  const [header, event] = records(await readFile(fixture, 'utf8'))
+  const fixture = scenario.manifest.session ? join(scenario.dir, scenario.manifest.session.source) : (await fixtureFiles(scenario))[0]!
+  const [header, ...events] = records(await readFile(fixture, 'utf8'))
+  const owner = join(projectDir(sessions, header?.cwd ? directory : undefined), sessionId)
   const log = join(owner, basename(fixture))
-  const saved = { ...event, seq: 0, time: 1 }
+  const saved = events.map((event, seq) => ({ ...event, seq, time: seq + 1 }))
   const harness = new DeepSeekHarness({ profile: 'sdk', patches: [patch], dshHome: directory, processCwd: directory,
     env: { PATH: process.env.PATH ?? '', HOME: directory, DSH_TELEMETRY_DISABLED: '1' } })
   try {
     await mkdir(owner, { recursive: true })
-    await writeFile(log, [JSON.stringify({ ...header, id: sessionId }), JSON.stringify(saved), ''].join('\n'))
+    await writeFile(log, [{ ...header, id: sessionId, ...(header?.cwd && { cwd: directory }) }, ...saved].map(row => JSON.stringify(row)).join('\n') + '\n')
     await writeFile(patch, JSON.stringify([{ id: 'session-persistence-jsonl', config: { root: sessions, compression: 'none' } }]))
     try {
       expect((await harness.resumeSession(sessionId, { requireEmptyInbox: true })).id).toBe(sessionId)
     } finally { await harness.close() }
     const restored = records(await readFile(log, 'utf8'))
+    if (scenario.name === 'taskboard-native-executor') {
+      expect(restored.slice(1)).toEqual([...saved, { type: 'session/end-seed', data: {}, seq: saved.length, time: expect.any(Number) }])
+      expect(saved.at(-1)).toMatchObject({ type: 'turn/end', data: { reason: { kind: 'completed' } } })
+      return
+    }
     const requests = restored.filter(record => record.type === 'taskboard/review-request')
-    expect(requests).toEqual([saved])
+    expect(requests).toEqual(saved)
     expect({ inboxEmpty: true, reviewRequests: requests.length, conversationTurns: restored.filter(record => record.type === 'turn/start').length })
       .toEqual(JSON.parse(await readFile(join(scenario.dir, 'resume.expected.json'), 'utf8')))
   } finally { await rm(directory, { recursive: true, force: true }) }
@@ -855,7 +861,7 @@ describe('TypeScript SDK snapshots over the jsonrpc runtime', () => {
       ? it.skip
       : it
     scenarioTest(`${mode}s ${scenario.name} through dsh --profile sdk`, async () => {
-      if (scenario.name === 'taskboard-review-resume') return restoreCoverageReview(scenario)
+      if (scenario.name === 'taskboard-review-resume' || scenario.name === 'taskboard-native-executor') return restoreTaskboardSession(scenario)
       const scenarioDir = scenario.dir
       const retained = scenario.manifest.sessionFormat !== undefined
       const notificationsExpectedPath = join(scenarioDir, retained ? 'notifications.current.expected.jsonl' : 'notifications.expected.jsonl')

@@ -34,8 +34,7 @@ Read these files in order:
 2. This checklist and the v4 plan’s sections 0–2, Phase 0S, Phases 0–8, release checks in sections 10–11, and prototype migration in section 14.
 3. [L1 implementation summary](MGSD_L1_Local_DSH_Implementation_Summary.md) for responsibilities, execution flow, acceptance, and limits; [local Codely guide](../user/guide/codely-local.md) for configuration, behavior, and recorded results.
 4. [L2 implementation summary](MGSD_L2_Local_DSH_Implementation_Summary.md) for durable workflow, approval, recovery, acceptance, and L3 handoff.
-5. [Executor experiment](../MGSD_Codely_Executor_Validation_Report.md) for the observed exit-code, prompt-transport, auto-save, and sandbox limitations.
-6. [Architecture](../architecture.md), [testing policy](../testing.md), and [defensive patterns](../defensive-patterns.md) before implementation work.
+5. [Architecture](../architecture.md), [testing policy](../testing.md), and [defensive patterns](../defensive-patterns.md) before implementation work.
 
 Preserve the existing `.codely-cli/settings.json` change and the current execution, test, guide, and checklist edits. Inspect only task-relevant files; do not add local settings or editor data wholesale. Do not reset, clean, auto-commit, or auto-push the checkout.
 

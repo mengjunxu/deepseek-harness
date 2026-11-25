@@ -1,6 +1,8 @@
 {
+  "source_tree": "3188f4b158e1236dcbf9b74aa225845ff9a36bec",
+  "source_commit_subject": "feat: checkpoint P1 runtime and Taskboard implementation for handoff",
+  "source_committed_at": "2026-11-18T23:31:11+08:00",
   "verified_at": "2026-11-18T15:35:40.863835+00:00",
-  "source_commit": "844566ed37fe3acf548a5ee5b98b0e1cd2a53054",
   "platform": "macOS arm64",
   "node": "26.5.0",
   "pnpm": "11.25.0",
@@ -24,7 +26,7 @@
   "limitations": [
     "Fresh checkout used independent node_modules and empty build outputs on the same macOS host; dependency installation used the existing pnpm cache.",
     "Target receiving machine, Linux/Windows, live provider e2e and remote CI have not been verified.",
-    "Initial tests precede the checkpoint commit; subsequent changes are the documented fixes, regenerated output and whitespace normalization. Fresh checkout checks use the exact source_commit."
+    "Initial tests precede the checkpoint commit; subsequent changes are the documented fixes, regenerated output and whitespace normalization. Fresh checkout checks use the recorded source tree."
   ],
   "logs": {
     "unit": {

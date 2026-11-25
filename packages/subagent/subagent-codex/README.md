@@ -25,6 +25,8 @@ Install `@deepseek-ai/dsh-subagent-codex` into a Profile when delegated work sho
 <a id="use-this-package"></a>
 ## Use this package
 
+The provider reports `usesParentCwd: true`. The app-server thread uses the delegating Session’s directory.
+
 Mount this provider when a delegation should run as a real Codex session in the parent's workspace. The common path is explicit: install the Bundle into a Profile, optionally configure the provider row, and expose it to the model through a delegation tool row.
 
 ### Installing the Bundle
@@ -78,6 +80,8 @@ Each delegation tool row names one provider and needs its own `toolName`, so the
 The `one-shot` policy keeps omitted or `false` `run_in_background` calls in the foreground, while explicit `true` returns a parent-owned Job id for `job_output` or `job_kill`; the base host and full presets already provide the generic Job registry and controls.
 
 ### What you get
+
+The optional `onNativeActivity` observer receives tool and approval categories for the matching thread and turn. A refusal handled internally by Codex can leave the adapter with no approval event.
 
 A foreground call gives the model the selected final Codex answer, or an error with the stop reason and optional safe diagnostic for a failed run. A background call first returns a Job id; the generic job controls later deliver a completion notice and expose the same final answer or failed status through `job_output`. Codex commentary, reasoning, tool activity, raw stderr, and workspace diffs never enter the parent session.
 

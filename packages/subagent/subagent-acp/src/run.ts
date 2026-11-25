@@ -418,23 +418,32 @@ export async function startAcpRun(request: SubagentStartRequest, spec: AcpRunSpe
   const flags = { cancelled: false }
   let latestPermission: AcpPermissionDecision | undefined
 
+  let sessionId: string | undefined
   const clientApp = createAcpClientApp({ name: 'deepseek-harness-subagent-acp' })
     .onNotification(methods.client.session.update, ({ params }) => {
+      if (sessionId === undefined || params.sessionId !== sessionId) return Promise.resolve()
       const update = params.update
+      if (update.sessionUpdate === 'tool_call') {
+        const kind = update.kind
+        request.onNativeActivity?.(kind === 'execute' ? 'command' : kind === 'edit' || kind === 'delete' || kind === 'move'
+          ? 'fileChange' : kind === 'read' ? 'read' : 'otherTool')
+      }
+      if ((update.sessionUpdate === 'tool_call' || update.sessionUpdate === 'tool_call_update')
+        && (update.status === 'completed' || update.status === 'failed')) request.onNativeActivity?.(update.status)
       if (update.sessionUpdate === 'agent_message_chunk') {
         fold.pushText(acpContentText(update.content))
       }
-      // Other updates (thoughts, tool calls, plans) are consumed but not
-      // surfaced — the subagent returns only its final answer.
       return Promise.resolve()
     })
     .onRequest(methods.client.session.requestPermission, ({ params }) => {
       // Auto-answer by the configured policy. `allow` selects the first option
       // whose kind is `allow_once` or `allow_always`; if the child offered none (or we
       // reject), answer `cancelled` so the child does not proceed.
+      if (sessionId === undefined || params.sessionId !== sessionId) return Promise.resolve({ outcome: { outcome: 'cancelled' } })
       if (spec.permission === 'allow') {
         const allow = params.options.find(o => o.kind === 'allow_once' || o.kind === 'allow_always')
         if (allow !== undefined) {
+          request.onNativeActivity?.('allowed')
           latestPermission = {
             policy: 'allow',
             request: permissionRequestKind(params.toolCall.kind),
@@ -443,6 +452,7 @@ export async function startAcpRun(request: SubagentStartRequest, spec: AcpRunSpe
           return Promise.resolve({ outcome: { outcome: 'selected', optionId: allow.optionId } })
         }
       }
+      request.onNativeActivity?.('denied')
       latestPermission = {
         policy: spec.permission,
         request: permissionRequestKind(params.toolCall.kind),
@@ -457,7 +467,6 @@ export async function startAcpRun(request: SubagentStartRequest, spec: AcpRunSpe
   ))
   const agent = connection.agent
 
-  let sessionId: string | undefined
   let startupStage: Extract<AcpFailureStage, 'initialize' | 'new-session'> = 'initialize'
   // Cancellation settles the result without waiting for a cooperative child.
   let signalCancelSettled!: () => void

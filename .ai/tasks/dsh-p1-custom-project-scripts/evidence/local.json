@@ -1,0 +1,87 @@
+{
+  "checkedAt": "2026-11-24T15:26:55+08:00",
+  "platform": "macOS arm64",
+  "commit": null,
+  "branch": "codely_bridge",
+  "sourceSha256": {
+    "apps/web/tests/fixtures/taskboard-browser.mjs": "a8bb0dc06c9c0033a2195aadd25c909001eb0bc9d15f85c973eca4ac2f835041",
+    "apps/web/tests/fixtures/taskboard-smoke.mjs": "d0827b8eb387e18cbafce1bc1a77686f7e0fa56eee3faf37b5737fa2cc19e173",
+    "apps/web/tests/taskboard.e2e.ts": "92bfd5817d1b611747d4e4ed43bc73c568051dcbe3082c4b1a2f517997a56697",
+    "packages/api/taskboard-controller/src/backup.ts": "9771c8daa193ebb41af19921b9d10b0888b54fa75724c350f748dcd11a27fcc4",
+    "packages/api/taskboard-controller/src/execution-domain.ts": "6f8670139f506abc09e7e863d5a334e054d2300e3068da87978a29cf57efb7e6",
+    "packages/api/taskboard-controller/src/execution.ts": "3732ea00de2bb5443e5ce14fa96bb7bd03113b1d5cb6388d5ff2dac3fcc76fb8",
+    "packages/api/taskboard-controller/src/index.ts": "bf011d64d408f91b96e176f079cd74dd50a09d4937d75498b19664917fc57237",
+    "packages/api/taskboard-controller/src/member-board.ts": "8c340038cae0fa5bbdc7a368df4396640ba9b64506a6117b772bd92113433c00",
+    "packages/api/taskboard-controller/src/sdk-tools.ts": "4fb787c722be12850368fe9bc4c03b699132bf6b06c4093dde1bdf242e490bb7",
+    "packages/api/taskboard-controller/src/types.ts": "0e850b9934280ba6185eb70ae56758dcddcafcf643897ba78418580118464266",
+    "packages/api/taskboard-controller/tests/taskboard.host.spec.ts": "6d344ca09d71a8ad0f24e97c652de6d24207a100eca5c3203d0386def6dbc183",
+    "packages/client/ui-taskboard/src/client/DeliveryPanel.tsx": "60d2d26778fcfcfd468ce9722e8199a2693904c5b0a90bc3c6fbb0c17ce31d2c",
+    "packages/client/ui-taskboard/src/client/RunPanel.tsx": "95e582a8077f8479f85e4ac0cf678bea81ffcb0d14c220463b3b1df7c27ee72c",
+    "packages/client/ui-taskboard/src/client/TaskboardPage.tsx": "f30b5526d23f8d617956915cf5f693f917cc54ebef289b9eed41b2b152d50771",
+    "packages/client/ui-taskboard/src/client/locales.ts": "0d7e8312a551ccb337fcd4fd39132c34a22c058d6c7c64ebec29f1dc4cb4aa86",
+    "packages/extensions/tool-cordis/src/api-catalog.ts": "ff89ee4f7bdb09b3a3972cffef7169fde8837c79ad76e0fbdabada7dd7b688ad",
+    "scripts/release/verify-packed-install.ts": "55f87406d011aa9021bb57be6d8bde19e22e8586828f51a906bff742132bb1bf",
+    "packages/client/ui-taskboard/src/client/project-script.ts": "cc182d2ee57cc19294e5b244d25f2e3a1546d5ee970cd37a4d446bedec494b59"
+  },
+  "officialBuild": "PASS",
+  "dshTarballs": 323,
+  "totalLocalTarballs": 334,
+  "onlyDirectDependency": "@deepseek-ai/dsh",
+  "installedVersion": "0.1.7-rc.2",
+  "tarballSha256": {
+    "deepseek-ai-dsh-0.1.7-rc.2.tgz": "6bf933587d93435077708a0fc525b175c3f720775bd1a5f3f819a27d3321d81b",
+    "deepseek-ai-dsh-api-taskboard-controller-0.1.7-rc.2.tgz": "00f7b84456ced4b4c001b92c95b649d45df343576f1667fac5b80144db02da77",
+    "deepseek-ai-dsh-client-ui-taskboard-0.1.7-rc.2.tgz": "d983d713117f3cea71c7b81f5216ad307a871a57306440f6ad2425808a53be5b",
+    "deepseek-ai-dsh-web-0.1.7-rc.2.tgz": "e117d7c0dbc2824b82b3005477a4a73f667421a374ae4f5f35ab2c32162b7faa"
+  },
+  "commands": [
+    "pnpm run build:official",
+    "pnpm run release:pack --family dsh --out <dsh> --concurrency 4",
+    "pnpm run release:verify-packed-install --family dsh --from <dsh> --from <vendor> --from <native> --taskboard custom-scripts"
+  ],
+  "installedScenarios": [
+    {
+      "command": "npm run verify:notes",
+      "exitCode": 17,
+      "restored": true,
+      "output": {
+        "startedFromBrowser": true,
+        "answeredAndApproved": true,
+        "diffAndWaiver": true,
+        "humanAcceptance": true
+      }
+    },
+    {
+      "command": "pnpm run verify:notes",
+      "exitCode": 0,
+      "restored": true,
+      "output": {
+        "trackedCheckPassed": true,
+        "modelReviewRequested": false,
+        "acceptedByOperator": true
+      }
+    }
+  ],
+  "model": "loopback fixture",
+  "hostTestsPassed": 34,
+  "focusedWebTestsPassed": 4,
+  "checks": {
+    "focusedLint": "PASS",
+    "diffWhitespace": "PASS",
+    "namedTranslationPairs": 4,
+    "initialDocSync": {
+      "passed": 36,
+      "failed": 6
+    },
+    "fixedAndRechecked": [
+      "config catalog"
+    ],
+    "remainingDocSyncFailures": [
+      "doc-typecheck",
+      "markdown links",
+      "translation pairing",
+      "markdown wrap",
+      "repository references"
+    ]
+  }
+}

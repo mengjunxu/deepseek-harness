@@ -11,6 +11,7 @@ import { fromMarkdown } from 'mdast-util-from-markdown'
 import { gfmFromMarkdown } from 'mdast-util-gfm'
 import { gfm } from 'micromark-extension-gfm'
 import type { Nodes } from 'mdast'
+import { isArchivedPlanningSnapshot } from './repo-files.ts'
 import {
   languageSwitcherLinkOffset,
   semanticTranslationLinkNodeTarget,
@@ -199,7 +200,7 @@ export function isTranslationPairingManifestExcluded(
   file: string,
   manifest: TranslationPairingManifest,
 ): boolean {
-  return manifest.excluded.some(entry => (entry.endsWith('/') ? file.startsWith(entry) : file === entry))
+  return isArchivedPlanningSnapshot(file) || manifest.excluded.some(entry => (entry.endsWith('/') ? file.startsWith(entry) : file === entry))
 }
 
 /** Build the active bilingual-source predicate shared by every link consumer. */

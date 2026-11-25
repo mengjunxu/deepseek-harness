@@ -2,7 +2,7 @@ import { mkdtempSync, mkdirSync, realpathSync, rmSync, symlinkSync, writeFileSyn
 import { tmpdir } from 'node:os'
 import { join, relative } from 'node:path'
 import { describe, expect, it } from 'vitest'
-import { uniqueRepoFiles } from './repo-files.ts'
+import { isArchivedPlanningSnapshot, uniqueRepoFiles } from './repo-files.ts'
 
 interface Tree {
   root: string
@@ -24,6 +24,20 @@ function makeTree(): Tree {
   writeFileSync(join(root, '.hidden', 'snap.md'), 'hidden by dot\n')
   return { root, clean: () => { rmSync(parent, { recursive: true, force: true }) } }
 }
+
+describe('original planning snapshots', () => {
+  it.each([
+    ['docs/legacy/workflows/DSH_CHECKLIST.md', true],
+    ['docs\\legacy\\myPlan\\AGENTS.original.md', true],
+    ['docs/legacy/workflows/DSH_CHECKLIST.zh.md', false],
+    ['docs/legacy/workflows/NEW_PLAN.md', false],
+    ['docs/legacy/README.md', false],
+    ['docs/legacy/MGSD_Implementation_Checklist.md', false],
+    ['docs/workflows/DSH_IMPLEMENTATION_PLAN.md', false],
+  ] as const)('classifies %s', (path, archived) => {
+    expect(isArchivedPlanningSnapshot(path)).toBe(archived)
+  })
+})
 
 describe('uniqueRepoFiles', () => {
   it('enumerates ** matches without probing a symlinked file as a directory', () => {

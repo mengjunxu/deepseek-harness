@@ -252,6 +252,7 @@ export async function startCodexRun(
     child.stdin as NonNullable<SubprocessHandle['stdin']>,
     spec.permissionMode,
     spec.model,
+    request.onNativeActivity,
   )
   const onStderr = (chunk: Buffer | string): void => {
     const bytes = typeof chunk === 'string' ? Buffer.from(chunk) : chunk

@@ -1,0 +1,60 @@
+{
+  "codex": {
+    "version": "0.153.4",
+    "persistedThreadAndTurnRecovered": true,
+    "priorMessagesInResumedInputOnly": true,
+    "ephemeralError": -32600,
+    "unknownError": -32600,
+    "modelRequests": 4
+  },
+  "codely": {
+    "version": "1.0.0-nightly.53",
+    "firstTurnCompleted": true,
+    "loadAdvertised": false,
+    "resumeAdvertised": false,
+    "methodCodes": {
+      "session/load": -32601,
+      "session/resume": -32601
+    },
+    "vendorExtension": {
+      "existingIdMatched": true,
+      "priorUserAndAssistantInReplaceHistoryBeforePrompt": true,
+      "priorMessagesInResumedInputOnly": true,
+      "unknownIdEchoedWithEmptyHistory": true
+    },
+    "freshIdDistinct": true,
+    "modelRequests": 4
+  },
+  "checkedAt": "2026-11-25T14:07:46+08:00",
+  "platform": "macOS arm64",
+  "modelEndpoints": "loopback",
+  "testedCodeCommit": null,
+  "webBackupRestore": {
+    "codex": "PASS",
+    "codely": "PASS",
+    "explicitAndOmittedExecutorResumeRejected": true,
+    "taskDetailUnchanged": true,
+    "pendingHumanReview": true
+  },
+  "sourceSha256": {
+    ".ai/tasks/dsh-p1-native-resume-probe/evidence/probe.mjs": "10606ea38810e5738ddeb5213765f839805ddbdde9f54f00ee2764c3150fd82a",
+    "apps/web/tests/fixtures/taskboard-smoke.mjs": "48b30b4b8681500474c998a37ac6129e990840b781f99b0c799e8111052283c0",
+    "packages/subagent/subagent-codex/src/wire.ts": "8f4a52b4b5b6ac24aa824a8b96ecb90658d957712d91c601c9ee8f7634e8ba44",
+    "packages/subagent/subagent-acp/src/run.ts": "995ebbf3ed86e4892de11bd6b5fe0d3ec8394fa6a6cb407008f6fbb8c2bdc5d7",
+    "packages/api/taskboard-controller/src/index.ts": "57ce21ac71f0acce990235f8a5cad0f06aef8dcaa2e27c25e9436139886a1bb2"
+  },
+  "checks": {
+    "docSync": {
+      "passed": 37,
+      "failed": [
+        "markdown links",
+        "doc-typecheck",
+        "markdown wrap",
+        "repository references",
+        "translation pairing"
+      ]
+    },
+    "nodeSyntax": "PASS",
+    "gitDiffCheck": "PASS"
+  }
+}

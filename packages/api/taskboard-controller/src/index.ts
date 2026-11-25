@@ -1,4 +1,6 @@
 /** Authenticated Web Host commands for Taskboard project bindings, requirements and history. */
+import { isDeepStrictEqual } from 'node:util'
+import { nextMilestone } from './milestones.ts'
 import { Context, Service } from '@deepseek-ai/cordis'
 import z from '@deepseek-ai/schemastery'
 import { TaskWorkspaces, type TaskWorkspacePlan, type WorkspaceConfig } from './workspaces.ts'
@@ -33,7 +35,7 @@ import type {
   TaskCommand, TaskRelations, TaskCommentCommand, TaskDeliveryDetail, TaskDetail, TaskId,
   TaskInteractionReply, TaskOrderCommand, TaskPendingInteraction, TaskReceipt, TaskRequirements, TaskRequirementsCommand,
   ModelReviewAttempt, ModelReviewCommand, TaskReviewCommand, RunTaskSpec, TaskRunInputSnapshot,
-  TaskStartCommand, TaskStartReceipt, TaskStopCommand, TaskView, WorkspaceInspection,
+  NativeTaskExecutor, TaskStartCommand, TaskStartReceipt, TaskStopCommand, TaskView, WorkspaceInspection,
   TaskboardCard, TaskboardExecutionRoute, TaskboardInbox, TaskboardRestore,
 } from './types.ts'
 
@@ -80,6 +82,15 @@ interface ExecutionConfig {
   env?: Record<string, string>
   /** Absolute SDK profile overlays applied before the required permission services. */
   patches?: string[]
+  /** Absolute SDK overlays registering the named native adapter for fresh Runs. */
+  nativeExecutors?: Partial<Record<NativeTaskExecutor, string>>
+}
+
+function executorPatches(config: ExecutionConfig, executor: 'dsh-sdk' | NativeTaskExecutor): string[] | undefined {
+  if (executor === 'dsh-sdk') return config.patches
+  const overlay = config.nativeExecutors?.[executor]
+  if (!overlay) throw new Error('selected native executor is unavailable')
+  return [...config.patches ?? [], overlay]
 }
 
 function runtimeCompatibility({ provider, model, patches }: ExecutionConfig): string {
@@ -145,6 +156,7 @@ export default class TaskboardController extends TypertRemoteService {
       requestTimeoutMs: z.natural().min(1).max(2_147_483_647).default(30_000),
       env: z.dict(z.string()).default({}),
       patches: z.array(z.string().min(1)).default([]),
+      nativeExecutors: z.object({ codex: z.string().min(1), codely: z.string().min(1) }),
     }), z.const(undefined)]),
   })
   static inject = ['subprocess', 'storageDomain', storageBackendServiceKey('sqlite')]
@@ -181,6 +193,9 @@ export default class TaskboardController extends TypertRemoteService {
     this.executionConfig = resolved.execution
     if (this.executionConfig && !isAbsolute(this.executionConfig.sessionRoot)) throw new Error('Taskboard execution.sessionRoot must be absolute')
     if (this.executionConfig?.patches?.some(path => !isAbsolute(path))) throw new Error('Taskboard execution.patches must be absolute')
+    if (Object.values(this.executionConfig?.nativeExecutors ?? {}).some(path => !isAbsolute(path))) {
+      throw new Error('Taskboard native executor overlay paths must be absolute')
+    }
     this.workspaces = new TaskWorkspaces(ctx.subprocess, resolved)
   }
 
@@ -357,8 +372,10 @@ export default class TaskboardController extends TypertRemoteService {
             || session.provider !== config.provider || session.home !== join(config.sessionRoot, session.sessionId)) {
             throw new Error('queued Run has no matching SDK configuration')
           }
+          const executor = run.admission.authorization?.executor ?? 'dsh-sdk'
+          const patches = executorPatches(config, executor)
           if (run.admission.sdkPatchDigest !== undefined
-            && run.admission.sdkPatchDigest !== await sdkPatchDigest(config.patches, this.lifetime.signal)) {
+            && run.admission.sdkPatchDigest !== await sdkPatchDigest(patches, this.lifetime.signal)) {
             throw new Error('queued Run SDK patch contents changed')
           }
           const { projectId, taskId, mode, previousRun } = run.admission
@@ -370,7 +387,8 @@ export default class TaskboardController extends TypertRemoteService {
           return {
             cwd: session.workspace, dshHome: session.home, provider: config.provider, model: config.model,
             env: { ...scrubbedParentEnv(), ...config.env },
-            ...config.patches === undefined ? {} : { patches: config.patches },
+            ...(executor !== 'dsh-sdk' && { nativeExecutor: executor }),
+            ...(patches && { patches }),
             ...config.requestTimeoutMs === undefined ? {} : { requestTimeoutMs: config.requestTimeoutMs },
           }
         },
@@ -485,22 +503,26 @@ export default class TaskboardController extends TypertRemoteService {
       if (!config || (project.configurationRef && project.configurationRef !== config.reference)) {
         throw new Error('Taskboard execution configuration is unavailable for this project')
       }
-      if (project.projectScript !== parsed.confirmedScript) throw new Error('project script differs from the Run confirmation')
+      if (!isDeepStrictEqual(project.projectScript, parsed.confirmedScript)) throw new Error('project script differs from the Run confirmation')
       const expected = parsed.confirmedRoute
       if (expected && (expected.provider !== config.provider || expected.model !== config.model)) {
         throw new Error('SDK provider or model changed. Reopen the Run confirmation.')
       }
+      if (parsed.nativeExecutor && !expected) throw new Error('native execution requires explicit Run confirmation')
+      if (mode === 'resume' && parsed.nativeExecutor) throw new Error('native executors require a fresh Run')
       if (mode === 'resume' && (!previousRun || !confirmation)) {
         throw new Error('Session continuation requires a prior Run and its confirmed directory')
       }
       const previous = mode === 'resume' && previousRun ? this.priorRun(projectId, taskId, previousRun) : null
       const prior = previous?.admission
+      if (prior?.authorization && prior.authorization.executor !== 'dsh-sdk') throw new Error('native executors require a fresh Run')
+      const executor = parsed.nativeExecutor ?? 'dsh-sdk'
       const compatibility = runtimeCompatibility(config)
       if (prior && (prior.configurationRef !== config.reference || prior.session.compatibility !== compatibility
         || prior.session.home !== join(config.sessionRoot, prior.session.sessionId))) {
         throw new Error('prior Session uses a different Taskboard execution configuration')
       }
-      const patchDigest = await sdkPatchDigest(config.patches, this.lifetime.signal)
+      const patchDigest = await sdkPatchDigest(executorPatches(config, executor), this.lifetime.signal)
       if (prior?.sdkPatchDigest !== undefined && prior.sdkPatchDigest !== patchDigest) {
         throw new Error('SDK patch contents changed. Start a fresh Run with the current configuration.')
       }
@@ -513,7 +535,7 @@ export default class TaskboardController extends TypertRemoteService {
         projectId, taskId, commandId, expectedVersion, previousRun, runId, runtimeId: randomUUID(),
         ...(parsed.whenReady && { whenReady: parsed.whenReady }), mode, configurationRef: config.reference, model: config.model,
         ...(parsed.confirmedScript && { projectScript: parsed.confirmedScript }),
-        authorization: { executor: 'dsh-sdk', routeSelection: expected ? 'operator-confirmed' : 'deployment-default' },
+        authorization: { executor, routeSelection: expected ? 'operator-confirmed' : 'deployment-default' },
         ...patchDigest !== undefined && { sdkPatchDigest: patchDigest }, materials, feedback: [],
         workspace: { directory, branch, baseline },
         session: prior?.session ?? {
@@ -613,7 +635,8 @@ export default class TaskboardController extends TypertRemoteService {
     if (!config || (project.configurationRef && project.configurationRef !== config.reference)) {
       return { state: 'unconfigured', provider: null, model: null }
     }
-    return { state: config.dispatch ? 'configured' : 'disabled', provider: config.provider, model: config.model,
+    const nativeExecutors = (['codex', 'codely'] as const).filter(executor => config.nativeExecutors?.[executor])
+    return { ...(nativeExecutors.length > 0 && { nativeExecutors }), state: config.dispatch ? 'configured' : 'disabled', provider: config.provider, model: config.model,
       ...(project.projectScript && { projectScript: project.projectScript }) }
   }
 
@@ -630,7 +653,12 @@ export default class TaskboardController extends TypertRemoteService {
     const { changes, knownIssues, unfinished, verification, code } = delivery
     const modelReviews = task.modelReviews?.filter(attempt => attempt.deliveryId === deliveryId) ?? []
     const route = this.reviewConfig
-    return structuredClone({ ...summarizeDelivery(delivery, task.task.revision), changes, knownIssues, unfinished,
+    const workflow = task.revisions[delivery.revision - 1]?.workflow
+    const position = workflow?.template === 'task.milestone.v1' ? this.inputRun(projectId, taskId, delivery.runId).input.milestone : undefined
+    const goal = position && workflow?.template === 'task.milestone.v1' && workflow.steps[position - 1]
+    const milestone = goal && { position, total: workflow.steps.length, goal }
+    return structuredClone({ ...summarizeDelivery(delivery, task.task.revision), ...(milestone && { milestone }),
+      changes, knownIssues, unfinished,
       verification, validationResults: validationResults(delivery), code: code ?? null,
       modelReviewStatus: modelReviews.at(-1)?.state ?? delivery.modelReviewStatus ?? null, modelReviews,
       reviewRoute: route ? { provider: route.provider, model: route.model, maxAttempts: route.maxAttempts } : null })
@@ -895,6 +923,7 @@ export default class TaskboardController extends TypertRemoteService {
         branch: a.workspace.branch, sessionId: a.session.sessionId, priorSessionId: prior?.admission.session.sessionId ?? null,
         ...run.sessionNotIncluded && { sessionNotIncluded: run.sessionNotIncluded },
         lastEvent: run.lastEvent ?? null,
+        ...(run.nativeActivity && { nativeActivity: run.nativeActivity }),
         interactions: run.interactions.map(({ kind, requestId, state }) => ({ kind, requestId, state })),
         ...(a.whenReady && { whenReady: a.whenReady }), mode: a.mode, materialReferences: a.materials.map(m => m.reference),
         inputAttemptedAt: run.inputAttemptedAt ?? null,
@@ -910,7 +939,10 @@ export default class TaskboardController extends TypertRemoteService {
       if (!review) throw new Error('missing recorded review')
       return review
     })
-    return structuredClone({ task: record.task, revisions: record.revisions, activity, runs, deliveries, reviews })
+    const milestone = record.task.workflow?.template === 'task.milestone.v1' && record.task.status === 'todo'
+      ? nextMilestone(record.activity, record.task.revision) : undefined
+    return structuredClone({ ...(milestone && { nextMilestone: milestone }), task: record.task, revisions: record.revisions,
+      activity, runs, deliveries, reviews })
   }
 
   /**

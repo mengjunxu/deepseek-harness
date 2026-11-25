@@ -1,4 +1,5 @@
 /** Delivery evidence and explicit human review. */
+import { projectScriptLabel } from './project-script.ts'
 import { useEffect, useState } from 'react'
 import { Button, Input, Modal, PathLabel, Tag } from '@deepseek-ai/dsh-client-ui-primitives'
 import type {
@@ -101,6 +102,7 @@ export function DeliveryPanel({ task, selected, current, reviews, actions, t, cl
       {delivery && <div className={css.section}>
         <header className={css.section}>
           <h3>{delivery.summary}</h3>
+          {delivery.milestone && <p>{t('milestone')} {delivery.milestone.position}/{delivery.milestone.total} · {delivery.milestone.goal}</p>}
           <div className={css.controls}>
             <Tag>{t('delivery')} {delivery.version}</Tag><Tag>{t('revision')} {delivery.revision}</Tag>
             {stale && <Tag tone="warning">{t('staleDelivery')}</Tag>}
@@ -144,7 +146,7 @@ export function DeliveryPanel({ task, selected, current, reviews, actions, t, cl
           void actions.downloadReviewPackage(task, delivery.id)
         }}>{t('downloadReviewPackage')}</Button></div>
         {delivery.validationResults.map(check => <section key={check.check} className={css.section}>
-          <h3>{t(check.check === 'git-diff-check' ? 'gitDiffCheck' : check.check)}</h3>
+          <h3>{check.check === 'git-diff-check' ? t('gitDiffCheck') : projectScriptLabel(delivery.code?.projectScriptCheck?.script)}</h3>
           <Tag tone={check.status === 'passed' ? 'success' : 'warning'}>{t(`check.${check.status}`)}</Tag>
           {check.exitCode !== null && <div>{t('checkExitCode')} <code>{check.exitCode}</code></div>}
           {check.reason && <p>{t(`check.${check.reason}`)}</p>}
@@ -198,7 +200,7 @@ export function DeliveryPanel({ task, selected, current, reviews, actions, t, cl
           <div className={css.formEnd}>
             <Button variant="outline" disabled={busy || !feedback.trim()} onClick={() => { void decide('return') }}>{t('returnDelivery')}</Button>
             <Button variant="primary" disabled={busy || stale || !!assessmentId || (reasonRequired && !feedback.trim()) || required.some(({ index }) => !reasons[index]?.trim())}
-              onClick={() => { void decide('accept') }}>{t('acceptDelivery')}</Button>
+              onClick={() => { void decide('accept') }}>{t(delivery.milestone && delivery.milestone.position < delivery.milestone.total ? 'acceptStage' : 'acceptDelivery')}</Button>
           </div>
         </div>}
       </div>}

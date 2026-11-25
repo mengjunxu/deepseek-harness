@@ -94,7 +94,11 @@ async function createTask(page, board, directory, title, description, { riskLeve
   const project = page.getByRole('dialog', { name: 'New project', exact: true })
   await project.getByRole('textbox', { name: 'Project name' }).fill('Browser fixture')
   await project.getByRole('textbox', { name: 'Project folder' }).fill(directory)
-  if (projectScript) await project.getByLabel('Project validation script').selectOption(projectScript)
+  if (projectScript) {
+    const custom = typeof projectScript === 'object'
+    await project.getByLabel('Project validation script').selectOption(custom ? projectScript.manager : projectScript)
+    if (custom) await project.getByLabel('package.json script name').fill(projectScript.name)
+  }
   if (checkTrackedDiff) await project.getByRole('checkbox', { name: 'Check tracked Git changes before delivery' }).check()
   await project.getByRole('button', { name: 'Save' }).click()
   await board.getByRole('button', { name: 'Browser fixture', exact: true }).waitFor()
@@ -106,7 +110,7 @@ async function addTask(page, board, title, description, riskLevel, workflow) {
   const task = page.getByRole('dialog', { name: 'New task', exact: true })
   if (workflow) {
     await task.getByLabel('Workflow').selectOption(workflow.template)
-    const steps = task.getByLabel('Optional steps (one per line)')
+    const steps = task.getByLabel(workflow.template === 'task.milestone.v1' ? 'Stage goals (one per line)' : 'Optional steps (one per line)')
     if (workflow.steps) await steps.fill(workflow.steps.join('\n'))
     else assert.equal(await steps.count(), 0)
   }
@@ -120,6 +124,78 @@ async function addTask(page, board, title, description, riskLevel, workflow) {
   await detail.getByRole('button', { name: 'Move to To do' }).click()
   await board.getByRole('region', { name: 'To do', exact: true }).getByRole('button', { name: title }).waitFor()
   return detail
+}
+
+/** Select a native adapter in the Run dialog, leaving the submitted delivery for human review. */
+export function queueNativeRun(url, cookie, directory, executor) {
+  return withTaskboard(url, cookie, async (page, board) => {
+    const detail = await createTask(page, board, directory, 'Native delivery task', 'Read the confirmed fixture requirements')
+    await detail.getByRole('button', { name: 'Start run' }).click()
+    const start = page.getByRole('dialog', { name: 'Start run', exact: true })
+    const choice = start.getByRole('button', { name: executor, exact: true })
+    await choice.click()
+    assert.equal(await choice.getAttribute('aria-pressed'), 'true')
+    await start.getByRole('button', { name: 'Queue run' }).click()
+    await start.waitFor({ state: 'detached' })
+  })
+}
+
+/** Inspect the native submission’s file inventory and patch without recording a decision. */
+export function inspectNativeFileReview(url, cookie, projectTitle, title, summary, patch, activity) {
+  return withTaskboard(url, cookie, async (page, board) => {
+    await board.getByRole('button', { name: projectTitle, exact: true }).click()
+    await board.getByRole('region', { name: 'In review', exact: true }).getByRole('button', { name: title }).click()
+    const detail = board.getByRole('complementary', { name: title })
+    const history = detail.locator('details').filter({ has: page.getByText('Native tool activity', { exact: true }) })
+    await history.locator('summary').click()
+    const labels = { command: 'Command calls', fileChange: 'File change calls', otherTool: 'Other tool calls', read: 'Read calls',
+      completed: 'Completion reports', failed: 'Failure reports', declined: 'Declined tool reports', allowed: 'Permissions allowed',
+      denied: 'Permissions denied', cancelled: 'Approval requests cancelled' }
+    for (const [kind, count] of Object.entries(activity)) {
+      assert.equal(await history.getByText(labels[kind], { exact: true }).locator('+ dd').textContent(), String(count))
+    }
+    if (!Object.keys(activity).length) await history.getByText('No tool or permission events reported.').waitFor()
+    await detail.getByRole('button', { name: new RegExp(summary) }).click()
+    const review = page.getByRole('dialog', { name: 'Review delivery' })
+    await review.getByText(patch ? 'The native tool wrote notes.txt' : 'The native tool could not write notes.txt', { exact: true }).waitFor()
+    const file = review.getByRole('button', { name: 'notes.txt' })
+    if (patch) {
+      await file.click()
+      assert.equal(await review.locator('pre').filter({ hasText: '+native edit' }).textContent(), patch)
+    } else {
+      assert.equal(await file.count(), 0)
+    }
+    await review.getByRole('button', { name: 'Return for changes' }).waitFor()
+  })
+}
+
+/** Confirm one stage per Run, retry a returned stage and accept the final criteria. */
+export function verifyMilestonePlan(url, cookie, directory, afterFirstAcceptance) {
+  return withTaskboard(url, cookie, async (page, board) => {
+    const workflow = { template: 'task.milestone.v1', steps: ['Prepare notes', 'Publish notes'] }
+    const detail = await createTask(page, board, directory, 'Staged delivery', 'Deliver the notes in order', { workflow })
+    for (const [index, stage] of [1, 1, 2].entries()) {
+      await detail.getByRole('button', { name: 'Start run' }).click()
+      const start = page.getByRole('dialog', { name: 'Start run', exact: true })
+      const label = 'Stage ' + stage + '/2 · ' + workflow.steps[stage - 1]
+      await start.getByText(label, { exact: true }).waitFor()
+      await start.getByRole('button', { name: 'Queue run' }).click()
+      const summary = 'Stage submission ' + (2 + index * 3)
+      await detail.getByRole('button', { name: new RegExp(summary) }).click()
+      const review = page.getByRole('dialog', { name: 'Review delivery' })
+      await review.getByText(label, { exact: true }).waitFor()
+      if (index === 0) {
+        await review.getByRole('textbox').fill('Clarify the first stage')
+        await review.getByRole('button', { name: 'Return for changes' }).click()
+      } else {
+        await review.getByRole('button', { name: stage === 1 ? 'Accept stage' : 'Accept delivery' }).click()
+      }
+      await review.waitFor({ state: 'detached' })
+      await board.getByRole('region', { name: stage === 1 ? 'To do' : 'Done', exact: true })
+        .getByRole('button', { name: 'Staged delivery', exact: true }).waitFor()
+      if (index === 1) await afterFirstAcceptance()
+    }
+  })
 }
 
 /** Disconnect the visible board while another authenticated client commits task activity. */
@@ -287,11 +363,13 @@ export function restoreTaskboardBackup(url, cookie, archive) {
   })
 }
 
-export function verifyTaskboardRunPage(url, cookie, directory, noModelReview, coverageReview) {
+export function verifyTaskboardRunPage(url, cookie, directory, noModelReview, coverageReview, customScript) {
   return withTaskboard(url, cookie, async (page, board) => {
     const title = 'Browser delivery task'
     const workflow = noModelReview ? { template: 'task.quick.v1' } : { template: 'task.standard.v1', steps: ['Read notes', 'Review changes'] }
-    const projectScript = noModelReview ? 'test' : 'build'
+    const projectScript = customScript ?? (noModelReview ? 'test' : 'build')
+    const scriptLabel = customScript ? customScript.manager + ' run ' + customScript.name : 'npm run ' + projectScript
+    const checkId = customScript ? 'project-script' : 'npm-' + projectScript
     const label = noModelReview ? 'Quick task · v1' : 'Standard task · v1'
     const detail = await createTask(page, board, directory, title, 'Run the browser delivery fixture', { riskLevel: 'low', checkTrackedDiff: true, workflow, projectScript })
     await detail.getByRole('button', { name: 'Start run' }).click()
@@ -299,7 +377,7 @@ export function verifyTaskboardRunPage(url, cookie, directory, noModelReview, co
     await start.getByText(directory, { exact: true }).waitFor()
     await start.locator('p', { hasText: 'Risk level · Low' }).waitFor()
     await start.locator('p', { hasText: label }).waitFor()
-    await start.getByText('Project validation script · npm run ' + projectScript).waitFor()
+    await start.getByText('Project validation script · ' + scriptLabel).waitFor()
     if (workflow.steps) assert.deepEqual(await start.getByRole('list').filter({ hasText: 'Read notes' }).getByRole('listitem').allTextContents(), workflow.steps)
     await start.locator('input[type=file]').setInputFiles({ name: 'criteria.txt', mimeType: 'text/plain', buffer: Buffer.from('Keep the browser fixture working') })
     await start.getByText(/deepseek-official · deepseek-v4-pro/).waitFor()
@@ -332,8 +410,8 @@ export function verifyTaskboardRunPage(url, cookie, directory, noModelReview, co
     assert.equal(file.suggestedFilename(), 'task-spec.json')
     const spec = JSON.parse(await readFile(await file.path(), 'utf8'))
     assert.deepEqual([spec.format, spec.version, spec.revision, spec.workspace.directory], ['dsh-task-spec', 1, 1, directory])
-    assert.equal(spec.projectScript, projectScript)
-    assert.equal(sent.postDataJSON().payload.args.request.confirmedScript, projectScript)
+    assert.deepEqual(spec.projectScript, projectScript)
+    assert.deepEqual(sent.postDataJSON().payload.args.request.confirmedScript, projectScript)
     assert.deepEqual(spec.input.workflow, workflow)
     assert.deepEqual(spec.input.materials, [{ reference: 'criteria.txt', text: 'Keep the browser fixture working' }])
     assert.deepEqual(spec.route, sent.postDataJSON().payload.args.request.confirmedRoute)
@@ -354,10 +432,11 @@ export function verifyTaskboardRunPage(url, cookie, directory, noModelReview, co
     assert.equal(downloaded.suggestedFilename(), 'taskboard-review.json')
     const summary = JSON.parse(await readFile(await downloaded.path(), 'utf8'))
     assert.equal(summary.format, 'dsh-taskboard-review')
+    if (customScript) assert.ok(!JSON.stringify(summary).includes(customScript.name))
     assert.equal(summary.projectChecks[0].status, 'passed')
-    const scriptCheck = summary.projectChecks.find(result => result.check === 'npm-' + projectScript)
-    assert.deepEqual(scriptCheck, { check: 'npm-' + projectScript, status: noModelReview ? 'passed' : 'failed', exitCode: noModelReview ? 0 : 17, reason: null })
-    const scriptSection = review.locator('section').filter({ has: page.getByRole('heading', { name: 'npm run ' + projectScript }) })
+    const scriptCheck = summary.projectChecks.find(result => result.check === checkId)
+    assert.deepEqual(scriptCheck, { check: checkId, status: noModelReview ? 'passed' : 'failed', exitCode: noModelReview ? 0 : 17, reason: null })
+    const scriptSection = review.locator('section').filter({ has: page.getByRole('heading', { name: scriptLabel }) })
     await scriptSection.getByText('Exit code ' + String(scriptCheck.exitCode), { exact: true }).waitFor()
     assert.doesNotMatch(JSON.stringify(summary), /notes\.txt|Synchronize the details|reviewed browser work/)
     assert.equal(await review.getByRole('region', { name: 'Human decision' }).count(), 0)
@@ -594,11 +673,11 @@ export async function editSharedRequirements(url, keys, projectId) {
       return { page, card }
     }))
     const [first, second] = editors
-    await first.card.getByLabel('Workflow').selectOption('task.standard.v1')
-    await first.card.getByLabel('Optional steps (one per line)').fill('Read the goal\nCheck the result')
+    await first.card.getByLabel('Workflow').selectOption('task.milestone.v1')
+    await first.card.getByLabel('Stage goals (one per line)').fill('Read the goal\nCheck the result')
     await first.card.getByLabel('Workflow').selectOption('task.quick.v1')
-    await first.card.getByLabel('Workflow').selectOption('task.standard.v1')
-    assert.equal(await first.card.getByLabel('Optional steps (one per line)').inputValue(), 'Read the goal\nCheck the result')
+    await first.card.getByLabel('Workflow').selectOption('task.milestone.v1')
+    assert.equal(await first.card.getByLabel('Stage goals (one per line)').inputValue(), 'Read the goal\nCheck the result')
     await first.card.getByRole('textbox', { name: 'Goal', exact: true }).fill('First editor revision')
     await second.card.getByRole('textbox', { name: 'Goal', exact: true }).fill('Second editor revision')
     await first.card.getByRole('button', { name: 'Save requirements' }).click()
@@ -609,7 +688,7 @@ export async function editSharedRequirements(url, keys, projectId) {
     await second.page.getByRole('button', { name: 'Refresh' }).click()
     await second.card.getByRole('paragraph').filter({ hasText: /^First editor revision$/ }).waitFor()
     await second.card.locator('summary').click()
-    assert.equal(await second.card.getByLabel('Optional steps (one per line)').inputValue(), 'Read the goal\nCheck the result')
+    assert.equal(await second.card.getByLabel('Stage goals (one per line)').inputValue(), 'Read the goal\nCheck the result')
     await second.card.getByLabel('Workflow').selectOption('task.quick.v1')
     await second.card.getByRole('textbox', { name: 'Goal', exact: true }).fill('Both editors reviewed the goal')
     await second.card.getByRole('button', { name: 'Save requirements' }).click()

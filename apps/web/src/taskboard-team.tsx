@@ -11,7 +11,8 @@ const en = {
   denied: 'Access denied. Check your member key and project role.', conflict: 'Task changed. Refresh before editing.',
   failed: 'Could not load or save. Try again.', reload: 'Refresh', save: 'Save requirements', comment: 'Add comment',
   riskLevel: 'Risk level', unspecified: 'Unspecified', low: 'Low', medium: 'Medium', high: 'High',
-  workflow: 'Workflow', 'task.quick.v1': 'Quick task · v1', 'task.standard.v1': 'Standard task · v1', steps: 'Optional steps (one per line)',
+  workflow: 'Workflow', 'task.quick.v1': 'Quick task · v1', 'task.standard.v1': 'Standard task · v1',
+  'task.milestone.v1': 'Milestone plan · v1', milestoneSteps: 'Stage goals (one per line)', steps: 'Optional steps (one per line)',
   constraints: 'Constraints', description: 'Goal', name: 'Task title', acceptance: 'Acceptance criteria (one per line)', empty: 'No visible tasks.',
   projects: 'Projects', operator: 'Operator', runtime: 'Run', member: 'Member', viewer: 'Viewer', editor: 'Editor', signedIn: 'Account',
   backlog: 'Backlog', todo: 'To do', in_progress: 'In progress', in_review: 'In review', blocked: 'Blocked', done: 'Done', canceled: 'Canceled',
@@ -20,7 +21,8 @@ const zh: Record<keyof typeof en, string> = {
   title: '团队任务看板', signIn: '登录', key: '成员密钥', signOut: '退出登录', choose: '选择项目', denied: '访问被拒绝，请核对成员密钥和项目角色。',
   conflict: '任务已变更，请刷新后再编辑。', failed: '读取或保存失败，请重试。', reload: '刷新', save: '保存需求', comment: '添加评论',
   riskLevel: '风险等级', unspecified: '未指定', low: '低', medium: '中', high: '高',
-  workflow: '工作流', 'task.quick.v1': '快速任务 · v1', 'task.standard.v1': '常规任务 · v1', steps: '执行步骤（可选，每行一步）',
+  workflow: '工作流', 'task.quick.v1': '快速任务 · v1', 'task.standard.v1': '常规任务 · v1',
+  'task.milestone.v1': '里程碑计划 · v1', milestoneSteps: '阶段目标（每行一项）', steps: '执行步骤（可选，每行一步）',
   constraints: '约束', description: '目标', name: '任务标题', acceptance: '验收标准（每行一项）', empty: '暂无可见任务。', projects: '项目', operator: '操作者', runtime: '执行', member: '成员',
   viewer: '只读成员', editor: '编辑者', signedIn: '账号', backlog: '储备', todo: '待办', in_progress: '进行中', in_review: '待验收',
   blocked: '阻塞', done: '完成', canceled: '已取消',
@@ -38,7 +40,7 @@ function TaskCard({ item, editor, busy, save }: {
 }) {
   const { task, comments } = item
   const [template, setTemplate] = useState<string>(task.workflow?.template ?? '')
-  const [steps, setSteps] = useState(task.workflow?.template === 'task.standard.v1' ? task.workflow.steps.join('\n') : '')
+  const [steps, setSteps] = useState(task.workflow && 'steps' in task.workflow ? task.workflow.steps.join('\n') : '')
   const submit = (event: FormEvent<HTMLFormElement>, action: 'edited' | 'commented') => {
     event.preventDefault()
     save(task, event.currentTarget, action)
@@ -46,7 +48,7 @@ function TaskCard({ item, editor, busy, save }: {
   return <article><header><h2>{task.title}</h2><span>{t[task.status]}</span></header><p>{task.description}</p>
     {task.riskLevel && <p><strong>{t.riskLevel}</strong> · {t[task.riskLevel]}</p>}
     {task.workflow && <p><strong>{t.workflow}</strong> · {t[task.workflow.template]}</p>}
-    {task.workflow?.template === 'task.standard.v1' && task.workflow.steps.length > 0 &&
+    {task.workflow && 'steps' in task.workflow && task.workflow.steps.length > 0 &&
       <ol>{task.workflow.steps.map((step, index) => <li key={index}>{step}</li>)}</ol>}
     {task.constraints && <p><strong>{t.constraints}</strong><br />{task.constraints}</p>}
     <ul>{task.acceptance.map((text, index) => <li key={index}>{text}</li>)}</ul>
@@ -59,15 +61,17 @@ function TaskCard({ item, editor, busy, save }: {
           <option value="">{t.unspecified}</option>
           <option value="task.quick.v1">{t['task.quick.v1']}</option>
           <option value="task.standard.v1">{t['task.standard.v1']}</option>
+          <option value="task.milestone.v1">{t['task.milestone.v1']}</option>
         </select></label>
-        {template === 'task.standard.v1' && <label>{t.steps}<textarea name="steps"
-          value={steps} onChange={(event) => { setSteps(event.target.value) }} /></label>}
+        {(template === 'task.standard.v1' || template === 'task.milestone.v1') && <label>{template === 'task.milestone.v1' ? t.milestoneSteps : t.steps}
+          <textarea name="steps" required={template === 'task.milestone.v1'}
+            value={steps} onChange={(event) => { setSteps(event.target.value) }} /></label>}
         <label>{t.riskLevel}<select name="riskLevel" defaultValue={task.riskLevel ?? ''}>
           <option value="">{t.unspecified}</option>
           {riskLevel.options.map(level => <option key={level} value={level}>{t[level]}</option>)}
         </select></label>
         <label>{t.acceptance}<textarea name="acceptance" defaultValue={task.acceptance.join('\n')} /></label>
-        <button disabled={busy}>{t.save}</button>
+        <button disabled={busy || (template === 'task.milestone.v1' && !steps.trim())}>{t.save}</button>
       </form></details>}
     {comments.map((entry, index) => <p key={index}><b>{entry.author ?? t[entry.actor]}</b> · {entry.text}</p>)}
     {editor && <form onSubmit={(event) => { submit(event, 'commented') }}>
@@ -116,7 +120,7 @@ function TeamPage() {
       return typeof field === 'string' ? field : ''
     }
     const template = text('workflow')
-    const workflow = template === 'task.standard.v1' ? { template, steps: text('steps').split('\n').map(s => s.trim()).filter(Boolean) }
+    const workflow = template === 'task.standard.v1' || template === 'task.milestone.v1' ? { template, steps: text('steps').split('\n').map(s => s.trim()).filter(Boolean) }
       : template === 'task.quick.v1' ? { template } : null
     const fields = action === 'commented' ? { text: text('text') } : { requirements: {
       title: text('title'), description: text('description'), constraints: text('constraints'), riskLevel: text('riskLevel') || null,

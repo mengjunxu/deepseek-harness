@@ -157,6 +157,15 @@ function makeAgent() {
           watcher.close()
         }
       }
+      const toolSession = process.env.MOCK_TOOL_SESSION ?? params.sessionId
+      if (process.env.MOCK_TOOL_ACTIVITY === '1') {
+        for (const kind of ['execute', 'edit', 'delete', 'move', 'read', 'other'] as const) {
+          await conn.notify(methods.client.session.update, { sessionId: toolSession,
+            update: { sessionUpdate: 'tool_call', toolCallId: kind, title: 'private tool details', kind, status: 'pending' } })
+          await conn.notify(methods.client.session.update, { sessionId: toolSession,
+            update: { sessionUpdate: 'tool_call_update', toolCallId: kind, status: 'completed' } })
+        }
+      }
       if (WANT_PERMISSION) {
         // Ask the client to approve before answering; honor its decision. Under
         // MOCK_NO_ALLOW the only options are reject-shaped, so an `allow`-policy
@@ -168,7 +177,7 @@ function makeAgent() {
             { optionId: 'no', name: 'Reject', kind: 'reject_once' as const },
           ]
         const decision = await conn.request(methods.client.session.requestPermission, {
-          sessionId: params.sessionId,
+          sessionId: toolSession,
           toolCall: {
             toolCallId: 'mock-call',
             title: 'mock side effect',

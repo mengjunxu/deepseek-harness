@@ -3,7 +3,7 @@ import { observeSavedMacosProcessScope, type DeepSeekHarness, type NotificationS
 import { createHash } from 'node:crypto'
 import { brandString } from '@deepseek-ai/dsh-brand'
 import { z } from 'zod'
-import { runSessionEvent, scriptOutcome, type RuntimeBinding, type TaskRun, type TurnOutcome } from './execution-domain.ts'
+import { nativeActivity, runSessionEvent, scriptOutcome, type RuntimeBinding, type TaskRun, type TurnOutcome } from './execution-domain.ts'
 import type { TaskExecutions } from './execution.ts'
 import { createTaskRuntime, type TaskRuntimeOptions } from './runtime.ts'
 import type { RunStops } from './stop.ts'
@@ -304,6 +304,10 @@ export class RunDispatch {
     if (request.tool === 'taskboard/read') {
       taskReadArgs.parse(request.args)
       return this.options.executions.inspectForTool(owner)
+    }
+    if (request.tool === 'taskboard/native-activity') {
+      await this.options.executions.recordNativeActivity(owner, nativeActivity.parse(request.args))
+      return {}
     }
     const id = toolCommandId(owner, request.callId)
     if (request.tool === 'taskboard/script-result') {

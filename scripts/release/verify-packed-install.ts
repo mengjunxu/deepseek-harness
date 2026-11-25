@@ -26,11 +26,20 @@ import { capture, isEntry } from './process.ts'
 import { packedIdentity } from './tarball.ts'
 import { verifyInstalledProductIsolation } from './installed-product-isolation.ts'
 
+function nativeProbes(executor: 'codex' | 'codely'): string[][] {
+  const flag = '--native-' + executor
+  return [[flag], [flag, '--native-file-write'], [flag, '--native-file-deny']]
+}
+
 const taskboardScenarios = new Map<string, string[][]>([
   ['history', [[]]],
   ['backup', [['--backup']]],
   ['openai', [['--openai-deployment']]],
   ['validation', [['--no-model-review'], ['--browser-run'], ['--script-scope']]],
+  ['native-executors', nativeProbes('codex')],
+  ['native-codely', nativeProbes('codely')],
+  ['milestones', [['--milestone-plan']]],
+  ['custom-scripts', [['--custom-npm'], ['--custom-pnpm']]],
   ['review', [['--reviewed-repair']]],
 ])
 
@@ -108,12 +117,14 @@ function main(): void {
   const consumerRoot = mkdtempSync(join(tmpdir(), `dsh-packed-${family.id}-`))
   try {
     const localPackages = Object.fromEntries([...packed].map(([name, artifact]) => [name, artifact.url]))
+    const nativeAdapter = probe === 'native-executors' ? '@deepseek-ai/dsh-subagent-codex'
+      : probe === 'native-codely' ? '@deepseek-ai/dsh-subagent-acp' : undefined
     writeFileSync(join(consumerRoot, 'package.json'), `${JSON.stringify({
       name: `dsh-packed-install-${family.id}`,
       version: '0.0.0',
       private: true,
       ...(probe === undefined ? { dependencies: localPackages } : {
-        dependencies: { [entry.packageName]: expected.url },
+        dependencies: { [entry.packageName]: expected.url, ...(nativeAdapter && { [nativeAdapter]: localPackages[nativeAdapter] }) },
         overrides: localPackages,
       }),
     }, null, 2)}\n`)

@@ -233,11 +233,11 @@ function fakeChild(options: FakeChildOptions = {}): FakeChild {
   }
 }
 
-function defaultWire(child: FakeChild): CodexAppServerWire {
+function defaultWire(child: FakeChild, observe?: (kind: string) => void): CodexAppServerWire {
   return new CodexAppServerWire(
     child.handle.stdout!,
     child.handle.stdin!,
-    DEFAULT_CODEX_PERMISSION_MODE,
+    DEFAULT_CODEX_PERMISSION_MODE, undefined, observe,
   )
 }
 
@@ -255,12 +255,12 @@ function runSpec(
   }
 }
 
-async function initializeWire(): Promise<{
+async function initializeWire(observe?: (kind: string) => void): Promise<{
   readonly child: FakeChild
   readonly wire: CodexAppServerWire
 }> {
   const child = fakeChild()
-  const wire = defaultWire(child)
+  const wire = defaultWire(child, observe)
   wire.start()
   const initializing = wire.initialize(new AbortController().signal)
   const initialize = await child.peer.nextMethod('initialize')
@@ -1036,7 +1036,8 @@ describe('CodexAppServerWire', () => {
   })
 
   it('answers all five unattended request classes without granting authority', async () => {
-    const { child, wire } = await initializeWire()
+    const observe = vi.fn()
+    const { child, wire } = await initializeWire(observe)
     const result = wire.runTurn(['task'], new AbortController().signal)
     const turnStart = await child.peer.nextMethod('turn/start')
 
@@ -1130,6 +1131,7 @@ describe('CodexAppServerWire', () => {
       })
       expect(wire.collectDiagnostic()).toBe(serverRequest.diagnostic)
     }
+    expect(observe.mock.calls.flat()).toEqual(['cancelled', 'denied', 'denied', 'cancelled', 'denied', 'denied'])
     expect(wire.collectDiagnostic()).not.toContain('/private/secret.txt')
 
     child.peer.send(agentMessage('answer', 'final_answer'), turnCompleted('completed'))
@@ -1320,7 +1322,8 @@ describe('CodexAppServerWire', () => {
   })
 
   it('does not retain a diagnostic from a mismatched provisional request', async () => {
-    const { child, wire } = await initializeWire()
+    const observe = vi.fn()
+    const { child, wire } = await initializeWire(observe)
     const result = wire.runTurn(['task'], new AbortController().signal)
     const turnStart = await child.peer.nextMethod('turn/start')
     child.peer.send({
@@ -1333,9 +1336,11 @@ describe('CodexAppServerWire', () => {
       },
     })
     await child.peer.nextResponse('provisional-approval')
+    expect(observe).not.toHaveBeenCalled()
     child.peer.respond(turnStart, { turn: { id: 'turn-response' } })
     await expect(result).rejects.toThrow('did not match the active turn')
     expect(wire.collectDiagnostic()).toBeUndefined()
+    expect(observe).not.toHaveBeenCalled()
     wire.close()
   })
 

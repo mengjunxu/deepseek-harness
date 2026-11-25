@@ -1,5 +1,6 @@
 /** Browser-safe Taskboard identities, operator commands and read models. */
 import type { SessionId, SessionSeq } from '@deepseek-ai/dsh-session/types'
+import type { NativeActivityKind } from '@deepseek-ai/dsh-subagent'
 import type { Branded } from '@deepseek-ai/dsh-brand'
 
 /** One Taskboard project. */
@@ -47,7 +48,7 @@ export interface MemberBoard {
 }
 
 /** Package script selected by the project operator for delivery validation. */
-export type ProjectScript = 'test' | 'build'
+export type ProjectScript = 'test' | 'build' | { manager: 'npm' | 'pnpm'; name: string }
 
 /** Operator-selected project configuration. */
 export interface TaskboardProject {
@@ -132,8 +133,12 @@ export interface TaskboardSdkRoute {
   model: string
 }
 
+/** One-shot executor registered by a deployment SDK overlay. */
+export type NativeTaskExecutor = 'codex' | 'codely'
+
 /** Operator-visible configuration for launching a Run without exposing credentials. */
 export interface TaskboardExecutionRoute {
+  nativeExecutors?: NativeTaskExecutor[] | undefined
   projectScript?: ProjectScript | undefined
   state: 'unconfigured' | 'disabled' | 'configured'
   provider: string | null
@@ -143,8 +148,9 @@ export interface TaskboardExecutionRoute {
 /** Risk level specified by the person editing the requirements. */
 export type TaskRiskLevel = 'low' | 'medium' | 'high'
 
-/** Versioned execution template selected for a task revision. Standard steps are in operator-specified order. */
-export type TaskWorkflow = { template: 'task.quick.v1' } | { template: 'task.standard.v1'; steps: string[] }
+/** Versioned execution template selected for a task revision. Milestone steps are the ordered goals requiring separate human acceptance. */
+export type TaskWorkflow = { template: 'task.quick.v1' }
+  | { template: 'task.standard.v1'; steps: string[] } | { template: 'task.milestone.v1'; steps: string[] }
 
 /** Editable requirements at one revision. */
 export interface TaskRequirements {
@@ -247,6 +253,8 @@ export interface TaskStopCommand extends TaskCommand {
 
 /** Queue a fresh Session or explicitly reopen the preceding Run's Session in the same workspace. */
 export interface TaskStartCommand extends TaskCommand {
+  /** Omission authorizes the SDK model loop. A native selection authorizes one fresh invocation. */
+  nativeExecutor?: NativeTaskExecutor | undefined
   /** Provider and model shown for confirmation, when supplied by the caller. */
   confirmedRoute?: TaskboardSdkRoute | undefined
   confirmedScript?: ProjectScript | undefined
@@ -271,6 +279,8 @@ export interface TaskRunInputSnapshot {
   constraints?: string
   riskLevel?: TaskRiskLevel
   workflow?: TaskWorkflow
+  /** One-based stage assigned to this Run in the saved milestone plan. */
+  milestone?: number
   acceptance: string[]
   reviewFeedback: string | null
   materials: TaskInputMaterial[]
@@ -324,6 +334,8 @@ export interface TaskRunCheckpoint {
 
 /** Execution projection for the project detail page. */
 export interface TaskRunSummary {
+  /** Counts of native protocol observations collected before the executor returned. */
+  nativeActivity?: Partial<Record<NativeActivityKind, number>>
   /** Operator start command and its route choice, when recorded by the admitting Host. */
   authorization?: TaskRunAuthorization
   /** Source of a retry or continuation when captured at admission. */
@@ -362,7 +374,7 @@ export interface TaskRunAuthorization {
   commandId: CommandId
   authorizedAt: string
   taskVersion: number
-  executor: 'dsh-sdk'
+  executor: 'dsh-sdk' | NativeTaskExecutor
   routeSelection: 'operator-confirmed' | 'deployment-default'
   scope: 'queue-once' | 'when-ready-once'
 }
@@ -426,7 +438,7 @@ export interface DeliveryCodeSnapshot {
 
 /** Deterministic Host check attached to one sealed delivery fingerprint. */
 export interface ValidationResult {
-  check: 'git-diff-check' | 'npm-test' | 'npm-build'
+  check: 'git-diff-check' | 'npm-test' | 'npm-build' | 'project-script'
   snapshot: string
   status: 'passed' | 'failed' | 'not-run'
   observedAt: string | null
@@ -475,6 +487,9 @@ export interface DeliveryVerification {
 
 /** Full evidence and code inventory for an immutable Delivery. */
 export interface TaskDeliveryDetail extends DeliverySummary {
+  /** Stage of the original plan reviewed by this delivery. */
+  milestone?: { position: number; total: number; goal: string }
+
   /** Project checks observed by the Host, in execution order. */
   validationResults: ValidationResult[]
   /** A null status means the sealing Host did not record a model review decision. */
@@ -508,6 +523,9 @@ export interface TaskReviewCommand extends TaskCommand, Omit<ReviewSummary, 'com
 
 /** Task detail with ordered activity and requirements history. */
 export interface TaskDetail {
+  /** Stage offered for a new Run of the current milestone revision. */
+  nextMilestone?: number
+
   task: TaskView
   revisions: TaskRevision[]
   activity: TaskActivity[]

@@ -8,7 +8,7 @@ const text = z.string().trim().min(1)
 
 /** Runtime-identified tool call offered to the Host. */
 export const hostToolRequest = z.strictObject({
-  sessionId: text, callId: text, tool: z.enum(['taskboard/read', 'taskboard/update', 'taskboard/submit-delivery', 'taskboard/script-result']), args: z.unknown(),
+  sessionId: text, callId: text, tool: z.enum(['taskboard/read', 'taskboard/update', 'taskboard/submit-delivery', 'taskboard/script-result', 'taskboard/native-activity']), args: z.unknown(),
 })
 
 /** The read tool takes no arguments. */
@@ -17,7 +17,7 @@ export const taskReadArgs = z.strictObject({})
 /** The read result uses the active Run's confirmed requirements. */
 export const taskReadResult = z.strictObject({
   title: text, description: z.string(), constraints: text.optional(), riskLevel: riskLevel.optional(),
-  workflow: workflow.optional(),
+  workflow: workflow.optional(), milestone: z.number().int().positive().optional(),
   acceptance: z.array(text), revision: version, version,
 })
 

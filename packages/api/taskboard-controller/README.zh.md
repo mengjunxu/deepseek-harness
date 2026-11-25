@@ -74,6 +74,14 @@ Web Host 通过已认证的 `taskboard` Remote 命名空间提供项目绑定、
 ```
 
 <a id="upgrade-or-roll-back"></a>
+### 选择原生执行器
+
+将 Codex 或 ACP 适配器安装在 SDK Loader 可解析的位置。在 Web Host 上把 `execution.nativeExecutors.codex` 或 `execution.nativeExecutors.codely` 设为对应 SDK 补丁的绝对路径。每份补丁按相应名称注册一个 Provider。Codex 使用 `@deepseek-ai/dsh-subagent-codex`，设置 `permissionMode: never`。Codely 使用 `@deepseek-ai/dsh-subagent-acp`，配置 `providerName: codely`、已安装的 `codely` 命令、`--experimental-acp`、`--path-policy strict` 和 `permission: reject`。工作台要求适配器声明 `usesParentCwd`，若 ACP 部署覆盖工作目录，会在启动子进程前拒绝执行。原生模型、凭据和文件权限由该部署配置。
+
+在启动窗口选择执行器，或调用 `startRun` 时一起传入执行器名称 `nativeExecutor` 和 `confirmedRoute`。Host 保存本次选择，并在派发时再次核对补丁内容。每次授权启动一个新的原生会话，使用 SDK 记录的输入。结构化交付进入项目检查和人工验收。适配器不可用、执行失败或报告格式无效都会使 Run 失败。停止后可通过新的 Run 继续任务。
+
+原生适配器返回后，SDK 会在校验交付前把工具和权限计数写入当前 Run。Host 重启和备份恢复后可继续查看。SDK 中断时可能来不及保存摘要。
+
 ### 升级或回退
 
 等待活动 Run 退出。下载工作台备份后关闭使用该数据库的全部 Web Host。复制 Harness home 下整个 `taskboard` 目录，包括仍然存在的 SQLite 辅助文件，并单独保存配置的 Session 根目录、工作目录和部署补丁。先在独立本地实例中验证升级。将元数据备份恢复到空工作台，继续 Run 前将原 Session 文件放回配置的根目录。版本不受支持时，保留数据库与原 Session 文件，使用升级前的副本重新打开兼容实例。
@@ -104,6 +112,8 @@ review:
 
 任务的可选字段 `constraints` 保存操作者给执行者的约束。编辑时省略该字段会保留当前约束，传入空文本可清除约束。修改约束会生成新的需求版本。可选的 `riskLevel` 支持 `low`、`medium` 或 `high`。编辑时省略该字段可保留风险等级，传入 `null` 可清除；修改等级会生成新版本。SDK 输入和 `taskboard_read` 均使用 Run 入队时保存的版本。选择 `task.quick.v1` 可直接执行；选择 `task.standard.v1` 可用有序的 `steps` 数组保存操作者编写的可选步骤。编辑时省略 `workflow` 会保留已有选择，传入 `null` 可清除。Run 输入和 `taskboard_read` 保留所选版本及步骤。
 
+选择 `task.milestone.v1` 时，须在有序的 `steps` 数组中填写至少一个阶段目标。每次授权的 Run 保存从 1 起算的 `milestone`。交付须覆盖当前阶段目标，最终阶段还须覆盖任务验收标准。接受中间阶段会将任务移回待办。退回后再次授权时仍执行原阶段。重新打开任务或修改需求版本会从第一阶段开始。恢复备份时按顺序核对阶段与人工决定。
+
 调用 `runTaskSpec(projectId, taskId, runId)` 可读取受理时的版本化任务说明，包含工作区基线、路线、操作者授权、前序检查点和原始 SDK 输入。历史记录缺少的路线、授权或检查点返回 `null`。
 
 通过 `runInput(projectId, taskId, runId)` 读取某次 Run 已保存的 SDK 输入，包括原需求、退回反馈和选入材料的原文。排队取消或恢复元数据后仍可读取。该操作读取工作台数据库，不向 Session 发送输入。
@@ -116,7 +126,7 @@ review:
 
 通过 `inspectProject` 查看已登记项目的实际路径、分支、commit 和本地变更。继续执行时，`inspectPriorWorkspace` 读取最近一次已结束 Run 的目录。原目录执行会在取得租约后重新核对操作者确认的状态。隔离执行从固定 commit 在配置的 `worktreeRoot` 下创建工作树。
 
-通过 `startRun` 将当前任务版本加入队列。在 `confirmedRoute` 中传入操作者看到的 Provider 和模型，Host 会在入队前拒绝已变更的路线。客户端省略此字段时，使用入队时的项目配置。新 Run 的历史和项目交接文件保留当时的 Provider 与模型。默认新会话模式下，传入 `inspectProject` 的结果确认原目录，或传入 `null` 选择隔离。重试时传入前序 Run ID，并提供本次选定的材料。使用 `mode: resume` 时传入前序 Run 和 `inspectPriorWorkspace` 的结果。原 Session 的目录必须匹配且收件队列为空，SDK 才会接受新输入。Host 的 `execution` 配置提供项目配置引用、绝对路径 `sessionRoot`、Provider 和模型，用于启用入队请求。重放相同请求返回原回执和 Run ID，移除执行配置后仍可以重放。Run 取得执行槽之前可以用 `cancelQueuedRun` 取消。新启动记录保存操作命令、受理时间、授权时的任务版本、SDK 执行器及单次入队范围。Run 详情和项目交接可区分操作者确认与部署选定的模型路线。旧记录未保存授权事实时不补写。
+通过 `startRun` 将当前任务版本加入队列。在 `confirmedRoute` 中传入操作者看到的 Provider 和模型，Host 会在入队前拒绝已变更的路线。客户端省略此字段时，使用入队时的项目配置。新 Run 的历史和项目交接文件保留当时的 Provider 与模型。默认新会话模式下，传入 `inspectProject` 的结果确认原目录，或传入 `null` 选择隔离。重试时传入前序 Run ID，并提供本次选定的材料。使用 `mode: resume` 时传入前序 Run 和 `inspectPriorWorkspace` 的结果。原 Session 的目录必须匹配且收件队列为空，SDK 才会接受新输入。Host 的 `execution` 配置提供项目配置引用、绝对路径 `sessionRoot`、Provider 和模型，用于启用入队请求。重放相同请求返回原回执和 Run ID，移除执行配置后仍可以重放。Run 取得执行槽之前可以用 `cancelQueuedRun` 取消。新启动记录保存操作命令、受理时间、授权时的任务版本、所选执行器及单次入队范围。Run 详情和项目交接可区分操作者确认与部署选定的模型路线。旧记录未保存授权事实时不补写。
 
 使用 `setRelations` 设置同项目父任务和前置任务。父任务用于分组；所有前置任务都经人工验收后才能领取。操作者可用 `startRun` 的 `whenReady: true` 为当前需求授权一次全新隔离执行。等待期间可取消；修改需求或任务关系前先取消授权。失败、退回和恢复备份后重新执行均需新的操作者命令。
 
@@ -126,13 +136,15 @@ review:
 
 注册 npm 项目时可设置 `projectScript: "test"` 或 `"build"`。新启动命令须传入相同的 `confirmedScript`。提交交付时，SDK 在本次 Run 的目录中执行该脚本，遵守 Session 文件策略与 shell 执行器的时限。Host 为同一交付只分配一次脚本执行，并将执行前的代码指纹与封存指纹核对。执行结果未确认或指纹变化时，人工接受须填写理由。交付保留退出状态或失败原因，交接资料省略脚本输出。
 
+操作者也可登记具名脚本，例如 `projectScript: { manager: "pnpm", name: "verify:unit" }`。npm 和 pnpm 脚本名以英文字母或数字开头，可含英文字母、数字、冒号、点、下划线和连字符。开始执行时确认同一包管理器及脚本名。交付保存所选命令，外发覆盖摘要以 `project-script` 标识自定义检查。 SDK 运行检查时关闭 pnpm 的自动依赖安装。
+
 项目注册时启用 `checkTrackedDiff: true` 后，Host 在封存交付时对相对于确认基线的已跟踪变更运行 `git diff --check`，并把结果写入快照。检查失败或未能执行（包括非 Git 目录）时，操作者需在验收反馈中填写接受理由。未跟踪文件仍列在交付清单中。本地 SDK 流程封存的交付在操作者请求审查前，通过 `deliveryDetail.modelReviewStatus` 中记录 `not-requested`；较早交付缺少此字段时返回 `null`。交付详情和项目交接文件通过 `validationResults` 将检查名称、状态与封存的指纹关联。Host 保存观察时间和实际取得的退出码，无法执行时说明是否缺少 Git 基线或有效退出状态。早期交付沿用原有状态。
 
 调用 `reviewDelivery` 时提供当前任务版本、准确的交付 ID、交付版本、需求版本及快照。接受交付要求代码与需求匹配，且每项失败或未执行的验证均有人工豁免理由。退回会将反馈带入下一 Run，并保留原交付和验收记录。重放已提交的等价请求时返回原回执。
 
 通过 `exportHandoff` 分享单个项目的需求版本、Run 摘要、选定材料、交付和验收记录。活动执行退出后，通过 `exportBackup` 下载带版本与 SHA-256 校验值的备份。备份保存工作台记录及 Session 引用，省略凭据、工作区文件、原始工具输出和 Session 日志文件。再次受理执行时，Host 将前序 Run ID、Session ID、需求版本、输入回执及最后观察到的事件保存到 `previousCheckpoint`。项目交接文件包含该引用及新 Run 的 Session ID。早期 Run 沿用当时记录的信息。
 
-`restoreBackup` 仅在空数据库中接受备份。写入前，Host 会核对校验值、格式版本和记录关联。每个 Run 的标题、描述及有序验收条件必须与启动时记录的需求版本一致。恢复的交付必须逐项覆盖这些条件。接受交付须保留对失败或未执行检查的人工豁免，退回交付须保留反馈。排队 Run 恢复为已取消的历史。启动前已取消的 Run 在多次恢复后仍保留历史，无需补回 Session 文件。恢复时不会启动 SDK 或交互。若要继续已恢复的 Run，请把兼容的原 Session 文件放回配置的位置，并确认工作目录。Host 在受理续接和实际启动前核对已记录的输入回执及最后观察到的 Session 事件。请使用包含该进度的副本，或显式新开 Session。恢复时按各任务的启动记录核对先后关系。新开和续接 Session 均须关联上一次实际认领的 Run，即使中间有已取消的排队请求。续接须保留原 Session、工作目录和已记录的 SDK 配置。Host 将每次人工决定与当时的命令核对，并按活动顺序检查每个 Run 的退回意见是否与受理前最后一次决定一致。
+`restoreBackup` 仅在空数据库中接受备份。写入前，Host 会核对校验值、格式版本和记录关联。Host 将每个 Run 与受理时的需求版本核对，并检查授权阶段或整个任务的有序验收条件。恢复的交付必须逐项覆盖这些条件。接受交付须保留对失败或未执行检查的人工豁免，退回交付须保留反馈。排队 Run 恢复为已取消的历史。启动前已取消的 Run 在多次恢复后仍保留历史，无需补回 Session 文件。恢复时不会启动 SDK 或交互。若要继续已恢复的 Run，请把兼容的原 Session 文件放回配置的位置，并确认工作目录。Host 在受理续接和实际启动前核对已记录的输入回执及最后观察到的 Session 事件。请使用包含该进度的副本，或显式新开 Session。恢复时按各任务的启动记录核对先后关系。新开和续接 Session 均须关联上一次实际认领的 Run，即使中间有已取消的排队请求。续接须保留原 Session、工作目录和已记录的 SDK 配置。Host 将每次人工决定与当时的命令核对，并按活动顺序检查每个 Run 的退回意见是否与受理前最后一次决定一致。
 
 Host Adapter 通过 `createTaskRuntime` 创建独占客户端。它在确认的工作目录启动 `sdk` profile，并在 Host 选定的补丁之后加载工作台权限补丁。SDK 握手要求审批、权限预设、沙箱策略、沙箱后端及 Session 持久化服务均已激活。补丁将 JSONL 存储指向 Run 主目录下的 `sessions`。通过 `execution.patches` 指定 profile 补丁的绝对路径，通过 `execution.requestTimeoutMs` 限制等待输入回执的时间。新 Run 按加载顺序保存显式 SDK 补丁文件的内容摘要。Host 在准备启动和受理原 Session 续接时核对这些文件。补丁变更后，需新开 Run 使用更新后的部署。没有摘要的历史记录继续使用原有的路线和路径校验。
 

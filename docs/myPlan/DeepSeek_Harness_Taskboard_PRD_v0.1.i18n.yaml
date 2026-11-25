@@ -1,0 +1,181 @@
+# Bilingual-pair consistency record for DeepSeek_Harness_Taskboard_PRD_v0.1.md (docs/i18n/README.md): per heading
+# section, a hash of its English and Chinese blocks outside code blocks and generated regions.
+# After editing either side, bring the other along and re-record with:
+#   pnpm run verify-translation-pairing --write docs/myPlan/DeepSeek_Harness_Taskboard_PRD_v0.1.md
+/deepseek-harness-taskboard:
+  en: 9bf6657b2b092f6a
+  zh: 4ef0519bd51b72de
+/deepseek-harness-taskboard/overview:
+  en: 49f29dbcca071a21
+  zh: 77b520ca7751e2c3
+/deepseek-harness-taskboard/overview/product-decisions:
+  en: ad763bf74217a01e
+  zh: 52bebc328f52dc94
+/deepseek-harness-taskboard/overview/purpose:
+  en: f680bc0d745bdcfe
+  zh: 3d80ef1ab046c110
+/deepseek-harness-taskboard/contents:
+  en: 206a687f9961990c
+  zh: 4e08e0aa92ecb994
+/deepseek-harness-taskboard/1-reference-products-and-design-decisions:
+  en: bb1627a828c12a69
+  zh: ecb4588e332ead2c
+/deepseek-harness-taskboard/1-reference-products-and-design-decisions/two-implementation-decisions:
+  en: aa1965eed19ae5b8
+  zh: 79c655e2ddb91faf
+/deepseek-harness-taskboard/1-reference-products-and-design-decisions/community-implementation-for-further-evaluation:
+  en: cb4f690dbf6cf2fd
+  zh: a26ac515b5913cc0
+/deepseek-harness-taskboard/2-user-scenarios-and-release-scope:
+  en: eed1c65d1daff75c
+  zh: e0b67df29e037b67
+/deepseek-harness-taskboard/2-user-scenarios-and-release-scope/users-and-needs:
+  en: 6862a63c43a2e1f0
+  zh: 85097c81a24662db
+/deepseek-harness-taskboard/2-user-scenarios-and-release-scope/p0-scope:
+  en: 0d647e0e7ff5e85a
+  zh: 1dac6d608c963d00
+/deepseek-harness-taskboard/2-user-scenarios-and-release-scope/p1-and-p2-scope:
+  en: 508053ff8ed7d7c4
+  zh: fc52b1a1444f8ca8
+/deepseek-harness-taskboard/2-user-scenarios-and-release-scope/priority-rules:
+  en: 602e032751e1caca
+  zh: 908619236ec8d01d
+/deepseek-harness-taskboard/3-workflow-and-interface:
+  en: 738cd0436d37a275
+  zh: 8ee2009654c01f11
+/deepseek-harness-taskboard/4-task-management-requirements:
+  en: 136cff3c43fedc10
+  zh: 6dda3c23b6df0eba
+/deepseek-harness-taskboard/4-task-management-requirements/fr01-project-and-integration-checks:
+  en: 023eacdd0713d092
+  zh: f1b0afc90c722a73
+/deepseek-harness-taskboard/4-task-management-requirements/fr02-task-fields-and-board:
+  en: 2d419f92f351443f
+  zh: 27ddfa8ee1b55849
+/deepseek-harness-taskboard/4-task-management-requirements/fr03-requirement-versions-and-context:
+  en: d34ac00891cb4e89
+  zh: 95b5a3a3509029d6
+/deepseek-harness-taskboard/4-task-management-requirements/fr04-comments-and-history:
+  en: f8a1a71acbd30148
+  zh: 72a8c246911c3edc
+/deepseek-harness-taskboard/4-task-management-requirements/input-and-ui-limits:
+  en: 371343e0e804f45c
+  zh: 099e86468b413d0b
+/deepseek-harness-taskboard/5-execution-and-recovery-requirements:
+  en: f2d6527f8c9f0090
+  zh: 0e4af342d863bcc9
+/deepseek-harness-taskboard/5-execution-and-recovery-requirements/fr05-manual-start-and-queuing:
+  en: 484da5b9727eaeec
+  zh: f00d5fe9fbec9437
+/deepseek-harness-taskboard/5-execution-and-recovery-requirements/fr06-progress-and-pending-interactions:
+  en: e2ce2568c69ee303
+  zh: cb7828c7be8b7067
+/deepseek-harness-taskboard/5-execution-and-recovery-requirements/fr07-stop-and-cancel:
+  en: bc5976ec5c78f3b5
+  zh: ebdb8600a3ff3bce
+/deepseek-harness-taskboard/5-execution-and-recovery-requirements/fr08-retry-and-session-recovery:
+  en: 275a92d62a5b71de
+  zh: 46b3648b73a71c65
+/deepseek-harness-taskboard/5-execution-and-recovery-requirements/fr09-working-directories:
+  en: 2f17db86e083940a
+  zh: e03832c8f7f7b027
+/deepseek-harness-taskboard/6-delivery-and-human-acceptance:
+  en: 7215f3412908d3e0
+  zh: 654ac0adaf12e7ae
+/deepseek-harness-taskboard/6-delivery-and-human-acceptance/fr10-structured-delivery:
+  en: 3068259e2607614f
+  zh: b4b4798050409ba7
+/deepseek-harness-taskboard/6-delivery-and-human-acceptance/fr11-reviewing-changes:
+  en: 0227a71285e5141e
+  zh: 11e839e3be72a081
+/deepseek-harness-taskboard/6-delivery-and-human-acceptance/fr12-accepting-and-returning:
+  en: c6a828d3450c8c71
+  zh: b8e55cac38f11049
+/deepseek-harness-taskboard/6-delivery-and-human-acceptance/fr13-permissions-and-user-questions:
+  en: 979254fc7bd1b0f8
+  zh: 31c9b8cf528d30e7
+/deepseek-harness-taskboard/6-delivery-and-human-acceptance/fr14-archiving-and-changes-after-completion:
+  en: 03046dcd31d3d1d7
+  zh: 0b798d0e1f368822
+/deepseek-harness-taskboard/7-task-states-and-transitions:
+  en: 409850bbc973bdb3
+  zh: 09d6ff8730d9e0cd
+/deepseek-harness-taskboard/7-task-states-and-transitions/automatic-transitions:
+  en: 68ce15bcc8b3fb47
+  zh: 72cd6b4ca550a35e
+/deepseek-harness-taskboard/7-task-states-and-transitions/server-enforced-rules:
+  en: 7c532822f227c87d
+  zh: 39928b6d7be835b8
+/deepseek-harness-taskboard/8-run-states-and-event-consistency:
+  en: 42872c08b64c9190
+  zh: e714fd2ca9fef0ad
+/deepseek-harness-taskboard/8-run-states-and-event-consistency/deriving-product-state-from-harness-events:
+  en: f01c36166d6254a0
+  zh: 28a25b4a67135ce4
+/deepseek-harness-taskboard/8-run-states-and-event-consistency/duplicate-events-and-restart-reconciliation:
+  en: c7755385bbb4abc8
+  zh: 9ae95c5bab3d7c26
+/deepseek-harness-taskboard/8-run-states-and-event-consistency/finalizing-execution:
+  en: 84852fbeb903a924
+  zh: 219930f54a1e0402
+/deepseek-harness-taskboard/9-harness-integration-architecture:
+  en: 0d3409c03d5c7f07
+  zh: 48faef2784acf9a0
+/deepseek-harness-taskboard/9-harness-integration-architecture/data-and-execution-ownership:
+  en: 4c6b01d373b67d75
+  zh: b49c8c00d06e5c6d
+/deepseek-harness-taskboard/9-harness-integration-architecture/plugins-and-mcp:
+  en: e645d788a68b4a08
+  zh: cbcc1ea66c26b14c
+/deepseek-harness-taskboard/10-integration-capabilities-and-validation:
+  en: df31ebc970a757c9
+  zh: 4b7f97c2509ce353
+/deepseek-harness-taskboard/10-integration-capabilities-and-validation/required-g0-integration-validation:
+  en: dda78db4247dd408
+  zh: 87474039c453183b
+/deepseek-harness-taskboard/11-data-model-and-service-responsibilities:
+  en: 4d30c12d97cf2bb7
+  zh: 10a23484ee96c2a5
+/deepseek-harness-taskboard/11-data-model-and-service-responsibilities/relationships-and-constraints:
+  en: 8dcc0eebfc7af0ef
+  zh: 191121ebd3505189
+/deepseek-harness-taskboard/11-data-model-and-service-responsibilities/product-service-commands:
+  en: f071853f4fba3ad3
+  zh: d5be831b048d1704
+/deepseek-harness-taskboard/12-reliability-and-nonfunctional-requirements:
+  en: ab9582a2a271b1b8
+  zh: c899a008044ba271
+/deepseek-harness-taskboard/12-reliability-and-nonfunctional-requirements/minimum-failure-handling:
+  en: 92338fcb4f6021a8
+  zh: 2f64b4be4f4ea290
+/deepseek-harness-taskboard/12-reliability-and-nonfunctional-requirements/export-backup-and-retention:
+  en: a9dcef16b28d67b5
+  zh: 3819a85aa8e47268
+/deepseek-harness-taskboard/13-functional-acceptance-cases:
+  en: fc8490f8d2528a15
+  zh: dc3ac70f19080389
+/deepseek-harness-taskboard/13-functional-acceptance-cases/acceptance-evidence:
+  en: 02990ef487e23e46
+  zh: 2afb6f899991d816
+/deepseek-harness-taskboard/14-recovery-and-control-acceptance-cases:
+  en: d3ae77335ec77364
+  zh: 696e0cf345203c3d
+/deepseek-harness-taskboard/14-recovery-and-control-acceptance-cases/release-quality-criteria:
+  en: 1e88da97b5834be0
+  zh: 5371a10c6f2a537f
+/deepseek-harness-taskboard/15-iteration-plan-and-risks:
+  en: a540485aba32cec7
+  zh: c507c3e56c423aa1
+/deepseek-harness-taskboard/15-iteration-plan-and-risks/major-risks-and-mitigations:
+  en: 3bf0265eaffdd501
+  zh: de6a6a7f9809909f
+/deepseek-harness-taskboard/16-open-decisions-and-review-checklist:
+  en: c6d181864bb71892
+  zh: 03206a64f3d9d4b8
+/deepseek-harness-taskboard/16-open-decisions-and-review-checklist/required-review-conclusions:
+  en: 1a93f70d7ec549f3
+  zh: 740677ad28d4ee94
+/deepseek-harness-taskboard/17-references:
+  en: 9f3d32b7414a0bd8
+  zh: ffe10541aae94b33

@@ -1,0 +1,120 @@
+{
+  "checkedAt": "2026-11-24T17:11:09+08:00",
+  "testedCodeCommit": null,
+  "branch": "codely_bridge",
+  "platform": "macOS arm64",
+  "route": "installed executors with loopback model responses",
+  "installed": {
+    "codex": [
+      {
+        "executor": "codex",
+        "pendingHumanReview": true,
+        "invalidDeliveryRejected": true,
+        "stoppedAndContinuedQueue": true,
+        "missingAdapterRejected": true,
+        "restored": true,
+        "sdkModelRequests": 0
+      },
+      {
+        "executor": "codex",
+        "fileAccess": "write",
+        "nativeActivity": {
+          "command": 1,
+          "completed": 1
+        },
+        "changedFiles": 1,
+        "pendingHumanReview": true
+      },
+      {
+        "executor": "codex",
+        "fileAccess": "deny",
+        "nativeActivity": {},
+        "changedFiles": 0,
+        "pendingHumanReview": true
+      }
+    ],
+    "codely": [
+      {
+        "executor": "codely",
+        "pendingHumanReview": true,
+        "invalidDeliveryRejected": true,
+        "stoppedAndContinuedQueue": true,
+        "missingAdapterRejected": true,
+        "restored": true,
+        "sdkModelRequests": 0
+      },
+      {
+        "executor": "codely",
+        "fileAccess": "write",
+        "nativeActivity": {
+          "otherTool": 1,
+          "allowed": 1,
+          "completed": 1
+        },
+        "changedFiles": 1,
+        "pendingHumanReview": true
+      },
+      {
+        "executor": "codely",
+        "fileAccess": "deny",
+        "nativeActivity": {
+          "otherTool": 1,
+          "denied": 1,
+          "failed": 1
+        },
+        "changedFiles": 0,
+        "pendingHumanReview": true
+      }
+    ]
+  },
+  "assertions": {
+    "reopenedSqlite": true,
+    "backupRestoredToEmptyHost": true,
+    "previousRecordWithoutActivityRestored": true,
+    "mismatchedExecutorBackupRejected": true,
+    "handoffContainsRunCounts": true,
+    "browserCountsMatchRun": true
+  },
+  "tests": {
+    "unit": 166,
+    "webCodex": 3,
+    "docSync": {
+      "passed": 37,
+      "failed": [
+        "doc-typecheck",
+        "markdown links",
+        "translation pairing",
+        "markdown wrap",
+        "repository references"
+      ]
+    }
+  },
+  "sourceSha256": {
+    "apps/web/tests/fixtures/taskboard-smoke.mjs": "f28a864912b737dd3bfccb54773ad9d68ab69e3d9a24c28b6a9341f417648e58",
+    "apps/web/tests/fixtures/taskboard-browser.mjs": "b8988f110e97948923f3009c70535581437c4ac9c848907e716495763d25c288",
+    "apps/web/tests/taskboard.e2e.ts": "ab9f8127c811cfae15f908c1219b59e17cda10ea10b31357be16b5b6caff7e8d",
+    "packages/subagent/subagent/src/index.ts": "7209c9cc779909ff34fc17c23e9830cd5a1385f7d7af36213c22f49cf5b12d50",
+    "packages/subagent/subagent/src/types.ts": "377105dcd4092b65b09445023e9537c32357106f1f2f32d77d8b327f702189e7",
+    "packages/subagent/subagent-acp/src/run.ts": "995ebbf3ed86e4892de11bd6b5fe0d3ec8394fa6a6cb407008f6fbb8c2bdc5d7",
+    "packages/subagent/subagent-codex/src/wire.ts": "8f4a52b4b5b6ac24aa824a8b96ecb90658d957712d91c601c9ee8f7634e8ba44",
+    "packages/subagent/subagent-codex/src/run.ts": "d61269a1643ed0cfa1026c10e1e18d5f4ddd8b82ee4e56c1cbeb58986fe166b1",
+    "packages/api/taskboard-controller/src/dispatch.ts": "99662fe10117842ca83950b142d6586ea3e67bf2d4c2c4c510c0fb9d25628906",
+    "packages/api/taskboard-controller/src/execution.ts": "f6bec2cae0b24597dc9d6aae9b61215981047afa999393ccd91537b4b5d7eb31",
+    "packages/api/taskboard-controller/src/execution-domain.ts": "6b182e4293596ce9ab99187cae74dedfbb3d7dfa0db05c74aff7e30d39743950",
+    "packages/api/taskboard-controller/src/types.ts": "89c6c99282711d0c4129eb0f658adcd8c95f8f9a965b60597775e3016252b7b0",
+    "packages/api/taskboard-controller/src/tool-protocol.ts": "7e693ada466349e2485df0afbaf9955ac92a20824c7bdbfa5e4950fcad40289a",
+    "packages/api/taskboard-controller/src/sdk-native.ts": "e64a5db9cae73316101bf386cf8c2fa4cfefa81fc759bebe9311dd48b4b83b16",
+    "packages/api/taskboard-controller/src/index.ts": "57ce21ac71f0acce990235f8a5cad0f06aef8dcaa2e27c25e9436139886a1bb2",
+    "packages/api/taskboard-controller/src/backup.ts": "ab68e8a8458bc8ad88edccbd627df24ca8b8dc089c48bf03b7c9cbe62aed97ad",
+    "packages/client/ui-taskboard/src/client/RunPanel.tsx": "0be3cf31cb4bc18006893a7e55658394a1dee2633c5921f9e1d05409bd576aa3",
+    "packages/client/ui-taskboard/src/client/locales.ts": "e4a84c84a1b3ce1ee4c0be59bad9955d6e7531eb7e9478e16a5757ce4e24a38e"
+  },
+  "tarballSha256": {
+    "deepseek-ai-dsh-api-taskboard-controller-0.1.7-rc.2.tgz": "a3dcbdf217b6f1ab8f8483c97d61421107416a797f974265387d4bfcbe99f06b",
+    "deepseek-ai-dsh-client-ui-taskboard-0.1.7-rc.2.tgz": "c8228bbd4de47f65e126011e3f44e37a479b401df994b32d6f68d0c6e26c4e3b",
+    "deepseek-ai-dsh-subagent-0.1.7-rc.2.tgz": "a35589a742400e252fffeda5a02d07ad4b631a715aed29e701490bee88d7a4e8",
+    "deepseek-ai-dsh-subagent-acp-0.1.7-rc.2.tgz": "db80857f4e049934c6246c1360ddc98c9758d357b227b465b33ad28fbb81b308",
+    "deepseek-ai-dsh-subagent-codex-0.1.7-rc.2.tgz": "23273b9c1cc2d93f00f841f003b22fe962e3bf7a02fbcc3b865e4aa78281b905",
+    "deepseek-ai-dsh-web-frontend-0.1.7-rc.2.tgz": "eb5add26e02fb9de3fbfdb4eda980d7d7fdd17eee0d3a73baf338e0c298a607c"
+  }
+}

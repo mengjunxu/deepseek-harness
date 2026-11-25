@@ -1,6 +1,20 @@
-# DSH ChatGPT 集成工程进度总结（截至 2026-11-23）
+# DSH ChatGPT 集成工程进度总结（截至 2026-11-25）
 
-本文件是[主实施计划](../docs/workflows/DSH_IMPLEMENTATION_PLAN.md)第 12 节 Checklist 与各任务记录的人工可读叙事投影，回答"完成了什么、已经可以使用什么"。状态权威始终以主计划第 12 节与对应任务记录为准，本文件不另建状态体系；每次重要里程碑后更新本文件。
+本文件是[主实施计划](../docs/workflows/DSH_IMPLEMENTATION_PLAN.zh.md)第 12 节 Checklist 与各任务记录的人工可读叙事投影，回答"完成了什么、已经可以使用什么"。状态权威始终以主计划第 12 节与对应任务记录为准，本文件不另建状态体系；每次重要里程碑后更新本文件。
+
+## 2026-11-25 原生会话续接验证
+
+在本机重启执行器进程后，Codex 持久线程和 Codely 专用 ACP 扩展均找回了首轮问答。Codely 接受未知 ID 时也可返回同一个 ID，恢复必须另行核对历史。工作台继续执行新会话约束。[版本与验收结果](tasks/dsh-p1-native-resume-probe/handoff.md)。
+
+## 2026-11-24 工作台交接
+
+P1-10 自定义 npm / pnpm 脚本已在源码构建和独立安装的 macOS CLI 上验证。npm 检查退出 17 后须由操作者填写理由才能接受；pnpm 检查退出 0。两种交付与人工验收记录均可恢复。详见[当前交接](tasks/dsh-p1-custom-project-scripts/handoff.md)。
+
+P1-12 的[里程碑工作流](tasks/dsh-p1-milestone-workflow/handoff.md)已通过浏览器与 SDK 验证。中间阶段接受后回到待办，退回后的下一次 Run 保留原阶段，最终接受才完成任务。
+
+工作台启动窗口可选择部署启用的 Codex 或 Codely。两条原生路径均已在 macOS 正式 SDK 内对回环模型验证。停止占用租约的 Run 后，队列继续；交付仍须人工验收，授权可以备份恢复。[按 Run 选择执行器的交接与验证](tasks/dsh-p1-native-executor-selection/handoff.md)。当前及历史 Run 可展开[原生工具活动](tasks/dsh-p1-native-run-activity/handoff.md)，查看工具和权限计数。
+
+Codex 和 Codely 的原生工具均在单独工作树中完成了获准写入与拒绝写入验收。验收页可查看对应 Run 的真实 Git 差异，交付继续等待人工决定。[验证记录](tasks/dsh-p1-native-file-evidence/handoff.md)。
 
 ## 2026-11-23 工作台交接
 

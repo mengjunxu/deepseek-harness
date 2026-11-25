@@ -104,7 +104,7 @@ function TaskEditor({ task, t, onClose, onSave }: {
   const [constraints, setConstraints] = useState(task?.constraints ?? '')
   const [riskLevel, setRiskLevel] = useState(task?.riskLevel ?? null)
   const [template, setTemplate] = useState<string>(task?.workflow?.template ?? '')
-  const [steps, setSteps] = useState(task?.workflow?.template === 'task.standard.v1' ? task.workflow.steps.join('\n') : '')
+  const [steps, setSteps] = useState(task?.workflow && 'steps' in task.workflow ? task.workflow.steps.join('\n') : '')
   const [acceptance, setAcceptance] = useState(task?.acceptance.join('\n') ?? '')
   const [priority, setPriority] = useState<TaskRequirements['priority']>(task?.priority ?? 'normal')
   const [labels, setLabels] = useState(task?.labels.join(', ') ?? '')
@@ -117,7 +117,7 @@ function TaskEditor({ task, t, onClose, onSave }: {
     setBusy(true)
     const pieces = (text: string, separator: string) => text.split(separator).map(value => value.trim()).filter(Boolean)
     try {
-      const workflow = template === 'task.standard.v1' ? { template, steps: pieces(steps, '\n') } as const
+      const workflow = template === 'task.standard.v1' || template === 'task.milestone.v1' ? { template, steps: pieces(steps, '\n') } as const
         : template === 'task.quick.v1' ? { template } as const : null
       if (await onSave({ title, description, constraints, riskLevel, workflow, acceptance: pieces(acceptance, '\n'),
         priority, labels: pieces(labels, ',') })) onClose()
@@ -133,9 +133,11 @@ function TaskEditor({ task, t, onClose, onSave }: {
           <option value="">{t('unspecified')}</option>
           <option value="task.quick.v1">{t('task.quick.v1')}</option>
           <option value="task.standard.v1">{t('task.standard.v1')}</option>
+          <option value="task.milestone.v1">{t('task.milestone.v1')}</option>
         </select></label>
-        {template === 'task.standard.v1' && <label>{t('workflowSteps')}
-          <textarea value={steps} onChange={(event) => { setSteps(event.target.value) }} /></label>}
+        {(template === 'task.standard.v1' || template === 'task.milestone.v1') && <label>
+          {t(template === 'task.milestone.v1' ? 'milestoneSteps' : 'workflowSteps')}
+          <textarea required={template === 'task.milestone.v1'} value={steps} onChange={(event) => { setSteps(event.target.value) }} /></label>}
         <label>{t('riskLevel')}<select value={riskLevel ?? ''} onChange={(event) => {
           setRiskLevel(riskLevels.find(level => level === event.target.value) ?? null)
         }}>
@@ -153,7 +155,7 @@ function TaskEditor({ task, t, onClose, onSave }: {
         {invalid && <div role="alert" className={css.alert}>{t('invalidTask')}</div>}
         <div className={css.formEnd}>
           <Button type="button" variant="ghost" onClick={onClose}>{t('cancel')}</Button>
-          <Button type="submit" variant="primary" disabled={busy}>{t('save')}</Button>
+          <Button type="submit" variant="primary" disabled={busy || (template === 'task.milestone.v1' && !steps.trim())}>{t('save')}</Button>
         </div>
       </form>
     </Modal>
@@ -205,6 +207,7 @@ function ProjectEditor({ t, browse, onClose, onSave }: {
   const [branch, setBranch] = useState('')
   const [checkTrackedDiff, setCheckTrackedDiff] = useState(false)
   const [script, setScript] = useState('')
+  const [scriptName, setScriptName] = useState('')
   const [busy, setBusy] = useState(false)
   const [invalid, setInvalid] = useState(false)
   const submit = async (event: FormEvent<HTMLFormElement>) => {
@@ -213,7 +216,13 @@ function ProjectEditor({ t, browse, onClose, onSave }: {
     setInvalid(false)
     setBusy(true)
     try {
-      const project = { title, root, ...(script === 'test' || script === 'build' ? { projectScript: script } as const : {}), ...(checkTrackedDiff && { checkTrackedDiff }), ...(branch.trim() && { baselineBranch: branch }) }
+      let projectScript: TaskboardProject['projectScript']
+      if (script === 'test' || script === 'build') projectScript = script
+      if (script === 'npm' || script === 'pnpm') projectScript = { manager: script, name: scriptName }
+      const project = {
+        title, root, ...(projectScript && { projectScript }),
+        ...(checkTrackedDiff && { checkTrackedDiff }), ...(branch.trim() && { baselineBranch: branch }),
+      }
       if (await onSave(project)) onClose()
     } finally { setBusy(false) }
   }
@@ -232,7 +241,11 @@ function ProjectEditor({ t, browse, onClose, onSave }: {
         <label>{t('baselineBranch')}<Input value={branch} onChange={(event) =>{  setBranch(event.target.value) }} /></label>
         <label>{t('projectScript')}<select value={script} onChange={(event) => { setScript(event.target.value) }}>
           <option value="">{t('noScript')}</option><option value="test">{t('npm-test')}</option><option value="build">{t('npm-build')}</option>
+          <option value="npm">{t('customNpm')}</option><option value="pnpm">{t('customPnpm')}</option>
         </select></label>
+        {(script === 'npm' || script === 'pnpm') && <label>{t('scriptName')}
+          <Input required pattern="[A-Za-z0-9][A-Za-z0-9:._\-]*" value={scriptName} onChange={(event) => { setScriptName(event.target.value) }} />
+        </label>}
         <Checkbox checked={checkTrackedDiff} onChange={setCheckTrackedDiff} label={t('enableGitDiffCheck')} />
         {invalid && <div role="alert" className={css.alert}>{t('invalidProject')}</div>}
         <div className={css.formEnd}>

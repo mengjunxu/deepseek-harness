@@ -6312,8 +6312,16 @@ export const TYPE_API: readonly TypeApiEntry[] = [
     declaration: 'export interface ModelSelectionCapture {\n    readonly current: Readonly<ModelSelection> | undefined;\n    capture(selected: ModelSelection): void;\n}',
   },
   {
+    name: 'NativeActivityKind',
+    declaration: 'export type NativeActivityKind = \'command\' | \'fileChange\' | \'read\' | \'otherTool\' | \'completed\' | \'failed\' | \'declined\' | \'allowed\' | \'denied\' | \'cancelled\';',
+  },
+  {
     name: 'NativeFileApplication',
     declaration: 'export interface NativeFileApplication {\n    readonly id: string;\n    readonly name: string;\n    readonly default: boolean;\n    readonly icon: string | null;\n}',
+  },
+  {
+    name: 'NativeTaskExecutor',
+    declaration: 'export type NativeTaskExecutor = \'codex\' | \'codely\';',
   },
   {
     name: 'NotFutureError',
@@ -6553,7 +6561,7 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   },
   {
     name: 'ProjectScript',
-    declaration: 'export type ProjectScript = \'test\' | \'build\';',
+    declaration: 'export type ProjectScript = \'test\' | \'build\' | {\n    manager: \'npm\' | \'pnpm\';\n    name: string;\n};',
   },
   {
     name: 'ProjectScriptCheck',
@@ -7801,7 +7809,7 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   },
   {
     name: 'SubagentProvider',
-    declaration: 'export interface SubagentProvider {\n    readonly name: string;\n    readonly capabilities: SubagentCapabilities;\n    readonly inheritsParentContext: boolean;\n    readonly agentRouteDefaults?: Readonly<{\n        provider: string;\n        model: string;\n    }>;\n    start(request: ResolvedSubagentStartRequest): Promise<SubagentRun>;\n    prepareContinuable?(request: ContinuableCreateRequest): Promise<ContinuableCreateSpec>;\n}',
+    declaration: 'export interface SubagentProvider {\n    readonly name: string;\n    readonly capabilities: SubagentCapabilities;\n    readonly inheritsParentContext: boolean;\n    readonly usesParentCwd?: boolean;\n    readonly agentRouteDefaults?: Readonly<{\n        provider: string;\n        model: string;\n    }>;\n    start(request: ResolvedSubagentStartRequest): Promise<SubagentRun>;\n    prepareContinuable?(request: ContinuableCreateRequest): Promise<ContinuableCreateSpec>;\n}',
   },
   {
     name: 'SubagentResult',
@@ -7833,7 +7841,7 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   },
   {
     name: 'SubagentStartRequest',
-    declaration: 'export interface SubagentStartRequest {\n    readonly label?: string;\n    readonly prompt: ContentBlock[];\n    readonly parent: Agent;\n    readonly signal: AbortSignal;\n    readonly agentOptions?: AgentOptions;\n    readonly outputSchema?: ObjectJsonSchema;\n    readonly maxDepth?: number;\n    readonly toolFilter?: ToolRestriction;\n    readonly persona?: string;\n}',
+    declaration: 'export interface SubagentStartRequest {\n    readonly onNativeActivity?: (kind: NativeActivityKind) => void;\n    readonly label?: string;\n    readonly prompt: ContentBlock[];\n    readonly parent: Agent;\n    readonly signal: AbortSignal;\n    readonly agentOptions?: AgentOptions;\n    readonly outputSchema?: ObjectJsonSchema;\n    readonly maxDepth?: number;\n    readonly toolFilter?: ToolRestriction;\n    readonly persona?: string;\n}',
   },
   {
     name: 'SubagentStopReason',
@@ -7965,7 +7973,7 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   },
   {
     name: 'TaskboardExecutionRoute',
-    declaration: 'export interface TaskboardExecutionRoute {\n    projectScript?: ProjectScript | undefined;\n    state: \'unconfigured\' | \'disabled\' | \'configured\';\n    provider: string | null;\n    model: string | null;\n}',
+    declaration: 'export interface TaskboardExecutionRoute {\n    nativeExecutors?: NativeTaskExecutor[] | undefined;\n    projectScript?: ProjectScript | undefined;\n    state: \'unconfigured\' | \'disabled\' | \'configured\';\n    provider: string | null;\n    model: string | null;\n}',
   },
   {
     name: 'TaskboardInbox',
@@ -7993,15 +8001,15 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   },
   {
     name: 'TaskDeliveryDetail',
-    declaration: 'export interface TaskDeliveryDetail extends DeliverySummary {\n    validationResults: ValidationResult[];\n    modelReviewStatus: ModelReviewAttempt[\'state\'] | \'not-requested\' | null;\n    reviewRoute: ModelReviewRoute | null;\n    modelReviews: ModelReviewAttempt[];\n    changes: string[];\n    verification: DeliveryVerification[];\n    knownIssues: string[];\n    unfinished: string[];\n    code: DeliveryCodeSnapshot | null;\n}',
+    declaration: 'export interface TaskDeliveryDetail extends DeliverySummary {\n    milestone?: {\n        position: number;\n        total: number;\n        goal: string;\n    };\n    validationResults: ValidationResult[];\n    modelReviewStatus: ModelReviewAttempt[\'state\'] | \'not-requested\' | null;\n    reviewRoute: ModelReviewRoute | null;\n    modelReviews: ModelReviewAttempt[];\n    changes: string[];\n    verification: DeliveryVerification[];\n    knownIssues: string[];\n    unfinished: string[];\n    code: DeliveryCodeSnapshot | null;\n}',
   },
   {
     name: 'TaskDetail',
-    declaration: 'export interface TaskDetail {\n    task: TaskView;\n    revisions: TaskRevision[];\n    activity: TaskActivity[];\n    runs: TaskRunSummary[];\n    deliveries: DeliverySummary[];\n    reviews: ReviewSummary[];\n}',
+    declaration: 'export interface TaskDetail {\n    nextMilestone?: number;\n    task: TaskView;\n    revisions: TaskRevision[];\n    activity: TaskActivity[];\n    runs: TaskRunSummary[];\n    deliveries: DeliverySummary[];\n    reviews: ReviewSummary[];\n}',
   },
   {
     name: 'TaskExecutions',
-    declaration: 'export class TaskExecutions {\n    constructor(private readonly domain: Domain<typeof taskboardDomain>, private readonly maxParallelRuns = 1);\n    active(owner: RuntimeBinding): Promise<TaskRun>;\n    activeRuns(): Promise<{\n        owner: RuntimeBinding;\n        run: TaskRun;\n    }[]>;\n    bindProcessScope(owner: RuntimeBinding, evidence: RunProcessScope): Promise<void>;\n    disconnectedHost(owner: RuntimeBinding): Promise<void>;\n    inspectForTool(owner: RuntimeBinding): Promise<{\n        title: string;\n        description: string;\n        constraints?: string;\n        riskLevel?: TaskRiskLevel;\n        workflow?: TaskWorkflow;\n        acceptance: string[];\n        revision: number;\n        version: number;\n    }>;\n    recordToolUpdate(owner: RuntimeBinding, request: {\n        id: CommandId;\n        expectedVersion: number;\n        action: \'commented\' | \'run-progress\' | \'run-blocked\';\n        text: string;\n    }): Promise<TaskReceipt>;\n    submitDelivery(owner: RuntimeBinding, id: CommandId, submission: DeliverySubmission): Promise<TaskReceipt>;\n    claimProjectScript(owner: RuntimeBinding, id: CommandId, sourceSnapshot: string): Promise<{\n        script: ProjectScript;\n        directory: string;\n    } | null>;\n    recordProjectScript(owner: RuntimeBinding, id: CommandId, outcome: ProjectScriptOutcome): Promise<void>;\n    beginFinalization(owner: RuntimeBinding, outcome: TurnOutcome, observedAfterExit: boolean = false): Promise<boolean>;\n    sealDelivery(owner: RuntimeBinding /* …truncated — full shape in source */',
+    declaration: 'export class TaskExecutions {\n    constructor(private readonly domain: Domain<typeof taskboardDomain>, private readonly maxParallelRuns = 1);\n    active(owner: RuntimeBinding): Promise<TaskRun>;\n    activeRuns(): Promise<{\n        owner: RuntimeBinding;\n        run: TaskRun;\n    }[]>;\n    bindProcessScope(owner: RuntimeBinding, evidence: RunProcessScope): Promise<void>;\n    disconnectedHost(owner: RuntimeBinding): Promise<void>;\n    inspectForTool(owner: RuntimeBinding): Promise<{\n        title: string;\n        description: string;\n        constraints?: string;\n        riskLevel?: TaskRiskLevel;\n        workflow?: TaskWorkflow;\n        milestone?: number;\n        acceptance: string[];\n        revision: number;\n        version: number;\n    }>;\n    recordNativeActivity(owner: RuntimeBinding, counts: NonNullable<TaskRun[\'nativeActivity\']>): Promise<void>;\n    recordToolUpdate(owner: RuntimeBinding, request: {\n        id: CommandId;\n        expectedVersion: number;\n        action: \'commented\' | \'run-progress\' | \'run-blocked\';\n        text: string;\n    }): Promise<TaskReceipt>;\n    submitDelivery(owner: RuntimeBinding, id: CommandId, submission: DeliverySubmission): Promise<TaskReceipt>;\n    claimProjectScript(owner: RuntimeBinding, id: CommandId, sourceSnapshot: string): Promise<{\n        script: ProjectScript;\n        directory: string;\n    } | null>;\n    recordProjectScript(owner: RuntimeBinding, id: CommandId, outcome: ProjectScriptOutcome): Promise<void>;\n    beginFinalizatio /* …truncated — full shape in source */',
   },
   {
     name: 'TaskInputMaterial',
@@ -8069,7 +8077,7 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   },
   {
     name: 'TaskRunAuthorization',
-    declaration: 'export interface TaskRunAuthorization {\n    commandId: CommandId;\n    authorizedAt: string;\n    taskVersion: number;\n    executor: \'dsh-sdk\';\n    routeSelection: \'operator-confirmed\' | \'deployment-default\';\n    scope: \'queue-once\' | \'when-ready-once\';\n}',
+    declaration: 'export interface TaskRunAuthorization {\n    commandId: CommandId;\n    authorizedAt: string;\n    taskVersion: number;\n    executor: \'dsh-sdk\' | NativeTaskExecutor;\n    routeSelection: \'operator-confirmed\' | \'deployment-default\';\n    scope: \'queue-once\' | \'when-ready-once\';\n}',
   },
   {
     name: 'TaskRunCheckpoint',
@@ -8081,15 +8089,15 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   },
   {
     name: 'TaskRunInputSnapshot',
-    declaration: 'export interface TaskRunInputSnapshot {\n    title: string;\n    description: string;\n    constraints?: string;\n    riskLevel?: TaskRiskLevel;\n    workflow?: TaskWorkflow;\n    acceptance: string[];\n    reviewFeedback: string | null;\n    materials: TaskInputMaterial[];\n}',
+    declaration: 'export interface TaskRunInputSnapshot {\n    title: string;\n    description: string;\n    constraints?: string;\n    riskLevel?: TaskRiskLevel;\n    workflow?: TaskWorkflow;\n    milestone?: number;\n    acceptance: string[];\n    reviewFeedback: string | null;\n    materials: TaskInputMaterial[];\n}',
   },
   {
     name: 'TaskRunSummary',
-    declaration: 'export interface TaskRunSummary {\n    authorization?: TaskRunAuthorization;\n    previousCheckpoint?: TaskRunCheckpoint;\n    route?: TaskboardSdkRoute;\n    runId: TaskRunId;\n    previousRun: TaskRunId | null;\n    state: \'queued\' | \'preparing\' | \'running\' | \'finished\' | \'failed\' | \'canceled\' | \'interrupted\';\n    control: \'normal\' | \'stop_requested\' | \'finalizing\';\n    connection: \'connected\' | \'suspect\' | \'disconnected\';\n    stopFailure: StopFailure | null;\n    launchFailure: string | null;\n    revision: number;\n    workspace: string;\n    branch: string | null;\n    sessionId: SessionId;\n    sessionNotIncluded?: true;\n    lastEvent: RunSessionEvent | null;\n    interactions: TaskInteractionSummary[];\n    priorSessionId: SessionId | null;\n    mode: \'fresh\' | \'resume\';\n    whenReady?: true | undefined;\n    materialReferences: string[];\n    inputAttemptedAt: string | null;\n    receipt: string | null;\n    endReason: string | null;\n}',
+    declaration: 'export interface TaskRunSummary {\n    nativeActivity?: Partial<Record<NativeActivityKind, number>>;\n    authorization?: TaskRunAuthorization;\n    previousCheckpoint?: TaskRunCheckpoint;\n    route?: TaskboardSdkRoute;\n    runId: TaskRunId;\n    previousRun: TaskRunId | null;\n    state: \'queued\' | \'preparing\' | \'running\' | \'finished\' | \'failed\' | \'canceled\' | \'interrupted\';\n    control: \'normal\' | \'stop_requested\' | \'finalizing\';\n    connection: \'connected\' | \'suspect\' | \'disconnected\';\n    stopFailure: StopFailure | null;\n    launchFailure: string | null;\n    revision: number;\n    workspace: string;\n    branch: string | null;\n    sessionId: SessionId;\n    sessionNotIncluded?: true;\n    lastEvent: RunSessionEvent | null;\n    interactions: TaskInteractionSummary[];\n    priorSessionId: SessionId | null;\n    mode: \'fresh\' | \'resume\';\n    whenReady?: true | undefined;\n    materialReferences: string[];\n    inputAttemptedAt: string | null;\n    receipt: string | null;\n    endReason: string | null;\n}',
   },
   {
     name: 'TaskStartCommand',
-    declaration: 'export interface TaskStartCommand extends TaskCommand {\n    confirmedRoute?: TaskboardSdkRoute | undefined;\n    confirmedScript?: ProjectScript | undefined;\n    whenReady?: true | undefined;\n    mode?: \'fresh\' | \'resume\';\n    previousRun: TaskRunId | null;\n    confirmation: WorkspaceInspection | null;\n    materials: TaskInputMaterial[];\n}',
+    declaration: 'export interface TaskStartCommand extends TaskCommand {\n    nativeExecutor?: NativeTaskExecutor | undefined;\n    confirmedRoute?: TaskboardSdkRoute | undefined;\n    confirmedScript?: ProjectScript | undefined;\n    whenReady?: true | undefined;\n    mode?: \'fresh\' | \'resume\';\n    previousRun: TaskRunId | null;\n    confirmation: WorkspaceInspection | null;\n    materials: TaskInputMaterial[];\n}',
   },
   {
     name: 'TaskStartReceipt',
@@ -8109,7 +8117,7 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   },
   {
     name: 'TaskWorkflow',
-    declaration: 'export type TaskWorkflow = {\n    template: \'task.quick.v1\';\n} | {\n    template: \'task.standard.v1\';\n    steps: string[];\n};',
+    declaration: 'export type TaskWorkflow = {\n    template: \'task.quick.v1\';\n} | {\n    template: \'task.standard.v1\';\n    steps: string[];\n} | {\n    template: \'task.milestone.v1\';\n    steps: string[];\n};',
   },
   {
     name: 'TaskWorkspacePlan',
@@ -8541,7 +8549,7 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   },
   {
     name: 'ValidationResult',
-    declaration: 'export interface ValidationResult {\n    check: \'git-diff-check\' | \'npm-test\' | \'npm-build\';\n    snapshot: string;\n    status: \'passed\' | \'failed\' | \'not-run\';\n    observedAt: string | null;\n    exitCode: number | null;\n    reason: \'outside-git\' | \'no-exit-code\' | \'unexpected-exit\' | \'unavailable\' | \'timed-out\' | \'interrupted\' | \'sandbox-denied\' | \'unconfirmed\' | \'snapshot-changed\' | null;\n}',
+    declaration: 'export interface ValidationResult {\n    check: \'git-diff-check\' | \'npm-test\' | \'npm-build\' | \'project-script\';\n    snapshot: string;\n    status: \'passed\' | \'failed\' | \'not-run\';\n    observedAt: string | null;\n    exitCode: number | null;\n    reason: \'outside-git\' | \'no-exit-code\' | \'unexpected-exit\' | \'unavailable\' | \'timed-out\' | \'interrupted\' | \'sandbox-denied\' | \'unconfirmed\' | \'snapshot-changed\' | null;\n}',
   },
   {
     name: 'VerifiedWebhookDelivery',

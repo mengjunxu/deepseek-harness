@@ -1528,6 +1528,11 @@
     },
     {
       "doc": "docs/subsystems/subagent.md",
+      "symbol": "NativeActivityKind",
+      "source": "packages/subagent/subagent/src/types.ts"
+    },
+    {
+      "doc": "docs/subsystems/subagent.md",
       "symbol": "SubagentStartRequest",
       "source": "packages/subagent/subagent/src/types.ts"
     },

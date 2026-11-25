@@ -1,0 +1,8 @@
+{"type":"session","version":4,"id":"{{session:1}}","createdAt":1,"cwd":"{{cwd}}","isSeeded":false,"delegationDepth":0}
+{"type":"permission/preset","data":{"preset":"workspace-write"}}
+{"type":"sandbox/mode","data":{"mode":"workspace-write"}}
+{"type":"approval/policy","data":{"policy":"ask"}}
+{"type":"agent/inbox/spliced","data":{"target":"next-turn","start":0,"inserted":[{"content":[{"type":"text","text":"{\"title\":\"Native delivery task\",\"description\":\"Read the confirmed fixture requirements\",\"acceptance\":[\"Synchronize the details\"],\"reviewFeedback\":null,\"materials\":[]}\nComplete this task in the supplied workspace. Return only one JSON object for the human reviewer.\nInclude summary (string), changes, knownIssues, unfinished, files (arrays of strings), and verification.\nUse workspace-relative evidence files outside Git, or an empty files array in Git.\nFor each acceptance criterion in order, include its exact criterion, status (passed, failed, not-run, or not-applicable), and evidence. Explain any check you could not run."}],"source":{"kind":"user"},"role":"user","id":"{{message:1}}"}]}}
+{"type":"turn/start","data":{"turn":1}}
+{"type":"agent/inbox/spliced","data":{"target":"next-turn","start":0,"removedCount":1,"inserted":[]}}
+{"type":"turn/end","data":{"turn":1,"reason":{"kind":"completed"}}}

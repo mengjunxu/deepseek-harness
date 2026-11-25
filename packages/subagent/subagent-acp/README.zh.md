@@ -25,6 +25,8 @@ kind: "package-reference"
 <a id="use-this-package"></a>
 ## 使用本包
 
+省略 `cwd` 时，Provider 声明 `usesParentCwd`。持有父目录租约的调用方可在启动 ACP 进程前核对该值。
+
 当组合需要一个支持 Agent Client Protocol、完全隔离且在进程外运行的子 agent 时，挂载本提供方。常用路径是显式的：挂载 seam、挂载本提供方，并给出一个启动 ACP agent 的命令。
 
 ### 何时选择
@@ -64,6 +66,8 @@ DeepSeek Harness 子进程使用产品启动器和一个显式的绝对路径 `D
 ### 你会得到什么
 
 成功的运行会把子 agent 最终的流式 assistant 文本作为结果输出返回。子 agent 的会话、模型与工具来自子进程自身——父级只提供任务与工作目录。停止原因把 `end_turn` 映射为 `completed`、`max_tokens` 映射为 `max-tokens`、`refusal` 映射为 `refusal`、`cancelled` 映射为 `aborted`，其余值映射为 `error`。已发布运行失败时，部分 assistant 文本保留在 `output`，安全的结构化详情则单独放在 `diagnostic`。
+
+单次调用方可通过 `onNativeActivity` 统计当前 ACP 会话的工具调用、终态报告和权限答复。该回调仅接收固定类别，不包含工具参数、输出、路径或选项标题。
 
 ### 失败与恢复
 

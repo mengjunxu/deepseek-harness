@@ -1,0 +1,178 @@
+# Bilingual-pair consistency record for DSH_IMPLEMENTATION_PLAN.md (docs/i18n/README.md): per heading
+# section, a hash of its English and Chinese blocks outside code blocks and generated regions.
+# After editing either side, bring the other along and re-record with:
+#   pnpm run verify-translation-pairing --write docs/workflows/DSH_IMPLEMENTATION_PLAN.md
+/dsh-v2-codex-and-codely-implementation-plan:
+  en: 66138b28c4d9110d
+  zh: f0d90e1fa2aed283
+/dsh-v2-codex-and-codely-implementation-plan/0-required-first-step-for-implementing-agents:
+  en: 90e43113e3ee0a5c
+  zh: 744971046eae3e0c
+/dsh-v2-codex-and-codely-implementation-plan/1-required-product-goals-and-scope:
+  en: bf9b0388a3904731
+  zh: e65867d27dddd03f
+/dsh-v2-codex-and-codely-implementation-plan/1-required-product-goals-and-scope/1-1-required-experience:
+  en: 98aaae1e2b502402
+  zh: 88929e13eca9267f
+/dsh-v2-codex-and-codely-implementation-plan/1-required-product-goals-and-scope/1-2-exclusions-and-deferred-scope:
+  en: 0d17071699d9d0ab
+  zh: a433ed8fa5784584
+/dsh-v2-codex-and-codely-implementation-plan/1-required-product-goals-and-scope/1-3-limits-to-recheck-during-implementation:
+  en: 0d14f495776fc537
+  zh: 97ffe154e4e3450a
+/dsh-v2-codex-and-codely-implementation-plan/2-recommended-architecture-local-first-modular-monolith:
+  en: d8af6795a135cb34
+  zh: f368ab0225469d06
+/dsh-v2-codex-and-codely-implementation-plan/2-recommended-architecture-local-first-modular-monolith/2-1-existing-stack-and-storage-ownership:
+  en: 542765e1a0476862
+  zh: 8d8a8f00260f6a0d
+/dsh-v2-codex-and-codely-implementation-plan/2-recommended-architecture-local-first-modular-monolith/2-2-reuse-of-existing-modules:
+  en: 4bd4404278a1e691
+  zh: 8b997d29b3b4356f
+/dsh-v2-codex-and-codely-implementation-plan/2-recommended-architecture-local-first-modular-monolith/2-3-processes-and-ownership:
+  en: 6246cf0f7ff71559
+  zh: dac818a0866c03b4
+/dsh-v2-codex-and-codely-implementation-plan/3-target-semantics-to-map-to-existing-types-before-implementation:
+  en: 03d9a7b085aa800d
+  zh: 4ca142374f2178ca
+/dsh-v2-codex-and-codely-implementation-plan/3-target-semantics-to-map-to-existing-types-before-implementation/3-1-taskspec-v1-minimum-executable-objective:
+  en: 8d4f35e6a6a585b2
+  zh: d5763f5cffd6b02f
+/dsh-v2-codex-and-codely-implementation-plan/3-target-semantics-to-map-to-existing-types-before-implementation/3-2-states-and-transitions:
+  en: 5c8c685b04202d03
+  zh: 3782356632efe7cc
+/dsh-v2-codex-and-codely-implementation-plan/3-target-semantics-to-map-to-existing-types-before-implementation/3-3-executoradapter-v1-language-independent-behavior:
+  en: 105adbdfab97aec3
+  zh: 44fd3d3894e36d07
+/dsh-v2-codex-and-codely-implementation-plan/3-target-semantics-to-map-to-existing-types-before-implementation/3-4-verification-and-review:
+  en: 73b69eddd7462119
+  zh: 78087a117fcc3495
+/dsh-v2-codex-and-codely-implementation-plan/3-target-semantics-to-map-to-existing-types-before-implementation/3-5-conversations-and-events:
+  en: 103b849e0b9ff63c
+  zh: 54f49609d3ca8a04
+/dsh-v2-codex-and-codely-implementation-plan/3-target-semantics-to-map-to-existing-types-before-implementation/3-6-minimum-memory-behavior:
+  en: 840fac0fafb9245c
+  zh: 9fd580ffaf375c78
+/dsh-v2-codex-and-codely-implementation-plan/4-milestones-dependencies-and-development-tasks:
+  en: cbda36aebf9d2177
+  zh: 2a4de929ea06f909
+/dsh-v2-codex-and-codely-implementation-plan/4-milestones-dependencies-and-development-tasks/p0-repository-baseline-and-integration-feasibility:
+  en: c11fa6c2fe40ca8d
+  zh: 5331afabcd00201c
+/dsh-v2-codex-and-codely-implementation-plan/4-milestones-dependencies-and-development-tasks/p1-v0-single-machine-workflow-after-web-feasibility:
+  en: 07a107b2b737ae0a
+  zh: 914df9bd0fe164f3
+/dsh-v2-codex-and-codely-implementation-plan/4-milestones-dependencies-and-development-tasks/p2-v1-shared-memory-recovery-and-agent-handoff:
+  en: 285179c2c6e67df2
+  zh: d1d694d11cbbd8c8
+/dsh-v2-codex-and-codely-implementation-plan/4-milestones-dependencies-and-development-tasks/p3-v2-multi-pc-workers-and-remote-execution:
+  en: 1a9a09cbe59f1aa1
+  zh: 84d3e65d9f6a6778
+/dsh-v2-codex-and-codely-implementation-plan/4-milestones-dependencies-and-development-tasks/p4-extensions-beyond-v2:
+  en: 2e21e4e378692d06
+  zh: 15d62208246ec7c5
+/dsh-v2-codex-and-codely-implementation-plan/5-shared-development-workflow-for-codex-and-codely:
+  en: 37e7db75bc5575c2
+  zh: 38e9823af5f1d882
+/dsh-v2-codex-and-codely-implementation-plan/6-test-plan-and-failure-injection-matrix:
+  en: 6a17df88872a359b
+  zh: e1acfe3a280a28c7
+/dsh-v2-codex-and-codely-implementation-plan/7-security-reliability-and-rollback:
+  en: a4d1c25678777f54
+  zh: 93ca622006040212
+/dsh-v2-codex-and-codely-implementation-plan/8-stage-submission-and-acceptance-template:
+  en: 2637dff2ff711bd2
+  zh: e0f391b7f6cda2e2
+/dsh-v2-codex-and-codely-implementation-plan/8-stage-submission-and-acceptance-template/project-definition-of-done:
+  en: 31e89bbbd72960c8
+  zh: 686f92ebe89a7d64
+/dsh-v2-codex-and-codely-implementation-plan/9-change-control:
+  en: 6895eb19aab1f1fc
+  zh: e3718f86f6c0961a
+/dsh-v2-codex-and-codely-implementation-plan/10-chatgpt-integration-stages-and-current-status:
+  en: 887cb3bca63635f4
+  zh: 090212635f0afc80
+/dsh-v2-codex-and-codely-implementation-plan/10-chatgpt-integration-stages-and-current-status/10-1-verified-implementation-and-gaps:
+  en: ade1e80c05015cc9
+  zh: 8b995d90d9cacc8b
+/dsh-v2-codex-and-codely-implementation-plan/10-chatgpt-integration-stages-and-current-status/10-2-providers-execution-modes-and-quotas:
+  en: baaa342c29ab350e
+  zh: 9ac61a70933b110f
+/dsh-v2-codex-and-codely-implementation-plan/10-chatgpt-integration-stages-and-current-status/10-3-stage-dependencies-and-ownership:
+  en: 3c05f4c3aa7dc715
+  zh: c56b609ac727fe3f
+/dsh-v2-codex-and-codely-implementation-plan/10-chatgpt-integration-stages-and-current-status/10-4-cg1-tasks-and-acceptance:
+  en: b0de2d69160ae16d
+  zh: dc6f03d17eb30ea8
+/dsh-v2-codex-and-codely-implementation-plan/10-chatgpt-integration-stages-and-current-status/10-5-data-ownership-and-decision-log:
+  en: b3fd954642b42270
+  zh: d94ea0b3da956ef4
+/dsh-v2-codex-and-codely-implementation-plan/11-vnext-4-incremental-implementation-roadmap-after-p0-consolidation:
+  en: e98275ea98629779
+  zh: 61babbbfc3ce49f9
+/dsh-v2-codex-and-codely-implementation-plan/11-vnext-4-incremental-implementation-roadmap-after-p0-consolidation/11-1-historical-requirements-and-decision-conflicts:
+  en: 3c51313e4ab6b413
+  zh: a8a16e1870b05e2b
+/dsh-v2-codex-and-codely-implementation-plan/12-current-checklist-and-task-evidence:
+  en: 0fb1865856f1f504
+  zh: 69248bccd9737ae5
+/dsh-v2-codex-and-codely-implementation-plan/12-current-checklist-and-task-evidence/12-1-p0-baseline-and-feasibility-gate-0:
+  en: c86734913fb270d7
+  zh: 1f788a36ca8a7fdc
+/dsh-v2-codex-and-codely-implementation-plan/12-current-checklist-and-task-evidence/12-2-p1-v0-single-machine-mvp-workflow-highest-priority:
+  en: 8f2f9816ae003931
+  zh: 7521aefc67b350b2
+/dsh-v2-codex-and-codely-implementation-plan/12-current-checklist-and-task-evidence/12-3-p2-v1-memory-context-optimization-and-executor-replacement:
+  en: 05ebc3b5bfe5094c
+  zh: f4f28f7162a6be12
+/dsh-v2-codex-and-codely-implementation-plan/12-current-checklist-and-task-evidence/12-4-p3-v2-multi-pc-workers-and-remote-execution:
+  en: 009d7612aa64c87b
+  zh: 46f73127c0f7863a
+/dsh-v2-codex-and-codely-implementation-plan/12-current-checklist-and-task-evidence/12-5-p4-follow-up-work:
+  en: 37e8cd7c795442a1
+  zh: 45726b776d0c6640
+/dsh-v2-codex-and-codely-implementation-plan/12-current-checklist-and-task-evidence/12-6-cross-stage-acceptance-cases:
+  en: 2109348a604ae88f
+  zh: 14339f74c1a00ea7
+/dsh-v2-codex-and-codely-implementation-plan/12-current-checklist-and-task-evidence/12-7-task-evidence-ledger:
+  en: e6dcde844a2626c9
+  zh: 7581d335f3b64b75
+/dsh-v2-codex-and-codely-implementation-plan/12-current-checklist-and-task-evidence/12-8-chatgpt-integration-checklist:
+  en: bc9b113243358d36
+  zh: d0b40a914524f7c5
+/dsh-v2-codex-and-codely-implementation-plan/12-current-checklist-and-task-evidence/12-9-vnext-4-incremental-checklist:
+  en: c4c886f226b54e24
+  zh: e59d4f81cb0b1b8e
+/dsh-v2-codex-and-codely-implementation-plan/12-current-checklist-and-task-evidence/12-10-taskboard-incremental-checklist:
+  en: 24743731e1f05a82
+  zh: 4f9ab4000db4b375
+/dsh-v2-codex-and-codely-implementation-plan/13-p0-executor-capabilities-and-implementation-baseline-october-30-2026:
+  en: f46ff3a2743e03ab
+  zh: 33c70b2c644d5b0c
+/dsh-v2-codex-and-codely-implementation-plan/13-p0-executor-capabilities-and-implementation-baseline-october-30-2026/13-1-actual-versions-protocols-and-capabilities:
+  en: 12f6222a541ab3df
+  zh: e19bb7d7dbdc037f
+/dsh-v2-codex-and-codely-implementation-plan/13-p0-executor-capabilities-and-implementation-baseline-october-30-2026/13-2-p0-implementation-decisions:
+  en: fd762f02df60a808
+  zh: 1900659875603d58
+/dsh-v2-codex-and-codely-implementation-plan/14-current-p1-implementation-scope:
+  en: e9817922a84595bd
+  zh: 11dba54810bd882f
+/dsh-v2-codex-and-codely-implementation-plan/15-first-validation-priority-web-chatgpt-provider-feasibility:
+  en: e00749f9ef4b8efa
+  zh: 413b9aaaccde36f6
+/dsh-v2-codex-and-codely-implementation-plan/16-taskboard-incremental-implementation-plan:
+  en: 00cf96ce926dba61
+  zh: a20590923677bfdf
+/dsh-v2-codex-and-codely-implementation-plan/16-taskboard-incremental-implementation-plan/16-1-entry-and-data-decisions:
+  en: 543ba3ae0facd2ae
+  zh: b5d242295dcfa9f2
+/dsh-v2-codex-and-codely-implementation-plan/16-taskboard-incremental-implementation-plan/16-2-mapping-stages-to-the-roadmap:
+  en: d91f3e1a82ecf1ae
+  zh: 34582a9110248fec
+/dsh-v2-codex-and-codely-implementation-plan/16-taskboard-incremental-implementation-plan/16-3-claimable-tasks-and-acceptance-mapping:
+  en: 080f32845d01074b
+  zh: fd451b569e7d587c
+/dsh-v2-codex-and-codely-implementation-plan/16-taskboard-incremental-implementation-plan/16-4-validation-evidence-and-completion-criteria:
+  en: 1f5a5b9f0b40217f
+  zh: 56a64e04c84b076a

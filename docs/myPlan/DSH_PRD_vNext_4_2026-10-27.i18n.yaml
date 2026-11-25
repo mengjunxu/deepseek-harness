@@ -1,0 +1,112 @@
+# Bilingual-pair consistency record for DSH_PRD_vNext_4_2026-10-27.md (docs/i18n/README.md): per heading
+# section, a hash of its English and Chinese blocks outside code blocks and generated regions.
+# After editing either side, bring the other along and re-record with:
+#   pnpm run verify-translation-pairing --write docs/myPlan/DSH_PRD_vNext_4_2026-10-27.md
+/dsh-product-requirements-prd-vnext-4:
+  en: 7effdb25b6816281
+  zh: 3a0c4df1f6a1e793
+/dsh-product-requirements-prd-vnext-4/identifier-and-abbreviation-index:
+  en: b416c9398d214254
+  zh: 3c96dbae901b06d0
+/dsh-product-requirements-prd-vnext-4/identifier-and-abbreviation-index/task-stage-and-acceptance-identifiers:
+  en: 7415bb10e37daba1
+  zh: cf27427578c80e7d
+/dsh-product-requirements-prd-vnext-4/identifier-and-abbreviation-index/functional-requirement-prefixes:
+  en: 29b6e4c2cafc3fab
+  zh: 2c68d3e1fe8c6f51
+/dsh-product-requirements-prd-vnext-4/0-product-definition:
+  en: 1833400e741eb6ac
+  zh: e2d194df8b4e8ffa
+/dsh-product-requirements-prd-vnext-4/0-product-definition/0-1-responsibilities:
+  en: 6aea5a608cbcb62c
+  zh: c63ae5a7c1cf5781
+/dsh-product-requirements-prd-vnext-4/0-product-definition/0-2-success-criteria:
+  en: b3824c74adc3e99f
+  zh: 0c35ff4fe9e293c2
+/dsh-product-requirements-prd-vnext-4/1-background-and-problem:
+  en: 21758dc65337b72d
+  zh: 5749402e2496a827
+/dsh-product-requirements-prd-vnext-4/1-background-and-problem/1-1-product-goals:
+  en: 8585a66d44f477fc
+  zh: 642caf6b70ec8d3e
+/dsh-product-requirements-prd-vnext-4/1-background-and-problem/1-2-non-goals:
+  en: 68ecf3c994cea153
+  zh: a49e23d24c9ed720
+/dsh-product-requirements-prd-vnext-4/2-users-and-scenarios:
+  en: 5fe0403807b913f9
+  zh: 4929e5345186b11d
+/dsh-product-requirements-prd-vnext-4/2-users-and-scenarios/2-1-user-roles:
+  en: 2ae265c6634553a9
+  zh: 4ada440b434f17bf
+/dsh-product-requirements-prd-vnext-4/2-users-and-scenarios/2-2-core-scenarios:
+  en: 2fea65eda474564b
+  zh: 78a589ca688cfa3a
+/dsh-product-requirements-prd-vnext-4/3-main-workflow-conversation-tasks-and-autonomous-executors:
+  en: 07fbfc8811349ebb
+  zh: 0ff2a10b819ea390
+/dsh-product-requirements-prd-vnext-4/3-main-workflow-conversation-tasks-and-autonomous-executors/3-1-workflow-rules:
+  en: f18b19a2d77df5e2
+  zh: b4abe9b0a17e87aa
+/dsh-product-requirements-prd-vnext-4/3-main-workflow-conversation-tasks-and-autonomous-executors/3-2-initial-workflow-templates:
+  en: 13d0f841822fe47a
+  zh: 451142409456f0db
+/dsh-product-requirements-prd-vnext-4/4-chat-provider-experience-and-requirements:
+  en: 9f7d9ac0dd25d140
+  zh: 2d5f76dd318b803a
+/dsh-product-requirements-prd-vnext-4/4-chat-provider-experience-and-requirements/4-1-provider-menu-and-settings:
+  en: 34bf0e54ce622df3
+  zh: d9eeacbfd3325575
+/dsh-product-requirements-prd-vnext-4/4-chat-provider-experience-and-requirements/4-2-siwc-official:
+  en: 4bfa995123a32643
+  zh: 48c5451437496606
+/dsh-product-requirements-prd-vnext-4/4-chat-provider-experience-and-requirements/4-3-chatgpt-web-peer-provider-with-admission-controls:
+  en: 5f7cce69a9965995
+  zh: f7004e3ca0d3432d
+/dsh-product-requirements-prd-vnext-4/5-executor-task-and-review-requirements:
+  en: 43bf19cd01592ebd
+  zh: f40c7d18fd8e6be1
+/dsh-product-requirements-prd-vnext-4/6-optional-reverse-tools-and-the-official-mcp-entry-point:
+  en: 0b9df47aa0034bb2
+  zh: 237ca730d4292408
+/dsh-product-requirements-prd-vnext-4/7-conversations-memory-context-and-switching:
+  en: 24221411da079daf
+  zh: 317d759bb255d8e5
+/dsh-product-requirements-prd-vnext-4/8-quotas-failures-privacy-and-security:
+  en: d47775f775273827
+  zh: ab824f8a02f7741e
+/dsh-product-requirements-prd-vnext-4/8-quotas-failures-privacy-and-security/8-1-quota-sources-and-transparency:
+  en: e77184c58a39856a
+  zh: ca67b4fe0902f1f7
+/dsh-product-requirements-prd-vnext-4/8-quotas-failures-privacy-and-security/8-2-reliability-and-security:
+  en: 7b609d35ee4a0f22
+  zh: 7b408dd62fbb4598
+/dsh-product-requirements-prd-vnext-4/9-ui-information-architecture-and-interactions:
+  en: b37b237aa40d7a80
+  zh: b514f0e856501ff6
+/dsh-product-requirements-prd-vnext-4/9-ui-information-architecture-and-interactions/9-1-minimum-dsh-chat-ui:
+  en: 963a278ae04742f2
+  zh: 1030158b0787b7aa
+/dsh-product-requirements-prd-vnext-4/9-ui-information-architecture-and-interactions/9-2-interaction-requirements:
+  en: 13f2441829c47453
+  zh: 27147a2173e38ea7
+/dsh-product-requirements-prd-vnext-4/9-ui-information-architecture-and-interactions/9-3-taskboard-mvp:
+  en: 73a962bf4eaa8531
+  zh: 1de2045ea168a8c7
+/dsh-product-requirements-prd-vnext-4/9-ui-information-architecture-and-interactions/9-4-integration-and-implementation-decisions:
+  en: 8f1eb658fdfcb333
+  zh: 111ed9beae57a420
+/dsh-product-requirements-prd-vnext-4/10-priorities-and-milestones:
+  en: 789fd91c4e101c6b
+  zh: 9aa026ccdf0e3508
+/dsh-product-requirements-prd-vnext-4/11-key-user-acceptance-tests-uat:
+  en: ffed4efb76f5a82d
+  zh: 59d31e50713b4da2
+/dsh-product-requirements-prd-vnext-4/12-open-questions-for-repository-and-account-verification:
+  en: 512b7e31f4ae6e40
+  zh: dd5f9bf6a11a36b0
+/dsh-product-requirements-prd-vnext-4/13-references-and-terminology:
+  en: da29595705c61eb9
+  zh: f6a56b6ea14633da
+/dsh-product-requirements-prd-vnext-4/14-product-decisions-that-supersede-earlier-descriptions:
+  en: eaf08edbc076be56
+  zh: efe6dabd4bb7fc47

@@ -1,0 +1,7 @@
+version: 1
+scenario: taskboard-milestone
+profile: sdk
+composition: sdk-taskboard-dispatch
+recording: authored
+header:
+  class: taskboard-dispatch

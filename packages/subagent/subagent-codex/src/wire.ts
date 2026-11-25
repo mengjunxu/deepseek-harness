@@ -9,7 +9,7 @@
 
 import type { Readable, Writable } from 'node:stream'
 import type { ContentBlock } from '@deepseek-ai/dsh-llm'
-import type { SubagentResult } from '@deepseek-ai/dsh-subagent'
+import type { NativeActivityKind, SubagentResult } from '@deepseek-ai/dsh-subagent'
 import { JsonRpcLineTransport } from '@deepseek-ai/dsh-sdk-protocol'
 import type { CodexPermissionMode } from './run.ts'
 
@@ -28,6 +28,12 @@ export interface CodexWireFailureFacts {
     | 'unknown'
   readonly httpStatus?: number | undefined
 }
+
+const codexToolKinds = new Map<string, NativeActivityKind>([
+  ['commandExecution', 'command'], ['fileChange', 'fileChange'], ['imageView', 'read'],
+  ['mcpToolCall', 'otherTool'], ['dynamicToolCall', 'otherTool'], ['webSearch', 'otherTool'],
+  ['collabAgentToolCall', 'otherTool'], ['imageGeneration', 'otherTool'],
+])
 
 const THREAD_PERMISSION_PARAMS: Readonly<Record<CodexPermissionMode, JsonObject>> = {
   never: { approvalPolicy: 'never' },
@@ -199,11 +205,11 @@ export class CodexAppServerWire {
     readonly params: JsonObject
     readonly order: number
   }> | undefined
-  private readonly earlyTurnNotifications: Array<{
+  private readonly earlyTurnEvents: Array<{
     readonly method: string
     readonly params: JsonObject
     readonly order: number
-  }> = []
+  } | { readonly permission: 'denied' | 'cancelled' }> = []
   private lastFinalAnswer: string | undefined
   private lastUnphasedAnswer: string | undefined
   private diagnostic: string | undefined
@@ -225,6 +231,7 @@ export class CodexAppServerWire {
     output: Writable,
     private readonly permissionMode: CodexPermissionMode,
     private readonly model?: string,
+    private readonly onNativeActivity?: (kind: NativeActivityKind) => void,
   ) {
     this.transport = new JsonRpcLineTransport(input, output)
     // Fatal protocol state can arrive after the current guarded operation has
@@ -468,13 +475,9 @@ export class CodexAppServerWire {
         pendingDiagnostic.order,
       )
     }
-    const notifications = this.earlyTurnNotifications.splice(0)
-    for (const notification of notifications) {
-      this.handleNotification(
-        notification.method,
-        notification.params,
-        notification.order,
-      )
+    for (const event of this.earlyTurnEvents.splice(0)) {
+      if ('permission' in event) this.onNativeActivity?.(event.permission)
+      else this.handleNotification(event.method, event.params, event.order)
     }
   }
 
@@ -509,6 +512,11 @@ export class CodexAppServerWire {
     reason: string,
   ): void {
     const order = this.nextObservationOrder()
+    if (this.onNativeActivity && (request === 'command approval' || request === 'file approval' || request === 'permission grant')) {
+      const reply = decision === 'cancelled' ? 'cancelled' : 'denied'
+      if (provisional) this.earlyTurnEvents.push({ permission: reply })
+      else this.onNativeActivity(reply)
+    }
     if (provisional) {
       this.pendingDiagnostic = {
         order,
@@ -650,7 +658,7 @@ export class CodexAppServerWire {
       if (this.turnId === undefined) {
         if (this.turnCompleted !== undefined) {
           this.observePendingTurnId(id)
-          this.earlyTurnNotifications.push({
+          this.earlyTurnEvents.push({
             method,
             params,
             order: this.nextObservationOrder(),
@@ -660,6 +668,13 @@ export class CodexAppServerWire {
       }
       if (id !== this.turnId) return
       const item = object(params.item, 'item/completed item')
+      if (this.onNativeActivity && typeof item.type === 'string') {
+        const tool = codexToolKinds.get(item.type)
+        if (tool !== undefined) {
+          this.onNativeActivity(tool)
+          if (item.status === 'completed' || item.status === 'failed' || item.status === 'declined') this.onNativeActivity(item.status)
+        }
+      }
       if (this.recordDeclinedItem(item, order)) return
       if (item.type !== 'agentMessage') return
       const text = typeof item.text === 'string'
@@ -683,7 +698,7 @@ export class CodexAppServerWire {
     if (turnCompleted === undefined) return
     if (this.turnId === undefined) {
       this.observePendingTurnId(id)
-      this.earlyTurnNotifications.push({
+      this.earlyTurnEvents.push({
         method,
         params,
         order: this.nextObservationOrder(),

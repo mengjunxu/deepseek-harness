@@ -1,4 +1,6 @@
 /** Transactions joining the task, its execution, the active slot and human acceptance. */
+import { isDeepStrictEqual } from 'node:util'
+import { nextMilestone, runCriteria } from './milestones.ts'
 import { createHash, randomUUID } from 'node:crypto'
 import { isAbsolute, relative, sep } from 'node:path'
 import { brandString } from '@deepseek-ai/dsh-brand'
@@ -218,15 +220,36 @@ export class TaskExecutions {
     constraints?: string
     riskLevel?: TaskRiskLevel
     workflow?: TaskWorkflow
+    milestone?: number
     acceptance: string[]
     revision: number
     version: number
   }> {
     return this.domain.transaction((tx) => {
-      const { input: { title, description, constraints, riskLevel, workflow, acceptance }, taskRevision } = taskToolRun(tx, owner)
+      const { input, taskRevision } = taskToolRun(tx, owner)
+      const { title, description, constraints, riskLevel, workflow, milestone, acceptance } = input
       return { title, description, ...(constraints && { constraints }), ...(riskLevel && { riskLevel }), ...(workflow && { workflow }),
-        acceptance, revision: taskRevision,
+        ...(milestone && { milestone }), acceptance, revision: taskRevision,
         version: taskFor(tx, owner).task.version }
+    })
+  }
+
+  /**
+   * Save the settled native adapter's observations under its active lease.
+   * @param owner - SDK connection owning the Run.
+   * @param counts - payload-free counts validated by the Host.
+   */
+  recordNativeActivity(owner: RuntimeBinding, counts: NonNullable<TaskRun['nativeActivity']>): Promise<void> {
+    return this.domain.transaction((tx) => {
+      const run = taskToolRun(tx, owner)
+      const executor = run.admission.authorization?.executor
+      if (executor !== 'codex' && executor !== 'codely') throw new Error('native activity requires a native Run')
+      if (run.nativeActivity) {
+        if (!isDeepStrictEqual(run.nativeActivity, counts)) throw new Error('native activity already recorded')
+        return
+      }
+      run.nativeActivity = counts
+      tx.set('runs', owner.runId, run)
     })
   }
 
@@ -541,10 +564,11 @@ export class TaskExecutions {
       } else if (tx.get('sessions', sessionKey) || previous?.admission.session.sessionId === target.sessionId) {
         throw new Error('fresh session is already referenced')
       }
-      if (request.projectScript !== tx.get('projects', request.projectId)?.project.projectScript || (request.projectScript && !request.authorization)) {
+      if (!isDeepStrictEqual(request.projectScript, tx.get('projects', request.projectId)?.project.projectScript) || (request.projectScript && !request.authorization)) {
         throw new Error('project script differs from the Run confirmation')
       }
       const priorReview = task.lastReview ? tx.get('reviews', task.lastReview) : undefined
+      const milestone = task.task.workflow?.template === 'task.milestone.v1' ? nextMilestone(task.activity, task.task.revision) : undefined
       const run: SavedTaskRun = { admission: request, generation: null, admissionFingerprint: hash, taskRevision: task.task.revision,
         ...previous && { previousCheckpoint: { runId: previous.admission.runId, sessionId: previous.admission.session.sessionId,
           revision: previous.taskRevision, receipt: previous.receipt, lastEvent: previous.lastEvent ?? null } },
@@ -553,7 +577,7 @@ export class TaskExecutions {
           ...(task.task.constraints && { constraints: task.task.constraints }),
           ...(task.task.riskLevel && { riskLevel: task.task.riskLevel }),
           ...(task.task.workflow && { workflow: task.task.workflow }),
-          acceptance: [...task.task.acceptance],
+          ...(milestone && { milestone }), acceptance: runCriteria(task.task, milestone),
           reviewFeedback: priorReview?.verdict === 'return' ? priorReview.feedback : null },
         state: 'queued', control: 'normal', connection: 'disconnected', createdAt: new Date().toISOString(), receipt: null,
         endedAt: null, endReason: null, endFingerprint: null, interactions: [] }
@@ -808,7 +832,7 @@ export class TaskExecutions {
         throw new Error('delivery does not match the completed run')
       }
       verifyProjectCheck(tx.get('projects', owner.projectId)?.project.checkTrackedDiff, d)
-      if (run.admission.projectScript !== d.code?.projectScriptCheck?.script) throw new Error('delivery lacks authorized project script evidence')
+      if (!isDeepStrictEqual(run.admission.projectScript, d.code?.projectScriptCheck?.script)) throw new Error('delivery lacks authorized project script evidence')
       verifyCriteria(run.input.acceptance, d.verification)
       const prior = task.currentDelivery ? tx.get('deliveries', brandString<DeliveryId>(task.currentDelivery)) : undefined
       if (d.version !== (prior?.version ?? 0) + 1) throw new Error('unexpected delivery version')
@@ -868,7 +892,9 @@ export class TaskExecutions {
       if (review.verdict === 'accept' && d.snapshot !== observedSnapshot) throw new Error('requirements or code have changed')
       verifyReturnAssessment(review, task.modelReviews)
       verifyReviewEvidence(d, review)
-      task.task.status = review.verdict === 'accept' ? 'done' : 'todo'
+      const workflow = task.task.workflow
+      const finalStage = workflow?.template !== 'task.milestone.v1' || nextMilestone(task.activity, task.task.revision) === workflow.steps.length
+      task.task.status = review.verdict === 'accept' && finalStage ? 'done' : 'todo'
       if (tx.get('reviews', review.commandId)) throw new Error('review identity belongs to another task')
       task.lastReview = review.commandId
       const receipt = activity(task, 'operator', review.verdict === 'accept' ? 'accepted' : 'returned', d.runId, hash, review.commandId)

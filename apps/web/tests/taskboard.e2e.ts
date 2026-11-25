@@ -205,6 +205,18 @@ it.skipIf(process.platform !== 'darwin')('runs an SDK task, handles native reque
   expect(JSON.parse(stdout)).toEqual({ startedFromBrowser: true, answeredAndApproved: true, diffAndWaiver: true, humanAcceptance: true })
 })
 
+it.skipIf(process.platform !== 'darwin')('requires human acceptance to advance a milestone and restores its stage history', async () => {
+  const probe = fileURLToPath(new URL('./fixtures/taskboard-smoke.mjs', import.meta.url))
+  const { stdout } = await promisify(execFile)(process.execPath, [probe, '--milestone-plan'], { timeout: 100_000 })
+  expect(JSON.parse(stdout)).toEqual({ stages: [1, 1, 2], decisions: ['return', 'accept', 'accept'], restored: true })
+})
+
+it.skipIf(process.platform !== 'darwin').each(['npm', 'pnpm'])('restores operator acceptance of a custom %s script checked by the SDK', async (manager) => {
+  const probe = fileURLToPath(new URL('./fixtures/taskboard-smoke.mjs', import.meta.url))
+  const { stdout } = await promisify(execFile)(process.execPath, [probe, '--custom-' + manager], { timeout: 100_000 })
+  expect(JSON.parse(stdout)).toMatchObject(manager === 'pnpm' ? { acceptedByOperator: true } : { humanAcceptance: true })
+})
+
 it.skipIf(process.platform !== 'darwin')('runs independent SDKs and waits for human acceptance before claiming the authorized dependent once', async () => {
   const probe = fileURLToPath(new URL('./fixtures/taskboard-smoke.mjs', import.meta.url))
   const { stdout } = await promisify(execFile)(process.execPath, [probe, '--parallel'], { timeout: 100_000 })
@@ -224,4 +236,16 @@ it('limits named team members to current project roles across browser writes, ke
   expect(JSON.parse(stdout)).toEqual({ browserRoles: ['operator', 'viewer', 'editor'], deniedOperatorMethods: 6, scopedProjects: 2,
     concurrentEditors: 2, staleEditRejected: true, restoredAccounts: 0, attributedEdits: 4, replayedComments: 0,
     rotatedAndRevoked: true, restarted: true, backupExcludedCredentials: true })
+})
+
+it.skipIf(process.platform !== 'darwin')('dispatches the selected native Codex product and restores its pending human review', async () => {
+  const probe = fileURLToPath(new URL('./fixtures/taskboard-smoke.mjs', import.meta.url))
+  const { stdout } = await promisify(execFile)(process.execPath, [probe, '--native-codex'], { timeout: 100_000 })
+  expect(JSON.parse(stdout)).toEqual({ executor: 'codex', pendingHumanReview: true, invalidDeliveryRejected: true, stoppedAndContinuedQueue: true, missingAdapterRejected: true, restored: true, sdkModelRequests: 0 })
+})
+
+it.skipIf(process.platform !== 'darwin').each(['write', 'deny'])('shows the native Codex %s outcome in the delivery review', async (access) => {
+  const probe = fileURLToPath(new URL('./fixtures/taskboard-smoke.mjs', import.meta.url))
+  const { stdout } = await promisify(execFile)(process.execPath, [probe, '--native-codex', '--native-file-' + access], { timeout: 100_000 })
+  expect(JSON.parse(stdout)).toEqual({ executor: 'codex', fileAccess: access, nativeActivity: access === 'write' ? { command: 1, completed: 1 } : {}, changedFiles: access === 'write' ? 1 : 0, pendingHumanReview: true })
 })

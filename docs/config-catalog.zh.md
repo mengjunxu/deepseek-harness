@@ -257,7 +257,7 @@ export interface SettingsControllerInternals {
 ## `@deepseek-ai/dsh-api-taskboard-controller`
 
 - `inject`: `subprocess` · `storageDomain` · `storageBackendServiceKey('sqlite')`
-- `source`: [`packages/api/taskboard-controller/src/index.ts:100`](../packages/api/taskboard-controller/src/index.ts)
+- `source`: [`packages/api/taskboard-controller/src/index.ts:111`](../packages/api/taskboard-controller/src/index.ts)
 
 ```ts config-catalog
 /** Host worktree directory, Git command limits and optional Run configuration. */
@@ -311,7 +311,12 @@ interface ExecutionConfig {
   env?: Record<string, string>
   /** Absolute SDK profile overlays applied before the required permission services. */
   patches?: string[]
+  /** Absolute SDK overlays registering the named native adapter for fresh Runs. */
+  nativeExecutors?: Partial<Record<NativeTaskExecutor, string>>
 }
+
+/** One-shot executor registered by a deployment SDK overlay. */
+export type NativeTaskExecutor = 'codex' | 'codely'
 ```
 <!-- END GENERATED config-catalog:@deepseek-ai/dsh-api-taskboard-controller -->
 
@@ -3251,7 +3256,7 @@ export type JournalMode = 'wal' | 'delete' | 'truncate' | 'persist'
 ## `@deepseek-ai/dsh-subagent`
 
 - `refs`: `Volatile` (`@deepseek-ai/cordis`)
-- `source`: [`packages/subagent/subagent/src/index.ts:192`](../packages/subagent/subagent/src/index.ts)
+- `source`: [`packages/subagent/subagent/src/index.ts:193`](../packages/subagent/subagent/src/index.ts)
 
 ```ts config-catalog
 /** Host configuration for continuable subagent capacity. */

@@ -31,8 +31,9 @@ const picker = installedCliIndex !== -1 || previousCli ? join(root, 'pin-browse-
 const database = join(root, 'home', 'taskboard', 'tasks.sqlite')
 
 const executionPatch = join(root, 'execution.yml')
-const dispatchSession = new URL('../../../../snapshots/sdk/taskboard-dispatch/session.v4.jsonl', import.meta.url)
 const lostReceipt = process.argv.includes('--lost-sdk-ack')
+const dispatchSession = new URL(lostReceipt ? '../../../../snapshots/sdk/taskboard-milestone/session.v4.jsonl'
+  : '../../../../snapshots/sdk/taskboard-dispatch/session.v4.jsonl', import.meta.url)
 const dispatch = process.argv.includes('--dispatch') || lostReceipt
 const dispatchRelease = Promise.withResolvers()
 const parallelCrash = process.argv.includes('--parallel-crash')
@@ -49,18 +50,26 @@ const scriptScope = process.argv.includes('--script-scope')
 const macosScope = process.argv.includes('--macos-scope') || hostCrash || forceTimeout || scriptScope
 const interactionProbe = process.argv.includes('--interactions')
 const disconnectProbe = process.argv.includes('--disconnect-sdk')
+const nativeExecutor = process.argv.includes('--native-codex') ? 'codex' : process.argv.includes('--native-codely') ? 'codely' : undefined
+const nativeFileAccess = process.argv.includes('--native-file-write') ? 'write' : process.argv.includes('--native-file-deny') ? 'deny' : undefined
+if (nativeFileAccess && !nativeExecutor) throw new Error('native file evidence requires a selected executor')
+const nativeFileWorkspace = nativeFileAccess ? Promise.withResolvers() : undefined
+let native
+const milestoneProbe = process.argv.includes('--milestone-plan')
 const taskToolsProbe = process.argv.includes('--task-tools')
 const backupProbe = process.argv.includes('--backup')
 const deliveryProbe = process.argv.includes('--delivery') || backupProbe
 const reviewedNotes = backupProbe ? 'reviewed work \n' : 'reviewed work\n'
 const browserProbe = process.argv.includes('--browser')
-const noModelReview = process.argv.includes('--no-model-review')
+const customManager = process.argv.includes('--custom-pnpm') ? 'pnpm' : process.argv.includes('--custom-npm') ? 'npm' : undefined
+const customScript = customManager && { manager: customManager, name: 'verify:notes' }
+const noModelReview = process.argv.includes('--no-model-review') || customManager === 'pnpm'
 const reviewedRepair = process.argv.includes('--reviewed-repair')
 const repairFeedback = 'Correct the notes and verify the project build before resubmitting.'
 const coverageReviewProbe = process.argv.includes('--coverage-review') || reviewedRepair
 const reviewRequests = []
 let pendingReviewArchive
-const browserRunProbe = process.argv.includes('--browser-run') || noModelReview || coverageReviewProbe
+const browserRunProbe = process.argv.includes('--browser-run') || Boolean(customScript) || noModelReview || coverageReviewProbe
 const perfProbe = process.argv.includes('--performance')
 const failedRetryProbe = process.argv.includes('--failed-retry')
 const deploymentProbe = process.argv.includes('--deployment-config')
@@ -715,7 +724,7 @@ async function verifyDelivery(rpc, projectId, confirmation) {
 
 async function verifyDispatch(rpc, projectId, confirmation, modelRequests) {
   const first = await createStartRequest(rpc, projectId, confirmation, 'Send one saved task snapshot', 'Dispatch fixture', 'Preserve the existing API', 'high',
-    { template: 'task.standard.v1', steps: ['Inspect the existing API', 'Verify the receipt'] })
+    { template: lostReceipt ? 'task.milestone.v1' : 'task.standard.v1', steps: ['Inspect the existing API', 'Verify the receipt'] })
   const next = await createStartRequest(rpc, projectId, confirmation, 'Keep the second Run in the queue')
   const [started, replay] = await Promise.all([
     rpc('startRun', { request: first }), rpc('startRun', { request: first }),
@@ -1407,9 +1416,9 @@ async function verifyTeam(projectId) {
   assert.deepEqual(shared.activity.slice(-2).map(entry => [entry.actor, entry.member.id]), [['member', id], ['member', secondId]])
   assert.equal(shared.task.revision, edited.task.revision + 2)
   assert.deepEqual(shared.task.workflow, { template: 'task.quick.v1' })
-  assert.deepEqual(shared.revisions.at(-2).workflow, { template: 'task.standard.v1', steps: ['Read the goal', 'Check the result'] })
+  assert.deepEqual(shared.revisions.at(-2).workflow, { template: 'task.milestone.v1', steps: ['Read the goal', 'Check the result'] })
   assert.equal(shared.task.description, 'Both editors reviewed the goal')
-  for (const workflow of [{ template: 'task.quick.v1', steps: ['Unexpected'] }, { template: 'task.standard.v2', steps: [] }]) {
+  for (const workflow of [{ template: 'task.quick.v1', steps: ['Unexpected'] }, { template: 'task.standard.v2', steps: [] }, { template: 'task.milestone.v1', steps: [] }]) {
     const { title, description, acceptance, priority, labels } = shared.task
     await status(member(key, projectId, { projectId, taskId: start.taskId, expectedVersion: shared.task.version,
       commandId: randomUUID(), action: 'edited', requirements: { title, description, acceptance, priority, labels, workflow } }), 400)
@@ -1571,6 +1580,19 @@ function deliveryTool(index, body) {
   } }
 }
 
+function milestoneTool(index, body) {
+  if (index % 3 === 1) return { name: 'taskboard_read', input: {} }
+  if (index % 3 !== 2) return
+  const { version, milestone, workflow, acceptance } = taskToolResult(body, index - 1)
+  const stage = index === 8 ? 2 : 1
+  assert.equal(workflow.template, 'task.milestone.v1')
+  assert.equal(milestone, stage)
+  assert.deepEqual(acceptance, stage === 2 ? ['Publish notes', 'Synchronize the details'] : ['Prepare notes'])
+  return { name: 'taskboard_submit_delivery', input: { expected_version: version, summary: 'Stage submission ' + index,
+    changes: [], unfinished: [], knownIssues: [], files: [],
+    verification: acceptance.map(criterion => ({ criterion, status: 'passed', evidence: 'Checked the staged fixture' })) } }
+}
+
 function browserRunTool(index, body) {
   if (reviewedRepair && index === 7) {
     assert.ok(body.includes(repairFeedback))
@@ -1681,7 +1703,7 @@ const model = createServer(async (request, response) => {
       files: [], changes: [], unfinished: [], knownIssues: [],
       verification: [{ criterion: acceptance[0], status: 'passed', evidence: 'Reviewed the fixture' }] } }
   }
-  const tool = scriptScope ? validationTool : prDelivery ? prTool : parallel ? parallelTool(body) : browserRunProbe ? browserRunTool(modelRequests.length, body)
+  const tool = milestoneProbe ? milestoneTool(requestIndex, body) : scriptScope ? validationTool : prDelivery ? prTool : parallel ? parallelTool(body) : browserRunProbe ? browserRunTool(modelRequests.length, body)
     : interactionProbe ? interactionTool(modelRequests.length) : taskToolsProbe ? scopedTaskTool(modelRequests.length, body)
     : deliveryProbe ? deliveryTool(modelRequests.length, body) : requestScopeTool ? {
     name: 'bash', input: { command: [process.execPath, scopeToolPath].map(quoteShell).join(' '), description: 'Keep the fixture child alive' },
@@ -1704,6 +1726,7 @@ async function writeExecutionPatch(modelEndpoint, patches = [], testPlugin) {
     config: { worktreeRoot: join(root, 'worktrees'), ...(parallel ? { maxParallelRuns: 2 } : {}), ...(forceTimeout ? { stopTimeoutMs: 1_200 } : {}), execution: {
       reference: 'fixture', sessionRoot: join(root, 'sessions'), provider: 'deepseek-official', model: 'deepseek-v4-pro',
       dispatch: modelEndpoint !== undefined,
+      ...(native && { nativeExecutors: { [nativeExecutor]: native.overlay } }),
       patches,
       ...(lostReceipt ? { requestTimeoutMs: 1_000 } : {}),
       ...(modelEndpoint ? { env: { DEEPSEEK_API_KEY: 'local-fixture', DEEPSEEK_BASE_URL: modelEndpoint, DSH_TELEMETRY_DISABLED: '1' } } : {}),
@@ -1820,9 +1843,10 @@ async function verifyRestoredScriptCheck() {
     await verifyReviewRequests(before.modelReviews, summary)
   }
   const script = delivery.code.projectScriptCheck.script
+  const differentScript = customScript ? { ...customScript, manager: customManager === 'pnpm' ? 'npm' : 'pnpm' } : script === 'build' ? 'test' : 'build'
   const command = await createStartRequest(server.rpc, ids.projectId, await server.rpc('inspectProject', { projectId: ids.projectId }), 'Verify script consent')
   await assert.rejects(server.rpc('startRun', { request: command }), /project script differs/)
-  await assert.rejects(server.rpc('startRun', { request: { ...command, confirmedScript: script === 'build' ? 'test' : 'build' } }), /project script differs/)
+  await assert.rejects(server.rpc('startRun', { request: { ...command, confirmedScript: differentScript } }), /project script differs/)
   assert.deepEqual((await server.rpc('detail', { projectId: ids.projectId, taskId: command.taskId })).runs, [])
   await server.stop()
   server = await boot(true, join(root, 'script-restored-home'))
@@ -1834,7 +1858,7 @@ async function verifyRestoredScriptCheck() {
     await assert.rejects(restore(altered), /unbound model review/)
   }
   const changed = structuredClone(document)
-  changed.payload.projects[0].project.projectScript = script === 'build' ? 'test' : 'build'
+  changed.payload.projects[0].project.projectScript = differentScript
   await assert.rejects(restore(changed), /inconsistent project script authorization/)
   const missing = structuredClone(document)
   delete missing.payload.deliveries[0].code.projectScriptCheck
@@ -1911,11 +1935,12 @@ async function createProjectBaseline() {
     cwd: projectRoot, env: { PATH: process.env.PATH, HOME: root, GIT_CONFIG_NOSYSTEM: '1', GIT_CONFIG_GLOBAL: globalConfig },
   })
   await git('init', '-b', 'main')
-  if (deliveryProbe || browserRunProbe) {
+  if (deliveryProbe || browserRunProbe || nativeFileAccess) {
     await writeFile(join(projectRoot, 'notes.txt'), 'baseline\n')
     await git('add', 'notes.txt')
     if (browserRunProbe) {
-      await writeFile(join(projectRoot, 'package.json'), JSON.stringify({ private: true, scripts: { test: 'node check.mjs', build: 'node check.mjs build' } }))
+      await writeFile(join(projectRoot, 'package.json'), JSON.stringify({ private: true, scripts: { test: 'node check.mjs', build: 'node check.mjs build',
+        ...(customScript && { [customScript.name]: noModelReview ? 'node check.mjs' : 'node check.mjs build' }) } }))
       await writeFile(join(projectRoot, 'check.mjs'), [
         "import { readFileSync } from 'node:fs'",
         "const contents = readFileSync('notes.txt', 'utf8').trim()",
@@ -1929,18 +1954,19 @@ async function createProjectBaseline() {
 
 try {
   if (picker !== pickerSource) await copyFile(pickerSource, picker)
-  if (parallel || resume || deliveryProbe || browserRunProbe) await createProjectBaseline()
+  if (parallel || resume || deliveryProbe || browserRunProbe || milestoneProbe || nativeExecutor) await createProjectBaseline()
   if (scriptScope) await writeFile(join(projectRoot, 'package.json'), JSON.stringify({ private: true, scripts: { test: 'node taskboard-scope-tool.mjs' } }))
   if (macosScope) await copyFile(new URL('./taskboard-mac-scope-tool.mjs', import.meta.url), scopeToolPath)
   const sdkPatches = lostReceipt || hostCrashLostReceipt ? [await lossOfSdkReplyPatch()]
     : hostCrashBeforeReceipt ? [await withholdSdkPromptPatch()] : []
   if (parallel || denied || resume || macosScope || hostCrashBeforeReceipt || interactionProbe || disconnectProbe
-    || taskToolsProbe || deliveryProbe || browserRunProbe || failedRetryProbe || prDelivery) {
+    || nativeExecutor || milestoneProbe || taskToolsProbe || deliveryProbe || browserRunProbe || failedRetryProbe || prDelivery) {
     const invalid = join(root, 'invalid-approval.yml')
     if (denied) await writeFile(invalid, '- id: approval\n  config:\n    policy: invalid-test-policy\n')
     await once(model.listen(0, '127.0.0.1'), 'listening')
     const scopeFixture = resume && process.platform !== 'darwin' ? 'taskboard-text-only-scope' : undefined
     const patches = denied ? [invalid] : interactionProbe || browserRunProbe ? [await interactionPatch()] : disconnectProbe ? [await disconnectPatch()] : sdkPatches
+    if (nativeExecutor) native = await (await import('./taskboard-native.mjs')).nativeFixture(nativeExecutor, root, installedCliIndex !== -1, nativeFileAccess, nativeFileWorkspace?.promise)
     await writeExecutionPatch(`http://127.0.0.1:${model.address().port}`, patches, scopeFixture)
   } else if (openaiDeployment) {
     await once(model.listen(0, '127.0.0.1'), 'listening')
@@ -2016,10 +2042,219 @@ try {
     const path = process.argv[process.argv.indexOf('--team-import') + 1]
     assert.ok(path && !path.startsWith('--'), 'provide the source team fixture backup')
     console.log(JSON.stringify(await receiveTeamFixture(path)))
+  } else if (nativeFileAccess && nativeExecutor) {
+    const projectId = randomUUID(), taskId = randomUUID()
+    const ids = { projectId, taskId }
+    const title = 'Native file evidence', projectTitle = 'Native file project'
+    await server.rpc('createProject', { request: { commandId: randomUUID(), expectedVersion: 0,
+      project: { id: projectId, title: projectTitle, root: projectRoot } } })
+    await server.rpc('createTask', { request: { ...ids, commandId: randomUUID(), expectedVersion: 0, requirements: {
+      title, description: 'Use the native file tool to replace notes.txt with the line native edit. Report the actual outcome.',
+      acceptance: ['Update notes.txt'], priority: 'normal', labels: [],
+    } } })
+    await server.rpc('planTask', { request: { ...ids, commandId: randomUUID(), expectedVersion: 1 } })
+    const { provider, model: configuredModel } = await server.rpc('executionRoute', { projectId })
+    const { runId } = await server.rpc('startRun', { request: { ...ids, commandId: randomUUID(), expectedVersion: 2, confirmation: null,
+      previousRun: null, materials: [], confirmedRoute: { provider, model: configuredModel }, nativeExecutor } })
+    const spec = await server.rpc('runTaskSpec', { ...ids, runId })
+    nativeFileWorkspace.resolve(spec.workspace.directory)
+    const run = await pollRun(server.rpc, projectId, taskId, item => ['finished', 'failed', 'interrupted'].includes(item.state))
+    assert.equal(run.state, 'finished', JSON.stringify(run.endReason))
+    assert.equal(run.authorization.executor, nativeExecutor)
+    native.confirmFileResult()
+    const expectedActivity = nativeExecutor === 'codex'
+      ? { write: { command: 1, completed: 1 }, deny: {} }
+      : { write: { otherTool: 1, allowed: 1, completed: 1 }, deny: { otherTool: 1, denied: 1, failed: 1 } }
+    assert.deepEqual(run.nativeActivity, expectedActivity[nativeFileAccess])
+    const archive = JSON.parse(await server.rpc('exportBackup', {}))
+    assert.deepEqual(archive.payload.runs.find(row => row.admission.runId === runId).nativeActivity, run.nativeActivity)
+    const handoff = JSON.parse(await server.rpc('exportHandoff', { projectId }))
+    assert.deepEqual(handoff.runs.find(row => row.runId === runId).nativeActivity, run.nativeActivity)
+    await server.stop()
+    server = await boot(true)
+    const recovered = await server.rpc('detail', ids)
+    assert.deepEqual(recovered.runs.find(row => row.runId === runId).nativeActivity, run.nativeActivity)
+    const written = nativeFileAccess === 'write'
+    assert.notEqual(await realpath(run.workspace), await realpath(projectRoot))
+    assert.equal(await readFile(join(run.workspace, 'notes.txt'), 'utf8'), written ? 'native edit\n' : 'baseline\n')
+    assert.equal(await readFile(join(projectRoot, 'notes.txt'), 'utf8'), 'baseline\n')
+    const detail = await server.rpc('detail', ids)
+    assert.equal(detail.task.status, 'in_review')
+    assert.equal(detail.reviews.length, 0)
+    assert.equal(detail.deliveries.length, 1)
+    const [submission] = detail.deliveries
+    assert.equal(submission.runId, runId)
+    const target = { ...ids, deliveryId: submission.id }
+    const delivery = await server.rpc('deliveryDetail', target)
+    assert.equal(delivery.code.fingerprint, submission.snapshot)
+    assert.equal(delivery.verification[0].status, written ? 'passed' : 'failed')
+    assert.deepEqual(delivery.code.files, written ? [{ path: 'notes.txt', status: 'modified' }] : [])
+    let patch
+    if (written) {
+      const diff = await server.rpc('deliveryDiff', { ...target, path: 'notes.txt' })
+      assert.equal(diff.kind, 'patch')
+      assert.match(diff.text, /-baseline\n\+native edit/)
+      patch = diff.text
+    }
+    const { inspectNativeFileReview } = await import('./taskboard-browser.mjs')
+    await inspectNativeFileReview(server.url, server.cookie, projectTitle, title, submission.summary, patch, run.nativeActivity)
+    assert.equal((await server.rpc('detail', ids)).reviews.length, 0)
+    assert.equal(modelRequests.length, 0)
+    await server.stop()
+    server = await boot(true, join(root, 'restored-native-file'))
+    const foreign = structuredClone(archive)
+    foreign.payload.runs[0].admission.authorization.executor = 'dsh-sdk'
+    await assert.rejects(server.rpc('restoreBackup', { archive: encodeBackup(foreign) }), /invalid native activity owner/)
+    await server.rpc('restoreBackup', { archive: JSON.stringify(archive) })
+    const restored = await server.rpc('detail', ids)
+    assert.deepEqual(restored.runs.find(row => row.runId === runId).nativeActivity, run.nativeActivity)
+    assert.equal(restored.task.status, 'in_review')
+    assert.deepEqual(restored.reviews, [])
+    if (nativeExecutor === 'codex' && nativeFileAccess === 'deny') {
+      delete archive.payload.runs[0].nativeActivity
+      await server.stop()
+      server = await boot(true, join(root, 'legacy-native-file'))
+      await server.rpc('restoreBackup', { archive: encodeBackup(archive) })
+      const legacy = await server.rpc('detail', ids)
+      assert.equal(Object.hasOwn(legacy.runs[0], 'nativeActivity'), false)
+      assert.equal(legacy.task.status, 'in_review')
+    }
+    console.log(JSON.stringify({ executor: nativeExecutor, fileAccess: nativeFileAccess, nativeActivity: run.nativeActivity, changedFiles: delivery.code.files.length, pendingHumanReview: true }))
+  } else if (nativeExecutor) {
+    const { queueNativeRun } = await import('./taskboard-browser.mjs')
+    await queueNativeRun(server.url, server.cookie, await realpath(projectRoot), nativeExecutor === 'codex' ? 'Codex' : 'Codely')
+    const [project] = await server.rpc('listProjects', {})
+    const projectId = project.id
+    const [task] = await server.rpc('listTasks', { projectId, includeArchived: false })
+    const ids = { projectId, taskId: task.id }
+    const settled = run => ['finished', 'interrupted', 'failed'].includes(run.state)
+    await pollRun(server.rpc, projectId, task.id, settled)
+    const detail = await server.rpc('detail', ids)
+    const { nativeSession } = await import('./taskboard-native.mjs')
+    const transcript = await nativeSession(root, detail.runs[0].sessionId)
+    assert.equal(detail.runs[0].state, 'finished', JSON.stringify(transcript.at(-1)?.data))
+    const recording = new URL('../../../../snapshots/sdk/taskboard-native-executor/session.v4.jsonl', import.meta.url)
+    assert.deepEqual(transcript, (await readFile(recording, 'utf8')).trim().split('\n').map(line => JSON.parse(line)))
+    assert.equal(detail.task.status, 'in_review')
+    assert.equal(detail.reviews.length, 0)
+    const { executor } = detail.runs[0].authorization
+    assert.equal(executor, nativeExecutor)
+    const confirmation = await server.rpc('inspectProject', { projectId })
+    const next = await createStartRequest(server.rpc, projectId, confirmation, 'Malformed native report')
+    const { provider, model: modelName } = await server.rpc('executionRoute', { projectId })
+    const request = { ...next, confirmedRoute: { provider, model: modelName }, nativeExecutor }
+    await assert.rejects(server.rpc('startRun', { request: { ...request, nativeExecutor: executor === 'codex' ? 'codely' : 'codex' } }), /unavailable/)
+    await assert.rejects(server.rpc('startRun', { request: { ...request, mode: 'resume' } }), /fresh Run/)
+    const held = await createStartRequest(server.rpc, projectId, confirmation, 'Wait until the operator stops this run')
+    const heldIds = { projectId, taskId: held.taskId }
+    const active = await server.rpc('startRun', { request: { ...held, nativeExecutor, confirmedRoute: request.confirmedRoute } })
+    await native.waitForHeldRequest()
+    const receipt = await server.rpc('startRun', { request })
+    const waiting = await server.rpc('detail', { projectId, taskId: next.taskId })
+    assert.equal(waiting.runs[0].state, 'queued')
+    await assert.rejects(server.rpc('startRun', { request: { ...request, nativeExecutor: undefined } }), /different input/)
+    const running = await server.rpc('detail', heldIds)
+    await server.rpc('stopRun', { request: { ...heldIds, commandId: randomUUID(), expectedVersion: running.task.version, runId: active.runId, force: false } })
+    await pollRun(server.rpc, projectId, held.taskId, run => run.state === 'interrupted')
+    assert.deepEqual(await server.rpc('startRun', { request }), receipt)
+    await pollRun(server.rpc, projectId, next.taskId, settled)
+    const failed = await server.rpc('detail', { projectId, taskId: next.taskId })
+    assert.equal(failed.runs[0].state, 'failed')
+    assert.deepEqual(failed.runs[0].nativeActivity, {})
+    assert.equal(failed.deliveries.length, 0)
+    native.confirmRequests()
+    assert.equal(modelRequests.length, 0)
+    if (nativeExecutor === 'codely') {
+      const overlay = JSON.parse(await readFile(native.overlay, 'utf8'))
+      overlay[0].insert[0].config.cwd = root
+      await writeFile(native.overlay, JSON.stringify(overlay))
+      const redirected = await createStartRequest(server.rpc, projectId, confirmation, 'Refuse the ACP directory override')
+      await server.rpc('startRun', { request: { ...redirected, nativeExecutor, confirmedRoute: request.confirmedRoute } })
+      const rejected = await pollRun(server.rpc, projectId, redirected.taskId, settled)
+      assert.equal(rejected.state, 'failed')
+      const log = await nativeSession(root, rejected.sessionId)
+      assert.match(log.at(-1).data.reason.error.message, /uses the Run workspace/)
+      native.confirmRequests()
+    }
+    await writeFile(native.overlay, '[]\n')
+    const missing = await createStartRequest(server.rpc, projectId, confirmation, 'Missing native adapter')
+    await server.rpc('startRun', { request: { ...missing, nativeExecutor, confirmedRoute: request.confirmedRoute } })
+    const unavailable = await pollRun(server.rpc, projectId, missing.taskId, settled)
+    assert.equal(unavailable.state, 'failed')
+    assert.equal(modelRequests.length, 0)
+    const archive = await server.rpc('exportBackup', {})
+    await server.stop()
+    server = await boot(true, join(root, 'native-restored'))
+    const tampered = JSON.parse(archive)
+    tampered.payload.runs[0].admission.authorization.executor = executor === 'codex' ? 'codely' : 'codex'
+    await assert.rejects(server.rpc('restoreBackup', { archive: encodeBackup(tampered) }), /inconsistent Run authorization/)
+    await server.rpc('restoreBackup', { archive })
+    const restored = await server.rpc('detail', ids)
+    assert.equal(restored.task.status, 'in_review')
+    assert.deepEqual(restored.runs[0].authorization, detail.runs[0].authorization)
+    const continuation = { ...ids, previousRun: restored.runs[0].runId, expectedVersion: restored.task.version,
+      mode: 'resume', confirmation, confirmedRoute: restored.runs[0].route, materials: [] }
+    for (const selection of [{ nativeExecutor }, {}]) {
+      await assert.rejects(server.rpc('startRun', { request: { ...continuation, ...selection, commandId: randomUUID() } }), /native executors require a fresh Run/)
+    }
+    assert.deepEqual(await server.rpc('detail', ids), restored)
+    assert.equal(modelRequests.length, 0)
+    native.confirmRequests()
+    console.log(JSON.stringify({ executor, pendingHumanReview: true, invalidDeliveryRejected: true, stoppedAndContinuedQueue: true, missingAdapterRejected: true, restored: true, sdkModelRequests: 0 }))
+  } else if (milestoneProbe) {
+    const { verifyMilestonePlan } = await import('./taskboard-browser.mjs')
+    let intermediate
+    await verifyMilestonePlan(server.url, server.cookie, await realpath(projectRoot), async () => {
+      intermediate = await server.rpc('exportBackup', {})
+    })
+    const [project] = await server.rpc('listProjects', {})
+    const [task] = await server.rpc('listTasks', { projectId: project.id, includeArchived: false })
+    const ids = { projectId: project.id, taskId: task.id }
+    const before = await server.rpc('detail', ids)
+    assert.equal(before.task.status, 'done')
+    assert.deepEqual(before.reviews.map(review => review.verdict), ['return', 'accept', 'accept'])
+    assert.equal(modelRequests.length, 9)
+    const archive = await server.rpc('exportBackup', {})
+    await server.stop()
+    server = await boot(true)
+    assert.deepEqual(await server.rpc('detail', ids), before)
+    await server.stop()
+    server = await boot(true, join(root, 'milestone-restored'))
+    const tampered = JSON.parse(archive)
+    const first = tampered.payload.runs.find(run => run.admission.runId === before.runs[0].runId)
+    first.input.milestone = 2
+    first.input.acceptance = ['Publish notes', 'Synchronize the details']
+    const firstDelivery = tampered.payload.deliveries.find(delivery => delivery.runId === first.admission.runId)
+    firstDelivery.verification = first.input.acceptance.map(criterion => ({ ...firstDelivery.verification[0], criterion }))
+    await assert.rejects(server.rpc('restoreBackup', { archive: encodeBackup(tampered) }), /milestone differs from human acceptance history/)
+    const premature = JSON.parse(intermediate)
+    premature.payload.tasks[0].task.status = 'done'
+    await assert.rejects(server.rpc('restoreBackup', { archive: encodeBackup(premature) }), /milestone acceptance/)
+    await server.rpc('restoreBackup', { archive })
+    assert.deepEqual(await server.rpc('detail', ids), { ...before, runs: before.runs.map(run => ({ ...run, sessionNotIncluded: true })) })
+    const stages = []
+    for (const { runId } of before.runs) {
+      const input = await server.rpc('runInput', { ...ids, runId })
+      stages.push(input.milestone)
+    }
+    assert.deepEqual(stages, [1, 1, 2])
+    await server.rpc('reopenTask', { request: { ...ids, commandId: randomUUID(), expectedVersion: before.task.version } })
+    assert.equal((await server.rpc('detail', ids)).nextMilestone, 1)
+    await server.stop()
+    server = await boot(true, join(root, 'intermediate-restored'))
+    await server.rpc('restoreBackup', { archive: intermediate })
+    const pending = await server.rpc('detail', ids)
+    assert.equal(pending.nextMilestone, 2)
+    assert.equal(pending.task.status, 'todo')
+    const { title, description, priority, acceptance, labels, workflow } = pending.task
+    await server.rpc('editTask', { request: { ...ids, expectedVersion: pending.task.version, commandId: randomUUID(),
+      requirements: { title, priority, acceptance, labels, workflow, description: description + ' and cover the revised plan' } } })
+    assert.equal((await server.rpc('detail', ids)).nextMilestone, 1)
+    console.log(JSON.stringify({ stages, decisions: before.reviews.map(review => review.verdict), restored: true }))
   } else if (browserProbe || browserRunProbe) {
     const { verifyTaskboardPage, verifyTaskboardRunPage } = await import('./taskboard-browser.mjs')
     const verify = browserRunProbe ? verifyTaskboardRunPage : verifyTaskboardPage
-    const result = await verify(server.url, server.cookie, await realpath(projectRoot), noModelReview, coverageReviewProbe)
+    const result = await verify(server.url, server.cookie, await realpath(projectRoot), noModelReview, coverageReviewProbe, customScript)
     if (browserRunProbe) {
       await verifyRestoredScriptCheck()
       if (coverageReviewProbe) await verifyUnconfirmedReviewRecovery()
@@ -2188,6 +2423,7 @@ try {
 } finally {
   dispatchRelease.resolve()
   try { await server?.stop() } finally {
+    await native?.close()
     if (model.listening) { model.closeAllConnections(); await new Promise(resolve => model.close(resolve)) }
     if (!prDelivery && !addReceipt) await rm(root, { recursive: true, force: true })
   }

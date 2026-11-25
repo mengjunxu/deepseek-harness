@@ -12,7 +12,9 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { expect, it, onTestFinished, vi } from 'vitest'
 import TaskboardController from '../src/index.ts'
-import { validationResults, verifyReviewEvidence, type RunAdmission, type TaskRun } from '../src/execution-domain.ts'
+import { runCriteria } from '../src/milestones.ts'
+import { projectScript, workflow } from '../src/member-board.ts'
+import { nativeActivity, validationResults, verifyReviewEvidence, type RunAdmission, type TaskRun } from '../src/execution-domain.ts'
 import type { ScopeObservation } from '../src/stop.ts'
 import type { CommandId, ProjectId, ProjectScript, TaskId, TaskRequirements, TaskRunId } from '../src/types.ts'
 import { RunInteractions } from '../src/interactions.ts'
@@ -271,6 +273,24 @@ it('keeps the greatest bound Session position through duplicate events, stream l
   })
 })
 
+it('accepts one payload-free native summary from the owning Run', async () => {
+  const f = await fixture()
+  const request = await admissionFor(f, 'native-activity')
+  const { executions } = f.service
+  const run = await executions.admit({ ...request, model: 'fixture', sdkPatchDigest: 'a'.repeat(64),
+    authorization: { executor: 'codex', routeSelection: 'operator-confirmed' } })
+  const owner = { ...request, generation: run.generation }
+  await executions.started(owner, 'accepted')
+  const counts = { command: 1, completed: 1 }
+  expect(nativeActivity.safeParse({ ...counts, commandLine: 'private' }).success).toBe(false)
+  expect(nativeActivity.safeParse({ ...counts, completed: -1 }).success).toBe(false)
+  await expect(executions.recordNativeActivity({ ...owner, generation: owner.generation + 1 }, counts)).rejects.toThrow('no longer owns')
+  await executions.recordNativeActivity(owner, counts)
+  await executions.recordNativeActivity(owner, counts)
+  await expect(executions.recordNativeActivity(owner, { denied: 1 })).rejects.toThrow('already recorded')
+  expect(f.service.detail(request.projectId, request.taskId)?.runs[0]?.nativeActivity).toEqual(counts)
+})
+
 it('replays a task tool write only for the same active lease and arguments', async () => {
   const f = await fixture()
   const request = await admissionFor(f, 'task-tools')
@@ -279,6 +299,7 @@ it('replays a task tool write only for the same active lease and arguments', asy
   const owner = { ...request, generation: run.generation }
   await executions.started(owner, 'accepted')
   const task = await executions.inspectForTool(owner)
+  await expect(executions.recordNativeActivity(owner, {})).rejects.toThrow('requires a native Run')
   const update = { id: commandId(), expectedVersion: task.version, action: 'run-blocked' as const, text: 'Waiting for the fixture' }
   const receipt = await executions.recordToolUpdate(owner, update)
   expect(await executions.recordToolUpdate(owner, update)).toEqual(receipt)
@@ -398,6 +419,19 @@ it('keeps workflow versions and ordered steps across edits and restart', async (
   await close()
   const result = (await open()).service.detail(create.projectId, create.taskId)
   expect(result?.revisions.map(item => item.workflow)).toEqual([undefined, quick, standard([]), ordered, reordered, reordered, null])
+})
+
+it('preserves an ordered milestone plan after restart and requires a stage goal', async () => {
+  const { service, create, open, close } = await fixture()
+  const plan = { template: 'task.milestone.v1', steps: ['Prepare', 'Ship'] } as const
+  expect(runCriteria({ workflow: { ...plan, steps: [...plan.steps] }, acceptance: ['Audit', 'Ship', 'Audit'] }, 2)).toEqual(['Audit', 'Ship', 'Audit'])
+  for (const steps of [[], ['  ']]) expect(workflow.safeParse({ ...plan, steps }).success).toBe(false)
+  await service.createTask({ ...create, requirements: { ...fields, workflow: { ...plan, steps: [...plan.steps] } } })
+  await service.planTask({ projectId: create.projectId, taskId: create.taskId, commandId: commandId(), expectedVersion: 1 })
+  await close()
+  const detail = (await open()).service.detail(create.projectId, create.taskId)
+  expect(detail?.nextMilestone).toBe(1)
+  expect(detail?.revisions[0]?.workflow).toEqual(plan)
 })
 
 it('keeps an immutable input revision, rejects stale acceptance, and requires a new Session for a different directory', async () => {
@@ -555,12 +589,21 @@ it('holds an SDK delivery and its lease until the complete process scope is obse
     deliveries: [{ runId: request.runId, version: 1, summary: 'Finished' }] })
 })
 
-it('reserves one project check across repeated delivery calls and excludes a result from an earlier snapshot', async () => {
-  const f = await fixture(10_000, 1, 'build')
+it.each<[ProjectScript, string]>([
+  ['build', 'npm-build'],
+  [{ manager: 'npm', name: 'verify:internal' }, 'project-script'],
+  [{ manager: 'pnpm', name: 'verify:internal' }, 'project-script'],
+])('reserves the confirmed project check %j and excludes a result from an earlier snapshot', async (script, check) => {
+  const f = await fixture(10_000, 1, script)
   const intent = await admissionFor(f, 'project-check')
   const { executions, stops } = f.service
   await expect(executions.admit(intent)).rejects.toThrow('script differs')
-  const run = await executions.admit({ ...intent, projectScript: 'build',
+  if (typeof script !== 'string') {
+    const other = { ...script, manager: script.manager === 'npm' ? 'pnpm' as const : 'npm' as const }
+    await expect(executions.admit({ ...intent, projectScript: other,
+      authorization: { executor: 'dsh-sdk', routeSelection: 'operator-confirmed' } })).rejects.toThrow('script differs')
+  }
+  const run = await executions.admit({ ...intent, projectScript: structuredClone(script),
     authorization: { executor: 'dsh-sdk', routeSelection: 'operator-confirmed' } })
   const owner = { ...intent, generation: run.generation }
   await executions.started(owner, 'sdk-receipt')
@@ -573,7 +616,7 @@ it('reserves one project check across repeated delivery calls and excludes a res
   const before = 'b'.repeat(64)
   const reserve = () => executions.claimProjectScript(owner, callId, before)
   const reserved = await Promise.all([reserve(), reserve()])
-  expect(reserved.filter(Boolean)).toEqual([{ script: 'build', directory: f.root }])
+  expect(reserved.filter(Boolean)).toEqual([{ script, directory: f.root }])
   const outcome = { exitCode: 0, reason: null }
   await expect(executions.recordProjectScript(owner, commandId(), outcome)).rejects.toThrow('no script reservation')
   await executions.recordProjectScript(owner, callId, outcome)
@@ -585,8 +628,17 @@ it('reserves one project check across repeated delivery calls and excludes a res
   const delivery = f.service.detail(intent.projectId, intent.taskId)?.deliveries[0]
   if (!delivery) throw new Error('expected sealed delivery')
   const detail = f.service.deliveryDetail(intent.projectId, intent.taskId, delivery.id)
-  expect(detail.validationResults).toMatchObject([{ check: 'npm-build', status: 'not-run', reason: 'snapshot-changed', exitCode: null }])
+  expect(detail.validationResults).toMatchObject([{ check, status: 'not-run', reason: 'snapshot-changed', exitCode: null }])
+  expect(detail.code?.projectScriptCheck?.script).toEqual(script)
+  expect(f.service.exportReviewPackage(intent.projectId, intent.taskId, delivery.id)).not.toContain('verify:internal')
   expect(() => { verifyReviewEvidence({ ...detail, code: detail.code ?? undefined }, { verdict: 'accept', feedback: '', waivers: [] }) }).toThrow('requires a reason')
+})
+
+it('accepts a named package script and excludes paths, options and shell syntax', () => {
+  for (const name of ['ci:unit', 'test.all', 'test-local', 'lint_js']) expect(projectScript.safeParse({ manager: 'pnpm', name }).success).toBe(true)
+  for (const name of ['', '-r', '../test', 'test all', 'test;other', 'test\n']) {
+    expect(projectScript.safeParse({ manager: 'npm', name }).success).toBe(false)
+  }
 })
 
 it('rechecks original changes and prepares a pinned isolated checkout only under its Run lease', async () => {

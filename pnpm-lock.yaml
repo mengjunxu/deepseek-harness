@@ -1528,6 +1528,9 @@ importers:
       '@deepseek-ai/dsh-storage-sqlite':
         specifier: workspace:*
         version: link:../../storage/storage-sqlite
+      '@deepseek-ai/dsh-subagent':
+        specifier: workspace:*
+        version: link:../../subagent/subagent
       '@deepseek-ai/dsh-subprocess':
         specifier: workspace:*
         version: link:../../subprocess/subprocess

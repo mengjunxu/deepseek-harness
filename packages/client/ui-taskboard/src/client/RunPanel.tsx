@@ -1,8 +1,10 @@
 /** Run launch confirmations and the selected task’s execution history. */
-import { useEffect, useRef, useState, type ChangeEvent } from 'react'
+import { projectScriptLabel } from './project-script.ts'
+import { Fragment, useEffect, useRef, useState, type ChangeEvent } from 'react'
 import { Button, Checkbox, Modal, Pill, Tag } from '@deepseek-ai/dsh-client-ui-primitives'
 import type {
-  ProjectId, TaskboardExecutionRoute, TaskDetail, TaskId, TaskRunCheckpoint, TaskRunId, RunTaskSpec, TaskRunSummary,
+  NativeTaskExecutor, ProjectId, TaskboardExecutionRoute, TaskboardSdkRoute, TaskDetail, TaskId,
+  TaskRunCheckpoint, TaskRunId, RunTaskSpec, TaskRunSummary,
   TaskStartCommand, TaskView, WorkspaceInspection,
 } from '@deepseek-ai/dsh-api-taskboard-controller/types'
 import type { PropsLocale } from '@deepseek-ai/dsh-client-ui-slots'
@@ -12,15 +14,31 @@ import { WorkflowDetails } from './WorkflowDetails.tsx'
 type Translate = PropsLocale<'taskboard'>['t']
 type WorkspaceMode = 'original' | 'isolated' | 'resume'
 
+function routeLabel(route: TaskboardSdkRoute, executor: 'dsh-sdk' | NativeTaskExecutor | undefined, t: Translate): string {
+  const sdk = `${route.provider} · ${route.model}`
+  return executor && executor !== 'dsh-sdk' ? `${t(executor)} (${t('sdkExecutor')} · ${sdk})` : sdk
+}
+
 /** Browser actions over the deployed Taskboard run controller. */
 export interface RunActions {
   downloadRunSpec: (spec: RunTaskSpec) => Promise<boolean>
   getRunSpec: (projectId: ProjectId, taskId: TaskId, runId: TaskRunId) => Promise<RunTaskSpec>
   inspectRun: (task: TaskView, previous: TaskRunSummary | undefined, resume: boolean) => Promise<WorkspaceInspection>
-  startRun: (task: TaskView, input: Pick<TaskStartCommand, 'mode' | 'previousRun' | 'confirmation' | 'materials' | 'whenReady' | 'confirmedRoute' | 'confirmedScript'>) => Promise<boolean>
+  startRun: (task: TaskView, input: Pick<TaskStartCommand, 'mode' | 'previousRun' | 'confirmation' | 'materials' | 'whenReady' | 'confirmedRoute' | 'confirmedScript' | 'nativeExecutor'>) => Promise<boolean>
   stopRun: (task: TaskView, runId: TaskRunId, force: boolean) => Promise<boolean>
   cancelRun: (task: TaskView, runId: TaskRunId) => Promise<boolean>
   recheckRun: (task: TaskView, runId: TaskRunId) => Promise<boolean>
+}
+
+function NativeActivity({ run, t }: { run: TaskRunSummary; t: Translate }) {
+  if (!run.nativeActivity) return null
+  const kinds = Object.keys(run.nativeActivity) as (keyof NonNullable<TaskRunSummary['nativeActivity']>)[]
+  return <details className={css.history}>
+    <summary>{t('native.heading')}</summary>
+    {kinds.length ? <dl className={css.facts}>{kinds.map(kind =>
+      <Fragment key={kind}><dt>{t(`native.${kind}`)}</dt><dd>{run.nativeActivity?.[kind]}</dd></Fragment>)}</dl>
+      : <p>{t('native.empty')}</p>}
+  </details>
 }
 
 function PreviousCheckpoint({ point, t }: { point: TaskRunCheckpoint; t: Translate }) {
@@ -68,12 +86,12 @@ function RunInputDialog({ projectId, taskId, runId, actions, t, close }: {
     {!failed && !input && <p role="status">{t('loading')}</p>}
     {spec && input && <div className={css.section}>
       <h3>{input.title}</h3>
-      <p>{t('revision')} {spec.revision}{spec.route && <> · {spec.route.provider} · {spec.route.model}</>}</p>
+      <p>{t('revision')} {spec.revision}{spec.route && <> · {routeLabel(spec.route, spec.authorization?.executor, t)}</>}</p>
       {spec.previousCheckpoint && <PreviousCheckpoint point={spec.previousCheckpoint} t={t} />}
       {spec.authorization && <details className={css.history}>
         <summary>{t('startAuthorization')}</summary>
         <dl className={css.facts}>
-          <dt>{t('executor')}</dt><dd>{t('sdkExecutor')}</dd>
+          <dt>{t('executor')}</dt><dd>{t(spec.authorization.executor === 'dsh-sdk' ? 'sdkExecutor' : spec.authorization.executor)}</dd>
           <dt>{t('modelRoute')}</dt><dd>{t(spec.authorization.routeSelection)}</dd>
           <dt>{t('authorizedScope')}</dt><dd>{t(spec.authorization.scope)}</dd>
           <dt>{t('authorizedAt')}</dt><dd><time dateTime={spec.authorization.authorizedAt}>
@@ -88,9 +106,9 @@ function RunInputDialog({ projectId, taskId, runId, actions, t, close }: {
       </dl>
       <Button size="sm" variant="outline" onClick={() => { void actions.downloadRunSpec(spec) }}>{t('downloadRunSpec')}</Button>
       <p className={css.prose}>{input.description}</p>
-      {spec.projectScript && <p><strong>{t('projectScript')}</strong> · {t(`npm-${spec.projectScript}`)}</p>}
+      {spec.projectScript && <p><strong>{t('projectScript')}</strong> · {projectScriptLabel(spec.projectScript)}</p>}
       {input.riskLevel && <p><strong>{t('riskLevel')}</strong> · {t(input.riskLevel)}</p>}
-      {input.workflow && <WorkflowDetails workflow={input.workflow} t={t} />}
+      {input.workflow && <WorkflowDetails workflow={input.workflow} milestone={input.milestone} t={t} />}
       {input.constraints && <p className={css.prose}><strong>{t('constraints')}</strong><br />{input.constraints}</p>}
       <section><h3>{t('inputCriteria')}</h3><ol>{input.acceptance.map((criterion, i) => <li key={i}>{criterion}</li>)}</ol></section>
       {input.reviewFeedback && <section><h3>{t('reviewFeedback')}</h3><p className={css.prose}>{input.reviewFeedback}</p></section>}
@@ -101,7 +119,8 @@ function RunInputDialog({ projectId, taskId, runId, actions, t, close }: {
   </Modal>
 }
 
-function StartRunDialog({ task, previous, route, actions, close, t }: {
+function StartRunDialog({ task, previous, milestone, route, actions, close, t }: {
+  milestone?: number | undefined
   task: TaskView
   previous: TaskRunSummary | undefined
   route: TaskboardExecutionRoute
@@ -110,6 +129,7 @@ function StartRunDialog({ task, previous, route, actions, close, t }: {
   t: Translate
 }) {
   const [mode, setMode] = useState<WorkspaceMode>('original')
+  const [executor, setExecutor] = useState<'dsh-sdk' | NativeTaskExecutor>('dsh-sdk')
   const [whenReady, setWhenReady] = useState(false)
   const [seen, setSeen] = useState<WorkspaceInspection>()
   const [failed, setFailed] = useState(false)
@@ -120,9 +140,10 @@ function StartRunDialog({ task, previous, route, actions, close, t }: {
   const fileRead = useRef(0)
   const [busy, setBusy] = useState(false)
   const [check, setCheck] = useState(0)
-  const [selected] = useState({ task, previous, route })
+  const [selected] = useState({ task, previous, milestone, route })
   const routeChanged = route.state !== 'configured' || route.model !== selected.route.model || route.provider !== selected.route.provider
-    || route.projectScript !== selected.route.projectScript
+    || (executor !== 'dsh-sdk' && !route.nativeExecutors?.includes(executor))
+    || projectScriptLabel(route.projectScript) !== projectScriptLabel(selected.route.projectScript)
   const { inspectRun, startRun } = actions
 
   useEffect(() => {
@@ -171,6 +192,7 @@ function StartRunDialog({ task, previous, route, actions, close, t }: {
     setBusy(true)
     try {
       if (await startRun(selected.task, {
+        ...(executor !== 'dsh-sdk' && { nativeExecutor: executor }),
         confirmedRoute: { provider, model }, ...(selected.route.projectScript && { confirmedScript: selected.route.projectScript }),
         ...(whenReady && mode === 'isolated' && { whenReady: true as const }),
         previousRun: selected.previous?.runId ?? null, mode: mode === 'resume' ? 'resume' : 'fresh',
@@ -181,17 +203,26 @@ function StartRunDialog({ task, previous, route, actions, close, t }: {
   return (
     <Modal open onClose={close} closeLabel={t('close')} title={t('startRun')}>
       <div className={css.form}>
+        {!!selected.route.nativeExecutors?.length && <div className={css.controls} role="group" aria-label={t('executor')}>
+          {(['dsh-sdk', ...selected.route.nativeExecutors] as const).map(option => <Pill key={option}
+            active={executor === option} aria-pressed={executor === option}
+            onClick={() => { setExecutor(option); if (option !== 'dsh-sdk' && mode === 'resume') inspect('original') }}>
+            {t(option === 'dsh-sdk' ? 'sdkExecutor' : option)}
+          </Pill>)}
+        </div>}
         <div className={css.controls} role="group" aria-label={t('executionDirectory')}>
           {(['original', 'isolated', 'resume'] as const).map(option => (
             <Pill key={option} active={mode === option} aria-pressed={mode === option}
-              disabled={(option === 'resume' && !selected.previous?.receipt) || (option === 'isolated' && !seen?.repository)}
+              disabled={(option === 'resume' && (!selected.previous?.receipt || executor !== 'dsh-sdk'
+                || (selected.previous.authorization?.executor ?? 'dsh-sdk') !== 'dsh-sdk')) || (option === 'isolated' && !seen?.repository)}
               onClick={() => { if (option !== mode) inspect(option) }}>{t(option)}</Pill>
           ))}
         </div>
-        <p>{selected.route.provider} · {selected.route.model} · {t('revision')} {selected.task.revision}</p>
-        {selected.route.projectScript && <p><strong>{t('projectScript')}</strong> · {t(`npm-${selected.route.projectScript}`)}</p>}
+        {executor !== 'dsh-sdk' && <p>{t('nativePolicy')}</p>}
+        <p>{selected.route.provider && selected.route.model && routeLabel({ provider: selected.route.provider, model: selected.route.model }, executor, t)} · {t('revision')} {selected.task.revision}</p>
+        {selected.route.projectScript && <p><strong>{t('projectScript')}</strong> · {projectScriptLabel(selected.route.projectScript)}</p>}
         {selected.task.riskLevel && <p><strong>{t('riskLevel')}</strong> · {t(selected.task.riskLevel)}</p>}
-        {selected.task.workflow && <WorkflowDetails workflow={selected.task.workflow} t={t} />}
+        {selected.task.workflow && <WorkflowDetails workflow={selected.task.workflow} milestone={selected.milestone} t={t} />}
         {selected.previous && mode !== 'resume' && <p>{t('freshSessionContext')}</p>}
         {selected.previous && <PreviousCheckpoint point={selected.previous} t={t} />}
         {selected.previous?.sessionNotIncluded && mode === 'resume' && <p>{t('restoreSessionFiles')}</p>}
@@ -261,7 +292,8 @@ export function RunPanel({ detail, route, actions, t }: {
           {latest.revision !== task.revision && <Tag tone="warning">{t('runRevision')} {latest.revision}</Tag>}
         </div>
         <Button size="sm" variant="ghost" onClick={() => { setInputId(latest.runId) }}>{t('savedInput')}</Button>
-        {latest.route && <div>{latest.route.provider} · {latest.route.model}</div>}
+        {latest.route && <div>{routeLabel(latest.route, latest.authorization?.executor, t)}</div>}
+        <NativeActivity run={latest} t={t} />
         {latest.lastEvent && <div className={css.muted}>{t('lastEvent')} <code>{latest.lastEvent.type}</code></div>}
         {latest.endReason && <div>{t('endReason')} {latest.endReason}</div>}
         {latest.launchFailure && <div>{t('launchFailure')} {latest.launchFailure}</div>}
@@ -283,13 +315,14 @@ export function RunPanel({ detail, route, actions, t }: {
         <summary>{t('previousRuns')}</summary>
         <ol>{runs.slice(0, -1).map(run => (
           <li key={run.runId}>{t(`run.${run.state}`)} · {t('revision')} {run.revision}
-            {run.route && <> · {run.route.provider} · {run.route.model}</>}
-            <Button size="sm" variant="ghost" onClick={() => { setInputId(run.runId) }}>{t('savedInput')}</Button></li>
+            {run.route && <> · {routeLabel(run.route, run.authorization?.executor, t)}</>}
+            <Button size="sm" variant="ghost" onClick={() => { setInputId(run.runId) }}>{t('savedInput')}</Button>
+            <NativeActivity run={run} t={t} /></li>
         ))}</ol>
       </details>}
       {inputRun && <RunInputDialog key={inputRun.runId} projectId={task.projectId} taskId={task.id} runId={inputRun.runId}
         actions={actions} t={t} close={() => { setInputId(undefined) }} />}
-      {confirm === 'start' && route && <StartRunDialog task={task} previous={previous} route={route} actions={actions} t={t}
+      {confirm === 'start' && route && <StartRunDialog task={task} previous={previous} milestone={detail.nextMilestone} route={route} actions={actions} t={t}
         close={() => { setConfirm(null) }} />}
       {confirm === 'force' && latest && <Modal open onClose={() => { setConfirm(null) }} title={t('forceStop')} closeLabel={t('close')}
         footer={<Button variant="primary" disabled={!acknowledged} onClick={() => {

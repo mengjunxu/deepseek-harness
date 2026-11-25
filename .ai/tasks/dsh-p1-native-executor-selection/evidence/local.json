@@ -1,0 +1,99 @@
+{
+  "checkedAt": "2026-11-24T16:21:06+08:00",
+  "platform": "macOS arm64",
+  "testedCodeCommit": null,
+  "branch": "codely_bridge",
+  "nativeVersions": {
+    "codex": "0.153.4",
+    "codely": "1.0.0-nightly.53"
+  },
+  "modelEndpoints": "loopback only for the acceptance runs",
+  "installed": {
+    "codex": {
+      "executor": "codex",
+      "pendingHumanReview": true,
+      "invalidDeliveryRejected": true,
+      "stoppedAndContinuedQueue": true,
+      "missingAdapterRejected": true,
+      "restored": true,
+      "sdkModelRequests": 0
+    },
+    "codely": {
+      "executor": "codely",
+      "pendingHumanReview": true,
+      "invalidDeliveryRejected": true,
+      "stoppedAndContinuedQueue": true,
+      "missingAdapterRejected": true,
+      "restored": true,
+      "sdkModelRequests": 0
+    }
+  },
+  "additionalChecks": {
+    "codelyCwdOverrideRejectedBeforeNativeModelRequest": true,
+    "sameCommandWithChangedExecutorRejected": true,
+    "tamperedArchiveRejected": true,
+    "matchingSdkInboxAndTurnLog": true
+  },
+  "sourceSha256": {
+    "packages/api/taskboard-controller/src/domain.ts": "a37d55ee18ff0735d36b9c83cbe79e068b5e0abeb3363a89901dace27567310c",
+    "packages/api/taskboard-controller/src/execution-domain.ts": "6747c235f80ca83f58ee60b1d06f6a4dad39da3d907b3e94147657a930428946",
+    "packages/api/taskboard-controller/src/index.ts": "e08e6ec75504068ed0e2d0f054dc08ba774f8246e804fef5a0f340d98c363118",
+    "packages/api/taskboard-controller/src/backup.ts": "266f13270c8aa0551d09c01e8aee54674b31ab20c7c6b0aec9d05814b0f5c011",
+    "packages/api/taskboard-controller/src/runtime.ts": "ede99da1e82dbe8f82252dff3a515380e257cee8d6065e55bb7f3ccb2fff6efa",
+    "packages/api/taskboard-controller/src/sdk-native.ts": "273794d6147cd078580c35f0f3a21b0ffcc2755301b5c3d8b0cd6b64e652384f",
+    "packages/api/taskboard-controller/src/sdk-tools.ts": "12fedf3de46a4c0b1d8147cca20fe4939675cf3592d082875f897381484ebced",
+    "packages/api/taskboard-controller/src/session-recovery.ts": "bcf687a81c6291f97aad5c040fdb9f1923e2a04d706aa92319502ab4a26238c7",
+    "packages/api/taskboard-controller/src/types.ts": "2a625fc01ac4d36145e0f82e3d94174e1f2a8d812751cf5a854240460874cd21",
+    "packages/api/taskboard-controller/sdk-native.patch.yml": "37db83f27b95cfe919613c390a883466d4164211da5320bebe5ccf4a63df278a",
+    "packages/client/ui-taskboard/src/client/RunPanel.tsx": "c572bd3bcba61e0c2676a8dee2d920f5058e647f5c2448b6e0bd173d3981e36d",
+    "packages/subagent/subagent/src/types.ts": "abf610660f090f38a6968b4ebd070b53dc731554356efe15f93b46f220ac9008",
+    "packages/subagent/subagent-acp/src/index.ts": "8c69e6ca796c8c4127506672889f9cb644e89c397b588f4be4f5588bcd67287e",
+    "packages/subagent/subagent-codex/src/index.ts": "7e0d2cdab1f66d104048489e4523260d2740478a87a3dfdd4f6989b6aceaa857",
+    "snapshots/sdk/taskboard-native-executor/session.v4.jsonl": "d86264a9801f42b26df1524567c9f1a2d23704f913448895e15881e5c81c6b69",
+    "apps/web/tests/fixtures/taskboard-native.mjs": "732704ebc360566c1991f04bc41932738f16f3f4ad59d9d1c90a986165baf783",
+    "apps/web/tests/fixtures/taskboard-smoke.mjs": "75958bc10b05b845447acea3a6712d90f6ad08ae3f0cde65e015f362ac936241"
+  },
+  "tarballSha256": {
+    "deepseek-ai-dsh-0.1.7-rc.2.tgz": "6bf933587d93435077708a0fc525b175c3f720775bd1a5f3f819a27d3321d81b",
+    "deepseek-ai-dsh-web-0.1.7-rc.2.tgz": "e117d7c0dbc2824b82b3005477a4a73f667421a374ae4f5f35ab2c32162b7faa",
+    "deepseek-ai-dsh-api-taskboard-controller-0.1.7-rc.2.tgz": "985fcbca19aae675f9f34365124ab21e4ee605ea697abbb509c758ba978dabf4",
+    "deepseek-ai-dsh-client-ui-taskboard-0.1.7-rc.2.tgz": "e18a7b535428c0cc7f3259966671b2cd6b7fae85a30f1cc1f5fa02e5a17d6e1c",
+    "deepseek-ai-dsh-subagent-0.1.7-rc.2.tgz": "4b6fbe01fc41e3a40fc5992ea82707e9d51ee83a8e0ba7b1d883ed3d9e0d137d",
+    "deepseek-ai-dsh-subagent-codex-0.1.7-rc.2.tgz": "11001b5f0c464151fa0d5b19b99357014ab34cb02eb0098c883ab3252437877a",
+    "deepseek-ai-dsh-subagent-acp-0.1.7-rc.2.tgz": "00e4cec0cd5678054d4e3d1bd70ca583e100406d4aaa617f222a1746914a1da3"
+  },
+  "commands": [
+    "pnpm run build:official",
+    "pnpm run release:pack --family dsh --out <dsh> --concurrency 4",
+    "pnpm run release:verify-packed-install --family dsh --from <dsh> --from <vendor> --from <native> --taskboard native-executors",
+    "pnpm run release:verify-packed-install --family dsh --from <dsh> --from <vendor> --from <native> --taskboard native-codely",
+    "node apps/web/tests/fixtures/taskboard-smoke.mjs --native-codely",
+    "node_modules/.bin/vitest run --config vitest.web.config.ts apps/web/tests/taskboard.e2e.ts -t 'dispatches the selected native Codex|milestone'",
+    "pnpm run test:snapshot -t 'taskboard-native-executor|taskboard-review-resume'",
+    "node_modules/.bin/vitest run --config vitest.snapshot.config.ts scripts/session-snapshot-corpus.corpus.ts",
+    "node_modules/.bin/vitest run packages/api/taskboard-controller/tests/taskboard.host.spec.ts packages/subagent/subagent-acp/tests/subagent-acp.spec.ts",
+    "node_modules/.bin/vitest run packages/api/taskboard-controller/tests/taskboard.host.spec.ts",
+    "pnpm run verify-type-equiv",
+    "pnpm run doc-sync",
+    "git diff --check"
+  ],
+  "verification": {
+    "taskboardHost": 35,
+    "acp": 73,
+    "focusedWeb": 2,
+    "sdkSnapshots": 2,
+    "snapshotCorpus": 3,
+    "changedBilingualPairs": 7,
+    "initialCombinedUnitRun": "One pre-existing Git diff test exceeded its 5 s deadline while the official build and doc-sync were active. The entire Host file passed individually with its original timeout.",
+    "docSync": {
+      "passed": 37,
+      "failed": [
+        "doc-typecheck",
+        "markdown links",
+        "translation pairing",
+        "markdown wrap",
+        "repository references"
+      ]
+    }
+  }
+}

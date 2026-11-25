@@ -12,6 +12,9 @@
       "path": "../../../native/system/packages/entry"
     },
     {
+      "path": "../../subagent/subagent"
+    },
+    {
       "path": "../../sdk/client"
     },
     {
