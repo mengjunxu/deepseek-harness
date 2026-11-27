@@ -1529,7 +1529,7 @@
     {
       "doc": "docs/subsystems/subagent.md",
       "symbol": "NativeActivityKind",
-      "source": "packages/subagent/subagent/src/types.ts"
+      "source": "packages/subagent/subagent/src/projection-types.ts"
     },
     {
       "doc": "docs/subsystems/subagent.md",

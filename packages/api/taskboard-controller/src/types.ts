@@ -1,6 +1,6 @@
 /** Browser-safe Taskboard identities, operator commands and read models. */
 import type { SessionId, SessionSeq } from '@deepseek-ai/dsh-session/types'
-import type { NativeActivityKind } from '@deepseek-ai/dsh-subagent'
+import type { NativeActivityKind } from '@deepseek-ai/dsh-subagent/client'
 import type { Branded } from '@deepseek-ai/dsh-brand'
 
 /** One Taskboard project. */

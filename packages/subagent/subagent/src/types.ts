@@ -15,6 +15,9 @@ import type { ContentBlock, MessageId } from '@deepseek-ai/dsh-llm'
 import type { SessionEvent, SessionId } from '@deepseek-ai/dsh-session'
 import type { ObjectJsonSchema, ToolRestriction } from '@deepseek-ai/dsh-tools'
 import type { SubagentDescriptorData } from './descriptor.ts'
+import type { NativeActivityKind } from './projection-types.ts'
+
+export type { NativeActivityKind } from './projection-types.ts'
 
 /** Identifies one accepted subagent run across its lifecycle event pair. */
 export type SubagentRunId = Branded<'SubagentRunId'>
@@ -134,9 +137,6 @@ export interface SubagentCapabilities {
   readonly toolFilter: boolean
   readonly persona: boolean
 }
-
-/** Payload-free observations reported by a native one-shot provider. */
-export type NativeActivityKind = 'command' | 'fileChange' | 'read' | 'otherTool' | 'completed' | 'failed' | 'declined' | 'allowed' | 'denied' | 'cancelled'
 
 /**
  * What a caller asks for when starting a ONE-SHOT subagent. The tool layer

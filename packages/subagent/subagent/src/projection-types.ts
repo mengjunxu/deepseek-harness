@@ -6,6 +6,9 @@
 
 import type { SessionId, SessionSeq } from '@deepseek-ai/dsh-session/types'
 
+/** Payload-free observations reported by a native one-shot provider. */
+export type NativeActivityKind = 'command' | 'fileChange' | 'read' | 'otherTool' | 'completed' | 'failed' | 'declined' | 'allowed' | 'denied' | 'cancelled'
+
 /** One current direct-child discovery row materialized from parent facts. */
 export type SubagentCatalogEntry =
   & {
